@@ -1,0 +1,27 @@
+<%
+/*
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
+var ARTIFACT_UPLOAD_DIRECTORY = "/tmpUploadedApps/";
+var TENANT_DOMAIN_NAME = "tenantDomainName";
+var SUPER_TENANT_DOMAIN_NAME = "carbon.super";
+var CLOUD_TYPE="AppCloud";
+var DOCUMENTATION_REDIRECTION_URL = "https://docs.wso2.org/display/AF210/WSO2+App+Factory+Documentation";
+var SUPPORT_REDIRECTION_URL = "http://wso2.com/support/";
+
+%>

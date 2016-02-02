@@ -1,0 +1,81 @@
+<%
+/*
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
+include("/jagg/jagg.jag");
+
+jagg.template("runtimeLogs", function (inputs, outputs, jagg) {
+
+    var applicationName = request.getParameter("applicationName");
+    var applicationKey = request.getParameter("applicationKey");
+%>
+
+<div class="container-fluid app-content-section">
+    <div class="row">
+        <div class="col-md-12 msg-issues">
+            Download the logs of the deployed applications that are archived daily. To view logs that are not archived yet, click the <strong>View</strong> button.
+        </div>
+    </div>
+    <div class='row'>
+        <div id="push"></div>
+        <div class="col-md-6 forms cloud-tab" style="width:100%;">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#recent" aria-controls="general" role="tab" data-toggle="tab">Recent Logs</a></li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="recent">
+                    <div class='row'>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="stage-view">Revision: </label>
+                                <select id="stage-view" class="form-control select2 stage">
+                                   <option selected="true" value="revision">trunk</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='row button-container'>
+                        <div class="col-md-12">
+                            <button type="button" class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" id="view-log">
+                                <span class="fw-stack fw-lg btn-action-ico">
+                                    <i class="fw fw-ring fw-stack-2x"></i>
+                                    <i class="fw fw-down-arrow fw-stack-1x"></i>
+                                </span>
+                                View Recent Logs
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                    <div id="push"></div>
+                    <div class='row'>
+                        <div class='col-md-12 log-container'>
+                            <pre id="view-logs-content"></pre>
+                        </div>
+                    </div>
+                    <div class='clearfix'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('templates/runtimeLogs/js/runtimeLogs.js'))%>"></script>
+<%
+}); %>

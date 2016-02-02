@@ -1,0 +1,201 @@
+<%
+/*
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+
+var log = new Log("module/application/application.jag");
+var ApplicationManager = Packages.org.wso2.appcloud.core.ApplicationManager;
+var Application = Packages.org.wso2.appcloud.core.dto.Application;
+
+/**
+ * Add a application object
+ *
+ * @param applicationName name of the application
+ * @param applicationRevision revision number of the application
+ * @param applicationDescription description of the application
+ * @param replicas no of replicas
+ * @param uploadedArtifact the uploaded artifact file
+ * @param runtimeId runtime id of the application
+ */
+var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas, uploadedArtifact, runtimeId, appTypeName) {
+    //uploadedArtifact.move(ARTIFACT_UPLOAD_DIRECTORY + uploadedArtifact.getName());
+    log.info( "Application Name: " + applicationName + " " +
+            "Application Revision: " + applicationRevision + " " +
+            "Application Description: " + applicationDescription + " " +
+            "Replicas: " + replicas + " runtimeId : " + runtimeId + " apptype id : " + appTypeName
+    );
+
+    //Adding application to Database
+    var application = new Application();
+    application.setApplicationName(applicationName);
+    application.setRevision(applicationRevision);
+    application.setDescription(applicationDescription);
+    application.setNumberOfReplicas(replicas);
+    application.setRuntimeId(runtimeId);
+    application.setApplicationType(appTypeName);
+
+    ApplicationManager.addApplication(application);
+
+    //Creating basic deployment
+    log.info("Creating basic deployment");
+
+    var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
+    var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
+    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext("My-JAXWS", "1.0.0", "war", 5, "wso2.org");
+    var kubService = new KubernetesRuntime(applicationCtx);
+
+    var containers = getContainers();
+    log.info("Got container list");
+    var deploymentConfig = getDeploymentConfig(containers);
+    log.info("Created deployment config");
+    kubService.deployApplication(deploymentConfig);
+    log.info("Application creation done");
+};
+
+
+/**
+ * Method for getting all the available application types. e.g : war, mss, car
+ */
+function getContainers(){
+    var containerList = new java.util.ArrayList();
+    var container1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
+    container1.setBaseImageName("tomcat");
+    container1.setBaseImageVersion("8.0");
+    var envs1 = new java.util.HashMap();
+    envs1.put("ORG","WSO2");
+    container1.setEnvVariables(envs1);
+    var serviceProxyList1 = new java.util.ArrayList();
+    var serviceProxy1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
+    serviceProxy1.setServiceName("http");
+    serviceProxy1.setServiceProtocol("TCP");
+    serviceProxy1.setServicePort(39080);
+    serviceProxy1.setServiceBackendPort(8080);
+    serviceProxyList1.add(serviceProxy1);
+    container1.setServiceProxies(serviceProxyList1);
+    containerList.add(container1);
+
+    return containerList;
+};
+
+
+function getDeploymentConfig(containersList){
+
+    var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
+    deploymentConfig.setDeploymentName("test");
+    deploymentConfig.setReplicas(2);
+    deploymentConfig.setContainers(containersList);
+
+    return deploymentConfig;
+}
+
+
+/**
+ * Method for getting all the available application types e.g : war, mss, car
+ */
+var getAllAppTypes = function(){
+
+    var appTypeArray = [];
+
+    try {
+        var appTypes = ApplicationManager.getAllAppTypes();
+
+        for (var i = 0; i < appTypes.length; i++) {
+            var appType = appTypes[i];
+            var appTypeObject = {};
+
+            appTypeObject.id = appType.id;
+            appTypeObject.name = appType.appTypeName;
+            appTypeObject.description = appType.description;
+
+            appTypeArray.push(appTypeObject);
+        }
+    } catch(e){
+        log.error("Error while getting the list of apptypes");
+        log.error(e);
+        throw e;
+    }
+
+    return appTypeArray;
+};
+
+/**
+ * Method for getting all the available runtimes e.g : tomcat, wso2as
+ * @param appType application type
+ */
+var getAllRuntimes = function(appType){
+
+    var runtimeArray = [];
+
+    try {
+        var runtimes = ApplicationManager.getAllRuntimesForAppType(appType);
+
+        for(var i = 0; i < runtimes.length; i++){
+            var runtime = runtimes[i];
+            var runtimeObject = {};
+
+            runtimeObject.id = runtime.id;
+            runtimeObject.runtimeName = runtime.runtimeName;
+            runtimeObject.imageName = runtime.imageName;
+            runtimeObject.repoURL = runtime.repoURL;
+            runtimeObject.tag = runtime.tag;
+
+            runtimeArray.push(runtimeObject);
+        }
+    } catch(e){
+        log.error("Error while getting the list of runtimes");
+        log.error(e);
+        throw e;
+    }
+
+    return runtimeArray;
+}
+
+/**
+ * Method for getting the application summery of all the applications
+ */
+var getAllApplications = function(){
+
+    var applicationArray = [];
+
+    try {
+
+        var applications = ApplicationManager.getApplicationList();
+
+        for (var i = 0; i < applications.length; i++) {
+            var application = applications[i];
+            var applicationObject = {};
+
+            applicationObject.id = application.applicationId;
+            applicationObject.applicationName = application.applicationName;
+            applicationObject.runtimeName = application.runtimeName;
+            applicationObject.status = application.status;
+
+            applicationArray.push(applicationObject);
+        }
+    } catch(e){
+        log.error("Error while getting the application list");
+        log.error(e);
+        throw e;
+    }
+
+    return applicationArray;
+}
+
+%>

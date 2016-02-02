@@ -1,0 +1,87 @@
+<%
+/*
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
+include("/jagg/jagg.jag");
+
+jagg.template("apptype/select", function(inputs, outputs, jagg) {
+    var appTypes = outputs.appTypes;
+    %>
+
+    <script type="text/javascript">
+        $(document).on('click', '.cloud-app-type', function(){
+            var appTypeId = parseInt($(this).attr('apptype-id'));
+            var appTypeName = $(this).attr('apptype-name');
+            var description = $(this).attr('apptype-description');
+
+            $('#appTypeName').val(appTypeName);
+            $('#appTypeId').val(appTypeId);
+            $('#appTypedescription').val(description);
+
+            document.getElementById('appTypeForm').submit()
+
+        });
+
+    </script>
+
+
+    <div>
+    <b>Start the template index.--------------------------------------------------------------------------</b>
+    <div class="col-md-6">
+                <div class="cloud-selected-app-type-name">
+                    <h1>App Types</h1>
+                    <%
+                        if(appTypes.length > 0){
+                            for(var x=0; x < appTypes.length; x++){
+                                %>
+                                <div class="cloud-app-type" apptype-name="<%=appTypes[x].name%>"
+                                apptype-id="<%=appTypes[x].id%>" apptype-description="<%=appTypes[x].description%>" >
+                                <tr>
+                                <td><b><%=appTypes[x].name%></b></td>
+                                <td><%=appTypes[x].description%></td>
+
+                                </tr>
+                                <br>
+                                </div>
+                                <%
+                            }
+                        }
+                    %>
+                    <!--<h2><a href="/appmgt/site/pages/select-apptype.jag">Create</a> a new application</h2>-->
+                </div>
+            </div>
+
+            <div class="col-sm-4 col-md-4 col-lg-5 description-action">
+                          <form id='appTypeForm'  method='post' action='/appmgt/site/pages/application.jag'>
+                            <input type="hidden" id="appTypeName" name="appTypeName" value="" />
+                            <input type="hidden" id="appTypeId" name="appTypeId" value="" />
+                            <input type="hidden" id="appTypedescription" name="appTypedescription" value="" />
+                        </form>
+                    </div>
+
+            <br>
+            <br>
+
+            <b>End the template index. -------------------------------------------------------------------</b>
+
+
+
+</div>
+
+    <%
+}); %>

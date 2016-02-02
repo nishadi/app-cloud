@@ -1,0 +1,64 @@
+<%
+/*
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
+include("/jagg/jagg.jag");
+
+jagg.template("index", function(inputs, outputs, jagg) {
+    var applications = outputs.applications;
+    var log = new Log("index");
+
+    %>
+
+    <div>
+    <b>Start the template index.--------------------------------------------------------------------------</b>
+    <div class="col-md-6">
+                <div class="cloud-selected-app-type-name">
+                    <h1>Application Listing Page</h1>
+                    <%
+                        if(applications.length > 0){
+                            for(var x=0; x < applications.length; x++){
+                                %>
+                                <tr>
+                                <td>Application Name : <b><%=applications[x].applicationName%></b></td>
+                                <td>Application Status : <%=applications[x].status%></td>
+                                <td>Application Runtime : <%=applications[x].runtimeName%></td>
+
+                                </tr>
+                                <br>
+                                <%
+                            }
+                        } else { %>
+                            <div>There is No Application to List</div>
+                        <%}
+                    %>
+                    <h2><a href="/appmgt/site/pages/select-apptype.jag">Create</a> a new application</h2>
+                </div>
+            </div>
+
+            <br>
+            <br>
+
+            <b>End the template index. -------------------------------------------------------------------</b>
+
+
+
+</div>
+
+    <%
+}); %>
