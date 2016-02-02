@@ -1,0 +1,125 @@
+<%
+/*
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
+jagg.template("application", function (inputs, outputs, jagg) {
+        var runtimes = outputs.runtimes;
+        var appType = outputs.appTypeName;
+    %>
+
+ <script type="text/javascript">
+    $(document).ready(function()
+        {
+            $.each(<%=runtimes%>,function(key,value){
+                $("#runtime").append($('<option></option>').val(value.id).html(value.runtimeName));
+            });
+        });
+
+ </script>
+
+<!-- BOF App factory menu actionbar -->
+    <div class="action-bar">
+        <a href="002_cloud_select_app_type.html" class="btn-action">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-left-arrow fw-stack-1x"></i>
+                </span> Back to app type selection
+        </a>
+        <a href="001_cloud_first_login.html" class="btn-action">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fa fa-mail-reply-all fa-stack-1x"></i>
+                </span> Cancel
+        </a>
+    </div>
+<!-- EOF App factory menu actionbar-->
+
+<div class="container-fluid cloud-container">
+        <div class="row">
+            <div class="col-fixed-left col-fixed-1x">
+                <div class="cloud-selected-app-type app-color-one" id="1">
+                    <i class="fw fw-jaggery fw-4x"></i>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="cloud-selected-app-type-name">
+                    <h1>JAVA Web Application</h1>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5 forms">
+
+      <form id="data" method="post" action='<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")%>' enctype="multipart/form-data">
+            <div class="form-group">
+            <label for="application-name">Application Name: </label>
+            <input name="applicationName" type="text" class="form-control" placeholder="Enter Application name" />
+            </div>
+
+            <div class="form-group">
+            <label for="application-revision">Application Revision: </label>
+            <input name="applicationRevision" type="text" class="form-control" placeholder="Enter Application revision" />
+            </div>
+
+            <div class="form-group">
+            <label for="application-description" >Description: </label>
+            <textarea name="applicationDescription" class="form-control" rows="3" ></textarea>
+            </div>
+
+            <div class="form-group">
+            <label for="runtime">Runtime : </label>
+            <select name="runtime" id="runtime" class="form-control" ><option value="None" selected="Selected">Select runtime</option></select>
+            </div>
+
+            <div class="form-group">
+            <label>No Of Replicas</label>
+            <input name="replicas" class="form-control" placeholder="Enter No Of Replicas" />
+            </div>
+
+            <div class="form-group">
+            <label>Upload Artifact: </label>
+            <div class="input-group">
+                <input type="text" class="form-control" readonly>
+                <span class="input-group-btn">
+                   <span class="btn btn-primary btn-file">
+                       Upload&hellip; <input type="file" name="fileUpload" multiple>
+                   </span>
+                </span>
+            </div>
+
+            </div>
+
+            <div class="form-group">
+                <button class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" >
+                    <span class="fw-stack fw-lg btn-action-ico">
+                        <i class="fw fw-ring fw-stack-2x"></i>
+                        <i class="fw fw-add fw-stack-1x"></i>
+                    </span>
+                        Create
+                </button>
+            </div>
+
+        </form>
+
+        </div>
+
+        </div>
+      </div><!-- /.container -->
+
+    <%
+}); %>

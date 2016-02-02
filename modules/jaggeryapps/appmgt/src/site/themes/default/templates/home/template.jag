@@ -1,0 +1,78 @@
+<%
+/*
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
+include("/jagg/jagg.jag");
+
+jagg.template("home", function(inputs, outputs, jagg) {
+    var runTime = outputs.runTime;
+
+    %>
+
+    <div>
+    <b>Start the template home.--------------------------------------------------------------------------</b>
+    <div class="col-md-6">
+                <div class="cloud-selected-app-type-name">
+
+                    <h1>App Home</h1>
+
+                    <form action="demo_form.asp">
+                    Access End Point : <input type="url" name="endPoint">
+
+                    <button type="button">Go</button>
+                    </form>
+
+                    <button type="button">Stop</button>
+                    <button type="button">Start</button>
+                    <button type="button">Restart</button>
+
+                    <h3> Run Time Logs </h3>
+                </div>
+    </div>
+
+    <div class="col-md-6">
+             <table border="1" style="width:50%">
+              <tr>
+                <td>Run Time</td>
+                <td>Replicas</td>
+              </tr>
+              <tr>
+                <td><%=runTime.server%></td>
+                <td><%=runTime.replicas%></td>
+              </tr>
+            </table>
+    </div>
+
+    <div class="col-xs-3">
+          <ul class="list-group">
+              <li class="list-group-item list-group-item-info" style="font-weight:bold;"><a href="/appmgt/site/pages/runtimeLogs.jag">Logs</a></li>
+              <li class="list-group-item list-group-item-info" style="font-weight:bold;"><a href="/appmgt/site/pages/select-apptype.jag">Env Variables</a></li>
+          </ul>
+    </div>
+
+    <br>
+    <br>
+
+    <b>End the template home. -------------------------------------------------------------------</b>
+
+
+
+</div>
+
+    <%
+}); %>

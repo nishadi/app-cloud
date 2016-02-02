@@ -1,0 +1,88 @@
+<%
+/*
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+
+var log = new Log("module/manager/manager.jag");
+var carbon = require('carbon');
+var server = carbon.server;
+
+/*
+ *   getTenantDomain is used to logged user's domain name.
+ */
+var getTenantDomain = function () {
+
+    var tenantDomain = session.get(TENANT_DOMAIN_NAME);
+    if ( tenantDomain == null) {
+        var username = jagg.getUser();
+        if(username){
+            tenantDomain = SUPER_TENANT_DOMAIN_NAME;
+            if (username.indexOf("@") != -1) {
+                tenantDomain = username.substring(username.lastIndexOf('@') + 1);
+            } else {	// else assume super tenant
+                tenantDomain = SUPER_TENANT_DOMAIN_NAME;
+            }
+            session.put(TENANT_DOMAIN_NAME, tenantDomain.toString().toLowerCase());
+        }
+    }
+    return tenantDomain;
+};
+
+
+var getTenantAwareUsername = function (username) {
+	if(!username){
+		username = jagg.getUser();
+	}
+    var tenantAwareUsername = 'null';
+    if (username.indexOf("@") != -1) {
+        tenantAwareUsername = username.substring(0, username.lastIndexOf('@'));
+    } else {        // else assume super tenant
+        tenantAwareUsername = SUPER_TENANT_DOMAIN_NAME;
+    }
+    return tenantAwareUsername;
+};
+
+/*
+ *   getDomainlessUserName is used to get the user name without the domain name.
+ */
+var getDomainlessUserName = function () {
+	var username = jagg.getUser();
+	if(!username){
+        return null;
+    }
+    var separator = "@";
+    var strippedUserName;
+    var index = username.lastIndexOf(separator);
+    if (index == -1)
+        strippedUserName = username;
+    else
+        strippedUserName = username.substring(0, index);
+
+    return strippedUserName;
+};
+
+var getTenantId = function () {
+    var carbon = require('carbon');
+    var tenantDomain = getTenantDomain();
+    var tenantManager = multitenancy.getTenantManager();
+    return tenantManager.getTenantId(tenantDomain);
+};
+
+%>
