@@ -32,12 +32,13 @@ jagg.block("home", {
 
         var applicationModule = jagg.module("application");
         var application = applicationModule.getApplicationByNameRevision(inputs.applicationName,inputs.applicationRevision);
-        
-        var applicationKey = request.getParameter("applicationName");
-        var applicationKey = request.getParameter("applicationRevision");
+        var revision = applicationModule.getAllRevisionsOfApplication(inputs.applicationName);
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+
         return {
             "application" : application,
-
+            "revision" :revision
         };
     }
 

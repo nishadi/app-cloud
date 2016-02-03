@@ -199,13 +199,11 @@ var getAllApplications = function(){
 }
 
 /**
- * Method for getting the application  
+ * Method for getting the application e.g. :- Application ("fooApp", 1.0.0 ,WSO2AS, Running ,"")
  */
 var getApplicationByNameRevision = function(appName,appRevision){
     
-    var applicationArray;
-
-    try {
+       try {
 
         var application = ApplicationManager.getApplicationByNameRevision(appName,appRevision);
 
@@ -214,16 +212,44 @@ var getApplicationByNameRevision = function(appName,appRevision){
             applicationObject.id = application.applicationId;
             applicationObject.applicationName = application.applicationName;
             applicationObject.runtimeName = application.runtimeName;
+            applicationObject.revision = application.revision;
+            applicationObject.endpointURL = application.endpointURL;
             applicationObject.status = application.status;
+            applicationObject.numberOfReplicas = application.numberOfReplicas;
+            applicationObject.description = application.description;
 
-            applicationArray =applicationObject;
     } catch(e){
         log.error("Error while getting the application");
         log.error(e);
         throw e;
     }
 
-    return applicationArray;
+    return applicationObject;
 }
-    
+
+var getAllRevisionsOfApplication =function(appName){
+
+    var revisionArray = [];
+
+    try {
+
+        var revisions = ApplicationManager.getAllRevisionsOfApplication(appName);
+
+        for (var i = 0; i < revisions.length; i++) {
+            var revision = revisions[i];
+            var revisionObject = {};
+
+            revisionObject.revision = revision.revision;
+
+            revisionArray.push(revisionObject);
+        }
+    } catch(e){
+        log.error("Error while getting the application list");
+        log.error(e);
+        throw e;
+    }
+
+    return revisionArray;
+}
+
 %>

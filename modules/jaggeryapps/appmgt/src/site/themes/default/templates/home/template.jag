@@ -21,23 +21,23 @@ include("/jagg/jagg.jag");
 
 jagg.template("home", function(inputs, outputs, jagg) {
     var application = outputs.application;
-
+    var revisions = outputs.revision;
+    var i=0;
+<!--var application=outputs.runTime;-->
     var applicationName = request.getParameter("applicationName");
     var applicationKey = request.getParameter("applicationRevision");
 
     %>
 
     <div>
-    <b>Start the template home.--------------------------------------------------------------------------</b>
+    <b>Start the template App home.--------------------------------------------------------------------------</b>
     <div class="col-md-6">
                 <div class="cloud-selected-app-type-name">
-
                     <h1>App Home</h1>
                     <label>App Name      : <%=application.applicationName%></label>
                     <form action="demo_form.asp">
-                    Access End Point : <input type="url" name="endPoint">
-
-                    <button type="button">Go</button>
+                    Access End Point : <label><%=application.endpointURL%></label>
+                    <button class="btn-default" type="button">Go</button>
                     </form>
                     <br>
 
@@ -46,9 +46,13 @@ jagg.template("home", function(inputs, outputs, jagg) {
                     <br>
 
                     <label>Revision : </label>
-                    <select name = "revision" id= "runtime"><option value="None" selected="Selected">Select revision</option>
-                                        </select>
-                    <button type="button">Deploy new Revision</button>
+                    <select name = "revision" id= "runtime">
+                    <option value="revisions"><%=application.revision%> </option>
+                    for (i = 0; i < revisions.length; i++) {
+                         <option value="revisions"><%=revisions[i].revision%> </option>
+                    }
+                    </select>
+                    <button class="btn-default" type="button">Deploy new Revision</button>
                     <br>
                     <br>
 
@@ -67,19 +71,13 @@ jagg.template("home", function(inputs, outputs, jagg) {
               </tr>
               <tr>
               <td>Server 1</td>
-              <td>Running</td>
+              <td><%=application.status%></td>
               <td><a href="/appmgt/site/pages/runtimeLogs.jag">Runtime Logs</a>
               <br>
               <a href="/appmgt/site/pages/runtimeLogs.jag">Dashboard</a></td>
-              <td>Running</td>
+              <td><button class="btn-default" type="button">Stop</button></td>
               </tr>
               <tr>
-              <td>Server 2</td>
-              <td>Running</td>
-              <td><a href="/appmgt/site/pages/runtimeLogs.jag">Runtime Logs</a>
-              <br>
-              <a href="/appmgt/site/pages/runtimeLogs.jag">Dashboard</a></td>
-              <td>Running</td>
               </tr>
             </table>
     </div>
@@ -107,11 +105,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
     <br>
     <br>
 
-    <b>End the template home. -------------------------------------------------------------------</b>
-
-
-
+    <b>End the template App home. -------------------------------------------------------------------</b>
 </div>
-
     <%
 }); %>
