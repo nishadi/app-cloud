@@ -23,65 +23,141 @@ jagg.template("apptype/select", function(inputs, outputs, jagg) {
     var appTypes = outputs.appTypes;
     %>
 
+
+    <div class="container-fluid app-type-listing">
+       <div class="row listing padding-bottom-xlg" data-count="3.0">
+          <%
+        if(appTypes.length > 0){
+            for(var x=0; x < appTypes.length; x++){
+                %>
+            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 ">
+                <div class="cloud-app-type <%=appTypes[x].cssProperties.color%> cloud-app-type-max" id="<%=x+1%>"
+                        data-description="<%=appTypes[x].description%>"
+                        data-appname="<%=appTypes[x].cssProperties.displayName%>" >
+                        <i class="fw <%=appTypes[x].cssProperties.icon%> fw-5x"></i>
+                        <div class="type-name" ><%=appTypes[x].name%></div>
+                </div>
+          </div>
+          <%
+            }
+        }
+        %>
+    </div>
+
+    <!-- BOF template block appear on each click -->
+    <div class="app-type-info-template" style="display: none">
+      <div class="longme" style="display: none">
+         <div class="clearfix"></div>
+         <div class="col-md-12 long">
+            <div class="row">
+               <div class="col-sm-8 col-md-8 col-lg-7">
+                  <h2 class="data-appname"></h2>
+                  <div class="app-description">
+                  </div>
+                  <div class="button-bar">
+                     <a href="#" class="cu-btn cu-btn-md cu-btn-gray"><i class="fa fa-book"></i> Documentation</a>
+                     <a href="#" class="cu-btn cu-btn-md cu-btn-gray"><i class="fa fa-video-camera"></i> Video Guide</a>
+                  </div>
+               </div>
+                <div class="col-sm-4 col-md-4 col-lg-5 description-action">
+                   <a href="<%=jagg.getAbsoluteUrl("/site/pages/application.jag")%>" class="cu-btn cu-btn-md cu-btn-blue">
+                   <span class="fw-stack fw-lg btn-action-ico">
+                   <i class="fw fw-ring fw-stack-2x"></i>
+                   <i class="fw fw-add fw-stack-1x"></i>
+                   </span> Upload Application</a>
+                </div>
+             </div>
+          </div>
+       </div>
+    </div>
+    <!-- EOF template block appear on each click -->
+
     <script type="text/javascript">
-        $(document).on('click', '.cloud-app-type', function(){
-            var appTypeId = parseInt($(this).attr('apptype-id'));
-            var appTypeName = $(this).attr('apptype-name');
-            var description = $(this).attr('apptype-description');
+    /**
+     * this function use to append description block on app type selection
+     * */
+    $(document).on('click', '.cloud-app-type', function(){
 
-            $('#appTypeName').val(appTypeName);
-            $('#appTypeId').val(appTypeId);
-            $('#appTypedescription').val(description);
+        $('.listing').find('.longme').detach();
+        if($('.cloud-app-type').hasClass('cloud-app-selected')){
+            $('.cloud-app-type').removeClass('cloud-app-selected');
+            $(this).addClass('cloud-app-selected');
+        }else{
+            $(this).addClass('cloud-app-selected');
 
-            document.getElementById('appTypeForm').submit()
+        }
 
-        });
+        var width = $( window ).width(),
+                currentcount = parseInt($(this).attr('id')),
+                appDescription = $(this).attr('data-description'),
+                appName = $(this).attr('data-appname'),
+                dataCount = parseInt($('.listing').attr('data-count'));
+
+        //content replace with data attributes
+        $('.app-type-info-template').find('.data-appname').html(appName);
+        $('.app-type-info-template').find('.app-description').html(appDescription);
+        var appendHtml =$('.app-type-info-template').html();
+
+
+        if(width >=1170){
+            if(currentcount%7 == 0){
+                $('#'+currentcount+'\\.0').parent().after(appendHtml);
+                $('.longme').fadeIn('slow')
+            }else{
+                var ctest = currentcount+(7- currentcount%7);
+                console.log(ctest)
+                if(ctest > dataCount){
+                    $('#'+ dataCount+'\\.0').parent().after(appendHtml);
+                    $('.longme').fadeIn('slow')
+                }else{
+                    $('#'+ctest+'\\.0').parent().after(appendHtml);
+                    $('.longme').fadeIn('slow')
+                }
+
+            }
+        }else if(width >=970){
+            if(currentcount%4 == 0){
+                $('#'+currentcount+'\\.0').parent().after(appendHtml);
+                $('.longme').fadeIn('slow')
+            }else{
+                var ctest = parseInt(currentcount)+(4- currentcount%4);
+                if(ctest > dataCount){
+                    $('#'+ dataCount+'\\.0').parent().after(appendHtml);
+                    $('.longme').fadeIn('slow')
+                }else{
+                    $('#'+ctest+'\\.0').parent().after(appendHtml);
+                    $('.longme').fadeIn('slow')
+
+                }
+
+            }
+        }else if(width >=750 ){
+            if(currentcount%2 == 0){
+                $('#'+currentcount+'\\.0').parent().after(appendHtml);
+                $('.longme').fadeIn('slow')
+            }else{
+                var ctest = parseInt(currentcount)+1;
+                if(ctest > dataCount){
+                    $('#'+ dataCount+'\\.0').parent().after(appendHtml);
+                    $('.longme').fadeIn('slow')
+                }else{
+                    $('#'+ctest+'\\.0').parent().after(appendHtml);
+                    $('.longme').fadeIn('slow')
+
+                }
+
+            }
+
+        }else if(width <750 ){
+            $('#'+currentcount+'\\.0').parent().after(appendHtml);
+            $('.longme').fadeIn('slow')
+
+        }
+
+
+    })
 
     </script>
-
-
-    <div>
-    <b>Start the template index.--------------------------------------------------------------------------</b>
-    <div class="col-md-6">
-                <div class="cloud-selected-app-type-name">
-                    <h1>App Types</h1>
-                    <%
-                        if(appTypes.length > 0){
-                            for(var x=0; x < appTypes.length; x++){
-                                %>
-                                <div class="cloud-app-type" apptype-name="<%=appTypes[x].name%>"
-                                apptype-id="<%=appTypes[x].id%>" apptype-description="<%=appTypes[x].description%>" >
-                                <tr>
-                                <td><b><%=appTypes[x].name%></b></td>
-                                <td><%=appTypes[x].description%></td>
-
-                                </tr>
-                                <br>
-                                </div>
-                                <%
-                            }
-                        }
-                    %>
-                    <!--<h2><a href="/appmgt/site/pages/select-apptype.jag">Create</a> a new application</h2>-->
-                </div>
-            </div>
-
-            <div class="col-sm-4 col-md-4 col-lg-5 description-action">
-                          <form id='appTypeForm'  method='post' action='/appmgt/site/pages/application.jag'>
-                            <input type="hidden" id="appTypeName" name="appTypeName" value="" />
-                            <input type="hidden" id="appTypeId" name="appTypeId" value="" />
-                            <input type="hidden" id="appTypedescription" name="appTypedescription" value="" />
-                        </form>
-                    </div>
-
-            <br>
-            <br>
-
-            <b>End the template index. -------------------------------------------------------------------</b>
-
-
-
-</div>
 
     <%
 }); %>

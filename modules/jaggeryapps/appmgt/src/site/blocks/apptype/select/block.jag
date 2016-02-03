@@ -17,6 +17,8 @@
  *   under the License.
  */
 
+include('/jagg/constants.jag');
+
 jagg.block("apptype/select", {
     initialize:function (data) {
 
@@ -30,6 +32,13 @@ jagg.block("apptype/select", {
         var applicationModule = jagg.module("application");
         var appTypes = applicationModule.getAllAppTypes();
 
+        var appTypesProperties = require(APP_TYPES_PROPERTIES_CONFIG);
+        if(appTypes.length > 0) {
+            //Adding css properties to apptype objects
+            for (var index in appTypes) {
+                appTypes[index].cssProperties = appTypesProperties[appTypes[index].name];
+            }
+        }
         return {
             "appTypes" : appTypes
         };

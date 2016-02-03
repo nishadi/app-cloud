@@ -25,40 +25,46 @@ jagg.template("index", function(inputs, outputs, jagg) {
 
     %>
 
-    <div>
-    <b>Start the template index.--------------------------------------------------------------------------</b>
-    <div class="col-md-6">
-                <div class="cloud-selected-app-type-name">
-                    <h1>Application Listing Page</h1>
-                    <%
-                        if(applications.length > 0){
-                            for(var x=0; x < applications.length; x++){
-                                %>
-                                <tr>
-                                <td>Application Name : <b><%=applications[x].applicationName%></b></td>
-                                <td>Application Status : <%=applications[x].status%></td>
-                                <td>Application Runtime : <%=applications[x].runtimeName%></td>
-
-                                </tr>
-                                <br>
-                                <%
-                            }
-                        } else { %>
-                            <div>There is No Application to List</div>
-                        <%}
-                    %>
-                    <h2><a href="/appmgt/site/pages/select-apptype.jag">Create</a> a new application</h2>
-                </div>
+    <div class="container-fluid">
+        <div class="row row-centered app-sort-bar">
+            <div class="col-centered col-md-5 search">
+                <h2><a href="/appmgt/site/pages/select-apptype.jag">Create</a> a new application</h2>
             </div>
+        </div>
+        <div class="row row-centered app-sort-bar">
+            <div class="col-centered col-md-5 search">
+                <input type="text" class="form-control" id="search-apps" placeholder="Search applications">
+                <i class="fa fa-2x fa-search" ></i>
+            </div>
+        </div>
 
-            <br>
-            <br>
+    <div class="row row-centered app-listing">
+    <%
+    if (applications.length > 0) {
+        for (var x = 0; x < applications.length; x++) {
+            %>
+            <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+             <a href="009_cloud_app_details_initial.html">
+                <div class="cloud-app-listing app-color-one">
+                    <i class="fw fw-java fw-2x" data-toggle="tooltip" data-placement="right" title="Java Application"></i>
+                    <div class="app-icon">
+                    <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("/images/dark-app-iconx256.jpg"))%>" class="square-element">
+                    </div>
+                    <div class="app-name" ><%=applications[x].applicationName%></div>
+                </div>
+             </a>
+           </div>
+        <%
+        }
+    } else { %>
+      <div>There is No Application to List</div>
+    <%
+    }
+    %>
 
-            <b>End the template index. -------------------------------------------------------------------</b>
-
-
-
+    </div>
 </div>
 
-    <%
+
+<%
 }); %>
