@@ -21,7 +21,7 @@ $(document).ready(function () {
 
     $('#view-log').click(function(){
 
-        var applicationKey = 'My-JAXRS';
+        var applicationKey = 'My-JAXWS';
         var selectedRevision = '1.0.0';
         var applicationType = 'war';
 

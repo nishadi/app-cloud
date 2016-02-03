@@ -23,5 +23,6 @@ var SUPER_TENANT_DOMAIN_NAME = "carbon.super";
 var CLOUD_TYPE="AppCloud";
 var DOCUMENTATION_REDIRECTION_URL = "https://docs.wso2.org/display/AF210/WSO2+App+Factory+Documentation";
 var SUPPORT_REDIRECTION_URL = "http://wso2.com/support/";
+var APP_TYPES_PROPERTIES_CONFIG = "/site/themes/default/templates/apptype/select/app-types-properties.json";
 
 %>

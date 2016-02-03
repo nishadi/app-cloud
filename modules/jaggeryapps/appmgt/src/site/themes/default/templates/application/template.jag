@@ -32,23 +32,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
  </script>
 
-<!-- BOF App factory menu actionbar -->
-    <div class="action-bar">
-        <a href="002_cloud_select_app_type.html" class="btn-action">
-                <span class="fw-stack fw-lg btn-action-ico">
-                    <i class="fw fw-ring fw-stack-2x"></i>
-                    <i class="fw fw-left-arrow fw-stack-1x"></i>
-                </span> Back to app type selection
-        </a>
-        <a href="001_cloud_first_login.html" class="btn-action">
-                <span class="fw-stack fw-lg btn-action-ico">
-                    <i class="fw fw-ring fw-stack-2x"></i>
-                    <i class="fa fa-mail-reply-all fa-stack-1x"></i>
-                </span> Cancel
-        </a>
-    </div>
-<!-- EOF App factory menu actionbar-->
-
 <div class="container-fluid cloud-container">
         <div class="row">
             <div class="col-fixed-left col-fixed-1x">
