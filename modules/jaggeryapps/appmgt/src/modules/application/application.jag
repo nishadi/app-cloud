@@ -56,16 +56,18 @@ var addApplication = function (applicationName, applicationRevision, application
     //Creating basic deployment
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
     var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
-    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext("My-JAXWS", "1.0.0", "war", 5, "wso2.org");
+    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(applicationName, applicationRevision, appTypeName, 5, "wso2.org");
     var kubService = new KubernetesRuntime(applicationCtx);
 
     var containers = getContainers();
     var deploymentConfig = getDeploymentConfig(containers);
 
+    log.info("Deploying application: " + applicationName);
     kubService.deployApplication(deploymentConfig);
 
     //Creating Ingress
-    var ingressCreated = kubService.createDeploymentUrl("app-cloud.wso2.com");
+    var ingressCreated = kubService.createDeploymentUrl("appcloud.wso2.com");
+    log.info("Deployment URL status: " + ingressCreated);
 };
 
 
@@ -76,7 +78,7 @@ function getContainers(){
     var containerList = new java.util.ArrayList();
     var container1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
     container1.setBaseImageName("tomcat");
-    container1.setBaseImageVersion("8.0");
+    container1.setBaseImageVersion("latest");
     var envs1 = new java.util.HashMap();
     envs1.put("ORG","WSO2");
     container1.setEnvVariables(envs1);
@@ -84,7 +86,7 @@ function getContainers(){
     var serviceProxy1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
     serviceProxy1.setServiceName("http");
     serviceProxy1.setServiceProtocol("TCP");
-    serviceProxy1.setServicePort(39080);
+    serviceProxy1.setServicePort(80);
     serviceProxy1.setServiceBackendPort(8080);
     serviceProxyList1.add(serviceProxy1);
     container1.setServiceProxies(serviceProxyList1);
@@ -97,7 +99,7 @@ function getContainers(){
 function getDeploymentConfig(containersList){
 
     var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
-    deploymentConfig.setDeploymentName("testpp");
+    deploymentConfig.setDeploymentName("eeee");
     deploymentConfig.setReplicas(1);
     deploymentConfig.setContainers(containersList);
 
