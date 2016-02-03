@@ -36,10 +36,9 @@ var Application = Packages.org.wso2.appcloud.core.dto.Application;
  */
 var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas, uploadedArtifact, runtimeId, appTypeName) {
     //uploadedArtifact.move(ARTIFACT_UPLOAD_DIRECTORY + uploadedArtifact.getName());
-    log.info( "Application Name: " + applicationName + " " +
-            "Application Revision: " + applicationRevision + " " +
-            "Application Description: " + applicationDescription + " " +
-            "Replicas: " + replicas + " runtimeId : " + runtimeId + " apptype id : " + appTypeName
+    log.info("Started creating App => name: " + applicationName + " " +
+            "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
+            "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName
     );
 
     //Adding application to Database
