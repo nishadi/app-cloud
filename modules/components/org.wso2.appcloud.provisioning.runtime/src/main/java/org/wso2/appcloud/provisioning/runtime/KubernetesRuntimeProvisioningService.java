@@ -173,7 +173,10 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     Service service = new ServiceBuilder()
                             .withKind(KubernetesPovisioningConstants.KIND_SERVICE)
                             .withSpec(serviceSpec)
-                            .withMetadata(new ObjectMetaBuilder().withName(serviceName.toLowerCase()).build())
+                            .withMetadata(new ObjectMetaBuilder()
+                                    .withName(serviceName.toLowerCase())
+                                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
+                                    .build())
                             .build();
                     serviceList.add(service);
                 }
@@ -745,10 +748,84 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
 
             deleted = kubClient.extensions().ingress().inNamespace(namespace.getMetadata().getName()).delete(ing);
             if(!deleted){
-                log.error("Error occured while deleting Kubernetes ingress : " + ingName + "for service : " +
+                log.error("Error occurred while deleting Kubernetes ingress : " + ingName + "for service : " +
                         service.getMetadata().getName());
             }
         }
         return deleted;
+    }
+
+    @Override
+    public boolean createDeploymentUrl(String environmentUrl) throws RuntimeProvisioningException {
+
+        KubernetesClient kubClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
+        ServiceList serviceList = KubernetesProvisioningUtils.getServices(applicationContext);
+        if (log.isDebugEnabled()){
+            log.debug("Deployment service List size: " + serviceList.getItems().size());
+        }
+
+        Ingress createdIng;
+        boolean created = false;
+        String tenantDomain = applicationContext.getTenantInfo().getTenantDomain();
+        String appId = applicationContext.getId();
+        String appVersion = applicationContext.getVersion();
+        String ingressPathStr = "/" + tenantDomain + "/webapps/" + appId + "-" + appVersion;
+        if (log.isDebugEnabled()){
+            log.debug("Ingress path: " + ingressPathStr);
+        }
+
+        HTTPIngressPath ingressPath = new HTTPIngressPath(new IngressBackend(), ingressPathStr);
+
+        for (Service service : serviceList.getItems()) {
+            if (log.isDebugEnabled()){
+                log.debug("Ingress creating for service: " + service.getMetadata().getName());
+            }
+
+            Ingress ing = new IngressBuilder()
+                    .withApiVersion(Ingress.ApiVersion.EXTENSIONS_V_1_BETA_1)
+                    .withKind(KubernetesPovisioningConstants.KIND_INGRESS)
+                    .withNewMetadata()
+                    .withName(
+                            KubernetesProvisioningUtils.createIngressMetaName(applicationContext, environmentUrl,
+                                    service.getMetadata().getName()))
+                    .withNamespace(namespace.getMetadata().getName())
+                    .endMetadata()
+                    .withNewSpec()
+                    .withRules()
+                    .addNewRule()
+                    .withHost(environmentUrl)
+                    .withNewHttp()
+                    .withPaths()
+                    .addNewPathLike(ingressPath)
+                    .withNewBackend()
+                    .withServiceName(service.getMetadata().getName())
+                    .withServicePort(new IntOrString(80))
+                    .endBackend()
+                    .endPath()
+                    .endHttp()
+                    .endRule()
+                    .endSpec()
+                    .build();
+
+            createdIng = kubClient.extensions()
+                    .ingress()
+                    .inNamespace(namespace.getMetadata().getName())
+                    .create(ing);
+
+            if (createdIng != null && KubernetesProvisioningUtils
+                    .createIngressMetaName(applicationContext, environmentUrl, service.getMetadata().getName())
+                    .equals(createdIng.getMetadata().getName())) {
+                created = true;
+                if (log.isDebugEnabled()){
+                    log.debug("Kubernetes ingress : " + ing + "created for service : " + service.getMetadata().getName());
+                }
+
+            } else {
+                created = false;
+                log.error("Error occurred while creating Kubernetes ingress : " + ing + "for service : " +
+                        service.getMetadata().getName());
+            }
+        }
+        return created;
     }
 }
