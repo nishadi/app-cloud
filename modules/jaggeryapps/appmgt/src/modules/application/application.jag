@@ -54,19 +54,18 @@ var addApplication = function (applicationName, applicationRevision, application
     ApplicationManager.addApplication(application);
 
     //Creating basic deployment
-    log.info("Creating basic deployment");
-
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
     var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
     var applicationCtx = KubernetesProvisioningUtils.getApplicationContext("My-JAXWS", "1.0.0", "war", 5, "wso2.org");
     var kubService = new KubernetesRuntime(applicationCtx);
 
     var containers = getContainers();
-    log.info("Got container list");
     var deploymentConfig = getDeploymentConfig(containers);
-    log.info("Created deployment config");
+
     kubService.deployApplication(deploymentConfig);
-    log.info("Application creation done");
+
+    //Creating Ingress
+    var ingressCreated = kubService.createDeploymentUrl("app-cloud.wso2.com");
 };
 
 
@@ -98,8 +97,8 @@ function getContainers(){
 function getDeploymentConfig(containersList){
 
     var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
-    deploymentConfig.setDeploymentName("test");
-    deploymentConfig.setReplicas(2);
+    deploymentConfig.setDeploymentName("testpp");
+    deploymentConfig.setReplicas(1);
     deploymentConfig.setContainers(containersList);
 
     return deploymentConfig;

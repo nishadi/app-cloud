@@ -156,4 +156,16 @@ public interface RuntimeProvisioningService {
      * @throws RuntimeProvisioningException
      */
     boolean deleteCustomDomain(String domain) throws RuntimeProvisioningException;
+
+    /**
+     * Create the launch URL with respective to the environment, tenant domain, app name and the version.
+     *
+     * An example launch URL:
+     * https://appserver.dev.milestones.appfactory.wso2.com:9443/t/man.com/webapps/foo-default-SNAPSHOT/
+     *
+     * @param environmentUrl
+     * @return
+     * @throws RuntimeProvisioningException
+     */
+    boolean createDeploymentUrl(String environmentUrl) throws RuntimeProvisioningException;
 }
