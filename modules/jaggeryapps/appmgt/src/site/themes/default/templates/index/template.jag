@@ -57,7 +57,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
         <%
         }
     } else { %>
-      <div>There is No Application to List</div>
+      <div>Please create a new application</div>
     <%
     }
     %>
