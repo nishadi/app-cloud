@@ -20,7 +20,10 @@
 include("/jagg/jagg.jag");
 
 jagg.template("home", function(inputs, outputs, jagg) {
-    var runTime = outputs.runTime;
+    var application = outputs.application;
+
+    var applicationName = request.getParameter("applicationName");
+    var applicationKey = request.getParameter("applicationRevision");
 
     %>
 
@@ -30,40 +33,76 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 <div class="cloud-selected-app-type-name">
 
                     <h1>App Home</h1>
-
+                    <label>App Name      : <%=application.applicationName%></label>
                     <form action="demo_form.asp">
                     Access End Point : <input type="url" name="endPoint">
 
                     <button type="button">Go</button>
                     </form>
+                    <br>
 
-                    <button type="button">Stop</button>
-                    <button type="button">Start</button>
-                    <button type="button">Restart</button>
+                    <label>Runtime Server : <%=application.runtimeName%></label>
+                    <br>
+                    <br>
+
+                    <label>Revision : </label>
+                    <select name = "revision" id= "runtime"><option value="None" selected="Selected">Select revision</option>
+                                        </select>
+                    <button type="button">Deploy new Revision</button>
+                    <br>
+                    <br>
+
 
                     <h3> Run Time Logs </h3>
                 </div>
     </div>
 
-    <div class="col-md-6">
-             <table border="1" style="width:50%">
+    <div class="col-l-3">
+             <table border="1" style="width:60%">
               <tr>
-                <td>Run Time</td>
-                <td>Replicas</td>
+                <td>Nodes</td>
+                <td>Status</td>
+                <td>Links</td>
+                <td>Actions</td>
               </tr>
               <tr>
-                <td><%=runTime.server%></td>
-                <td><%=runTime.replicas%></td>
+              <td>Server 1</td>
+              <td>Running</td>
+              <td><a href="/appmgt/site/pages/runtimeLogs.jag">Runtime Logs</a>
+              <br>
+              <a href="/appmgt/site/pages/runtimeLogs.jag">Dashboard</a></td>
+              <td>Running</td>
+              </tr>
+              <tr>
+              <td>Server 2</td>
+              <td>Running</td>
+              <td><a href="/appmgt/site/pages/runtimeLogs.jag">Runtime Logs</a>
+              <br>
+              <a href="/appmgt/site/pages/runtimeLogs.jag">Dashboard</a></td>
+              <td>Running</td>
               </tr>
             </table>
     </div>
+    <br>
 
     <div class="col-xs-3">
-          <ul class="list-group">
-              <li class="list-group-item list-group-item-info" style="font-weight:bold;"><a href="/appmgt/site/pages/runtimeLogs.jag">Logs</a></li>
-              <li class="list-group-item list-group-item-info" style="font-weight:bold;"><a href="/appmgt/site/pages/select-apptype.jag">Env Variables</a></li>
-          </ul>
+              <ul class="list-group" >
+              <label style="font-weight:bold;">Tags </label>
+                  <li class="list-group-item list-group-item-info" style="font-weight:bold;">Version: 1.0.0</li>
+                  <li class="list-group-item list-group-item-info" style="font-weight:bold;">Stage : Dev</li>
+              </ul>
     </div>
+    <div class="col-xs-3">
+                  <ul class="list-group" >
+                  <label style="font-weight:bold;">Env Variables </label>
+                      <li class="list-group-item list-group-item-info" style="font-weight:bold;">DB_USER : root</li>
+                      <li class="list-group-item list-group-item-info" style="font-weight:bold;">DB_USER_PWD : root</li>
+                  </ul>
+        </div>
+        <br>
+        <br>
+
+
 
     <br>
     <br>

@@ -198,4 +198,32 @@ var getAllApplications = function(){
     return applicationArray;
 }
 
+/**
+ * Method for getting the application  
+ */
+var getApplicationByNameRevision = function(appName,appRevision){
+    
+    var applicationArray;
+
+    try {
+
+        var application = ApplicationManager.getApplicationByNameRevision(appName,appRevision);
+
+            var applicationObject = {};
+
+            applicationObject.id = application.applicationId;
+            applicationObject.applicationName = application.applicationName;
+            applicationObject.runtimeName = application.runtimeName;
+            applicationObject.status = application.status;
+
+            applicationArray =applicationObject;
+    } catch(e){
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+
+    return applicationArray;
+}
+    
 %>

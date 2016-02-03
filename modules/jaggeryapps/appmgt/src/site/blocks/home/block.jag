@@ -22,13 +22,22 @@ jagg.block("home", {
 
     },
     getInputs:function () {
-
+        return {
+            "applicationName": null,
+            "applicationRevision" : null
+        }
     },
 
     getOutputs:function (inputs) {
-        var runTime = {server:"WSO2AS", replicas:"2"};
+
+        var applicationModule = jagg.module("application");
+        var application = applicationModule.getApplicationByNameRevision(inputs.applicationName,inputs.applicationRevision);
+        
+        var applicationKey = request.getParameter("applicationName");
+        var applicationKey = request.getParameter("applicationRevision");
         return {
-            "runTime" : runTime
+            "application" : application,
+
         };
     }
 
