@@ -828,4 +828,60 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
         }
         return created;
     }
+
+    /**
+     * Delete deployment
+     *
+     * @param deploymentName name of the deployment
+     * @return
+     * @throws RuntimeProvisioningException
+     */
+    @Override
+    public boolean deleteDeployment(String deploymentName) throws RuntimeProvisioningException {
+        boolean deleted = true;
+        KubernetesClient kubernetesClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
+        //If it is not deleted one object successfully, continue deleting others.
+        try {
+            kubernetesClient.extensions().deployments().inNamespace(namespace.getMetadata().getName())
+                    .withName(deploymentName).delete();
+        } catch (KubernetesClientException e) {
+            String message = "Error while deleting kubernetes deployment : " + deploymentName;
+            log.warn(message, e);
+        }
+
+        try {
+            kubernetesClient.replicationControllers().inNamespace(namespace.getMetadata().getName())
+                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+        } catch (KubernetesClientException e) {
+            String message = "Error while deleting kubernetes replication controller in deployment : " + deploymentName;
+            log.warn(message, e);
+
+        }
+
+        try {
+            kubernetesClient.services().inNamespace(namespace.getMetadata().getName())
+                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+        } catch (KubernetesClientException e) {
+            String message = "Error while deleting kubernetes services in deployment : " + deploymentName;
+            log.warn(message, e);
+        }
+
+        try {
+            kubernetesClient.extensions().ingress().inNamespace(namespace.getMetadata().getName())
+                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+        } catch (KubernetesClientException e) {
+            String message = "Error while deleting kubernetes ingress in deployment : " + deploymentName;
+            log.warn(message, e);
+        }
+
+        try {
+            kubernetesClient.secrets().inNamespace(namespace.getMetadata().getName())
+                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+        } catch (KubernetesClientException e) {
+            String message = "Error while deleting kubernetes secrets in deployment : " + deploymentName;
+            log.warn(message, e);
+        }
+
+        return deleted;
+    }
 }
