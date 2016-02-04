@@ -19,14 +19,27 @@ package org.wso2.appcloud.common.util;
  *
  */
 
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudConstant;
 import org.wso2.appcloud.common.AppCloudException;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.*;
+import java.security.SignatureException;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.Properties;
+
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import org.wso2.carbon.core.util.KeyStoreManager;
+
 
 /**
  * This class is responsible for keeping utils method which needs for other modules
@@ -91,6 +104,32 @@ public class AppCloudUtil {
             log.warn(message);
         }
         return value;
+    }
+
+    public static String getAuthHeader(String username) throws AppCloudException {
+
+        //Get the filesystem keystore default primary certificate
+        KeyStoreManager keyStoreManager;
+        keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
+        try {
+            keyStoreManager.getDefaultPrimaryCertificate();
+            JWSSigner signer = new RSASSASigner((RSAPrivateKey) keyStoreManager.getDefaultPrivateKey());
+            JWTClaimsSet claimsSet = new JWTClaimsSet();
+            claimsSet.setClaim(AppCloudConstant.SIGNED_JWT_AUTH_USERNAME, username);
+            SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS512), claimsSet);
+            signedJWT.sign(signer);
+
+            // generate authorization header value
+            return "Bearer " + Base64Utils.encode(signedJWT.serialize().getBytes());
+        } catch (SignatureException e) {
+            String msg = "Failed to sign with signature instance";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } catch (Exception e) {
+            String msg = "Failed to get primary default certificate";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        }
     }
 
 }
