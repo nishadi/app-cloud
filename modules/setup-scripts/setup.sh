@@ -5,6 +5,7 @@ PACK_DIR=/home/manjula/appcloud/packs
 SETUP_DIR=/home/manjula/appcloud/setup
 AS_VERSION=wso2as-5.2.1
 IS_VERSION=wso2is-5.0.0
+SS_VERSION=wso2ss-1.1.0
 
 APP_CLOUD_SRC_HOME=`pwd`/../../
 
@@ -24,13 +25,21 @@ SQL1="${Q2}"
 $MYSQL -uroot -proot -A -e "$SQL1";
 $MYSQL -uroot -proot < $APP_CLOUD_SRC_HOME/modules/dbscripts/appcloud.sql
 
+# Setting up storage server databases
+Q3="DROP DATABASE IF EXISTS rss_db;"
+Q4="CREATE DATABASE rss_db;"
+SQL2="${Q3}${Q4}"
+$MYSQL -uroot -proot -A -e "$SQL2";
+
 # Unzip default wso2carbon product packs and configure
 mkdir -p $SETUP_DIR
 unzip -q $PACK_DIR/$AS_VERSION.zip -d $SETUP_DIR/
 unzip -q $PACK_DIR/$IS_VERSION.zip -d $SETUP_DIR/
+unzip -q $PACK_DIR/$SS_VERSION.zip -d $SETUP_DIR/
 
 AS_HOME=$SETUP_DIR/$AS_VERSION/ 
 IS_HOME=$SETUP_DIR/$IS_VERSION/
+SS_HOME=$SETUP_DIR/$SS_VERSION/
 
 echo "Updaing AS node with new configurations"
 cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/jaggery/modules/* $AS_HOME/modules/
@@ -48,6 +57,7 @@ cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.provisioning.runtime
 cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.common/target/org.wso2.appcloud.common-1.0.0-SNAPSHOT.jar $AS_HOME/repository/components/dropins/
 mkdir -p $AS_HOME/repository/conf/appcloud
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/appcloud/appcloud.properties $AS_HOME/repository/conf/appcloud/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/nimbus-jose-jwt_2.26.1.wso2v2.jar $AS_HOME/repository/components/dropins/
 
 echo "Updaing IS node with new configuraitons"
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $IS_HOME/repository/components/lib/
@@ -57,8 +67,21 @@ cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2is-5.0.0/repository/conf/u
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2is-5.0.0/repository/conf/carbon.xml $IS_HOME/repository/conf/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2is-5.0.0/repository/conf/security/sso-idp-config.xml $IS_HOME/repository/conf/security/sso-idp-config.xml
 
+echo "Updating SS node with new configurations"
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $SS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/nimbus-jose-jwt_2.26.1.wso2v2.jar $SS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/signedjwt-authenticator_4.3.3.jar $SS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2ss-1.1.0/repository/conf/datasources/master-datasources.xml $SS_HOME/repository/conf/datasources/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2ss-1.1.0/repository/conf/user-mgt.xml $SS_HOME/repository/conf/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2ss-1.1.0/repository/conf/carbon.xml $SS_HOME/repository/conf/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2ss-1.1.0/repository/conf/etc/* $SS_HOME/repository/conf/etc/
+cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/patches/wso2ss-1.1.0/* $SS_HOME/repository/components/patches/
+
+
 sh $IS_HOME/bin/wso2server.sh -Dsetup &
 sleep 60
 sh $AS_HOME/bin/wso2server.sh &
+sleep 60
+sh $SS_HOME/bin/wso2server.sh -Dsetup &
 echo "Set up is completed."
 
