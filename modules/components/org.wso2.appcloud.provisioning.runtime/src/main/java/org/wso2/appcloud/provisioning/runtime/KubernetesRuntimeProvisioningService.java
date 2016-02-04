@@ -46,6 +46,26 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
     public KubernetesRuntimeProvisioningService(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
         this.namespace = KubernetesProvisioningUtils.getNameSpace(applicationContext);
+
+        //Creating namespace in kubernetes if not available
+        KubernetesClient kubernetesClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
+        NamespaceList namespaceList = kubernetesClient.namespaces().list();
+        boolean isNamespaceExists = false;
+        for (Namespace ns : namespaceList.getItems()) {
+            if (ns.getMetadata().getName().equals(this.namespace.getMetadata().getName())) {
+                isNamespaceExists = true;
+                if (log.isDebugEnabled()) {
+                    log.debug("Namespace found: " + ns.getMetadata().getName());
+                }
+                break;
+            }
+        }
+        if (!isNamespaceExists) {
+            if (log.isDebugEnabled()) {
+                log.debug("Namespace not available hence creating namespace: " + namespace.getMetadata().getName());
+            }
+            kubernetesClient.namespaces().create(namespace);
+        }
     }
 
     @Override

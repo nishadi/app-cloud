@@ -21,6 +21,7 @@ include("/jagg/jagg.jag");
 include("/jagg/constants.jag");
 
 var log = new Log("module/application/application.jag");
+var modManager = jagg.module("manager");
 var ApplicationManager = Packages.org.wso2.appcloud.core.ApplicationManager;
 var Application = Packages.org.wso2.appcloud.core.dto.Application;
 
@@ -34,7 +35,8 @@ var Application = Packages.org.wso2.appcloud.core.dto.Application;
  * @param uploadedArtifact the uploaded artifact file
  * @param runtimeId runtime id of the application
  */
-var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas, uploadedArtifact, runtimeId, appTypeName) {
+var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas,
+                                                                            uploadedArtifact, runtimeId, appTypeName) {
     //uploadedArtifact.move(ARTIFACT_UPLOAD_DIRECTORY + uploadedArtifact.getName());
     log.info("Started creating App => name: " + applicationName + " " +
             "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
@@ -55,11 +57,13 @@ var addApplication = function (applicationName, applicationRevision, application
     //Creating basic deployment
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
     var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
-    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(applicationName, applicationRevision, appTypeName, 5, "wso2.org");
+    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
+             applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
+
     var kubService = new KubernetesRuntime(applicationCtx);
 
     var containers = getContainers();
-    var deploymentConfig = getDeploymentConfig(containers);
+    var deploymentConfig = getDeploymentConfig(containers, applicationName);
 
     log.info("Deploying application: " + applicationName);
     kubService.deployApplication(deploymentConfig);
@@ -95,10 +99,10 @@ function getContainers(){
 };
 
 
-function getDeploymentConfig(containersList){
+function getDeploymentConfig(containersList, applicationName){
 
     var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
-    deploymentConfig.setDeploymentName("eeee");
+    deploymentConfig.setDeploymentName(applicationName);
     deploymentConfig.setReplicas(1);
     deploymentConfig.setContainers(containersList);
 

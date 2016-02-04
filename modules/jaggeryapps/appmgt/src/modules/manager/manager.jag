@@ -23,6 +23,7 @@ include("/jagg/constants.jag");
 var log = new Log("module/manager/manager.jag");
 var carbon = require('carbon');
 var server = carbon.server;
+var multitenancy = carbon.multitenancy;
 
 /*
  *   getTenantDomain is used to logged user's domain name.
@@ -79,7 +80,6 @@ var getDomainlessUserName = function () {
 };
 
 var getTenantId = function () {
-    var carbon = require('carbon');
     var tenantDomain = getTenantDomain();
     var tenantManager = multitenancy.getTenantManager();
     return tenantManager.getTenantId(tenantDomain);
