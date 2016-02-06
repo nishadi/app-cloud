@@ -1,8 +1,13 @@
 #!/bin/bash
 # This is a basic script to get a developer setup done with multi-tenancy and sso
 # Update the pack_dir and setup_dir and run. it will drop existing databases and setup 
-PACK_DIR=/home/manjula/appcloud/packs
-SETUP_DIR=/home/manjula/appcloud/setup
+if [[ $# -eq 0 ]] ; then
+    echo 'Usage: ./setup.sh /srv/app_cloud'
+    exit 1
+fi
+APPCLOUD_HOME=$1
+PACK_DIR=$APPCLOUD_HOME/packs
+SETUP_DIR=$APPCLOUD_HOME/appcloud/setup
 AS_VERSION=wso2as-5.2.1
 IS_VERSION=wso2is-5.0.0
 SS_VERSION=wso2ss-1.1.0
