@@ -20,6 +20,7 @@
 include("/jagg/jagg.jag");
 
 (function () {
+    var applicationName = request.getParameter('applicationName');
     jagg.render({
         "name":"page/master",
         "inputs":{
@@ -35,7 +36,11 @@ include("/jagg/jagg.jag");
                         "title":"WSO2 App Cloud",
                         "middle":[
                             {
-                                "name":"home"
+                                "name":"home",
+                                "inputs":{
+                                    "applicationName":applicationName,
+                                    "pageName":"home"
+                                }
                             }
                         ]
                     }
