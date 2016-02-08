@@ -24,14 +24,21 @@ jagg.template("index", function(inputs, outputs, jagg) {
     var log = new Log("index");
 
     %>
-
-    <div class="container-fluid">
-        <div class="row row-centered app-sort-bar">
-            <div class="col-centered col-md-5 search">
-                <h2><a href="/appmgt/site/pages/select-apptype.jag">Create Application</a></h2>
-                <h2><a href="/appmgt/site/pages/databases.jag">Create Database</a></h2>
-            </div>
-        </div>
+    <div class="action-bar">
+        <a href="/appmgt/site/pages/select-apptype.jag" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-add fw-stack-1x"></i>
+                </span> <span class="hidden-xs">Create Application</span>
+        </a>
+        <a href="/appmgt/site/pages/databases.jag" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-add fw-stack-1x"></i>
+                </span> <span class="hidden-xs">Create Database</span>
+        </a>
+    </div>
+    <div class="container-fluid">       
         <div class="row row-centered app-sort-bar">
             <div class="col-centered col-md-5 search">
                 <input type="text" class="form-control" id="search-apps" placeholder="Search applications">
