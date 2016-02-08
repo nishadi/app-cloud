@@ -30,9 +30,11 @@ jagg.block("index", {
 
         var applicationModule = jagg.module("application");
         var applications = applicationModule.getAllApplications();
+        var applicationName = request.getParameter("applicationName");
 
         return {
-            "applications" : applications
+            "applications" : applications,
+            "applicationName" :applicationName
         };
     }
 

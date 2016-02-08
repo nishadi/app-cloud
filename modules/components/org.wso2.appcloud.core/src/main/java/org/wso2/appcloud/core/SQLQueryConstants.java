@@ -92,7 +92,7 @@ public class SQLQueryConstants {
             "SELECT id FROM Application WHERE application_name=? AND revision=? AND tenant_id=?";
 
     public static final String GET_ALL_REVISIONS_OF_APPLICATION =
-            "SELECT revision from Application WHERE application_name=?, tenant_id=?";
+            "SELECT revision from Application WHERE application_name=? AND tenant_id=?";
 
     public static final String GET_ALL_ENDPOINT_URL_OF_APPLICATION =
             "SELECT * FROM EndpointURL WHERE application_id=(SELECT id FROM Application WHERE application_name=? AND " +
