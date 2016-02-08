@@ -25,4 +25,16 @@ var DOCUMENTATION_REDIRECTION_URL = "https://docs.wso2.org/display/AF210/WSO2+Ap
 var SUPPORT_REDIRECTION_URL = "http://wso2.com/support/";
 var APP_TYPES_PROPERTIES_CONFIG = "/site/themes/default/templates/apptype/select/app-types-properties.json";
 
+//events related constants
+var ARTIFACT_UPLOAD = "artifact_upload";
+var DOCKER_FILE_CREATE = "docker_file_create";
+var DOCKER_IMAGE_BUILD = "docker_image_build";
+var DOCKER_REGISTRY_PUSH = "docker_registry_push";
+var KUBE_DEPLOY = "kube_deploy";
+
+var EVENT_SUCCEEDED = "success";
+var EVENT_PENDING = "pending";
+var EVENT_FAILED = "failed";
+
+
 %>

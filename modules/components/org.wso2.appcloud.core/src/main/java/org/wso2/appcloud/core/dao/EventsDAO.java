@@ -24,11 +24,9 @@ import org.wso2.appcloud.core.SQLQueryConstants;
 import org.wso2.appcloud.core.dto.Application;
 import org.wso2.appcloud.core.dto.Event;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -60,7 +58,9 @@ public class EventsDAO {
             preparedStatement.setTimestamp(4, event.getTimestamp());
             preparedStatement.setString(5, event.getEventDescription());
 
-            preparedStatement.execute();
+            boolean result = preparedStatement.execute();
+            dbConnection.commit();
+            log.info("DB insert query result: " + result);
 
         } catch (SQLException e) {
             String msg = "Error occurred while adding app creation event: " + event.getEventName() + " status: " + event
@@ -115,5 +115,4 @@ public class EventsDAO {
         }
         return eventList;
     }
-
 }

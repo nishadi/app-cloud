@@ -32,10 +32,9 @@ public class EventsManager {
      * @param applicationName application name
      * @param revision application revision
      * @param event event object
-     * @return
      * @throws AppCloudException
      */
-    public static boolean addAppCreationEvent(String applicationName, String revision, Event event) throws AppCloudException {
+    public void addAppCreationEvent(String applicationName, String revision, Event event) throws AppCloudException {
 
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
 
@@ -44,8 +43,6 @@ public class EventsManager {
 
         EventsDAO eventsDAO = new EventsDAO();
         eventsDAO.addAppCreationEvent(applicationId, event);
-
-        return true;
     }
 
     /**
