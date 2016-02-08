@@ -18,3 +18,6 @@ To start with your local setup, you need to add below jars in current directory.
 │       └── patch1085
 │           └── org.wso2.carbon.rssmanager.core_4.2.0.jar
 
+
+* If you are using DAS for the Dashboard, you need to install SSO module 1.4.4 from the feature repo http://product-dist.wso2.com/p2/carbon/releases/wilkes to DAS.
+
