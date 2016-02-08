@@ -16,60 +16,34 @@
 
 package org.wso2.appcloud.core;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
+import org.wso2.appcloud.core.dao.ApplicationDAO;
 import org.wso2.appcloud.core.dao.EventsDAO;
-import org.wso2.appcloud.core.dto.Application;
 import org.wso2.appcloud.core.dto.Event;
 import org.wso2.carbon.context.CarbonContext;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 
 public class EventsManager {
 
-    private static Log log = LogFactory.getLog(ApplicationManager.class);
-
     /**
      * Method for updating app creation events
      *
-     * @param application application object
+     * @param applicationName application name
+     * @param revision application revision
      * @param event event object
      * @return
      * @throws AppCloudException
      */
-    public static boolean addAppCreationEvent(Application application, Event event) throws AppCloudException {
+    public static boolean addAppCreationEvent(String applicationName, String revision, Event event) throws AppCloudException {
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
 
         EventsDAO eventsDAO = new EventsDAO();
-        Connection dbConnection = DBUtil.getDBConnection();
-
-        try {
-            eventsDAO.addAppCreationEvent(application, event);
-            dbConnection.commit();
-
-        } catch (AppCloudException e) {
-
-            DBUtil.rollbackTransaction(dbConnection);
-
-            String msg = "Error occurred while adding application event: " + event.getEventName() + "for application: "
-                    + application.getApplicationName();
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-
-        } catch (SQLException e) {
-
-            DBUtil.rollbackTransaction(dbConnection);
-
-            String msg = "Error while committing the App Creation Event: " + event.getEventName()
-                    + " transaction for application : " + application.getApplicationName();
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-
-        } finally {
-            DBUtil.closeConnection(dbConnection);
-        }
+        eventsDAO.addAppCreationEvent(applicationId, event);
 
         return true;
     }
@@ -83,9 +57,15 @@ public class EventsManager {
      * @throws AppCloudException
      */
     public Event[] getEventsOfApplication(String applicationName, String revision) throws AppCloudException {
+
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
+
         EventsDAO eventsDAO = new EventsDAO();
-        List<Event> events = eventsDAO.getEventsOfApplication(applicationName, revision, tenantId);
+        List<Event> events = eventsDAO.getEventsOfApplication(applicationId);
+
         return events.toArray(new Event[events.size()]);
     }
 }
