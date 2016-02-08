@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS HTTP_STATUS
   serverName               VARCHAR(45),
   averageRequestCount      BIGINT,
   responseHttpStatusCode   INT,
+  tenantId                 INT,
   TIME VARCHAR(100)
 );
 
@@ -103,6 +104,7 @@ CREATE TABLE IF NOT EXISTS WEBAPP_CONTEXT
   serverName            VARCHAR(45),
   averageRequestCount   BIGINT,
   webappcontext         VARCHAR(200),
+  tenantId              INT,
   TIME VARCHAR(100)
 );
 
@@ -128,6 +130,7 @@ CREATE TABLE IF NOT EXISTS TEMP_HTTP_STATUS
   serverName               VARCHAR(45),
   averageRequestCount      BIGINT,
   responseHttpStatusCode   INT,
+  tenantId                 INT,
   TIME VARCHAR(100)
 );
 
@@ -137,6 +140,7 @@ CREATE TABLE IF NOT EXISTS TEMP_WEBAPP_CONTEXT
   serverName            VARCHAR(45),
   averageRequestCount   BIGINT,
   webappcontext         VARCHAR(200),
+  tenantId              INT,
   TIME VARCHAR(100)
 );
 
