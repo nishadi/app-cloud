@@ -86,21 +86,47 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             });
 
+            $('#fileupload').fileupload({
+
+                progressall: function (e, data) {
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    $('#progress .progress-bar').css(
+                        'width',
+                        progress + '%'
+                    );
+                },
+
+                change:function (e, data) {
+                     $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
+
+                },
+
+                done: function (e, data) {
+                   $.each(data.files, function (index, file) {
+                        $("#uploadedFileName").val(file.name);
+                    });
+
+                }
+
+
+            });
 
 
         });
+
+
 
  </script>
 
 <!-- BOF App factory menu actionbar -->
     <div class="action-bar">
-        <a href="002_cloud_select_app_type.html" class="btn-action">
+        <a href="<%=jagg.getAbsoluteUrl("/site/pages/select-apptype.jag")%>" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
                     <i class="fw fw-ring fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
                 </span> Back to app type selection
         </a>
-        <a href="001_cloud_first_login.html" class="btn-action">
+        <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
                     <i class="fw fw-ring fw-stack-2x"></i>
                     <i class="fa fa-mail-reply-all fa-stack-1x"></i>
@@ -158,14 +184,16 @@ jagg.template("application", function (inputs, outputs, jagg) {
             <div class="form-group">
             <label>Upload Artifact: </label>
             <div class="input-group">
-                <input type="text" class="form-control" readonly>
+                <input id="uploadedFileName" type="text" class="form-control" readonly>
                 <span class="input-group-btn">
                    <span class="btn btn-primary btn-file">
-                       Upload&hellip; <input type="file" name="fileUpload" multiple>
+                       Upload&hellip; <input id="fileupload" type="file" name="fileUpload" multiple>
                    </span>
                 </span>
             </div>
-
+            <div id="progress" class="progress">
+                <div class="progress-bar progress-bar-success" style="width: 0%;"></div>
+            </div>
             </div>
 
 
@@ -200,6 +228,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
         </div>
       </div><!-- /.container -->
 
-      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/custom/custom.js'))%>"></script>
+      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/vendor/jquery.ui.widget.js'))%>"></script>
+      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.fileupload.js'))%>"></script>
+      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.iframe-transport.js'))%>"></script>
     <%
 }); %>
