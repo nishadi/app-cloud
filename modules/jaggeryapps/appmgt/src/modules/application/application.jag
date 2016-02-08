@@ -43,6 +43,15 @@ var addApplication = function (applicationName, applicationRevision, application
             "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName
     );
 
+    //Create Docker file
+    var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
+    var dockerOpClient = new DockerOpClient("http://127.0.0.1:2375");
+    dockerOpClient.createDockerFile("webapp", "playground2.war", "/repo/wso2.org/appcloud/modules/jaggeryapps/appmgt/repo/vm/tmp/app_cloud/setup/uploads/Dockerfile");
+    //Build Docker image
+    dockerOpClient.buildDockerImage("registry.docker.appfactory.private.wso2.com:5000/deep","tomcat", "wso2v1","/repo/wso2.org/appcloud/modules/jaggeryapps/appmgt/repo/vm/tmp/app_cloud/setup/uploads/");
+     //Push Docker image
+    dockerOpClient.pushDockerImage("registry.docker.appfactory.private.wso2.com:5000/deep","tomcat", "wso2v1");
+
     //Adding application to Database
     var application = new Application();
     application.setApplicationName(applicationName);

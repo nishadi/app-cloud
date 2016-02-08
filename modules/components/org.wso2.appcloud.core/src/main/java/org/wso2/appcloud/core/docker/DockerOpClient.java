@@ -16,63 +16,122 @@
 
 package org.wso2.appcloud.core.docker;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.model.SearchItem;
-import com.github.dockerjava.core.DockerClientBuilder;
-import com.github.dockerjava.core.DockerClientConfig;
-import com.github.dockerjava.core.command.BuildImageResultCallback;
-import com.github.dockerjava.core.command.PushImageResultCallback;
-import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
+import io.fabric8.docker.client.Config;
+import io.fabric8.docker.client.ConfigBuilder;
+import io.fabric8.docker.client.DefaultDockerClient;
+import io.fabric8.docker.client.DockerClient;
+import io.fabric8.docker.dsl.EventListener;
+import io.fabric8.docker.dsl.OutputHandle;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class DockerOpClient {
 
+    private static Log log = LogFactory.getLog(DockerOpClient.class);
+
     DockerClient dockerClient;
+    OutputHandle handle;
 
-    DockerOpClient() {
-        dockerClient = DockerClientBuilder.getInstance(DockerOpClientConstants.DEFAULT_DOCKER_URL).build();
-    }
+    final CountDownLatch buildDone = new CountDownLatch(1);
+    final CountDownLatch pushDone = new CountDownLatch(1);
 
-    DockerOpClient(String uri) {
-        DockerClientConfig config = DockerClientConfig.createDefaultConfigBuilder()
-                .withVersion(DockerOpClientConstants.DOCKER_CLIENT_API_VERSION)
-                .withUri(uri)
+    public DockerOpClient() {
+        Config config = new ConfigBuilder()
+                .withMasterUrl(DockerOpClientConstants.DEFAULT_DOCKER_URL)
                 .build();
+        dockerClient = new DefaultDockerClient(config);
+    }
 
-        DockerCmdExecFactoryImpl dockerCmdExecFactory = new DockerCmdExecFactoryImpl()
-                .withReadTimeout(DockerOpClientConstants.DOCKER_CLIENT_READ_TIMEOUT)
-                .withConnectTimeout(DockerOpClientConstants.DOCKER_CLIENT_CONNECTION_TIMEOUT)
-                .withMaxTotalConnections(DockerOpClientConstants.DOCKER_CLIENT_TOTAL_CONNECTIONS)
-                .withMaxPerRouteConnections(DockerOpClientConstants.DOCKER_CLIENT_MAX_PER_ROUTE_CONNECTIONS);
-
-        dockerClient = DockerClientBuilder.getInstance(config)
-                .withDockerCmdExecFactory(dockerCmdExecFactory)
+    public DockerOpClient(String uri) {
+        Config config = new ConfigBuilder()
+                .withMasterUrl(uri)
                 .build();
+        dockerClient = new DefaultDockerClient(config);
     }
 
-    public String buildDockerImage(String repoUrl, String imageName, String tag, String dockerFileUrl) {
-        File baseDir = new File(dockerFileUrl);
-        String dockerImageTag = repoUrl + "/" + imageName + ":" + tag;
-        return dockerClient.buildImageCmd(baseDir).withTag(dockerImageTag).exec(new BuildImageResultCallback())
-                .awaitImageId();
+    public void createDockerFile(String appType, String artifactName, String dockerFilePath) throws IOException {
+        String dockerRegistryUrl = DockerUtil.getDockerRegistryUrl();
+        String dockerBaseImageName = DockerUtil.getBaseImageName(appType);
+        String dockerBaseImageVersion = DockerUtil.getBaseImageVersion(appType);
+        String baseImangeConfig = DockerOpClientConstants.DOCKER_COMMAND_FROM + " " + dockerRegistryUrl + "/" +
+                dockerBaseImageName + ":" + dockerBaseImageVersion + "\r\n";
+        List<String> dockerFileConfigs = new ArrayList<String>();
+        dockerFileConfigs.add(baseImangeConfig);
+        String deploymentLocation = DockerUtil.getDeploymentLocation(appType);
+        String artifactCopyConfig = DockerOpClientConstants.DOCKER_COMMAND_COPY + " " + artifactName + " " +
+                deploymentLocation + "\r\n";
+        dockerFileConfigs.add(artifactCopyConfig);
+        FileUtils.writeLines(new File(dockerFilePath), dockerFileConfigs);
     }
 
-    public void pushDockerImage(String repoUrl, String imageName, String tag) {
-        String dockerImge = repoUrl + "/" + imageName;
-        dockerClient.pushImageCmd(dockerImge).withTag(tag).exec(new PushImageResultCallback()).awaitSuccess();
+    public void buildDockerImage(String repoUrl, String imageName, String tag, String dockerFileUrl) throws
+            InterruptedException, IOException {
+
+        String dockerImage = repoUrl + "/" + imageName + ":" + tag;
+
+        handle = dockerClient.image().build()
+                .withRepositoryName(dockerImage)
+                .usingListener(new EventListener() {
+                    @Override
+                    public void onSuccess(String message) {
+                        log.info("Success:" + message);
+                        //System.out.println("Success:" + message);
+                        buildDone.countDown();
+                    }
+
+                    @Override
+                    public void onError(String messsage) {
+                        log.error("Failure:" +messsage);
+                        //System.err.println("Failure:" +messsage);
+                        buildDone.countDown();
+                    }
+
+                    @Override
+                    public void onEvent(String event) {
+                        log.info(event);
+                        //System.out.println(event);
+                    }
+                })
+                .fromFolder(dockerFileUrl);
+        buildDone.await();
+        handle.close();
     }
 
-    public void deleteDockerImagewithForce(String imageId) {
-        dockerClient.removeImageCmd(imageId).withForce().exec();
+    public void pushDockerImage(String repoUrl, String imageName, String tag) throws InterruptedException, IOException {
+        String dockerImgeName = repoUrl + "/" + imageName;
+
+        handle = dockerClient.image().withName(dockerImgeName).push().usingListener(new EventListener() {
+            @Override
+            public void onSuccess(String message) {
+                System.out.println("Success:" + message);
+                pushDone.countDown();
+            }
+
+            @Override
+            public void onError(String message) {
+                System.out.println("Error:" + message);
+                pushDone.countDown();
+            }
+
+            @Override
+            public void onEvent(String event) {
+                System.out.println(event);
+
+            }
+        }).toRegistry();
+
+        pushDone.await();
+        handle.close();
     }
 
-    public void deleteDockerImage(String imageId) {
-        dockerClient.removeImageCmd(imageId).exec();
-    }
-
-    public List<SearchItem> searchImage(String term) {
-        return dockerClient.searchImagesCmd(term).exec();
+    public void clientClose() throws IOException {
+        dockerClient.close();
     }
 }
