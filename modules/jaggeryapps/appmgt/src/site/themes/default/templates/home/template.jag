@@ -357,7 +357,6 @@ $('#appVersionList li').click(function() {
 }); %>
     <div class="clearfix"></div>
     <div id="push"></div>
-</div>
 <div id="footer">
     <div class="container-fluid">
         <div class="footer-text">WSO2 Cloud V: 1.2 . &copy; 2016
