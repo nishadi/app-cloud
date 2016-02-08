@@ -24,6 +24,8 @@ var log = new Log("module/application/application.jag");
 var modManager = jagg.module("manager");
 var ApplicationManager = Packages.org.wso2.appcloud.core.ApplicationManager;
 var Application = Packages.org.wso2.appcloud.core.dto.Application;
+var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
+var CloudUtil = Packages.org.wso2.appcloud.common.util;
 
 /**
  * Add a application object
@@ -36,11 +38,13 @@ var Application = Packages.org.wso2.appcloud.core.dto.Application;
  * @param runtimeId runtime id of the application
  */
 var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas,
-                                                                            uploadedArtifact, runtimeId, appTypeName) {
+                                                                            uploadedArtifact, runtimeId, appTypeName, runtimeProperties) {
     //uploadedArtifact.move(ARTIFACT_UPLOAD_DIRECTORY + uploadedArtifact.getName());
+    var runtimeProperties = parse(runtimeProperties);
     log.info("Started creating App => name: " + applicationName + " " +
             "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
-            "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName
+            "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " " + "runtimeProperties: "
+            + runtimeProperties
     );
 
     //Create Docker file
@@ -65,7 +69,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     //Creating basic deployment
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
-    var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
+
     var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
              applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
 
@@ -184,11 +188,8 @@ var getAllRuntimes = function(appType){
  * Method for getting the application summery of all the applications
  */
 var getAllApplications = function(){
-
     var applicationArray = [];
-
     try {
-
         var applications = ApplicationManager.getApplicationList();
 
         for (var i = 0; i < applications.length; i++) {
@@ -211,4 +212,64 @@ var getAllApplications = function(){
     return applicationArray;
 }
 
+/**
+ * Method for getting the application e.g. :- Application {
+ *                                              id=1,
+ *                                              applicationName="fooApp",
+ *                                              revision="1.0.0",
+ *                                              runtimeName= "WSO2AS",
+ *                                              status = "Running",
+ *                                              numberOfReplicas=2
+ *                                              description="this is fooApp java application"
+ *                                              }
+ */
+var getApplicationByNameRevision = function(appName,appRevision){
+       try {
+        var application = ApplicationManager.getApplicationByNameRevision(appName,appRevision);
+            var applicationObject = {};
+            applicationObject.id = application.applicationId;
+            applicationObject.applicationName = application.applicationName;
+            applicationObject.runtimeName = application.runtimeName;
+            applicationObject.revision = application.revision;
+            applicationObject.endpointURL = application.endpointURL;
+            applicationObject.status = application.status;
+            applicationObject.numberOfReplicas = application.numberOfReplicas;
+            applicationObject.description = application.description;
+
+    } catch(e){
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+
+    return applicationObject;
+}
+
+var getAllRevisionsOfApplication =function(appName){
+    var revisionArray = [];
+    try {
+        var revisions = ApplicationManager.getAllRevisionsOfApplication(appName);
+        for (var i = 0; i < revisions.length; i++) {
+            var revision = revisions[i];
+            revisionArray.push(revisions[i]);
+        }
+    } catch(e){
+        log.error("Error while getting the application list");
+        log.error(e);
+        throw e;
+    }
+    return revisionArray;
+}
+
+var getDeploymentURL = function (applicationName, applicationRevision, appTypeName){
+
+    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
+             applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
+
+    var deploymentPath = KubernetesProvisioningUtils.getDeploymentPath(applicationCtx);
+    var baseURL = CloudUtil.getPropertyValue("ApplicationLaunchBaseURL");
+
+    log.info("Deployment URL: " + baseURL + deploymentPath);
+    return baseURL + deploymentPath;
+}
 %>

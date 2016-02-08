@@ -42,19 +42,19 @@ public class EventsDAO {
     /**
      * Method for adding application creation events to database
      *
-     * @param application application object
+     * @param applicationId application id
      * @param event application creation event
      * @return
      * @throws AppCloudException
      */
-    public boolean addAppCreationEvent(Application application, Event event) throws AppCloudException {
+    public boolean addAppCreationEvent(int applicationId, Event event) throws AppCloudException {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
 
         try {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_APP_CREATION_EVENT);
-            preparedStatement.setInt(1, application.getApplicationId());
+            preparedStatement.setInt(1, applicationId);
             preparedStatement.setString(2, event.getEventName());
             preparedStatement.setString(3, event.getEventStatus());
             preparedStatement.setTimestamp(4, event.getTimestamp());
@@ -63,44 +63,38 @@ public class EventsDAO {
             preparedStatement.execute();
 
         } catch (SQLException e) {
-
-            String msg =
-                    "Error occurred while adding application event: " + event.getEventName() + "for application: "
-                            + application.getApplicationName() + " to database";
+            String msg = "Error occurred while adding app creation event: " + event.getEventName() + " status: " + event
+                    .getEventStatus() + " timestamp: " + event.getTimestamp();
+            log.error(msg, e);
             throw new AppCloudException(msg, e);
 
         } finally {
             DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
         }
         return true;
     }
 
     /**
-     * Method to get event stream of an application
+     *  Method to get event stream of an application
      *
-     * @param applicationName application name
-     * @param revision applicatoin revision
-     * @param tenantId tenant id
+     * @param applicationId application id
      * @return
      * @throws AppCloudException
      */
-    public List<Event> getEventsOfApplication(String applicationName, String revision, int tenantId)
-            throws AppCloudException {
+    public List<Event> getEventsOfApplication(int applicationId) throws AppCloudException {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
 
-        List<Event> eventList = new ArrayList<Event>();
-        Event event;
+        List<Event> eventList = new ArrayList<>();
 
         try {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_EVENTS_OF_APPLICATION);
-            preparedStatement.setString(1, applicationName);
-            preparedStatement.setString(2, revision);
-            preparedStatement.setInt(3, tenantId);
+            preparedStatement.setInt(1, applicationId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-
+            Event event;
             while (resultSet.next()) {
                 event = new Event();
                 event.setEventName(resultSet.getString(SQLQueryConstants.EVENT_NAME));
@@ -112,15 +106,14 @@ public class EventsDAO {
             }
 
         } catch (SQLException e) {
-            String msg = "Error while retrieving Application creation event stream from database for application : " +
-                    applicationName + " revision : " + revision + " in tenant : " + tenantId;
+            String msg = "Error while retrieving Application creation event stream for applicationId: " + applicationId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
-        return null;
+        return eventList;
     }
 
 }

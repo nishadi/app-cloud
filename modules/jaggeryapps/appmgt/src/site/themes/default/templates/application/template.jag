@@ -19,36 +19,113 @@
 
 jagg.template("application", function (inputs, outputs, jagg) {
         var runtimes = outputs.runtimes;
-        var appType = outputs.appTypeName;
+        var appType = outputs.appType;
+        var appTypeName = appType.type;
+
     %>
 
  <script type="text/javascript">
+    var appTypeName = "<%=appType.type%>";
     $(document).ready(function()
         {
             $.each(<%=runtimes%>,function(key,value){
                 $("#runtime").append($('<option></option>').val(value.id).html(value.runtimeName));
             });
+
+            var max_fields      = 10; //maximum input boxes allowed
+            var wrapper         = $(".input_fields_wrap"); //Fields wrapper
+            var add_button      = $(".add_field_button"); //Add button ID
+
+            var x = 1; //initlal text box count
+            $(add_button).click(function(e){ //on add input button click
+                e.preventDefault();
+                if(x < max_fields){ //max input box allowed
+                    x++; //text box increment
+                    $(wrapper).append('<div class="runtime_property"> <input type="text" class="form-control" name="key">' +
+                     '<input type="text" class="form-control" name="value">' +
+                     '<a href="#" class="remove_field">Remove</a>' +
+                     '</div>'); //add input box
+                }
+            });
+
+            $(wrapper).on("click",".remove_field", function(e){ //user click on remove text
+                e.preventDefault(); $(this).parent('div').remove(); x--;
+            });
+
+
+            $('#application-details').submit(function(e){
+                e.preventDefault();
+                var runtimeProperties = [];
+                $('.runtime_property').each(function(){
+                    var runtimeProperty = {};
+                    $(this).children('input').each(function(){
+                      runtimeProperty[this.name] = this.value;
+                    });
+                    runtimeProperties.push(runtimeProperty);
+                });
+
+                var formData = new FormData($(this)[0]);
+                formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
+
+                formData.append('appTypeName', appTypeName);
+                $.ajax({
+                        url: $(this).attr("action"),
+                        type: 'POST',
+                        data: formData,
+                        async: false,
+                        success: function (data) {
+                            alert(data)
+                        },
+                        cache: false,
+                        contentType: false,
+                        processData: false
+                    });
+
+                return false;
+
+
+            });
+
+
+
         });
 
  </script>
 
+<!-- BOF App factory menu actionbar -->
+    <div class="action-bar">
+        <a href="002_cloud_select_app_type.html" class="btn-action">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-left-arrow fw-stack-1x"></i>
+                </span> Back to app type selection
+        </a>
+        <a href="001_cloud_first_login.html" class="btn-action">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fa fa-mail-reply-all fa-stack-1x"></i>
+                </span> Cancel
+        </a>
+    </div>
+<!-- EOF App factory menu actionbar-->
+
 <div class="container-fluid cloud-container">
         <div class="row">
             <div class="col-fixed-left col-fixed-1x">
-                <div class="cloud-selected-app-type app-color-one" id="1">
-                    <i class="fw fw-jaggery fw-4x"></i>
+                <div class="cloud-selected-app-type <%= appType.color%>" id="1">
+                    <i class="fw <%= appType.icon%> fw-4x"></i>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="cloud-selected-app-type-name">
-                    <h1>JAVA Web Application</h1>
+                    <h1><%= appType.displayName%></h1>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-md-5 forms">
 
-      <form id="data" method="post" action='<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")%>' enctype="multipart/form-data">
+      <form id="application-details" method="post" action='<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")%>' enctype="multipart/form-data">
             <div class="form-group">
             <label for="application-name">Application Name: </label>
             <input name="applicationName" type="text" class="form-control" placeholder="Enter Application name" />
@@ -65,13 +142,17 @@ jagg.template("application", function (inputs, outputs, jagg) {
             </div>
 
             <div class="form-group">
-            <label for="runtime">Runtime : </label>
+            <label for="runtime">Runtime: </label>
             <select name="runtime" id="runtime" class="form-control" ><option value="None" selected="Selected">Select runtime</option></select>
             </div>
 
             <div class="form-group">
-            <label>No Of Replicas</label>
-            <input name="replicas" class="form-control" placeholder="Enter No Of Replicas" />
+            <label>No Of Replicas: </label>
+            <select name="replicas" id="replicas" class="form-control" >
+                <option value="None" selected="Selected">Select replicas</option>
+                <option value="1" >1</option>
+                <option value="2" >2</option>
+            </select>
             </div>
 
             <div class="form-group">
@@ -86,6 +167,21 @@ jagg.template("application", function (inputs, outputs, jagg) {
             </div>
 
             </div>
+
+
+
+            <div class="form-group">
+            <div class="form-inline input_fields_wrap">
+                <button class="add_field_button btn btn-info">Add More Properties</button>
+                <div class="runtime_property">
+                    <input type="text" class="form-control" name="key">
+                    <input type="text" class="form-control" name="value">
+                </div>
+
+            </div>
+            </div>
+
+
 
             <div class="form-group">
                 <button class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" >
@@ -104,5 +200,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
         </div>
       </div><!-- /.container -->
 
+      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/custom/custom.js'))%>"></script>
     <%
 }); %>

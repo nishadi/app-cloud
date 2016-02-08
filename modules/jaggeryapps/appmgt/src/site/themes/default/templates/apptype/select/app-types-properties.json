@@ -1,6 +1,6 @@
 {
-  "default":{"icon":"fw-java", "color":"app-color-one", "displayName":"Default Application"},
-  "war":{"icon":"fw-java", "color":"app-color-one", "displayName":"Java Application"},
-  "mss":{"icon":"fw-rest-service", "color":"app-color-two", "displayName":"Micro Service Server"},
-  "car":{"icon":"fw-nodejs", "color":"app-color-three", "displayName":"Carbon Application"}
+  "default":{"type":"default", "icon":"fw-java", "color":"app-color-one", "displayName":"Default Application"},
+  "war":{"type":"war", "icon":"fw-java", "color":"app-color-one", "displayName":"Java Application"},
+  "mss":{"type":"mss", "icon":"fw-rest-service", "color":"app-color-two", "displayName":"Micro Service Server"},
+  "car":{"type":"car", "icon":"fw-nodejs", "color":"app-color-three", "displayName":"Carbon Application"}
 }

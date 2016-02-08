@@ -149,4 +149,19 @@ public class KubernetesProvisioningUtils {
         applicationContext.setTenantInfo(tenantInfo);
         return applicationContext;
     }
+
+    /**
+     * This util will generate the deployment path for application
+     *
+     * @param applicationContext application context
+     * @return
+     */
+    public static String getDeploymentPath(ApplicationContext applicationContext){
+
+        String tenantDomain = applicationContext.getTenantInfo().getTenantDomain();
+        String appId = applicationContext.getId();
+        String appVersion = applicationContext.getVersion();
+
+        return "/" + tenantDomain + "/webapps/" + appId + "-" + appVersion;
+    }
 }

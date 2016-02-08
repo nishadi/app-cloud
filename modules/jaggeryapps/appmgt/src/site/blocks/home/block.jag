@@ -22,13 +22,23 @@ jagg.block("home", {
 
     },
     getInputs:function () {
-
-    },
-
-    getOutputs:function (inputs) {
-        var runTime = {server:"WSO2AS", replicas:"2"};
         return {
-            "runTime" : runTime
+            "applicationName": null
+        }
+    },
+    getOutputs:function (inputs) {
+        var applicationModule = jagg.module("application");
+        var revision = applicationModule.getAllRevisionsOfApplication(inputs.applicationName);
+        var applicationRevision=revision[0];
+        var applicationArray=[];
+        for (var x = 0; x < revision.length; x++) {
+            var application = applicationModule.getApplicationByNameRevision(inputs.applicationName,revision[x]);
+            applicationArray.push(application);
+        }
+        return {
+            "application" : applicationArray,
+            "revision" :revision,
+
         };
     }
 

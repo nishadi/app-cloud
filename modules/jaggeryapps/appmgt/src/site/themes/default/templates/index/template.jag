@@ -45,7 +45,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
         for (var x = 0; x < applications.length; x++) {
             %>
             <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
-             <a href="009_cloud_app_details_initial.html">
+             <a href="/appmgt/site/pages/home.jag?applicationName=<%=applications[x].applicationName%>">
                 <div class="cloud-app-listing app-color-one">
                     <i class="fw fw-java fw-2x" data-toggle="tooltip" data-placement="right" title="Java Application"></i>
                     <div class="app-icon">
