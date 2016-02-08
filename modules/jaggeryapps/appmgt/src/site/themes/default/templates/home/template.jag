@@ -346,7 +346,7 @@ $('#appVersionList li').click(function() {
            index=i;
         }
         }
-        document.getElementById("tableStatus").innerHTML=descriptionArray[index];
+        document.getElementById("tableStatus").innerHTML=statusArray[index];
         document.getElementById("runTime").innerHTML=runtimeNameArray[index];
         document.getElementById("endpointURL").innerHTML=endpointURLNameArray[index];
        alert(index);
