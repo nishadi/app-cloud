@@ -39,5 +39,14 @@ jagg.module("application", {
     getAllRevisionsOfApplication:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getAllRevisionsOfApplication.apply(this, arguments);
     },
+    getDeploymentURL:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getDeploymentURL.apply(this, arguments);
+    },
+    getSelectedRevisionFromSession:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getSelectedRevisionFromSession.apply(this, arguments);
+    },
+    putSelectedRevisionToSession:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").putSelectedRevisionToSession.apply(this, arguments);
+    },
 });
 %>

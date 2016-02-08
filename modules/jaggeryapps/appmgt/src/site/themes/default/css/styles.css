@@ -139,6 +139,9 @@ button[disabled]{
 .cu-btn-orange {
     background-color: #F0AD4E
 }
+.cu-btn-red {
+    background-color: #ea6153;
+}
 .cu-btn-gr-dark {
     background-color: #1f1f1f
 }
