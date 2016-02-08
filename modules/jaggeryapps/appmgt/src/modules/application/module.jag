@@ -32,6 +32,12 @@ jagg.module("application", {
 
     getAllApplications:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getAllApplications.apply(this, arguments);
-    }
+    },
+    getApplicationByNameRevision:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationByNameRevision.apply(this, arguments);
+    },
+    getAllRevisionsOfApplication:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getAllRevisionsOfApplication.apply(this, arguments);
+    },
 });
 %>

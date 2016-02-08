@@ -1,8 +1,13 @@
 #!/bin/bash
 # This is a basic script to get a developer setup done with multi-tenancy and sso
 # Update the pack_dir and setup_dir and run. it will drop existing databases and setup 
-PACK_DIR=/home/manjula/appcloud/packs
-SETUP_DIR=/home/manjula/appcloud/setup
+if [[ $# -eq 0 ]] ; then
+    echo 'Usage: ./setup.sh /srv/app_cloud'
+    exit 1
+fi
+APPCLOUD_HOME=$1
+PACK_DIR=$APPCLOUD_HOME/packs
+SETUP_DIR=$APPCLOUD_HOME/setup
 AS_VERSION=wso2as-5.2.1
 IS_VERSION=wso2is-5.0.0
 SS_VERSION=wso2ss-1.1.0
@@ -47,8 +52,32 @@ mkdir -p $AS_HOME/repository/deployment/server/jaggeryapps/appmgt/
 unzip -q $APP_CLOUD_SRC_HOME/modules/jaggeryapps/appmgt/target/appmgt-1.0.0-SNAPSHOT.zip -d $AS_HOME/repository/deployment/server/jaggeryapps/appmgt/
 
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/org.wso2.carbon.hostobjects.sso_4.2.0.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/nimbus-jose-jwt_2.26.1.wso2v2.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-codec-1.10.wso2v1.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-compress-1.9.wso2v1.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-client-1.0.4.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-dsl-1.0.4.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-model-1.0.4.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-annotations-2.6.0.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-core-2.6.3.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-databind-2.6.3.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-dataformat-yaml-2.6.3.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/slf4j-api-1.7.12.wso2v1.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/snakeyaml-1.15.jar $AS_HOME/repository/components/dropins/
+
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $AS_HOME/repository/components/lib/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-java-2.1.4.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/dsl-annotations-0.1.25.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jaxb-api-2.2.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/junixsocket-common-2.0.4.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/logging-interceptor-2.7.2.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okhttp-2.7.2.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okhttp-ws-2.7.2.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okio-1.6.0.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/sundr-codegen-0.1.25.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/sundr-core-0.1.25.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/validation-api-1.1.0.Final.jar $AS_HOME/repository/components/lib/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/velocity-1.7.jar $AS_HOME/repository/components/lib/
+
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/datasources/master-datasources.xml $AS_HOME/repository/conf/datasources/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/datasources/appcloud-datasources.xml $AS_HOME/repository/conf/datasources/
 sed -e "s@AS_HOME@${AS_HOME}@g" $APP_CLOUD_SRC_HOME/modules/setup-scripts/jaggery/site.json > $AS_HOME/repository/deployment/server/jaggeryapps/appmgt/site/conf/site.json
@@ -57,7 +86,6 @@ cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.provisioning.runtime
 cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.common/target/org.wso2.appcloud.common-1.0.0-SNAPSHOT.jar $AS_HOME/repository/components/dropins/
 mkdir -p $AS_HOME/repository/conf/appcloud
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/appcloud/appcloud.properties $AS_HOME/repository/conf/appcloud/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/nimbus-jose-jwt_2.26.1.wso2v2.jar $AS_HOME/repository/components/dropins/
 
 echo "Updaing IS node with new configuraitons"
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $IS_HOME/repository/components/lib/

@@ -69,7 +69,6 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
     }
 
     @Override
-
     public void setApplicationContext(ApplicationContext applicationContext)
             throws RuntimeProvisioningException {
 
@@ -783,13 +782,9 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
         if (log.isDebugEnabled()){
             log.debug("Deployment service List size: " + serviceList.getItems().size());
         }
-
         Ingress createdIng;
         boolean created = false;
-        String tenantDomain = applicationContext.getTenantInfo().getTenantDomain();
-        String appId = applicationContext.getId();
-        String appVersion = applicationContext.getVersion();
-        String ingressPathStr = "/" + tenantDomain + "/webapps/" + appId + "-" + appVersion;
+        String ingressPathStr = KubernetesProvisioningUtils.getDeploymentPath(applicationContext);
         if (log.isDebugEnabled()){
             log.debug("Ingress path: " + ingressPathStr);
         }
