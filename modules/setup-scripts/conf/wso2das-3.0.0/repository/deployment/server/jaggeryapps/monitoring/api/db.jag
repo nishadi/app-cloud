@@ -22,26 +22,36 @@ var config = require('/config/config.json');
 
 function executeQuery(sql, params) {
     var results;
-    var db = getDbConnection();
 
-    if (params == null) {
-        return db.query(sql);
+    try {
+        var db = getDbConnection();
+
+        if (params == null) {
+            return db.query(sql);
+        }
+
+        // duplicate the parameters in the case of percentage calculation
+        if (sql.split('?').length - 1 > params.length) {
+            params = params.concat(params);
+        }
+
+        // add sql statement as the first parameter
+        params = [sql].concat(params);
+
+        if (log.isDebugEnabled()) {
+            log.debug('Query parameters: ' + params);
+        }
+
+        result = db.query.apply(db, params);
+
+    } catch (e){
+        log.error("Error while executing database query");
+        log.error(e);
+        throw e;
+    } finally {
+        db.close();
     }
 
-    // duplicate the parameters in the case of percentage calculation
-    if (sql.split('?').length - 1 > params.length) {
-        params = params.concat(params);
-    }
-
-    // add sql statement as the first parameter
-    params = [sql].concat(params);
-
-    if (log.isDebugEnabled()) {
-        log.debug('Query parameters: ' + params);
-    }
-
-    result = db.query.apply(db, params);
-    db.close();
     return result;
 }
 
