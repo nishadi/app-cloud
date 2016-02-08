@@ -31,10 +31,12 @@ jagg.block("application", {
 
         var applicationModule = jagg.module("application");
         var runtimes = applicationModule.getAllRuntimes(inputs.appTypeName);
+        var appTypesProperties = require(APP_TYPES_PROPERTIES_CONFIG);
+        var appType = appTypesProperties[inputs.appTypeName];
 
         return {
             "runtimes" : runtimes,
-            "appTypeName" : inputs.appTypeName
+            "appType" : appType
         };
     }
 });

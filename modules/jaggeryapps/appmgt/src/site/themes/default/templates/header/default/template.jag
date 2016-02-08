@@ -105,7 +105,6 @@ jagg.template("header/default", function(inputs, outputs, jagg) {
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/noty-2.3.5/themes/noty.theme.wso2.js'))%>"></script>
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jagg.js'))%>"></script>
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/bootstrap-3.2.0/bootstrap.min.js'))%>"></script>
-<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/custom/custom.js'))%>"></script>
 
     <%
 }); %>
