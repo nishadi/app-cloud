@@ -11,6 +11,7 @@ SETUP_DIR=$APPCLOUD_HOME/setup
 AS_VERSION=wso2as-5.2.1
 IS_VERSION=wso2is-5.0.0
 SS_VERSION=wso2ss-1.1.0
+DAS_VERSION=wso2das-3.0.0
 
 APP_CLOUD_SRC_HOME=`pwd`/../../
 
@@ -36,15 +37,23 @@ Q4="CREATE DATABASE rss_db;"
 SQL2="${Q3}${Q4}"
 $MYSQL -uroot -proot -A -e "$SQL2";
 
+#Setting up http monitoring dataase
+Q2="DROP DATABASE IF EXISTS mss_httpmon;"
+SQL1="${Q2}"
+$MYSQL -uroot -proot -A -e "$SQL1";
+$MYSQL -uroot -proot < $APP_CLOUD_SRC_HOME/modules/dbscripts/http-mon-mysql.sql
+
 # Unzip default wso2carbon product packs and configure
 mkdir -p $SETUP_DIR
 unzip -q $PACK_DIR/$AS_VERSION.zip -d $SETUP_DIR/
 unzip -q $PACK_DIR/$IS_VERSION.zip -d $SETUP_DIR/
 unzip -q $PACK_DIR/$SS_VERSION.zip -d $SETUP_DIR/
+unzip -q $PACK_DIR/$DAS_VERSION.zip -d $SETUP_DIR/
 
 AS_HOME=$SETUP_DIR/$AS_VERSION/ 
 IS_HOME=$SETUP_DIR/$IS_VERSION/
 SS_HOME=$SETUP_DIR/$SS_VERSION/
+DAS_HOME=$SETUP_DIR/$DAS_VERSION/
 
 echo "Updaing AS node with new configurations"
 cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/jaggery/modules/* $AS_HOME/modules/
@@ -105,11 +114,23 @@ cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2ss-1.1.0/repository/conf/c
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2ss-1.1.0/repository/conf/etc/* $SS_HOME/repository/conf/etc/
 cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/patches/wso2ss-1.1.0/* $SS_HOME/repository/components/patches/
 
+echo "Updating DAS node with new configurations"
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.0/repository/conf/datasources/master-datasources.xml $DAS_HOME/repository/conf/datasources/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.0/repository/conf/datasources/httpmon-datasources.xml $DAS_HOME/repository/conf/datasources/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $DAS_HOME/repository/components/lib/
+mkdir -p $DAS_HOME/repository/deployment/server/carbonapps
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.0/repository/deployment/server/capps/*.car $DAS_HOME/repository/deployment/server/carbonapps
+cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.0/repository/deployment/server/jaggeryapps/monitoring $DAS_HOME/repository/deployment/server/jaggeryapps/
+cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.0/modules $DAS_HOME/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.0/repository/conf/carbon.xml $DAS_HOME/repository/conf/
+
 
 sh $IS_HOME/bin/wso2server.sh -Dsetup &
 sleep 60
 sh $AS_HOME/bin/wso2server.sh &
 sleep 60
 sh $SS_HOME/bin/wso2server.sh -Dsetup &
+sleep 60
+sh $DAS_HOME/bin/wso2server.sh -Dsetup &
 echo "Set up is completed."
 
