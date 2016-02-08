@@ -202,10 +202,10 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationEvents` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `application_id` INT NOT NULL,
+  `application_id` VARCHAR(45) NOT NULL,
   `event_name` INT NOT NULL,
   `event_status` VARCHAR(45) NULL,
-  `timestamp` VARCHAR(45) NOT NULL,
+  `timestamp` TIMESTAMP NOT NULL,
   `event_desc` VARCHAR(1000) NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_ApplicationEvents_Application1`
