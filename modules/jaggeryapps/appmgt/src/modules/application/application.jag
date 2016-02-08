@@ -24,6 +24,8 @@ var log = new Log("module/application/application.jag");
 var modManager = jagg.module("manager");
 var ApplicationManager = Packages.org.wso2.appcloud.core.ApplicationManager;
 var Application = Packages.org.wso2.appcloud.core.dto.Application;
+var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
+var CloudUtil = Packages.org.wso2.appcloud.common.util;
 
 /**
  * Add a application object
@@ -56,7 +58,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     //Creating basic deployment
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
-    var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
+
     var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
              applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
 
@@ -248,4 +250,15 @@ var getAllRevisionsOfApplication =function(appName){
     return revisionArray;
 }
 
+var getDeploymentURL = function (applicationName, applicationRevision, appTypeName){
+
+    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
+             applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
+
+    var deploymentPath = KubernetesProvisioningUtils.getDeploymentPath(applicationCtx);
+    var baseURL = CloudUtil.getPropertyValue("ApplicationLaunchBaseURL");
+
+    log.info("Deployment URL: " + baseURL + deploymentPath);
+    return baseURL + deploymentPath;
+}
 %>
