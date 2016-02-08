@@ -21,24 +21,21 @@ package org.wso2.appcloud.common;/*
 /**
  * Constant for AppCloudUtil
  */
+
 public class AppCloudConstant {
 
     public static final String CONFIG_FOLDER = "appcloud";
     public static final String CONFIG_FILE_NAME = "appcloud.properties";
     public static final String SIGNED_JWT_AUTH_USERNAME = "Username";
 
-        /*==============================
-        App Creation Event Constants
-      ==============================*/
 
-    public static final String ARTIFACT_UPLOAD = "artifact_upload";
-    public static final String DOCKER_FILE_CREATE = "docker_file_create";
-    public static final String DOCKER_IMAGE_BUILD = "docker_image_build";
-    public static final String DOCKER_REGISTRY_PUSH_ = "docker_registry_push";
-    public static final String KUBE_DEPLOY = "kubernetes_deploy";
+    public enum events {
+        ARTIFACT_UPLOAD, DOCKER_FILE_CREATE, DOCKER_IMAGE_BUILD, DOCKER_REGISTRY_PUSH, KUBE_DEPLOY
+    }
 
-    public static final String EVENT_SUCCEEDED = "succeeded";
-    public static final String EVENT_PENDING = "pending";
-    public static final String EVENT_FAILED = "failed";
+    public enum eventStatus {
+        EVENT_SUCCEEDED, EVENT_PENDING, EVENT_FAILED
+    }
+
 
 }

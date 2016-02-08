@@ -69,7 +69,6 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
     }
 
     @Override
-
     public void setApplicationContext(ApplicationContext applicationContext)
             throws RuntimeProvisioningException {
 
