@@ -170,11 +170,8 @@ var getAllRuntimes = function(appType){
  * Method for getting the application summery of all the applications
  */
 var getAllApplications = function(){
-
     var applicationArray = [];
-
     try {
-
         var applications = ApplicationManager.getApplicationList();
 
         for (var i = 0; i < applications.length; i++) {
@@ -198,16 +195,20 @@ var getAllApplications = function(){
 }
 
 /**
- * Method for getting the application e.g. :- Application ("fooApp", 1.0.0 ,WSO2AS, Running ,"")
+ * Method for getting the application e.g. :- Application {
+ *                                              id=1,
+ *                                              applicationName="fooApp",
+ *                                              revision="1.0.0",
+ *                                              runtimeName= "WSO2AS",
+ *                                              status = "Running",
+ *                                              numberOfReplicas=2
+ *                                              description="this is fooApp java application"
+ *                                              }
  */
 var getApplicationByNameRevision = function(appName,appRevision){
-    
        try {
-
         var application = ApplicationManager.getApplicationByNameRevision(appName,appRevision);
-
             var applicationObject = {};
-
             applicationObject.id = application.applicationId;
             applicationObject.applicationName = application.applicationName;
             applicationObject.runtimeName = application.runtimeName;
@@ -227,27 +228,18 @@ var getApplicationByNameRevision = function(appName,appRevision){
 }
 
 var getAllRevisionsOfApplication =function(appName){
-
     var revisionArray = [];
-
     try {
-
         var revisions = ApplicationManager.getAllRevisionsOfApplication(appName);
-
         for (var i = 0; i < revisions.length; i++) {
             var revision = revisions[i];
-            var revisionObject = {};
-
-            revisionObject.revision = revision.revision;
-
-            revisionArray.push(revisionObject);
+            revisionArray.push(revisions[i]);
         }
     } catch(e){
         log.error("Error while getting the application list");
         log.error(e);
         throw e;
     }
-
     return revisionArray;
 }
 
