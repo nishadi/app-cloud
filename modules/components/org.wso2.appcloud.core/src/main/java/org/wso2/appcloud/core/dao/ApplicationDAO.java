@@ -295,15 +295,8 @@ public class ApplicationDAO {
                 application.setEndpointURL(resultSet.getString(SQLQueryConstants.APPLICATION_ENDPOINT_URL));
                 application.setRevision(resultSet.getString(SQLQueryConstants.REVISION));
                 application.setNumberOfReplicas(resultSet.getInt(SQLQueryConstants.NUMBER_OF_REPLICA));
-
-                preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_APP_TYPE_BY_ID);
-                preparedStatement.setInt(1, resultSet.getInt(SQLQueryConstants.APPLICATION_TYPE_ID));
-
-                ResultSet resultSet1 = preparedStatement.executeQuery();
-                while (resultSet1.next()){
-                    application.setApplicationType(resultSet1.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
-                }
-
+                application.setApplicationType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
+                application.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
             }
 
         } catch (SQLException e) {
