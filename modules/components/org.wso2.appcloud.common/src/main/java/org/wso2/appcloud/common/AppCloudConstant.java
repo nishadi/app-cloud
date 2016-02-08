@@ -25,6 +25,7 @@ public class AppCloudConstant {
 
     public static final String CONFIG_FOLDER = "appcloud";
     public static final String CONFIG_FILE_NAME = "appcloud.properties";
+    public static final String SIGNED_JWT_AUTH_USERNAME = "Username";
 
         /*==============================
         App Creation Event Constants

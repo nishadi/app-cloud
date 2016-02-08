@@ -23,6 +23,23 @@ include("/jagg/constants.jag");
 var log = new Log("module/manager/manager.jag");
 var carbon = require('carbon');
 var server = carbon.server;
+var multitenancy = carbon.multitenancy;
+
+var getStorageServerServiceURL = function(){
+    return "https://localhost:9445/services/";
+}
+var setAuthHeaders = function (options, httpHeaders, username) {
+    if(!username){
+        username = jagg.getUser();
+    }
+    if(!httpHeaders){
+        httpHeaders = [];
+    }
+    var AppCloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
+    var authHeader = {name : "Authorization", value : String(AppCloudUtil.getAuthHeader(username))};
+    httpHeaders.push(authHeader);
+    options["HTTPHeaders"] = httpHeaders;
+};
 
 /*
  *   getTenantDomain is used to logged user's domain name.

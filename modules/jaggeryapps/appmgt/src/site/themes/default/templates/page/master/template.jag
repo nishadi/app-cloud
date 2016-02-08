@@ -31,6 +31,7 @@ jagg.template("page/master", function(inputs, outputs, jagg) {%>
     <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/select2-4.0.0/select2.min.css'))%>">
     <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/select2-4.0.0/select2.override.css'))%>">
     <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
+     <link rel="shortcut icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/img/favicon.png'))%>" type="image/x-icon"/>
 </head>
 <body>
     <div id="wrap">

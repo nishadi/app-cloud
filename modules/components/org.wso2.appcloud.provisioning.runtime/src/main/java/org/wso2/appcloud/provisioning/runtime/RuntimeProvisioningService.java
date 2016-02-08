@@ -168,4 +168,13 @@ public interface RuntimeProvisioningService {
      * @throws RuntimeProvisioningException
      */
     boolean createDeploymentUrl(String environmentUrl) throws RuntimeProvisioningException;
+
+    /**
+     * Delete deployment related K8 objects
+     *
+     * @param deploymentName name of the deployment
+     * @return false if one object deletion is fail
+     * @throws RuntimeProvisioningException
+     */
+    boolean deleteDeployment(String deploymentName) throws RuntimeProvisioningException;
 }

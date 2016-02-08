@@ -28,7 +28,8 @@ jagg.template("index", function(inputs, outputs, jagg) {
     <div class="container-fluid">
         <div class="row row-centered app-sort-bar">
             <div class="col-centered col-md-5 search">
-                <h2><a href="/appmgt/site/pages/select-apptype.jag">Create</a> a new application</h2>
+                <h2><a href="/appmgt/site/pages/select-apptype.jag">Create Application</a></h2>
+                <h2><a href="/appmgt/site/pages/databases.jag">Create Database</a></h2>
             </div>
         </div>
         <div class="row row-centered app-sort-bar">
@@ -37,7 +38,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
                 <i class="fa fa-2x fa-search" ></i>
             </div>
         </div>
-
+    </div>
     <div class="row row-centered app-listing">
     <%
     if (applications.length > 0) {
@@ -56,14 +57,9 @@ jagg.template("index", function(inputs, outputs, jagg) {
            </div>
         <%
         }
-    } else { %>
-      <div>Please create a new application</div>
-    <%
     }
     %>
-
     </div>
-</div>
 
 
 <%
