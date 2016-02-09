@@ -40,23 +40,32 @@ function changeSelectedRevision(newRevision){
     putSelectedRevisionToSession(applicationName, newRevision);
     $('#selected-version').html(newRevision+" ");
 
+    var selectedApplicationRevision = applicationRevisions[newRevision];
     //Changing deploymentURL
-    var deploymentURL = applicationRevisions[newRevision].deploymentURL;
+    var deploymentURL = selectedApplicationRevision.deploymentURL;
     var repoUrlHtml = generateLunchUrl(deploymentURL);
     $("#version-url-link").html(repoUrlHtml);
     $('#btn-launchApp').attr({url:deploymentURL});
 
-
     //changing app description
-    $("#app-description").text(applicationRevisions[newRevision].description?applicationRevisions[newRevision].description:'');
+    $("#app-description").text(selectedApplicationRevision.description?selectedApplicationRevision.description:'');
 
     //changing runtime
-    $("#runtime").html(applicationRevisions[newRevision].runtimeName);
+    $("#runtime").html(selectedApplicationRevision.runtimeName);
 
     //change icon
     loadAppIcon(applicationName, newRevision)
 
-    $("#tableStatus").html(applicationRevisions[newRevision].status);
+    // Change replica status
+    $("#tableStatus").html(selectedApplicationRevision.status);
+
+    // Set upload revision btn
+    var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+selectedApplicationRevision.applicationType +
+                        "&pplicationName="+applicationName;
+    $('#upload-revision').attr("href", uploadRevisionUrl);
+
+    changeRuntimeProps(selectedApplicationRevision);
+    changeLabels(selectedApplicationRevision);
 }
 
 function generateLunchUrl(appURL) {
@@ -80,4 +89,12 @@ function putSelectedRevisionToSession(applicationName, selectedRevision){
         applicationName: applicationName,
         selectedRevision: selectedRevision
     });
+}
+
+function changeRuntimeProps(selectedApplicationRevision){
+    $('#runtimePropCount').html(selectedApplicationRevision.runtimeProperties.length);
+}
+
+function changeLabels(selectedApplicationRevision){
+    $('#labelCount').html(selectedApplicationRevision.labels.length);
 }
