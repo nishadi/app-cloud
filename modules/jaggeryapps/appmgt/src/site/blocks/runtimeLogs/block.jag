@@ -19,7 +19,7 @@
 
 include('/jagg/constants.jag');
 include('/jagg/jagg.jag');
-
+var log = new Log();
 jagg.block("runtimeLogs", {
     initialize: function (data) {
 
@@ -31,18 +31,22 @@ jagg.block("runtimeLogs", {
     },
 
     getOutputs: function (inputs) {
-        var userName = jagg.getUser();
         var viewRuntimeLogPermission = true;
+        var applicationMod = jagg.module("application");
         var applicationName = inputs.applicationName;
-        var applicationRevision = inputs.applicationRevision;
-
-        var logModule = jagg.module("runtimeLogs");
-        var applicationKey = request.getParameter("applicationKey");
-
+        var revisionsList = applicationMod.getAllRevisionsOfApplication(applicationName);
+        var selectedRevision = inputs.applicationRevision;
+        if(!selectedRevision) {
+            selectedRevision = applicationMod.getSelectedRevisionFromSession(inputs.applicationName);
+            if(!selectedRevision && revisionsList.length > 0){
+                selectedRevision = revisionsList[0];
+            }
+        }
         return {
             "viewRuntimeLogPermission": viewRuntimeLogPermission,
             "applicationName": applicationName,
-            "applicationRevision": applicationRevision,
+            "selectedRevision": selectedRevision,
+            "revisionsList":revisionsList
         };
     }
 

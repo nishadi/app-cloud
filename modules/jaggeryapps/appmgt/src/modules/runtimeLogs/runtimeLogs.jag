@@ -32,3 +32,19 @@ var getRuntimeLogs = function (applicationKey, selectedRevision, applicationType
 
     return deploymentLog;
 }
+
+var getFormattedRuntimeLogs = function (applicationKey, selectedRevision, applicationType) {
+    var result = getRuntimeLogs(applicationKey, selectedRevision, applicationType);
+    var logMap = {};
+    if (result instanceof Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentLogs){
+        var map = result.getDeploymentLogs();
+        var iterator = map.entrySet().iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            logMap[entry.getKey()] = entry.getValue().toString();
+        }
+        return logMap;
+    } else {
+        throw "Error while calling mod.getRuntimeLogs. Results are not instances of DeploymentLogs";
+    }
+}

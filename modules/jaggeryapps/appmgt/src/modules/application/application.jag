@@ -106,7 +106,7 @@ var addApplication = function (applicationName, applicationRevision, application
     var kubService = new KubernetesRuntime(applicationCtx);
 
     var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision);
-    var deploymentConfig = getDeploymentConfig(containers, applicationName);
+    var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
 
     log.info("Deploying application: " + applicationName);
     kubService.deployApplication(deploymentConfig);
@@ -151,11 +151,11 @@ function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName,
 };
 
 
-function getDeploymentConfig(containersList, applicationName){
+function getDeploymentConfig(containersList, applicationName, replicas){
 
     var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
     deploymentConfig.setDeploymentName(applicationName);
-    deploymentConfig.setReplicas(1);
+    deploymentConfig.setReplicas(parseInt(replicas));
     deploymentConfig.setContainers(containersList);
 
     return deploymentConfig;
