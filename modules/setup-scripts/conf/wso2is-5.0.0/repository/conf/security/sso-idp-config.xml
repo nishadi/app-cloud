@@ -47,7 +47,7 @@
 
         <ServiceProvider>
             <Issuer>monitoring</Issuer>
-            <AssertionConsumerService>https://localhost:9445/monitoring/acs.jag</AssertionConsumerService>
+            <AssertionConsumerService>https://localhost:9446/monitoring/acs.jag</AssertionConsumerService>
             <SignResponse>true</SignResponse>
             <SignAssertion>true</SignAssertion>
             <EnableSingleLogout>true</EnableSingleLogout>
