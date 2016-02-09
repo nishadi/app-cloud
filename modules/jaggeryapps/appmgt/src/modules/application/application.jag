@@ -105,7 +105,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     var kubService = new KubernetesRuntime(applicationCtx);
 
-    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName);
+    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision);
     var deploymentConfig = getDeploymentConfig(containers, applicationName);
 
     log.info("Deploying application: " + applicationName);
@@ -127,7 +127,7 @@ var addApplication = function (applicationName, applicationRevision, application
 /**
  * Method for getting all the available application types. e.g : war, mss, car
  */
-function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName){
+function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName, applicationRevision){
     var containerList = new java.util.ArrayList();
     var container1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
     var appBaseImageName = tenantDockerRegistryUrl + "/" + applicationName;
@@ -270,12 +270,13 @@ var getApplicationByNameRevision = function(appName,appRevision){
             applicationObject.applicationName = application.applicationName;
             applicationObject.runtimeName = application.runtimeName;
             applicationObject.revision = application.revision;
-            applicationObject.endpointURL = application.endpointURL;
             applicationObject.status = application.status;
             applicationObject.numberOfReplicas = application.numberOfReplicas;
             applicationObject.description = application.description;
             applicationObject.applicationType = application.applicationType;
-
+            applicationObject.runtimeProperties = generateRuntimePropsArray(application.runtimeProperties);
+            applicationObject.labels = generateLabelsArray(application.labels);
+            applicationObject.endpoints = generateEndpointsArray(application.endpoints);
     } catch(e){
         log.error("Error while getting the application");
         log.error(e);
@@ -283,6 +284,53 @@ var getApplicationByNameRevision = function(appName,appRevision){
     }
 
     return applicationObject;
+}
+
+var generateRuntimePropsArray=function(runtimeList){
+    var size = runtimeList.size();
+    var runtimePropsArray = [];
+    for (var i = 0; i < size; i++) {
+        var runtimePropObject = runtimeList.get(i);
+        var runtimeProperty = {
+            id: runtimePropObject.id,
+            propertyName: runtimePropObject.propertyName,
+            propertyValue: runtimePropObject.propertyValue,
+            description: runtimePropObject.propertyValue
+        };
+        runtimePropsArray.push(runtimeProperty);
+    }
+    return runtimePropsArray;
+}
+
+var generateLabelsArray=function(labelsList){
+    var size = labelsList.size();
+    var labelsArray = [];
+    for (var i = 0; i < size; i++) {
+        var labelObject = labelsList.get(i);
+        var label = {
+            labelId: labelObject.labelId,
+            labelName: labelObject.labelName,
+            labelValue: labelObject.labelValue,
+            description: labelObject.description
+        };
+        labelsArray.push(label);
+    }
+    return labelsArray;
+}
+
+var generateEndpointsArray=function(endpointsList){
+    var size = endpointsList.size();
+    var endpointsArray = [];
+    for (var i = 0; i < size; i++) {
+        var epObject = endpointsList.get(i);
+        var endpoint = {
+            id: epObject.id,
+            urlValue: epObject.urlValue,
+            description: epObject.description
+        };
+        endpointsArray.push(endpoint);
+    }
+    return endpointsArray;
 }
 
 var getAllRevisionsOfApplication =function(appName){

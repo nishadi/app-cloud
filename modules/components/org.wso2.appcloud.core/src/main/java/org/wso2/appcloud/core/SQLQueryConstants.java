@@ -101,13 +101,22 @@ public class SQLQueryConstants {
             "SELECT * FROM EndpointURL WHERE application_id=(SELECT id FROM Application WHERE application_name=? AND " +
             "revision=? AND tenant_id=?)";
 
+    public static final String GET_ALL_ENDPOINT_URL_OF_APPLICATION_BY_ID =
+            "SELECT * FROM EndpointURL WHERE application_id=?";
+
     public static final String GET_ALL_LABELS_OF_APPLICATION =
             "SELECT * FROM Label WHERE application_id=(SELECT id FROM Application WHERE application_name=? AND revision=?" +
             " AND tenant_id=?)";
 
+    public static final String GET_ALL_LABELS_OF_APPLICATION_BY_ID =
+            "SELECT * FROM Label WHERE application_id=?";
+
     public static final String GET_ALL_RUNTIME_PROPERTIES_OF_APPLICATION =
             "SELECT * FROM RuntimeProperties WHERE application_id=(SELECT id FROM Application WHERE application_name=? " +
             "AND revision=? AND tenant_id=?)";
+
+    public static final String GET_ALL_RUNTIME_PROPERTIES_OF_APPLICATION_BY_ID =
+            "SELECT * FROM RuntimeProperties WHERE application_id=?";
 
     public static final String GET_ALL_APP_TYPES = "SELECT * FROM ApplicationType";
 
@@ -123,6 +132,10 @@ public class SQLQueryConstants {
     public static final String GET_ALL_EVENTS_OF_APPLICATION =
             "SELECT MAX(id), event_name, event_status, timestamp, event_desc "
             + "FROM ApplicationEvents WHERE application_id=? GROUP BY event_name";
+
+    public static final String GET_RUNTIME_FOR_APP_TYPE =
+            "SELECT * FROM ApplicationRuntime WHERE id = (SELECT application_runtime_id FROM ApplicationTypeRuntime " +
+            "WHERE application_type_id=(SELECT id FROM ApplicationType WHERE app_type_name=?))";
 
 
     /*Update Queries*/

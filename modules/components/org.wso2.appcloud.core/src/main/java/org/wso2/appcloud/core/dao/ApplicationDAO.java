@@ -231,13 +231,13 @@ public class ApplicationDAO {
 
         List<ApplicationSummery> applicationSummeryList = new ArrayList<ApplicationSummery>();
         ApplicationSummery applicationSummery;
-
+        ResultSet resultSet = null;
         try {
 
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_APPLICATIONS_LIST);
             preparedStatement.setInt(1, tenantId);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 applicationSummery = new ApplicationSummery();
@@ -254,6 +254,7 @@ public class ApplicationDAO {
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
+            DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
@@ -326,7 +327,7 @@ public class ApplicationDAO {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-
+        ResultSet resultSet = null;
         int applicationId = 0;
 
         try {
@@ -335,8 +336,7 @@ public class ApplicationDAO {
             preparedStatement.setString(1, applicationName);
             preparedStatement.setString(2, revision);
             preparedStatement.setInt(3, tenantId);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 applicationId = resultSet.getInt(SQLQueryConstants.ID);
@@ -348,6 +348,7 @@ public class ApplicationDAO {
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
+            DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
@@ -368,7 +369,7 @@ public class ApplicationDAO {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-
+        ResultSet resultSet = null;
         List<String> revisionList = new ArrayList<String>();
 
         try {
@@ -376,8 +377,7 @@ public class ApplicationDAO {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_REVISIONS_OF_APPLICATION);
             preparedStatement.setString(1, applicationName);
             preparedStatement.setInt(2, tenantId);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 revisionList.add(resultSet.getString(SQLQueryConstants.REVISION));
@@ -389,6 +389,7 @@ public class ApplicationDAO {
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
+            DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
@@ -410,36 +411,64 @@ public class ApplicationDAO {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-
-        List<Endpoint> endpointList = new ArrayList<Endpoint>();
-        Endpoint endpoint;
-
+        ResultSet resultSet = null;
         try {
 
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_ENDPOINT_URL_OF_APPLICATION);
             preparedStatement.setString(1, applicationName);
             preparedStatement.setString(2, revision);
             preparedStatement.setInt(3, tenantId);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                endpoint = new Endpoint();
-                endpoint.setId(resultSet.getInt(SQLQueryConstants.ID));
-                endpoint.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
-                endpoint.setUrlValue(resultSet.getString(SQLQueryConstants.ENDPOINT_URL_VALUE));
-
-                endpointList.add(endpoint);
-            }
-
+            resultSet = preparedStatement.executeQuery();
+            return generateEndpoints(resultSet);
         } catch (SQLException e) {
             String msg = "Error while retrieving Application endpoints from database for application : " +
                          applicationName + " revision : " + revision + " in tenant : " + tenantId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
+            DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    /**
+     * Method for retrieving all the endpoints of a given application.
+     *
+     * @param applicationId application id
+     * @return Endpoints list
+     * @throws AppCloudException
+     */
+    public List<Endpoint> getAllEndpointsOfApplication(int applicationId) throws AppCloudException {
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = dbConnection.prepareStatement(
+                    SQLQueryConstants.GET_ALL_ENDPOINT_URL_OF_APPLICATION_BY_ID);
+            preparedStatement.setInt(1, applicationId);
+            resultSet = preparedStatement.executeQuery();
+            return generateEndpoints(resultSet);
+        } catch (SQLException e) {
+            String msg = "Error while retrieving Application endpoints from database for application :" + applicationId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    private List<Endpoint> generateEndpoints(ResultSet resultSet) throws SQLException {
+        List<Endpoint> endpointList = new ArrayList<Endpoint>();
+        while (resultSet.next()) {
+            Endpoint endpoint = new Endpoint();
+            endpoint.setId(resultSet.getInt(SQLQueryConstants.ID));
+            endpoint.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
+            endpoint.setUrlValue(resultSet.getString(SQLQueryConstants.ENDPOINT_URL_VALUE));
+            endpointList.add(endpoint);
         }
         return endpointList;
     }
@@ -459,29 +488,15 @@ public class ApplicationDAO {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-
-        List<Label> labelList = new ArrayList<Label>();
-        Label label;
-
+        ResultSet resultSet = null;
         try {
 
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_LABELS_OF_APPLICATION);
             preparedStatement.setString(1, applicationName);
             preparedStatement.setString(2, revision);
             preparedStatement.setInt(3, tenantId);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                label = new Label();
-                label.setLabelId(resultSet.getInt(SQLQueryConstants.ID));
-                label.setLabelName(resultSet.getString(SQLQueryConstants.LABEL_NAME));
-                label.setLabelValue(resultSet.getString(SQLQueryConstants.LABEL_VALUE));
-                label.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
-
-                labelList.add(label);
-            }
-
+            resultSet = preparedStatement.executeQuery();
+            return generateLabels(resultSet);
         } catch (SQLException e) {
             String msg =
                     "Error while retrieving labels from database for application : " + applicationName + " revision :" +
@@ -490,8 +505,49 @@ public class ApplicationDAO {
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
+            DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    /**
+     * Method for retrieving list of labels belongs to a given application
+     *
+     * @param applicationId applicationId
+     * @return Labels list
+     * @throws AppCloudException
+     */
+    public List<Label> getAllLabelsOfApplication(int applicationId) throws AppCloudException {
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_LABELS_OF_APPLICATION_BY_ID);
+            preparedStatement.setInt(1, applicationId);
+            resultSet = preparedStatement.executeQuery();
+            return generateLabels(resultSet);
+        } catch (SQLException e) {
+            String msg = "Error while retrieving labels from database for application : " + applicationId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    private List<Label> generateLabels(ResultSet resultSet) throws SQLException {
+        List<Label> labelList = new ArrayList<Label>();
+        while (resultSet.next()) {
+            Label label = new Label();
+            label.setLabelId(resultSet.getInt(SQLQueryConstants.ID));
+            label.setLabelName(resultSet.getString(SQLQueryConstants.LABEL_NAME));
+            label.setLabelValue(resultSet.getString(SQLQueryConstants.LABEL_VALUE));
+            label.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
+            labelList.add(label);
         }
         return labelList;
     }
@@ -511,10 +567,7 @@ public class ApplicationDAO {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-
-        List<RuntimeProperty> runtimePropertyList = new ArrayList<RuntimeProperty>();
-        RuntimeProperty runtimeProperty;
-
+        ResultSet resultSet = null;
         try {
 
             preparedStatement = dbConnection.prepareStatement(
@@ -522,27 +575,61 @@ public class ApplicationDAO {
             preparedStatement.setString(1, applicationName);
             preparedStatement.setString(2, revision);
             preparedStatement.setInt(3, tenantId);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                runtimeProperty = new RuntimeProperty();
-                runtimeProperty.setId(resultSet.getInt(SQLQueryConstants.ID));
-                runtimeProperty.setPropertyName(resultSet.getString(SQLQueryConstants.PROPERTY_NAME));
-                runtimeProperty.setPropertyValue(resultSet.getString(SQLQueryConstants.PROPERTY_VALUE));
-                runtimeProperty.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
-
-                runtimePropertyList.add(runtimeProperty);
-            }
-
+            resultSet = preparedStatement.executeQuery();
+            return generateRuntimeProperties(resultSet);
         } catch (SQLException e) {
             String msg = "Error while retrieving the runtime properties from the database for application : " +
                          applicationName + " revision : " + revision + " in tenant : " + tenantId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
+            DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    /**
+     * Method for retrieving all the runtime properties of a given application
+     *
+     * @param applicationId applicationId
+     * @return RuntimeProperty List
+     * @throws AppCloudException
+     */
+    public List<RuntimeProperty> getAllRuntimePropertiesOfApplication(int applicationId) throws AppCloudException {
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = dbConnection.prepareStatement(
+                    SQLQueryConstants.GET_ALL_RUNTIME_PROPERTIES_OF_APPLICATION_BY_ID);
+            preparedStatement.setInt(1, applicationId);
+            resultSet = preparedStatement.executeQuery();
+            return generateRuntimeProperties(resultSet);
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving the runtime properties from the database " +
+                         "for application : "+applicationId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    private List<RuntimeProperty> generateRuntimeProperties(ResultSet resultSet)
+            throws SQLException {
+        List<RuntimeProperty> runtimePropertyList = new ArrayList<RuntimeProperty>();
+        while (resultSet.next()) {
+            RuntimeProperty runtimeProperty = new RuntimeProperty();
+            runtimeProperty.setId(resultSet.getInt(SQLQueryConstants.ID));
+            runtimeProperty.setPropertyName(resultSet.getString(SQLQueryConstants.PROPERTY_NAME));
+            runtimeProperty.setPropertyValue(resultSet.getString(SQLQueryConstants.PROPERTY_VALUE));
+            runtimeProperty.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
+            runtimePropertyList.add(runtimeProperty);
         }
         return runtimePropertyList;
     }
@@ -558,6 +645,7 @@ public class ApplicationDAO {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
 
         List<ApplicationType> applicationTypeList = new ArrayList<ApplicationType>();
         ApplicationType applicationType;
@@ -565,8 +653,7 @@ public class ApplicationDAO {
         try {
 
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_APP_TYPES);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 applicationType = new ApplicationType();
@@ -582,6 +669,7 @@ public class ApplicationDAO {
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
+            DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
@@ -601,7 +689,7 @@ public class ApplicationDAO {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-
+        ResultSet resultSet = null;
         List<ApplicationRuntime> applicationRuntimeList = new ArrayList<ApplicationRuntime>();
         ApplicationRuntime applicationRuntime;
 
@@ -609,8 +697,7 @@ public class ApplicationDAO {
 
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_RUNTIMES_FOR_APP_TYPE_OF_TENANT);
             preparedStatement.setString(1, appType);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 applicationRuntime = new ApplicationRuntime();
@@ -628,6 +715,7 @@ public class ApplicationDAO {
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
+            DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
@@ -710,6 +798,39 @@ public class ApplicationDAO {
             DBUtil.closeConnection(dbConnection);
         }
         return true;
+    }
+
+    public ApplicationRuntime getRuntimeForAppType(String appType) throws AppCloudException {
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        ApplicationRuntime applicationRuntime = new ApplicationRuntime();
+        ResultSet resultSet = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_RUNTIME_FOR_APP_TYPE);
+            preparedStatement.setString(1, appType);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                applicationRuntime.setId(resultSet.getInt(SQLQueryConstants.ID));
+                applicationRuntime.setImageName(resultSet.getString(SQLQueryConstants.RUNTIME_IMAGE_NAME));
+                applicationRuntime.setRepoURL(resultSet.getString(SQLQueryConstants.RUNTIME_REPO_URL));
+                applicationRuntime.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
+                applicationRuntime.setTag(resultSet.getString(SQLQueryConstants.RUNTIME_TAG));
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving runtime info from database for app type : " + appType;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return applicationRuntime;
     }
 
 }

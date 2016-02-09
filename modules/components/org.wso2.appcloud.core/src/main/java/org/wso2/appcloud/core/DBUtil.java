@@ -27,6 +27,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DBUtil {
@@ -90,6 +91,25 @@ public class DBUtil {
                 String msg = "Error while closing prepared statement";
                 log.error(msg, e);
             }
+        }
+    }
+
+    /**
+     * This method is used to close the database result set.
+     * The intended use of this method is within a finally block.
+     * This method will log any exceptions that is occurred while closing the database result set.
+     *
+     * @param resultSet The database result set that needs to be closed.
+     */
+    public static void closeResultSet(ResultSet resultSet) {
+        try {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+        } catch (SQLException e) {
+            // This method is called within a finally block. Hence we do not throw an error from here
+            String msg = "Could not close resultSet";
+            log.error(msg, e);
         }
     }
 

@@ -22,11 +22,11 @@ include("/jagg/jagg.jag");
 jagg.template("home", function(inputs, outputs, jagg) {
     var applicationRevisions = outputs.applicationRevisions;
     var selectedRevision = outputs.selectedRevision;
+    var selectedApplicationRevision = applicationRevisions[selectedRevision];
     var revisions = outputs.revision;
     var applicationName = request.getParameter("applicationName");
     var defaultAppIconUrl = jagg.getAbsoluteUrl("/site/themes/default/images/sample-app-image.png");
-    var log = new Log();
-    log.info(defaultAppIconUrl);
+    var appCreationPageBaseUrl = jagg.getAbsoluteUrl("/site/pages/application.jag");
 %>
 
 <script>
@@ -36,8 +36,53 @@ jagg.template("home", function(inputs, outputs, jagg) {
     var applicationRevisions = jQuery.parseJSON('<%=applicationRevisions%>');
     var selectedRevision = "<%=selectedRevision%>";
     var revisions = jQuery.parseJSON('<%=revisions%>');
+    var appCreationPageBaseUrl = "<%=appCreationPageBaseUrl%>";
+    var selectedApplicationRevision =  jQuery.parseJSON('<%=selectedApplicationRevision%>');
 
 </script>
+    <div class="navbar navbar-secondary">
+    <div class="container-fliud">
+        <div class="row">
+             <div class="side-pane-trigger">
+                <i class="fa fa-reorder"></i>
+            </div>
+            <div class="col-md-3 breadcrumb-secondary">
+                <a href="/appmgt/site/pages/index.jag"><i class="fa fa-cubes visible-xs visible-lg"></i></a>
+                <span class="hidden-xs"><a href="/appmgt/site/pages/index.jag">Application Cloud</a></span>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div class="inner-wrapper">
+   <!-- left pane wrapper -->
+    <div class="left-pane ">
+        <ul>
+            <li class="selected">
+                <a href="#" target="_blank"><i class="fa fa-laptop"></i> Overview</a>
+            </li>
+            <li>
+                <a><i class="fa fa-wrench"></i> Env Variables</a>
+            </li>
+            <li>
+                <a><i class="fa fa-tag"></i> Tags</a>
+            </li>
+            <li>
+                <a href="/appmgt/site/pages/runtimeLogs.jag"><i class="fa fa-hdd-o"></i>Runtime Logs</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- left pane wrapper -->
+    <div class="right-pane">
+    <!-- BOF App factory menu actionbar -->
+    <div class="action-bar">
+        <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action"  title="Back to Application listing">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-left-arrow fw-stack-1x"></i>
+                </span> Back to Listing
+        </a>
+    </div><!-- EOF App factory menu actionbar-->
 
     <div class="container-fluid app-content-section">
 
@@ -48,9 +93,9 @@ jagg.template("home", function(inputs, outputs, jagg) {
                   <span><i class="fa fa-pencil"></i></span>
               </div>
               <div class="app-desc">
-                <h2><%=applicationRevisions[selectedRevision].applicationName%></h2>
-                  <h4 class="app-run-time">Runtime: <span id="runtime"><%=applicationRevisions[selectedRevision].runtimeName%></span></h4>
-                <p id="app-description"><%=(applicationRevisions[selectedRevision].description)?applicationRevisions[selectedRevision].description:''%></p>
+                <h2><%=selectedApplicationRevision.applicationName%></h2>
+                  <h4 class="app-run-time">Runtime: <span id="runtime"><%=selectedApplicationRevision.runtimeName%></span></h4>
+                <p id="app-description"><%=(selectedApplicationRevision.description)?selectedApplicationRevision.description:''%></p>
                 <!--div class="app-preview-action-bar">
                     <div class="sec prod-url"><a href="#" >http://javatest.djcompany.wso2app.com</a>
                     <a href="#"><i class="fw fw-settings"></i></a>
@@ -78,22 +123,20 @@ jagg.template("home", function(inputs, outputs, jagg) {
                               </ul>
                           </div>
                           <div id="version-url-link" class="version-url">
-                          <a href="#"><span>URL:<%=applicationRevisions[selectedRevision].deploymentURL%></span></a>
+                          <a href="#"><span>URL:<%=selectedApplicationRevision.deploymentURL%></span></a>
                           </div>
                           <div class="sec">
                               <button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"
-                              url="<%=applicationRevisions[selectedRevision].deploymentURL%>">Launch App</button>
-                              <!-- edit code button -->
+                              url="<%=selectedApplicationRevision.deploymentURL%>">Launch App</button>
                               <div class="btn-group ctrl-edit-button btn-edit-code">
                                   <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Stop</a>
-                              </div>
-                              <div class="btn-group ctrl-edit-button btn-edit-code">
-                                    <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="runtimeLogs.jag?applicationName=<%=applicationName%>&applicationRevision=<%=selectedRevision%>">View Logs</a>
                               </div>
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-12 col-lg-3">
-                          <a>
+                          <a id="upload-revision"
+                          href="<%=appCreationPageBaseUrl%>?appTypeName=<%=selectedApplicationRevision
+                                      .applicationType%>&applicationName=<%=applicationName%>">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
                                     <i class="fw fw-ring fw-stack-2x"></i>
@@ -114,7 +157,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                 </tr>
                                 <tr>
                                 <td>Server 1</td>
-                                <td id="tableStatus"><%=applicationRevisions[selectedRevision].status%></td>
+                                <td id="tableStatus"><%=selectedApplicationRevision.status%></td>
                                 </tr>
                               </table>
                       </div>
@@ -149,7 +192,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                     <i class="fa fa-wrench fa-5x"></i>
                   </div>
                   <div class="block-number pull-right">
-                    12
+                   <span id="runtimePropCount"><%=selectedApplicationRevision.runtimeProperties.length.toString()%></span>
                   </div>
                   <div class="clearfix"></div>
                   <a href="team_invite.html">
@@ -167,7 +210,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                     <i class="fa fa-tags fa-5x"></i>
                   </div>
                   <div class="block-number pull-right">
-                    04
+                    <span id="labelCount"><%=selectedApplicationRevision.labels.length.toString()%></span>
                   </div>
                   <div class="clearfix"></div>
                   <a href="database_new.html">
@@ -183,7 +226,40 @@ jagg.template("home", function(inputs, outputs, jagg) {
           </div>
         </div>
     </div><!-- /.container -->
+    </div>
 
+
+
+<script>
+
+    $('.side-pane-trigger').click(function(){
+        var rightPane = $('.right-pane');
+        var leftPane = $('.left-pane');
+        if (rightPane.hasClass('visible')){
+            rightPane.animate({"left":"0em"}, "slow").removeClass('visible');
+            leftPane.animate({"left":"-18em"}, "slow");
+            $(this).find('i').removeClass('fa-arrow-left').addClass('fa-reorder');
+        } else {
+            rightPane.animate({"left":"18em"}, "slow").addClass('visible');
+            leftPane.animate({"left":"0em"}, "slow");
+            $(this).find('i').removeClass('fa-reorder').addClass('fa-arrow-left');
+        }
+    });
+
+
+    //Url text loaded from the span element
+    var urlText = $('.version-url a span').text();
+
+    //Maximum character limit is 90. further than that the text would not show and the title would!
+    if(urlText.length > 90){
+      $('.version-url a').prop('title',urlText).find('span').text(urlText);
+    }else{
+      $('.version-url a span').text(urlText);
+    }
+
+
+
+</script>
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('templates/home/js/home.js'))%>"></script>
 
 <%
