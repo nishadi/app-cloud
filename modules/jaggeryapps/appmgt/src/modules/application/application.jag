@@ -39,7 +39,7 @@ var CloudUtil = Packages.org.wso2.appcloud.common.util;
  */
 var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas,
                                                                             uploadedArtifact, runtimeId, appTypeName, runtimeProperties) {
-    //uploadedArtifact.move(ARTIFACT_UPLOAD_DIRECTORY + uploadedArtifact.getName());
+    uploadedArtifact.move(ARTIFACT_UPLOAD_DIRECTORY + uploadedArtifact.getName());
     var runtimeProperties = parse(runtimeProperties);
     log.info("Started creating App => name: " + applicationName + " " +
             "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
@@ -50,11 +50,14 @@ var addApplication = function (applicationName, applicationRevision, application
     //Create Docker file
     var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
     var dockerOpClient = new DockerOpClient("http://127.0.0.1:2375");
-    dockerOpClient.createDockerFile("webapp", "playground2.war", "/repo/wso2.org/appcloud/modules/jaggeryapps/appmgt/repo/vm/tmp/app_cloud/setup/uploads/Dockerfile");
+    var dockerFilePath = ARTIFACT_DOCKER_FILE_DIRECTORY + "/" + DOCKER_FILE_NAME;
+    dockerOpClient.createDockerFile(appTypeName, uploadedArtifact.getName(), dockerFilePath);
     //Build Docker image
-    dockerOpClient.buildDockerImage("registry.docker.appfactory.private.wso2.com:5000/deep","tomcat", "wso2v1","/repo/wso2.org/appcloud/modules/jaggeryapps/appmgt/repo/vm/tmp/app_cloud/setup/uploads/");
+    var dockerRegTenantSpace = "super";
+    var tenantDockerRegistryUrl = DOCKER_REGISTRY_URL + "/" + dockerRegTenantSpace;
+    dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,ARTIFACT_DOCKER_FILE_DIRECTORY);
      //Push Docker image
-    dockerOpClient.pushDockerImage("registry.docker.appfactory.private.wso2.com:5000/deep","tomcat", "wso2v1");
+    dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
 
     //Adding application to Database
     var application = new Application();
@@ -75,7 +78,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     var kubService = new KubernetesRuntime(applicationCtx);
 
-    var containers = getContainers();
+    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName);
     var deploymentConfig = getDeploymentConfig(containers, applicationName);
 
     log.info("Deploying application: " + applicationName);
@@ -90,20 +93,22 @@ var addApplication = function (applicationName, applicationRevision, application
 /**
  * Method for getting all the available application types. e.g : war, mss, car
  */
-function getContainers(){
+function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName){
     var containerList = new java.util.ArrayList();
     var container1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
-    container1.setBaseImageName("tomcat");
-    container1.setBaseImageVersion("latest");
+    var appBaseImageName = tenantDockerRegistryUrl + "/" + applicationName;
+    container1.setContainerName(applicationName);
+    container1.setBaseImageName(appBaseImageName);
+    container1.setBaseImageVersion(applicationRevision);
     var envs1 = new java.util.HashMap();
     envs1.put("ORG","WSO2");
     container1.setEnvVariables(envs1);
     var serviceProxyList1 = new java.util.ArrayList();
     var serviceProxy1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
-    serviceProxy1.setServiceName("http");
-    serviceProxy1.setServiceProtocol("TCP");
-    serviceProxy1.setServicePort(80);
-    serviceProxy1.setServiceBackendPort(8080);
+    serviceProxy1.setServiceName(appServiceName);
+    serviceProxy1.setServiceProtocol(KUB_SERVICE_PROTOCOL);
+    serviceProxy1.setServicePort(KUB_SERVICE_PORT);
+    serviceProxy1.setServiceBackendPort(KUB_SERVICE_BACKEND_PORT);
     serviceProxyList1.add(serviceProxy1);
     container1.setServiceProxies(serviceProxyList1);
     containerList.add(container1);

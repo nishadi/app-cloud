@@ -82,21 +82,18 @@ public class DockerOpClient {
                     @Override
                     public void onSuccess(String message) {
                         log.info("Success:" + message);
-                        //System.out.println("Success:" + message);
                         buildDone.countDown();
                     }
 
                     @Override
                     public void onError(String messsage) {
                         log.error("Failure:" +messsage);
-                        //System.err.println("Failure:" +messsage);
                         buildDone.countDown();
                     }
 
                     @Override
                     public void onEvent(String event) {
                         log.info(event);
-                        //System.out.println(event);
                     }
                 })
                 .fromFolder(dockerFileUrl);
@@ -110,20 +107,19 @@ public class DockerOpClient {
         handle = dockerClient.image().withName(dockerImgeName).push().usingListener(new EventListener() {
             @Override
             public void onSuccess(String message) {
-                System.out.println("Success:" + message);
+                log.info("Success:" + message);
                 pushDone.countDown();
             }
 
             @Override
             public void onError(String message) {
-                System.out.println("Error:" + message);
+                log.error("Error:" + message);
                 pushDone.countDown();
             }
 
             @Override
             public void onEvent(String event) {
-                System.out.println(event);
-
+                log.info(event);
             }
         }).toRegistry();
 
