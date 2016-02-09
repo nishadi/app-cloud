@@ -23,7 +23,14 @@ jagg.template("apptype/select", function(inputs, outputs, jagg) {
     var appTypes = outputs.appTypes;
     %>
 
-
+    <div class="action-bar">
+        <a href="/appmgt/site/pages/index.jag" class="btn-action">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-left-arrow fw-stack-1x"></i>
+                </span> <span class="hidden-xs">Back to Application listing</span>
+        </a>
+    </div>
     <div class="container-fluid app-type-listing">
        <div class="row listing padding-bottom-xlg" data-count="3.0">
           <%
@@ -36,7 +43,7 @@ jagg.template("apptype/select", function(inputs, outputs, jagg) {
                         data-appname="<%=appTypes[x].cssProperties.displayName%>"
                          app-type="<%=appTypes[x].name%>">
                         <i class="fw <%=appTypes[x].cssProperties.icon%> fw-5x"></i>
-                        <div class="type-name" ><%=appTypes[x].name%></div>
+                        <div class="type-name" ><%=appTypes[x].cssProperties.displayName%></div>
                 </div>
           </div>
           <%
@@ -65,7 +72,7 @@ jagg.template("apptype/select", function(inputs, outputs, jagg) {
                    <span class="fw-stack fw-lg btn-action-ico">
                    <i class="fw fw-ring fw-stack-2x"></i>
                    <i class="fw fw-add fw-stack-1x"></i>
-                   </span> Upload Application</a>
+                   </span> Continue</a>
                 </div>
              </div>
           </div>
