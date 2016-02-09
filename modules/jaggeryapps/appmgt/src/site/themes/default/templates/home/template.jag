@@ -76,16 +76,6 @@ jagg.template("home", function(inputs, outputs, jagg) {
     <div class="right-pane">
     <!-- BOF App factory menu actionbar -->
     <div class="action-bar">
-        <a href="/appmgt/site/pages/index.jag" class="btn-action">
-                <span class="fw-stack fw-lg btn-action-ico">
-                    <i class="fw fw-ring fw-stack-2x"></i>
-                    <i class="fw fw-left-arrow fw-stack-1x"></i>
-                </span> Back to Listing
-        </a>
-    </div><!-- EOF App factory menu actionbar-->
-
-    <!-- BOF App factory menu actionbar -->
-    <div class="action-bar">
         <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action"  title="Back to Application listing">
                 <span class="fw-stack fw-lg btn-action-ico">
                     <i class="fw fw-ring fw-stack-2x"></i>
@@ -138,6 +128,14 @@ jagg.template("home", function(inputs, outputs, jagg) {
                           <div class="sec">
                               <button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"
                               url="<%=selectedApplicationRevision.deploymentURL%>">Launch App</button>
+                              url="<%=applicationRevisions[selectedRevision].deploymentURL%>">Launch App</button>
+                              <!-- edit code button -->
+                              <div class="btn-group ctrl-edit-button btn-edit-code">
+                                  <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Stop</a>
+                              </div>
+                              <div class="btn-group ctrl-edit-button btn-edit-code">
+                                    <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="runtimeLogs.jag?applicationName=<%=applicationName%>&applicationRevision=<%=selectedRevision%>">View Logs</a>
+                              </div>
 
                           </div>
                       </div>
