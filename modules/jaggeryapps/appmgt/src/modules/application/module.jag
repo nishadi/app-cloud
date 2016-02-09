@@ -51,5 +51,8 @@ jagg.module("application", {
     getApplicationCreationEvents:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationCreationEvents.apply(this, arguments);
     },
+    uploadExistingArchive:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").uploadExistingArchive.apply(this, arguments);
+    }
 });
 %>

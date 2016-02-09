@@ -20,30 +20,38 @@
 include("/jagg/jagg.jag");
 include('/jagg/constants.jag');
 
-
 var action = request.getParameter("action");
+var applicationModule = jagg.module("application");
 
 (function(){
 
-    if (action == "deployApplication"){
-        var applicationModule = jagg.module("application");
-        
+    if(action == "uploadExistingArchive"){
         var uploadedArtifact = request.getFile("fileUpload");
         var applicationName = request.getParameter("applicationName");
-        var applicationRevision = request.getParameter("applicationRevision");
+        var appTypeName = request.getParameter("appTypeName");
+
+        applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName);
+        response.status = 200;
+        response.message = "Artifact is successfully uploaded!";
+    }else if(action == "createApplication"){
         var applicationDescription = request.getParameter("applicationDescription");
         var replicas = request.getParameter("replicas");
         var runtimeId = request.getParameter("runtime");
+        var runtimeProperties = request.getParameter("runtimeProperties");
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
         var appTypeName = request.getParameter("appTypeName");
-        var runtimeProperties = parse(request.getParameter("runtimeProperties"));
+
+        var parsedRuntimeProperties;
+        if(runtimeProperties != "None" || runtimeProperties != null ){
+            parsedRuntimeProperties = parse(runtimeProperties);
+        }
 
         applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
-                uploadedArtifact, runtimeId, appTypeName, JSON.stringify(runtimeProperties));
-        var status = {};
+                runtimeId, appTypeName, JSON.stringify(parsedRuntimeProperties));
         response.status = 200;
         response.message = "Artifact is successfully uploaded!";
-
-    } else if (action == "getApplicationCreationEvents"){
+    }else if (action == "getApplicationCreationEvents"){
 
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");

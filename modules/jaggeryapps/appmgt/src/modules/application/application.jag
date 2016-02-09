@@ -28,6 +28,7 @@ var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runti
 var EventsManager = Packages.org.wso2.appcloud.core.EventsManager;
 var Event = Packages.org.wso2.appcloud.core.dto.Event;
 var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
+var RuntimeProperty = Packages.org.wso2.appcloud.core.dto.RuntimeProperty;
 
 /**
  * Add a application object
@@ -39,14 +40,10 @@ var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
  * @param uploadedArtifact the uploaded artifact file
  * @param runtimeId runtime id of the application
  */
-var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas,
-                                                                            uploadedArtifact, runtimeId, appTypeName, runtimeProperties) {
-    uploadedArtifact.move(ARTIFACT_UPLOAD_DIRECTORY + uploadedArtifact.getName());
-    var runtimeProperties = parse(runtimeProperties);
+var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas, runtimeId, appTypeName, runtimeProperties) {
     log.info("Started creating App => name: " + applicationName + " " +
             "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
-            "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " " + "runtimeProperties: "
-            + runtimeProperties
+            "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " "
     );
 
     //Create Docker file
@@ -72,6 +69,21 @@ var addApplication = function (applicationName, applicationRevision, application
     application.setNumberOfReplicas(replicas);
     application.setRuntimeId(runtimeId);
     application.setApplicationType(appTypeName);
+
+
+    if (runtimeProperties != null || runtimeProperties != "None") {
+        var parsedRuntimeProperties = parse(runtimeProperties);
+        if(Object.keys(parsedRuntimeProperties[0]).length > 0) {
+            var runtimePropertyList = new java.util.ArrayList();
+            for (var i = 0; i < parsedRuntimeProperties.length; i++) {
+                var runtimeProperty = new RuntimeProperty();
+                runtimeProperty.setPropertyName(parsedRuntimeProperties[i].key);
+                runtimeProperty.setPropertyValue(parsedRuntimeProperties[i].value);
+                runtimePropertyList.add(runtimeProperty);
+            }
+            application.setRuntimeProperties(runtimePropertyList);
+        }
+    }
 
     ApplicationManager.addApplication(application);
 
@@ -345,4 +357,25 @@ var getApplicationCreationEvents = function(applicationName, applicationRevision
     var events = eventsManager.getEventsOfApplication(applicationName, applicationRevision);
 
 }
+
+var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationName){
+    createDestinationDirsForUploadedApps();
+    uploadApplicationTmpPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+            + modManager.getTenantDomain()
+            + "/" + uploadedArtifact.getName();
+    uploadedArtifact.move(uploadApplicationTmpPath);
+}
+
+var createDestinationDirsForUploadedApps = function () {
+    var destination = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/" + modManager.getTenantDomain();
+    var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH);
+    if (!destinationDir.isExists()) {
+        destinationDir.mkdir();
+    }
+    destinationDir = new File(destination);
+    if (!destinationDir.isExists()) {
+        destinationDir.mkdir();
+    }
+}
+
 %>
