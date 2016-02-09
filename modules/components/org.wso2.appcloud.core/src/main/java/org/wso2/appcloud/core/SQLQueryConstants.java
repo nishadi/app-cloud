@@ -129,14 +129,12 @@ public class SQLQueryConstants {
             "SELECT * FROM ApplicationRuntime WHERE id IN (SELECT application_runtime_id FROM ApplicationTypeRuntime WHERE " +
             "application_type_id=(SELECT id FROM ApplicationType WHERE app_type_name=?))";
 
-    public static final String GET_ALL_EVENTS_OF_APPLICATION =
-            "SELECT MAX(id), event_name, event_status, timestamp, event_desc "
-            + "FROM ApplicationEvents WHERE application_id=? GROUP BY event_name";
-
     public static final String GET_RUNTIME_FOR_APP_TYPE =
-            "SELECT * FROM ApplicationRuntime WHERE id = (SELECT application_runtime_id FROM ApplicationTypeRuntime " +
-            "WHERE application_type_id=(SELECT id FROM ApplicationType WHERE app_type_name=?))";
+            "SELECT * FROM ApplicationRuntime WHERE id = ?";
 
+    public static final String GET_ALL_EVENTS_OF_APPLICATION = "select * from ApplicationEvents A "
+            + "where A.application_id = ? "
+            + "and A.id >= (select MAX(B.id) from ApplicationEvents B where B.application_id = A.application_id and B.event_name = A.event_name);";
 
     /*Update Queries*/
 

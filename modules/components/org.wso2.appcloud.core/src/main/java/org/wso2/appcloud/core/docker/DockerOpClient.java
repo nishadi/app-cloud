@@ -59,11 +59,11 @@ public class DockerOpClient {
         dockerClient = new DefaultDockerClient(config);
     }
 
-    public void createDockerFile(String appType, String artifactName, String dockerFilePath)
+    public void createDockerFile(String runtimeId, String appType, String artifactName, String dockerFilePath)
             throws IOException, AppCloudException {
 
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        ApplicationRuntime applicationRuntime = applicationDAO.getRuntimeForAppType(appType);
+        ApplicationRuntime applicationRuntime = applicationDAO.getRuntime(Integer.parseInt(runtimeId));
 
         String dockerRegistryUrl = DockerUtil.getDockerRegistryUrl();
         String dockerBaseImageName = applicationRuntime.getImageName();

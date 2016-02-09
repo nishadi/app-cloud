@@ -186,7 +186,7 @@ INSERT INTO `ApplicationTypeRuntime` (`application_type_id`, `application_runtim
 (1, 1),
 (1, 2),
 (2, 3),
-(2, 4)
+(2, 4),
 (3, 2);
 
 
