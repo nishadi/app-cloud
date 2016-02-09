@@ -26,6 +26,7 @@ public class Application {
     private String description;
     private String revision;
     private int runtimeId;
+    private String runtimeName;
     private String applicationType;
     private String endpointURL;
     private String status;
@@ -132,5 +133,13 @@ public class Application {
 
     public void setEndpoints(List<Endpoint> endpoints) {
         this.endpoints = endpoints;
+    }
+
+    public String getRuntimeName() {
+        return runtimeName;
+    }
+
+    public void setRuntimeName(String runtimeName) {
+        this.runtimeName = runtimeName;
     }
 }

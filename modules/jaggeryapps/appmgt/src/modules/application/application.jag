@@ -25,7 +25,9 @@ var modManager = jagg.module("manager");
 var ApplicationManager = Packages.org.wso2.appcloud.core.ApplicationManager;
 var Application = Packages.org.wso2.appcloud.core.dto.Application;
 var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
-var CloudUtil = Packages.org.wso2.appcloud.common.util;
+var EventsManager = Packages.org.wso2.appcloud.core.EventsManager;
+var Event = Packages.org.wso2.appcloud.core.dto.Event;
+var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
 
 /**
  * Add a application object
@@ -59,6 +61,9 @@ var addApplication = function (applicationName, applicationRevision, application
      //Push Docker image
     dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
 
+    var eventsManager = new EventsManager();
+    var event = new Event();
+
     //Adding application to Database
     var application = new Application();
     application.setApplicationName(applicationName);
@@ -69,6 +74,13 @@ var addApplication = function (applicationName, applicationRevision, application
     application.setApplicationType(appTypeName);
 
     ApplicationManager.addApplication(application);
+
+    //Adding deployment pending event
+    event.setEventName(KUBE_DEPLOY);
+    event.setEventStatus(EVENT_PENDING);
+    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
+    event.setEventDescription("Application deployment successfully triggered in Kubernetes");
+    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
 
     //Creating basic deployment
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
@@ -83,6 +95,13 @@ var addApplication = function (applicationName, applicationRevision, application
 
     log.info("Deploying application: " + applicationName);
     kubService.deployApplication(deploymentConfig);
+
+    //Adding deployment success event
+    event.setEventName(KUBE_DEPLOY);
+    event.setEventStatus(EVENT_SUCCEEDED);
+    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
+    event.setEventDescription("Application deployment successfully triggered in Kubernetes");
+    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
 
     //Creating Ingress
     var ingressCreated = kubService.createDeploymentUrl("appcloud.wso2.com");
@@ -240,6 +259,7 @@ var getApplicationByNameRevision = function(appName,appRevision){
             applicationObject.status = application.status;
             applicationObject.numberOfReplicas = application.numberOfReplicas;
             applicationObject.description = application.description;
+            applicationObject.applicationType = application.applicationType;
 
     } catch(e){
         log.error("Error while getting the application");
@@ -276,5 +296,23 @@ var getDeploymentURL = function (applicationName, applicationRevision, appTypeNa
 
     log.info("Deployment URL: " + baseURL + deploymentPath);
     return baseURL + deploymentPath;
+}
+
+var putSelectedRevisionToSession = function(applicationName, currentRevision) {
+    var selectedVersions = session.get("SELECTED_REVISIONS");
+    if (!selectedVersions) {
+        selectedVersions = {};
+    }
+    selectedVersions[applicationName] = currentRevision;
+    session.put("SELECTED_REVISIONS", selectedVersions);
+}
+
+var getSelectedRevisionFromSession = function(applicationName) {
+    var selectedVersions = session.get("SELECTED_REVISIONS");
+    if (selectedVersions && selectedVersions[applicationName]) {
+        return selectedVersions[applicationName];
+    } else {
+        return null;
+    }
 }
 %>

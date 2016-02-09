@@ -32,9 +32,9 @@ ENGINE = InnoDB;
 -- Populate Data to `AppCloudDB`.`ApplicationType`
 -- -----------------------------------------------------
 INSERT INTO `ApplicationType` (`id`, `app_type_name`, `description`) VALUES
-(1, 'war', 'web app'),
-(2, 'mss', 'micro services'),
-(3, 'car', 'carbon app');
+(1, 'war', 'Allows you to create dynamic websites using Servlets and JSPs, instead of the static HTML webpages and JAX-RS/JAX-WS services.'),
+(2, 'mss', 'WSO2 Microservices Framework for Java (WSO2 MSF4J) offers the best option to create microservices in Java using annotation-based programming model.'),
+(3, 'car', 'A Carbon Application (C-App) is a collection of artifacts deployable on WSO2 ESB.');
 
 
 
@@ -202,10 +202,10 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationEvents` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `application_id` INT NOT NULL,
+  `application_id` VARCHAR(45) NOT NULL,
   `event_name` INT NOT NULL,
   `event_status` VARCHAR(45) NULL,
-  `timestamp` VARCHAR(45) NOT NULL,
+  `timestamp` TIMESTAMP NOT NULL,
   `event_desc` VARCHAR(1000) NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_ApplicationEvents_Application1`

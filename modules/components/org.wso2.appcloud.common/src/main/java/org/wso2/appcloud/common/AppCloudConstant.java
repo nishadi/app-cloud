@@ -28,14 +28,4 @@ public class AppCloudConstant {
     public static final String CONFIG_FILE_NAME = "appcloud.properties";
     public static final String SIGNED_JWT_AUTH_USERNAME = "Username";
 
-
-    public enum events {
-        ARTIFACT_UPLOAD, DOCKER_FILE_CREATE, DOCKER_IMAGE_BUILD, DOCKER_REGISTRY_PUSH, KUBE_DEPLOY
-    }
-
-    public enum eventStatus {
-        EVENT_SUCCEEDED, EVENT_PENDING, EVENT_FAILED
-    }
-
-
 }

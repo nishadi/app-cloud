@@ -45,5 +45,13 @@
             <EnableSingleLogout>true</EnableSingleLogout>
         </ServiceProvider>
 
+        <ServiceProvider>
+            <Issuer>monitoring</Issuer>
+            <AssertionConsumerService>https://localhost:9445/monitoring/acs.jag</AssertionConsumerService>
+            <SignResponse>true</SignResponse>
+            <SignAssertion>true</SignAssertion>
+            <EnableSingleLogout>true</EnableSingleLogout>
+        </ServiceProvider>
+
 	</ServiceProviders> 
 </SSOIdentityProviderConfig>

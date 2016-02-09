@@ -86,7 +86,10 @@ public class SQLQueryConstants {
             "Application.application_name";
 
     public static final String GET_APPLICATION_By_NAME_REVISION =
-            "SELECT * FROM Application WHERE application_name=? AND revision=? AND tenant_id=?";
+            "SELECT Application.*, ApplicationType.app_type_name, ApplicationRuntime.runtime_name  "+
+            "FROM Application INNER JOIN ApplicationType ON Application.application_type_id=ApplicationType.id " +
+            "INNER JOIN ApplicationRuntime ON Application.application_runtime_id=ApplicationRuntime.id "+
+            "WHERE application_name=? AND revision=? AND tenant_id=? ";
 
     public static final String GET_APPLICATION_ID =
             "SELECT id FROM Application WHERE application_name=? AND revision=? AND tenant_id=?";

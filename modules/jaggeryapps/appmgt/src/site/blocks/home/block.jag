@@ -27,18 +27,24 @@ jagg.block("home", {
         }
     },
     getOutputs:function (inputs) {
+        var log = new Log();
         var applicationModule = jagg.module("application");
         var revision = applicationModule.getAllRevisionsOfApplication(inputs.applicationName);
-        var applicationRevision=revision[0];
-        var applicationArray=[];
+        var applicationRevisions={};
         for (var x = 0; x < revision.length; x++) {
             var application = applicationModule.getApplicationByNameRevision(inputs.applicationName,revision[x]);
-            applicationArray.push(application);
+            var deploymentURL = applicationModule.getDeploymentURL(inputs.applicationName, revision[x], application.applicationType);
+            application["deploymentURL"] = deploymentURL;
+            applicationRevisions[revision[x]] = application;
+        }
+        var selectedRevision = applicationModule.getSelectedRevisionFromSession(inputs.applicationName);
+        if(!selectedRevision && revision.length > 0){
+            selectedRevision = revision[0];
         }
         return {
-            "application" : applicationArray,
+            "applicationRevisions" : applicationRevisions,
             "revision" :revision,
-
+            "selectedRevision":selectedRevision
         };
     }
 
