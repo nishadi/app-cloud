@@ -17,41 +17,82 @@
  *  under the License.
  *
  */
+
+var selectedRevisionLogMap = {};
+var selectedRevisionReplicaList = [];
+var selectedReplica;
+var editor;
 $(document).ready(function () {
-
-    $('#view-log').click(function(){
-
-        jagg.post("../blocks/runtimeLogs/ajax/runtimeLogs.jag", {
-            action:"getSnapshotLogs",
-            applicationKey:applicationName,
-            selectedRevision:applicationRevision
-        },function (result) {
-            if(result) {
-                 var obj = jQuery.parseJSON(result);
-
-                 //Generate the tab pane
-                 var tabPane = "<div><ul class=\"nav nav-tabs\" role=\"tablist\">";
-                 for (var key in obj) {
-                     if (obj.hasOwnProperty(key)) {
-                         tabPane += "<li role=\"presentation\"><a href=\"#" + key +"\"" +"aria-controls=" + key + " role=\"tab\" data-toggle=\"tab\">" + key + "</a></li>";
-                     }
-                 }
-                 tabPane += "</ul><div class=\"tab-content\">";
-
-                 for (var key in obj) {
-                     if (obj.hasOwnProperty(key)) {
-                         tabPane += "<div role=\"tabpanel\" class=\"tab-pane\" id=" + key + ">" + obj[key] + "</div>";
-                     }
-                 }
-                 tabPane += "</div></div>";
-
-                 $('#view-logs-content').html(tabPane);
-                 $('.log-container').show();
-            } else {
-                jagg.message({content: "No logs available for version" + selectedVersion + " in stage " + selectedStage + " .", type: 'error', id:'view_log'});
-            }
-        },function (jqXHR, textStatus, errorThrown) {
-            jagg.message({content: "Error occurred while loading the logs.", type: 'error', id:'view_log'});
-        });
+    editor = CodeMirror.fromTextArea(document.getElementById("build-logs"), {
+        styleActiveLine: true,
+        lineNumbers: true,
+        readOnly: true,
+        searchonly: true,
+        lineWrapping: true,
+        theme:'icecoder'
     });
+    initData(selectedRevision);
 });
+
+function regerateReplicasList(selectedRevisionReplicaList) {
+    $('#replicas').empty();
+    for (var i = 0; i < selectedRevisionReplicaList.length; i++) {
+        var $option = $('<option value="' + selectedRevisionReplicaList[i] + '">' + selectedRevisionReplicaList[i] + '</option>');
+        if (i == 0) {
+            selectedReplica = selectedRevisionReplicaList[i];
+            $option.attr('selected', 'selected');
+        }
+        $('#replicas').append($option);
+    }
+}
+
+function setLogArea(logVal){
+    $('#build-logs').val(logVal);
+    editor.setValue(logVal);
+    $('.log-search').focus();
+}
+
+function initData(selectedRevision){
+    $('#replicas').empty();
+    setLogArea("Loading...");
+    jagg.post("../blocks/runtimeLogs/ajax/runtimeLogs.jag", {
+        action:"getSnapshotLogs",
+        applicationKey:applicationName,
+        selectedRevision:selectedRevision
+    },function (result) {
+        initelements();
+        selectedRevisionLogMap = jQuery.parseJSON(result);
+        selectedRevisionReplicaList = Object.keys(selectedRevisionLogMap);
+        regerateReplicasList(selectedRevisionReplicaList);
+        setLogArea(selectedRevisionLogMap[selectedRevisionReplicaList[0]]);
+    },function (jqXHR, textStatus, errorThrown) {
+        $('#revision').prop("disabled", false);
+        jagg.message({content: "Error occurred while loading the logs.", type: 'error', id:'view_log'});
+    });
+}
+
+function initelements(){
+    //Url text loaded from the span element
+    var urlText = $('.version-url a span').text();
+
+    //Maximum character limit is 90. further than that the text would not show and the title would!
+    if(urlText.length > 90){
+        $('.version-url a').prop('title',urlText).find('span').text(urlText);
+    }else{
+        $('.version-url a span').text(urlText);
+    }
+
+    var revisionElement = $('#revision');
+    revisionElement.prop("disabled", false);
+
+    revisionElement.on('change', function (e) {
+        selectedRevision = this.value;
+        $(this).prop("disabled", true);
+        initData(selectedRevision);
+    });
+
+    $('#replicas').on('change', function (e) {
+        selectedReplica = this.value;
+        setLogArea(selectedRevisionLogMap[selectedReplica]);
+    });
+}

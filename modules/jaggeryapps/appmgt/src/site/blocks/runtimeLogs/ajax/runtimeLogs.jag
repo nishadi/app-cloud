@@ -34,32 +34,19 @@ include("/jagg/constants.jag");
 
     if (action == "getSnapshotLogs") {
 
-        var applicationKey = request.getParameter("applicationKey");
+        var applicationName = request.getParameter("applicationKey");
         var selectedRevision = request.getParameter("selectedRevision");
-
-        log.info("Application : " + applicationKey + ", Revision : " + selectedRevision);
-
         var mod = jagg.module("runtimeLogs");
-        var result = mod.getRuntimeLogs(applicationKey, selectedRevision, "war");
-
-        var logMap = {};
-        if (result instanceof Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentLogs){
-            var map = result.getDeploymentLogs();
-            var iterator = map.entrySet().iterator();
-            while (iterator.hasNext()) {
-               var entry = iterator.next();
-               logMap[entry.getKey()] = entry.getValue();
-            }
-            response.error = false;
-            response.contentType = 'application/txt';
+        try {
+            var logMap = mod.getFormattedRuntimeLogs(applicationName, selectedRevision, "");
             print(logMap);
-        } else {
-            log.error("Error while calling mod.getRuntimeLogs");
-            response.error = true;
-            response.message = "Error while calling mod.getRuntimeLogs";
-            print(response);
+        } catch(e) {
+            var msg = "Error while getting deployment logs";
+            log.error(e);
+            log.error(msg+" for application: "+applicationName+ " revision: "+applicationName);
+            response.status = 400;
+            response.content = msg;
         }
-        //print(result);
     } else {
         log.error("No action specified");
     }

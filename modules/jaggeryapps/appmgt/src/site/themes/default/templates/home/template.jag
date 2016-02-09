@@ -67,7 +67,9 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 <a><i class="fa fa-tag"></i> Tags</a>
             </li>
             <li>
-                <a href="/appmgt/site/pages/runtimeLogs.jag"><i class="fa fa-hdd-o"></i>Runtime Logs</a>
+                <a href="/appmgt/site/pages/runtimeLogs.jag?applicationName=<%=applicationName%>&selectedRevision=<%=selectedRevision%>"><i class="fa
+                fa-hdd-o"></i>Runtime
+                Logs</a>
             </li>
         </ul>
     </div>
