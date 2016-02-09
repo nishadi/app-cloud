@@ -56,7 +56,10 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 
 INSERT INTO `ApplicationRuntime` (`id`, `runtime_name`, `repo_url`, `image_name`, `tag`) VALUES
-(1, 'tomcat', 'https://github.com/', 'tomcat', '7-jre7');
+(1, 'tomcat', 'https://github.com/', 'tomcat', '8.0'),
+(2, 'wso2as', 'https://github.com/', 'wso2as', '1.0'),
+(3, 'msf4j', 'https://github.com/', 'msf4j', '1.0'),
+(4, 'ubuntu', 'https://github.com/', 'ubuntu', 'latest');
 
 
 -- -----------------------------------------------------
@@ -180,7 +183,11 @@ ENGINE = InnoDB;
 -- Populate Data to `AppCloudDB`.`ApplicationTypeRuntime`
 -- -----------------------------------------------------
 INSERT INTO `ApplicationTypeRuntime` (`application_type_id`, `application_runtime_id`) VALUES
-(1, 1);
+(1, 1),
+(1, 2),
+(2, 3),
+(2, 4)
+(3, 2);
 
 
 -- -----------------------------------------------------

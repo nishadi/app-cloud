@@ -25,6 +25,9 @@ import io.fabric8.docker.dsl.OutputHandle;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.appcloud.common.AppCloudException;
+import org.wso2.appcloud.core.dao.ApplicationDAO;
+import org.wso2.appcloud.core.dto.ApplicationRuntime;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,10 +59,15 @@ public class DockerOpClient {
         dockerClient = new DefaultDockerClient(config);
     }
 
-    public void createDockerFile(String appType, String artifactName, String dockerFilePath) throws IOException {
+    public void createDockerFile(String appType, String artifactName, String dockerFilePath)
+            throws IOException, AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        ApplicationRuntime applicationRuntime = applicationDAO.getRuntimeForAppType(appType);
+
         String dockerRegistryUrl = DockerUtil.getDockerRegistryUrl();
-        String dockerBaseImageName = DockerUtil.getBaseImageName(appType);
-        String dockerBaseImageVersion = DockerUtil.getBaseImageVersion(appType);
+        String dockerBaseImageName = applicationRuntime.getImageName();
+        String dockerBaseImageVersion = applicationRuntime.getTag();
         String baseImangeConfig = DockerOpClientConstants.DOCKER_COMMAND_FROM + " " + dockerRegistryUrl + "/" +
                 dockerBaseImageName + ":" + dockerBaseImageVersion + "\r\n";
         List<String> dockerFileConfigs = new ArrayList<String>();

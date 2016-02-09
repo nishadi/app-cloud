@@ -22,42 +22,6 @@ public class DockerUtil {
         return DockerOpClientConstants.DEFAULT_DOCKER_REG_URL;
     }
 
-    public static String getBaseImageName(String appType) {
-        String baseImageName;
-        switch (appType) {
-            case "war":
-                baseImageName = DockerOpClientConstants.DOCKER_BASE_IMAGE_TOMCAT;
-                break;
-            case "car":
-                baseImageName = DockerOpClientConstants.DOCKER_BASE_IMAGE_WSO2AS;
-                break;
-            case "msf4j":
-                baseImageName = DockerOpClientConstants.DOCKER_BASE_IMAGE_MSF4J;
-                break;
-            default:
-                baseImageName = DockerOpClientConstants.DOCKER_BASE_IMAGE_UBUNTU;
-                break;
-        }
-        return baseImageName;
-    }
-
-    public static String getBaseImageVersion(String appType){
-        String baseImageVersion;
-        switch (appType) {
-            case "war":
-                baseImageVersion = DockerOpClientConstants.DOCKER_TOMCAT_VERSION;
-                break;
-            case "car":
-                baseImageVersion = DockerOpClientConstants.DOCKER_MSF4J_VERSION;
-                break;
-            default:
-                baseImageVersion = DockerOpClientConstants.DOCKER_UBUNTU_VERSION;
-                break;
-        }
-
-        return baseImageVersion;
-    }
-
     public static String getDeploymentLocation(String appType) {
         return DockerOpClientConstants.DOCKER_WAR_LOCATION;
     }

@@ -133,6 +133,10 @@ public class SQLQueryConstants {
             "SELECT MAX(id), event_name, event_status, timestamp, event_desc "
             + "FROM ApplicationEvents WHERE application_id=? GROUP BY event_name";
 
+    public static final String GET_RUNTIME_FOR_APP_TYPE =
+            "SELECT * FROM ApplicationRuntime WHERE id = (SELECT application_runtime_id FROM ApplicationTypeRuntime " +
+            "WHERE application_type_id=(SELECT id FROM ApplicationType WHERE app_type_name=?))";
+
 
     /*Update Queries*/
 
