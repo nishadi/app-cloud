@@ -161,23 +161,18 @@ public class ApplicationManager {
         ApplicationDAO applicationDAO = new ApplicationDAO();
 
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-
-        Application application;
         try {
-
-            application = applicationDAO.getApplicationByNameRevision(applicationName, revision, tenantId);
-            application.setEndpoints(applicationDAO.getAllEndpointsOfApplication(applicationName, revision, tenantId));
-            application.setRuntimeProperties(applicationDAO.getAllRuntimePropertiesOfApplication(applicationName, revision, tenantId));
-            application.setLabels(applicationDAO.getAllLabelsOfApplication(applicationName, revision, tenantId));
-
+            Application application = applicationDAO.getApplicationByNameRevision(applicationName, revision, tenantId);
+            int applicationId = application.getApplicationId();
+            application.setEndpoints(applicationDAO.getAllEndpointsOfApplication(applicationId));
+            application.setRuntimeProperties(applicationDAO.getAllRuntimePropertiesOfApplication(applicationId));
+            application.setLabels(applicationDAO.getAllLabelsOfApplication(applicationId));
+            return application;
         } catch (AppCloudException e) {
             String msg = "Error while getting the application detail for application : " + applicationName + " revision :" +
                          " " + revision + " in tenant : " + tenantId;
             throw new AppCloudException(msg, e);
         }
-
-
-        return application;
     }
 
 

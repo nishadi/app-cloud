@@ -101,13 +101,22 @@ public class SQLQueryConstants {
             "SELECT * FROM EndpointURL WHERE application_id=(SELECT id FROM Application WHERE application_name=? AND " +
             "revision=? AND tenant_id=?)";
 
+    public static final String GET_ALL_ENDPOINT_URL_OF_APPLICATION_BY_ID =
+            "SELECT * FROM EndpointURL WHERE application_id=?";
+
     public static final String GET_ALL_LABELS_OF_APPLICATION =
             "SELECT * FROM Label WHERE application_id=(SELECT id FROM Application WHERE application_name=? AND revision=?" +
             " AND tenant_id=?)";
 
+    public static final String GET_ALL_LABELS_OF_APPLICATION_BY_ID =
+            "SELECT * FROM Label WHERE application_id=?";
+
     public static final String GET_ALL_RUNTIME_PROPERTIES_OF_APPLICATION =
             "SELECT * FROM RuntimeProperties WHERE application_id=(SELECT id FROM Application WHERE application_name=? " +
             "AND revision=? AND tenant_id=?)";
+
+    public static final String GET_ALL_RUNTIME_PROPERTIES_OF_APPLICATION_BY_ID =
+            "SELECT * FROM RuntimeProperties WHERE application_id=?";
 
     public static final String GET_ALL_APP_TYPES = "SELECT * FROM ApplicationType";
 

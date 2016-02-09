@@ -22,11 +22,11 @@ include("/jagg/jagg.jag");
 jagg.template("home", function(inputs, outputs, jagg) {
     var applicationRevisions = outputs.applicationRevisions;
     var selectedRevision = outputs.selectedRevision;
+    var selectedApplicationRevision = applicationRevisions[selectedRevision];
     var revisions = outputs.revision;
     var applicationName = request.getParameter("applicationName");
     var defaultAppIconUrl = jagg.getAbsoluteUrl("/site/themes/default/images/sample-app-image.png");
-    var log = new Log();
-    log.info(defaultAppIconUrl);
+    var appCreationPageBaseUrl = jagg.getAbsoluteUrl("/site/pages/application.jag");
 %>
 
 <script>
@@ -36,8 +36,20 @@ jagg.template("home", function(inputs, outputs, jagg) {
     var applicationRevisions = jQuery.parseJSON('<%=applicationRevisions%>');
     var selectedRevision = "<%=selectedRevision%>";
     var revisions = jQuery.parseJSON('<%=revisions%>');
+    var appCreationPageBaseUrl = "<%=appCreationPageBaseUrl%>";
+    var selectedApplicationRevision =  jQuery.parseJSON('<%=selectedApplicationRevision%>');
 
 </script>
+
+    <!-- BOF App factory menu actionbar -->
+    <div class="action-bar">
+        <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action"  title="Back to Application listing">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-left-arrow fw-stack-1x"></i>
+                </span> Back to Listing
+        </a>
+    </div><!-- EOF App factory menu actionbar-->
 
     <div class="container-fluid app-content-section">
 
@@ -48,9 +60,9 @@ jagg.template("home", function(inputs, outputs, jagg) {
                   <span><i class="fa fa-pencil"></i></span>
               </div>
               <div class="app-desc">
-                <h2><%=applicationRevisions[selectedRevision].applicationName%></h2>
-                  <h4 class="app-run-time">Runtime: <span id="runtime"><%=applicationRevisions[selectedRevision].runtimeName%></span></h4>
-                <p id="app-description"><%=(applicationRevisions[selectedRevision].description)?applicationRevisions[selectedRevision].description:''%></p>
+                <h2><%=selectedApplicationRevision.applicationName%></h2>
+                  <h4 class="app-run-time">Runtime: <span id="runtime"><%=selectedApplicationRevision.runtimeName%></span></h4>
+                <p id="app-description"><%=(selectedApplicationRevision.description)?selectedApplicationRevision.description:''%></p>
                 <!--div class="app-preview-action-bar">
                     <div class="sec prod-url"><a href="#" >http://javatest.djcompany.wso2app.com</a>
                     <a href="#"><i class="fw fw-settings"></i></a>
@@ -78,22 +90,24 @@ jagg.template("home", function(inputs, outputs, jagg) {
                               </ul>
                           </div>
                           <div id="version-url-link" class="version-url">
-                          <a href="#"><span>URL:<%=applicationRevisions[selectedRevision].deploymentURL%></span></a>
+                          <a href="#"><span>URL:<%=selectedApplicationRevision.deploymentURL%></span></a>
                           </div>
                           <div class="sec">
                               <button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"
-                              url="<%=applicationRevisions[selectedRevision].deploymentURL%>">Launch App</button>
+                              url="<%=selectedApplicationRevision.deploymentURL%>">Launch App</button>
                               <!-- edit code button -->
-                              <div class="btn-group ctrl-edit-button btn-edit-code">
+                              <!--div class="btn-group ctrl-edit-button btn-edit-code">
                                   <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Stop</a>
-                              </div>
+                              </div-->
                               <div class="btn-group ctrl-edit-button btn-edit-code">
                                     <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="runtimeLogs.jag?applicationName=<%=applicationName%>&applicationRevision=<%=selectedRevision%>">View Logs</a>
                               </div>
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-12 col-lg-3">
-                          <a>
+                          <a id="upload-revision"
+                          href="<%=appCreationPageBaseUrl%>?appTypeName=<%=selectedApplicationRevision
+                                      .applicationType%>&applicationName=<%=applicationName%>">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
                                     <i class="fw fw-ring fw-stack-2x"></i>
@@ -114,7 +128,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                 </tr>
                                 <tr>
                                 <td>Server 1</td>
-                                <td id="tableStatus"><%=applicationRevisions[selectedRevision].status%></td>
+                                <td id="tableStatus"><%=selectedApplicationRevision.status%></td>
                                 </tr>
                               </table>
                       </div>
@@ -149,7 +163,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                     <i class="fa fa-wrench fa-5x"></i>
                   </div>
                   <div class="block-number pull-right">
-                    12
+                   <span id="runtimePropCount"><%=selectedApplicationRevision.runtimeProperties.length.toString()%></span>
                   </div>
                   <div class="clearfix"></div>
                   <a href="team_invite.html">
@@ -167,7 +181,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                     <i class="fa fa-tags fa-5x"></i>
                   </div>
                   <div class="block-number pull-right">
-                    04
+                    <span id="labelCount"><%=selectedApplicationRevision.labels.length.toString()%></span>
                   </div>
                   <div class="clearfix"></div>
                   <a href="database_new.html">
