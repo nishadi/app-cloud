@@ -45,9 +45,11 @@ function executeQuery(sql, params) {
         result = db.query.apply(db, params);
 
     } catch (e){
+
         log.error("Error while executing database query");
         log.error(e);
         throw e;
+
     } finally {
         db.close();
     }

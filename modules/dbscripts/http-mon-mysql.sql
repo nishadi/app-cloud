@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS LANGUAGE
   webappName            VARCHAR(100) NOT NULL,
   serverName            VARCHAR(45),
   averageRequestCount   BIGINT,
+  tenantId              INT,
   LANGUAGE              VARCHAR(6),
   TIME VARCHAR(100)
 );
@@ -58,6 +59,7 @@ CREATE TABLE IF NOT EXISTS USER_AGENT_FAMILY
   webappName            VARCHAR(100) NOT NULL,
   serverName            VARCHAR(45),
   averageRequestCount   BIGINT,
+  tenantId              INT,
   userAgentFamily       VARCHAR(15),
   TIME VARCHAR(100)
 );
@@ -67,6 +69,7 @@ CREATE TABLE IF NOT EXISTS OPERATING_SYSTEM
   webappName            VARCHAR(100) NOT NULL,
   serverName            VARCHAR(45),
   averageRequestCount   BIGINT,
+  tenantId              INT,
   operatingSystem       VARCHAR(15),
   TIME VARCHAR(100)
 );
@@ -76,6 +79,7 @@ CREATE TABLE IF NOT EXISTS DEVICE_TYPE
   webappName            VARCHAR(100) NOT NULL,
   serverName            VARCHAR(45),
   averageRequestCount   BIGINT,
+  tenantId              INT,
   deviceCategory        VARCHAR(100),
   TIME VARCHAR(100)
 );
@@ -85,6 +89,7 @@ CREATE TABLE IF NOT EXISTS REFERRER
   webappName            VARCHAR(100) NOT NULL,
   serverName            VARCHAR(45),
   averageRequestCount   BIGINT,
+  tenantId              INT,
   referrer              VARCHAR(200),
   TIME VARCHAR(100)
 );
@@ -94,6 +99,7 @@ CREATE TABLE IF NOT EXISTS COUNTRY
   webappName            VARCHAR(100) NOT NULL,
   serverName            VARCHAR(45),
   averageRequestCount   BIGINT,
+  tenantId              INT,
   country               VARCHAR(200),
   TIME VARCHAR(100)
 );
