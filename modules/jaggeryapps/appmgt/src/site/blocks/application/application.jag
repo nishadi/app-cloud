@@ -29,10 +29,8 @@ var applicationModule = jagg.module("application");
         var uploadedArtifact = request.getFile("fileUpload");
         var applicationName = request.getParameter("applicationName");
         var appTypeName = request.getParameter("appTypeName");
-
-        applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName);
-        response.status = 200;
-        response.message = "Artifact is successfully uploaded!";
+        var applicationRevision = request.getParameter("applicationRevision");
+        applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName, applicationRevision);
     }else if(action == "createApplication"){
         var applicationDescription = request.getParameter("applicationDescription");
         var replicas = request.getParameter("replicas");
@@ -41,6 +39,7 @@ var applicationModule = jagg.module("application");
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
         var appTypeName = request.getParameter("appTypeName");
+        var uploadedFileName = request.getParameter("uploadedFileName");
 
         var parsedRuntimeProperties;
         if(runtimeProperties != "None" || runtimeProperties != null ){
@@ -48,7 +47,7 @@ var applicationModule = jagg.module("application");
         }
 
         applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
-                runtimeId, appTypeName, JSON.stringify(parsedRuntimeProperties));
+                runtimeId, appTypeName, JSON.stringify(parsedRuntimeProperties), uploadedFileName);
         response.status = 200;
         response.message = "Artifact is successfully uploaded!";
     }else if (action == "getApplicationCreationEvents"){

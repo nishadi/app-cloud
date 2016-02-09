@@ -72,8 +72,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 var formData = new FormData($(this)[0]);
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
                 formData.append('action', 'createApplication');
-
                 formData.append('appTypeName', appTypeName);
+                formData.append('uploadedFileName', $("#uploadedFileName").val())
                 $.ajax({
                         url: $(this).attr("action"),
                         type: 'POST',
@@ -95,12 +95,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
             $('#fileupload').fileupload({
 
                 submit: function(e, data){
-                      data.url = "<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")
-    %>",
+                      data.url = "<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")%>",
                           data.dataType = 'json',
                           data.formData = {action:'uploadExistingArchive',
                                 appTypeName:appTypeName,
-                                applicationName:$("#applicationName").val()}
+                                applicationName:$("#applicationName").val(),
+                                applicationRevision:$("#applicationRevision").val()
+                                }
                     },
                     progressall: function (e, data) {
                         var progress = parseInt(data.loaded / data.total * 100, 10);
@@ -187,7 +188,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             <div class="form-group">
             <label for="application-revision">Application Revision: </label>
-            <input name="applicationRevision" type="text" class="form-control" placeholder="Enter Application revision" />
+            <input id="applicationRevision" name="applicationRevision" type="text" class="form-control" placeholder="Enter Application revision" />
             </div>
 
             <div class="form-group">
