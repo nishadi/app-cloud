@@ -24,6 +24,104 @@ jagg.template("index", function(inputs, outputs, jagg) {
     var log = new Log("index");
 
     %>
+
+    <script type="text/javascript" xmlns="http://www.w3.org/1999/html" charset="utf-8">
+        var applicationList = <%=applications%>
+        $(document).ready(function (){
+
+            for (var i = 0; i < applicationList.length; i++){
+                addTableRow(applicationList[i]);
+            }
+
+            applicationList.sort(NameComparator);
+
+            $("#search-apps").bind("keyup", function () {
+            if ($(this).val() === null || $(this).val() === undefined || $(this).val().length === 0) {
+                init();
+            } else {
+                var finder = $(this).val();
+
+                var typingPattern = new RegExp($(this).val().replace(/^\s+|\s+$/g, ''), "gi");
+                addTableColumnHeaders();
+                jQuery.grep(applicationList, function (element, index) {
+
+                    if (element.applicationName.match(typingPattern) != null) {
+                        var matcher = element.applicationName.match(typingPattern);
+                        if (finder.length > 2) {
+
+                            var pre = element.applicationName.substr(0, element.applicationName.indexOf(matcher));
+                            var highlight = element.applicationName.substr(element.applicationName.indexOf(matcher), (finder.length));
+                            var rest = element.applicationName.substr(element.applicationName.indexOf(matcher) + (finder.length), element.applicationName.length);
+
+                            element.highlightedName = pre + "^" + highlight + "~" + rest;
+                        }
+                        addTableRow(element);
+                    }
+                });
+
+                if ($("#item_list").children().length <= 1) {
+	                $("#item_list").append($('<div class="col-centered col-md-4 "><div class="cloud-new-content"> ' +
+	                 '<h3>Your search "'+finder+'" did not match any applications.</h3></div></div>'));
+		        }
+            }
+            });
+        });
+
+
+    function addTableRow(application) {
+
+    removeTableRow(application.applicationName);
+    // This logic is specific to filter
+    var displayName = "";
+
+    if (application.highlightedName === undefined || application.highlightedName === "") {
+        displayName = application.applicationName;
+    } else {        // if this application is in search results
+        displayName = application.highlightedName;
+        // mark the search keyword in yellow in the app name
+        displayName = displayName.replace("^", "<b style=\"background-color:yellow;\">").replace("~", "</b>");
+        application.highlightedName = "";
+    }
+
+        var theLi = '<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2" id="' + application.applicationName + '">' +
+                        '<a href="/appmgt/site/pages/home.jag?applicationName=' + application.applicationName + '">'+
+                            '<div class="cloud-app-listing app-color-one">'+
+                                '<i class="fw fw-java fw-2x" data-toggle="tooltip" data-placement="right" title="Java Application"></i>' +
+                                    '<div class="app-icon">' +
+                                        '<img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('/images/dark-app-iconx256.jpg'))%>" class="square-element">' +
+                                    '</div>' +
+                                    '<div class="app-name" >' + displayName + '</div>' +
+                            '</div>' +
+                        '</a>' +
+                    '</div>';
+
+        $("#item_list").append(theLi);
+    }
+
+    function NameComparator(a, b) {
+        return a.name.localeCompare(b.name);
+    }
+
+    function addTableColumnHeaders() {
+        $("#item_list").html("");
+	    var columnHeaderLi = '<div class="item item_header"></div>';
+	    $("#item_list").append(columnHeaderLi);
+    }
+
+    function init() {
+        $("#item_list").empty(); //clearing the item list before re-rendering
+	    for (var i = 0; i < applicationList.length; i++){
+                addTableRow(applicationList[i]);
+        }
+    }
+
+    function removeTableRow(appKey){
+	    var theLi = $('#'+appKey);
+        theLi.remove();
+    }
+
+    </script>
+
     <div class="action-bar">
         <a href="/appmgt/site/pages/select-apptype.jag" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
                 <span class="fw-stack fw-lg btn-action-ico">
@@ -45,29 +143,12 @@ jagg.template("index", function(inputs, outputs, jagg) {
                 <i class="fa fa-2x fa-search" ></i>
             </div>
         </div>
-    </div>
-    <div class="row row-centered app-listing">
-    <%
-    if (applications.length > 0) {
-        for (var x = 0; x < applications.length; x++) {
-            %>
-            <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
-             <a href="/appmgt/site/pages/home.jag?applicationName=<%=applications[x].applicationName%>">
-                <div class="cloud-app-listing app-color-one">
-                    <i class="fw fw-java fw-2x" data-toggle="tooltip" data-placement="right" title="Java Application"></i>
-                    <div class="app-icon">
-                    <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("/images/dark-app-iconx256.jpg"))%>" class="square-element">
-                    </div>
-                    <div class="app-name" ><%=applications[x].applicationName%></div>
-                </div>
-             </a>
-           </div>
-        <%
-        }
-    }
-    %>
-    </div>
 
+        <div class="row row-centered app-listing">
+            <!-- BOF listing block -->
+            <div class="" id="item_list"></div>
+        </div>
+    </div>
 
 <%
 }); %>
