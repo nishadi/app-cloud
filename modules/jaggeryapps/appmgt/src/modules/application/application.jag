@@ -28,6 +28,7 @@ var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runti
 var EventsManager = Packages.org.wso2.appcloud.core.EventsManager;
 var Event = Packages.org.wso2.appcloud.core.dto.Event;
 var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
+var RuntimeProperty = Packages.org.wso2.appcloud.core.dto.RuntimeProperty;
 
 /**
  * Add a application object
@@ -39,25 +40,24 @@ var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
  * @param uploadedArtifact the uploaded artifact file
  * @param runtimeId runtime id of the application
  */
-var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas,
-                                                                            uploadedArtifact, runtimeId, appTypeName, runtimeProperties) {
-    uploadedArtifact.move(ARTIFACT_UPLOAD_DIRECTORY + uploadedArtifact.getName());
-    var runtimeProperties = parse(runtimeProperties);
+var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas, runtimeId, appTypeName, runtimeProperties, uploadedFileName) {
     log.info("Started creating App => name: " + applicationName + " " +
             "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
-            "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " " + "runtimeProperties: "
-            + runtimeProperties
+            "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " "
     );
 
     //Create Docker file
     var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
     var dockerOpClient = new DockerOpClient("http://127.0.0.1:2375");
-    var dockerFilePath = ARTIFACT_DOCKER_FILE_DIRECTORY + "/" + DOCKER_FILE_NAME;
-    dockerOpClient.createDockerFile(appTypeName, uploadedArtifact.getName(), dockerFilePath);
+    var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+            + modManager.getTenantDomain() + "/" + applicationName + "/" + applicationRevision + "/";
+    var absFileUploadedPath = BASE_DIR_PATH + fileUploadPath;
+    var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
+    dockerOpClient.createDockerFile(appTypeName, uploadedFileName, dockerFilePath);
     //Build Docker image
     var dockerRegTenantSpace = "super";
     var tenantDockerRegistryUrl = DOCKER_REGISTRY_URL + "/" + dockerRegTenantSpace;
-    dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,ARTIFACT_DOCKER_FILE_DIRECTORY);
+    dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,absFileUploadedPath);
      //Push Docker image
     dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
 
@@ -72,6 +72,21 @@ var addApplication = function (applicationName, applicationRevision, application
     application.setNumberOfReplicas(replicas);
     application.setRuntimeId(runtimeId);
     application.setApplicationType(appTypeName);
+
+
+    if (runtimeProperties != null || runtimeProperties != "None") {
+        var parsedRuntimeProperties = parse(runtimeProperties);
+        if(Object.keys(parsedRuntimeProperties[0]).length > 0) {
+            var runtimePropertyList = new java.util.ArrayList();
+            for (var i = 0; i < parsedRuntimeProperties.length; i++) {
+                var runtimeProperty = new RuntimeProperty();
+                runtimeProperty.setPropertyName(parsedRuntimeProperties[i].key);
+                runtimeProperty.setPropertyValue(parsedRuntimeProperties[i].value);
+                runtimePropertyList.add(runtimeProperty);
+            }
+            application.setRuntimeProperties(runtimePropertyList);
+        }
+    }
 
     ApplicationManager.addApplication(application);
 
@@ -393,4 +408,38 @@ var getApplicationCreationEvents = function(applicationName, applicationRevision
     var events = eventsManager.getEventsOfApplication(applicationName, applicationRevision);
 
 }
+
+var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationName, revision){
+    createDestinationDirsForUploadedApps(applicationName, revision);
+    uploadedFileName = uploadedArtifact.getName();
+    var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+            + modManager.getTenantDomain() + "/" + applicationName + "/" + revision + "/";
+    uploadApplicationTmpPath = fileUploadPath + uploadedFileName;
+    uploadedArtifact.move(uploadApplicationTmpPath);
+}
+
+var createDestinationDirsForUploadedApps = function (applicationName, revision) {
+
+    var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH);
+    if (!destinationDir.isExists()) {
+        destinationDir.mkdir();
+    }
+    var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH + "/" + modManager.getTenantDomain());
+    if (!destinationDir.isExists()) {
+        destinationDir.mkdir();
+
+    }
+    var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+            + modManager.getTenantDomain() + "/" + applicationName);
+    if (!destinationDir.isExists()) {
+        destinationDir.mkdir();
+
+    }
+    var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+            + modManager.getTenantDomain() + "/" + applicationName + "/" + revision);
+    if (!destinationDir.isExists()) {
+        destinationDir.mkdir();
+    }
+}
+
 %>

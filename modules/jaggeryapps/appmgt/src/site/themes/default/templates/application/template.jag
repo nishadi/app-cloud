@@ -62,21 +62,25 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 $('.runtime_property').each(function(){
                     var runtimeProperty = {};
                     $(this).children('input').each(function(){
-                      runtimeProperty[this.name] = this.value;
+                        if(this.value != ""){
+                            runtimeProperty[this.name] = this.value;
+                        }
                     });
                     runtimeProperties.push(runtimeProperty);
                 });
 
                 var formData = new FormData($(this)[0]);
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
-
+                formData.append('action', 'createApplication');
                 formData.append('appTypeName', appTypeName);
+                formData.append('uploadedFileName', $("#uploadedFileName").val())
                 $.ajax({
                         url: $(this).attr("action"),
                         type: 'POST',
                         data: formData,
                         async: false,
                         success: function (data) {
+                            alert(data)
                         },
                         cache: false,
                         contentType: false,
@@ -84,61 +88,68 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     });
 
                 return false;
+
+
             });
-        });
 
-        $('#fileupload').fileupload({
+            $('#fileupload').fileupload({
 
-            progressall: function (e, data) {
-                var progress = parseInt(data.loaded / data.total * 100, 10);
-                $('#progress .progress-bar').css(
-                    'width',
-                    progress + '%'
-                );
-            },
+                submit: function(e, data){
+                      data.url = "<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")%>",
+                          data.dataType = 'json',
+                          data.formData = {action:'uploadExistingArchive',
+                                appTypeName:appTypeName,
+                                applicationName:$("#applicationName").val(),
+                                applicationRevision:$("#applicationRevision").val()
+                                }
+                    },
+                    progressall: function (e, data) {
+                        var progress = parseInt(data.loaded / data.total * 100, 10);
+                        $('#progress .progress-bar').css(
+                            'width',
+                            progress + '%'
+                        );
+                    },
 
-            change:function (e, data) {
-                 $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
+                    change:function (e, data) {
+                         $.each(data.files, function (index, file) {
+                            $("#uploadedFileName").val(file.name);
+                        });
+                        $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
+                    }
 
-            },
+            });
 
-            done: function (e, data) {
-               $.each(data.files, function (index, file) {
-                    $("#uploadedFileName").val(file.name);
+            function drawProgressWindow(){
+                $("#app_creation_progress_modal").show();
+
+                setInterval(pollEvents, 5000);
+            }
+
+            function executeAsync(func) {
+                setTimeout(func, 0);
+            }
+
+            function pollEvents(){
+                jagg.post("../blocks/application/application.jag", {
+                    action:"getApplicationCreationEvents",
+                    applicationName:$("#applicationName").val(),
+                    applicationRevision:$("#applicationRevision").val(),
+
+                },function (result) {
+                    alert(result);
                 });
             }
-        });
 
-        function drawProgressWindow(){
-            $("#app_creation_progress_modal").show();
-
-            setInterval(pollEvents, 5000);
-        }
-
-        function executeAsync(func) {
-            setTimeout(func, 0);
-        }
-
-        function pollEvents(){
-            jagg.post("../blocks/application/application.jag", {
-                action:"getApplicationCreationEvents",
-                applicationName:$("#applicationName").val(),
-                applicationRevision:$("#applicationRevision").val(),
-
-            },function (result) {
-                alert(result);
+            $("#model_close_button_id").click(function(){
+                $("#app_creation_progress_modal").hide();
             });
-        }
-
-        $("#model_close_button_id").click(function(){
-            $("#app_creation_progress_modal").hide();
         });
+     </script>
 
- </script>
-
-<!-- BOF App factory menu actionbar -->
-    <div class="action-bar">
-        <a href="<%=jagg.getAbsoluteUrl("/site/pages/select-apptype.jag")%>" class="btn-action">
+    <!-- BOF App factory menu actionbar -->
+        <div class="action-bar">
+            <a href="<%=jagg.getAbsoluteUrl("/site/pages/select-apptype.jag")%>" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
                     <i class="fw fw-ring fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
@@ -170,19 +181,14 @@ jagg.template("application", function (inputs, outputs, jagg) {
             <div class="col-md-5 forms">
 
       <form id="application-details" method="post" action='<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")%>' enctype="multipart/form-data">
-
-            <div class="form-group">
-                <input type="hidden" name="action" value="deployApplication">
-            </div>
-
             <div class="form-group">
             <label for="application-name">Application Name: </label>
-            <input name="applicationName" type="text" class="form-control" placeholder="Enter Application name" id="applicationName" />
+            <input id="applicationName" name="applicationName" type="text" class="form-control" placeholder="Enter Application name" />
             </div>
 
             <div class="form-group">
             <label for="application-revision">Application Revision: </label>
-            <input name="applicationRevision" type="text" class="form-control" placeholder="Enter Application revision" id="applicationRevision"/>
+            <input id="applicationRevision" name="applicationRevision" type="text" class="form-control" placeholder="Enter Application revision" />
             </div>
 
             <div class="form-group">
