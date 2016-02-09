@@ -32,9 +32,9 @@ ENGINE = InnoDB;
 -- Populate Data to `AppCloudDB`.`ApplicationType`
 -- -----------------------------------------------------
 INSERT INTO `ApplicationType` (`id`, `app_type_name`, `description`) VALUES
-(1, 'war', 'web app'),
-(2, 'mss', 'micro services'),
-(3, 'car', 'carbon app');
+(1, 'war', 'Allows you to create dynamic websites using Servlets and JSPs, instead of the static HTML webpages and JAX-RS/JAX-WS services.'),
+(2, 'mss', 'WSO2 Microservices Framework for Java (WSO2 MSF4J) offers the best option to create microservices in Java using annotation-based programming model.'),
+(3, 'car', 'A Carbon Application (C-App) is a collection of artifacts deployable on WSO2 ESB.');
 
 
 
