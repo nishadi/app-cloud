@@ -36,12 +36,11 @@ include("/jagg/constants.jag");
 
         var applicationKey = request.getParameter("applicationKey");
         var selectedRevision = request.getParameter("selectedRevision");
-        var applicationType = request.getParameter("applicationType");
 
         log.info("Application : " + applicationKey + ", Revision : " + selectedRevision);
 
         var mod = jagg.module("runtimeLogs");
-        var result = mod.getRuntimeLogs(applicationKey, selectedRevision, applicationType);
+        var result = mod.getRuntimeLogs(applicationKey, selectedRevision, "war");
 
         var logMap = {};
         if (result instanceof Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentLogs){

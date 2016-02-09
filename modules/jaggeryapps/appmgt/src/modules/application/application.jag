@@ -298,6 +298,7 @@ var getDeploymentURL = function (applicationName, applicationRevision, appTypeNa
     return baseURL + deploymentPath;
 }
 
+
 var putSelectedRevisionToSession = function(applicationName, currentRevision) {
     var selectedVersions = session.get("SELECTED_REVISIONS");
     if (!selectedVersions) {
@@ -314,5 +315,34 @@ var getSelectedRevisionFromSession = function(applicationName) {
     } else {
         return null;
     }
+}
+
+var getApplicationCreationEvents = function(applicationName, applicationRevision) {
+
+    var eventsManager = new EventsManager();
+    var eventsArray = [];
+
+    try {
+            var events = eventsManager.getEventsOfApplication(applicationName, applicationRevision);
+            for (var i = 0; i < events.length; i++) {
+                var event = events[i];
+                var eventObject = {};
+
+                eventObject.name = event.eventName;
+                eventObject.status = event.eventStatus;
+                eventObject.timestamp = event.timestamp;
+                eventObject.description = event.eventDescription;
+
+                eventsArray.push(eventObject);
+            }
+        } catch(e){
+            log.error("Error while getting the application creation event list");
+            log.error(e);
+            throw e;
+        }
+        return eventsArray;
+
+    var events = eventsManager.getEventsOfApplication(applicationName, applicationRevision);
+
 }
 %>

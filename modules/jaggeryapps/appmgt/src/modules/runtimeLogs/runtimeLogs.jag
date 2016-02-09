@@ -20,12 +20,13 @@
 include("/jagg/jagg.jag");
 
 var log = new Log("module/runtimeLogs/runtimeLogs.jag");
+var modManager = jagg.module("manager");
 
 var getRuntimeLogs = function (applicationKey, selectedRevision, applicationType) {
 
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
     var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
-    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(applicationKey, selectedRevision, applicationType, 5, "wso2.org");
+    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(applicationKey, selectedRevision, applicationType, modManager.getTenantId(), modManager.getTenantDomain());
     var kubService = new KubernetesRuntime(applicationCtx);
     var deploymentLog = kubService.getRuntimeLogs(null);
 

@@ -54,6 +54,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
 
             $('#application-details').submit(function(e){
+
+                //executeAsync(drawProgressWindow());
+
                 e.preventDefault();
                 var runtimeProperties = [];
                 $('.runtime_property').each(function(){
@@ -74,7 +77,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                         data: formData,
                         async: false,
                         success: function (data) {
-                            alert(data)
                         },
                         cache: false,
                         contentType: false,
@@ -82,39 +84,55 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     });
 
                 return false;
-
-
             });
-
-            $('#fileupload').fileupload({
-
-                progressall: function (e, data) {
-                    var progress = parseInt(data.loaded / data.total * 100, 10);
-                    $('#progress .progress-bar').css(
-                        'width',
-                        progress + '%'
-                    );
-                },
-
-                change:function (e, data) {
-                     $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
-
-                },
-
-                done: function (e, data) {
-                   $.each(data.files, function (index, file) {
-                        $("#uploadedFileName").val(file.name);
-                    });
-
-                }
-
-
-            });
-
-
         });
 
+        $('#fileupload').fileupload({
 
+            progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#progress .progress-bar').css(
+                    'width',
+                    progress + '%'
+                );
+            },
+
+            change:function (e, data) {
+                 $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
+
+            },
+
+            done: function (e, data) {
+               $.each(data.files, function (index, file) {
+                    $("#uploadedFileName").val(file.name);
+                });
+            }
+        });
+
+        function drawProgressWindow(){
+            $("#app_creation_progress_modal").show();
+
+            setInterval(pollEvents, 5000);
+        }
+
+        function executeAsync(func) {
+            setTimeout(func, 0);
+        }
+
+        function pollEvents(){
+            jagg.post("../blocks/application/application.jag", {
+                action:"getApplicationCreationEvents",
+                applicationName:$("#applicationName").val(),
+                applicationRevision:$("#applicationRevision").val(),
+
+            },function (result) {
+                alert(result);
+            });
+        }
+
+        $("#model_close_button_id").click(function(){
+            $("#app_creation_progress_modal").hide();
+        });
 
  </script>
 
@@ -152,14 +170,19 @@ jagg.template("application", function (inputs, outputs, jagg) {
             <div class="col-md-5 forms">
 
       <form id="application-details" method="post" action='<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")%>' enctype="multipart/form-data">
+
+            <div class="form-group">
+                <input type="hidden" name="action" value="deployApplication">
+            </div>
+
             <div class="form-group">
             <label for="application-name">Application Name: </label>
-            <input name="applicationName" type="text" class="form-control" placeholder="Enter Application name" />
+            <input name="applicationName" type="text" class="form-control" placeholder="Enter Application name" id="applicationName" />
             </div>
 
             <div class="form-group">
             <label for="application-revision">Application Revision: </label>
-            <input name="applicationRevision" type="text" class="form-control" placeholder="Enter Application revision" />
+            <input name="applicationRevision" type="text" class="form-control" placeholder="Enter Application revision" id="applicationRevision"/>
             </div>
 
             <div class="form-group">
@@ -231,5 +254,40 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/vendor/jquery.ui.widget.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.fileupload.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.iframe-transport.js'))%>"></script>
+
+    <div id="app_creation_progress_modal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button id="model_close_button_id" type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="modal-title">Application Creation Progress</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-xs-12 col-md-12 section-title">
+                                <table class="table" style="width:100%; color:black">
+                                  <tr class="success">
+                                    <td>File uploaded</td>
+                                    <td>Done</td>
+                                  </tr>
+                                  <tr class="danger">
+                                    <td>Image Created</td>
+                                    <td>In Progress</td>
+                                  </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/custom/custom.js'))%>"></script>
     <%
 }); %>
