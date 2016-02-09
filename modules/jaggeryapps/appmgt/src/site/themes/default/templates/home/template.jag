@@ -40,7 +40,40 @@ jagg.template("home", function(inputs, outputs, jagg) {
     var selectedApplicationRevision =  jQuery.parseJSON('<%=selectedApplicationRevision%>');
 
 </script>
+    <div class="navbar navbar-secondary">
+    <div class="container-fliud">
+        <div class="row">
+             <div class="side-pane-trigger">
+                <i class="fa fa-reorder"></i>
+            </div>
+            <div class="col-md-3 breadcrumb-secondary">
+                <a href="/appmgt/site/pages/index.jag"><i class="fa fa-cubes visible-xs visible-lg"></i></a>
+                <span class="hidden-xs"><a href="/appmgt/site/pages/index.jag">Application Cloud</a></span>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div class="inner-wrapper">
+   <!-- left pane wrapper -->
+    <div class="left-pane ">
+        <ul>
+            <li class="selected">
+                <a href="#" target="_blank"><i class="fa fa-laptop"></i> Overview</a>
+            </li>
+            <li>
+                <a><i class="fa fa-wrench"></i> Env Variables</a>
+            </li>
+            <li>
+                <a><i class="fa fa-tag"></i> Tags</a>
+            </li>
+            <li>
+                <a href="/appmgt/site/pages/runtimeLogs.jag"><i class="fa fa-hdd-o"></i>Runtime Logs</a>
+            </li>
+        </ul>
+    </div>
 
+    <!-- left pane wrapper -->
+    <div class="right-pane">
     <!-- BOF App factory menu actionbar -->
     <div class="action-bar">
         <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action"  title="Back to Application listing">
@@ -95,12 +128,8 @@ jagg.template("home", function(inputs, outputs, jagg) {
                           <div class="sec">
                               <button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"
                               url="<%=selectedApplicationRevision.deploymentURL%>">Launch App</button>
-                              <!-- edit code button -->
-                              <!--div class="btn-group ctrl-edit-button btn-edit-code">
-                                  <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Stop</a>
-                              </div-->
                               <div class="btn-group ctrl-edit-button btn-edit-code">
-                                    <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="runtimeLogs.jag?applicationName=<%=applicationName%>&applicationRevision=<%=selectedRevision%>">View Logs</a>
+                                  <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Stop</a>
                               </div>
                           </div>
                       </div>
@@ -197,7 +226,40 @@ jagg.template("home", function(inputs, outputs, jagg) {
           </div>
         </div>
     </div><!-- /.container -->
+    </div>
 
+
+
+<script>
+
+    $('.side-pane-trigger').click(function(){
+        var rightPane = $('.right-pane');
+        var leftPane = $('.left-pane');
+        if (rightPane.hasClass('visible')){
+            rightPane.animate({"left":"0em"}, "slow").removeClass('visible');
+            leftPane.animate({"left":"-18em"}, "slow");
+            $(this).find('i').removeClass('fa-arrow-left').addClass('fa-reorder');
+        } else {
+            rightPane.animate({"left":"18em"}, "slow").addClass('visible');
+            leftPane.animate({"left":"0em"}, "slow");
+            $(this).find('i').removeClass('fa-reorder').addClass('fa-arrow-left');
+        }
+    });
+
+
+    //Url text loaded from the span element
+    var urlText = $('.version-url a span').text();
+
+    //Maximum character limit is 90. further than that the text would not show and the title would!
+    if(urlText.length > 90){
+      $('.version-url a').prop('title',urlText).find('span').text(urlText);
+    }else{
+      $('.version-url a span').text(urlText);
+    }
+
+
+
+</script>
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('templates/home/js/home.js'))%>"></script>
 
 <%
