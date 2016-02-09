@@ -800,4 +800,37 @@ public class ApplicationDAO {
         return true;
     }
 
+    public ApplicationRuntime getRuntimeForAppType(String appType) throws AppCloudException {
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        ApplicationRuntime applicationRuntime = new ApplicationRuntime();
+        ResultSet resultSet = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_RUNTIME_FOR_APP_TYPE);
+            preparedStatement.setString(1, appType);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                applicationRuntime.setId(resultSet.getInt(SQLQueryConstants.ID));
+                applicationRuntime.setImageName(resultSet.getString(SQLQueryConstants.RUNTIME_IMAGE_NAME));
+                applicationRuntime.setRepoURL(resultSet.getString(SQLQueryConstants.RUNTIME_REPO_URL));
+                applicationRuntime.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
+                applicationRuntime.setTag(resultSet.getString(SQLQueryConstants.RUNTIME_TAG));
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving runtime info from database for app type : " + appType;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return applicationRuntime;
+    }
+
 }
