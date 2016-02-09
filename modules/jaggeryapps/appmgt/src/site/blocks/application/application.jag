@@ -20,25 +20,42 @@
 include("/jagg/jagg.jag");
 include('/jagg/constants.jag');
 
-var uploadedArtifact = request.getFile("fileUpload");
-var applicationName = request.getParameter("applicationName");
-var applicationRevision = request.getParameter("applicationRevision");
-var applicationDescription = request.getParameter("applicationDescription");
-var replicas = request.getParameter("replicas");
-var runtimeId = request.getParameter("runtime");
-var appTypeName = request.getParameter("appTypeName");
-var runtimeProperties = parse(request.getParameter("runtimeProperties"));
 
-var applicationModule = jagg.module("application");
+var action = request.getParameter("action");
 
 (function(){
-    applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
-            uploadedArtifact, runtimeId, appTypeName, JSON.stringify(runtimeProperties));
-    var status = {};
-    status.result = 1;
-    status.message = "Artifact is successfully uploaded!";
-    print(status);
 
+    if (action == "deployApplication"){
+        var applicationModule = jagg.module("application");
+        
+        var uploadedArtifact = request.getFile("fileUpload");
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var applicationDescription = request.getParameter("applicationDescription");
+        var replicas = request.getParameter("replicas");
+        var runtimeId = request.getParameter("runtime");
+        var appTypeName = request.getParameter("appTypeName");
+        var runtimeProperties = parse(request.getParameter("runtimeProperties"));
+
+        applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
+                uploadedArtifact, runtimeId, appTypeName, JSON.stringify(runtimeProperties));
+        var status = {};
+        response.status = 200;
+        response.message = "Artifact is successfully uploaded!";
+
+    } else if (action == "getApplicationCreationEvents"){
+
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+
+        var mod = jagg.module("application");
+
+        log.info("applicationName: " + applicationName);
+        log.info("applicationRevision: " + applicationRevision);
+        var events = mod.getApplicationCreationEvents(applicationName, applicationRevision);
+        print(events);
+
+    }
 }());
 
 %>

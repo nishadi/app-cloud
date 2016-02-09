@@ -87,6 +87,9 @@ jagg.template("home", function(inputs, outputs, jagg) {
                               <div class="btn-group ctrl-edit-button btn-edit-code">
                                   <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Stop</a>
                               </div>
+                              <div class="btn-group ctrl-edit-button btn-edit-code">
+                                    <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="runtimeLogs.jag?applicationName=<%=applicationName%>&applicationRevision=<%=selectedRevision%>">View Logs</a>
+                              </div>
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-12 col-lg-3">

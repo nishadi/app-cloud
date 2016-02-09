@@ -33,12 +33,16 @@ jagg.block("runtimeLogs", {
     getOutputs: function (inputs) {
         var userName = jagg.getUser();
         var viewRuntimeLogPermission = true;
+        var applicationName = inputs.applicationName;
+        var applicationRevision = inputs.applicationRevision;
 
         var logModule = jagg.module("runtimeLogs");
         var applicationKey = request.getParameter("applicationKey");
 
         return {
             "viewRuntimeLogPermission": viewRuntimeLogPermission,
+            "applicationName": applicationName,
+            "applicationRevision": applicationRevision,
         };
     }
 

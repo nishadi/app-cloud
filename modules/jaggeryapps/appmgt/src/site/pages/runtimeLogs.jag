@@ -21,8 +21,8 @@
  var site = require("/site/conf/site.json");
 
  (function () {
-     var applicationKey = request.getParameter('applicationKey');
      var applicationName = request.getParameter('applicationName');
+     var applicationRevision = request.getParameter('applicationRevision');
      jagg.render({
          "name":"page/master",
          "inputs":{
@@ -40,8 +40,8 @@
                              {
                              	"name":"runtimeLogs",
                              "inputs":{
-                                 "applicationKey":applicationKey,
                                  "applicationName":applicationName,
+                                 "applicationRevision":applicationRevision,
                                  "pageName":"logs"
                              }
                              }

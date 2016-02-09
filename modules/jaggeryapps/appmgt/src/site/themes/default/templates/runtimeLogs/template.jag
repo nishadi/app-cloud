@@ -21,9 +21,14 @@ include("/jagg/jagg.jag");
 
 jagg.template("runtimeLogs", function (inputs, outputs, jagg) {
 
-    var applicationName = request.getParameter("applicationName");
-    var applicationKey = request.getParameter("applicationKey");
+    var applicationName = outputs.applicationName;
+    var applicationRevision = outputs.applicationRevision;
 %>
+
+<script>
+    var applicationName = "<%=applicationName%>";
+    var applicationRevision = "<%=applicationRevision%>";
+</script>
 
 <div class="container-fluid app-content-section">
     <div class="row">
@@ -44,10 +49,6 @@ jagg.template("runtimeLogs", function (inputs, outputs, jagg) {
                     <div class='row'>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="stage-view">Revision: </label>
-                                <select id="stage-view" class="form-control select2 stage">
-                                   <option selected="true" value="revision">trunk</option>
-                                </select>
                             </div>
                         </div>
                     </div>

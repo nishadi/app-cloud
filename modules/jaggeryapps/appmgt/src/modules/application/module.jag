@@ -48,5 +48,8 @@ jagg.module("application", {
     putSelectedRevisionToSession:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").putSelectedRevisionToSession.apply(this, arguments);
     },
+    getApplicationCreationEvents:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationCreationEvents.apply(this, arguments);
+    },
 });
 %>

@@ -21,14 +21,10 @@ $(document).ready(function () {
 
     $('#view-log').click(function(){
 
-        var applicationKey = 'My-JAXWS';
-        var selectedRevision = '1.0.0';
-        var applicationType = 'war';
-
         jagg.post("../blocks/runtimeLogs/ajax/runtimeLogs.jag", {
             action:"getSnapshotLogs",
-            applicationKey:applicationKey,
-            selectedRevision:selectedRevision
+            applicationKey:applicationName,
+            selectedRevision:applicationRevision
         },function (result) {
             if(result) {
                  var obj = jQuery.parseJSON(result);
