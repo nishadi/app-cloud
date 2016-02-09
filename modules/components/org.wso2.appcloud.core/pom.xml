@@ -18,12 +18,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java</artifactId>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-client</artifactId>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -34,7 +31,6 @@
             <artifactId>org.wso2.appcloud.common</artifactId>
         </dependency>
     </dependencies>
-
 
     <build>
         <plugins>

@@ -17,6 +17,5 @@
     "identityProviderURL" : "https://localhost:9444/samlsso",
     "keyStorePassword": "wso2carbon",
     "identityAlias" : "wso2carbon",
-    "keyStoreName" : "/mnt/app_cloud_home/appcloud/setup/wso2as-5.2.1//repository/resources/security/wso2carbon.jks"
   }
 }

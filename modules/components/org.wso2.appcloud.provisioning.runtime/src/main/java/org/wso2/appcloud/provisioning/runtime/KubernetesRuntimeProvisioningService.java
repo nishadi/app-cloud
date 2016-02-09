@@ -118,7 +118,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             //Deployment creation
             for (Container container : containers) {
                 io.fabric8.kubernetes.api.model.Container kubContainer = new io.fabric8.kubernetes.api.model.Container();
-                kubContainer.setName(container.getBaseImageName());
+                kubContainer.setName(container.getContainerName());
                 kubContainer.setImage(container.getBaseImageName() + ":" + container.getBaseImageVersion());
 
                 //Checking whether the container is including volume mounts
