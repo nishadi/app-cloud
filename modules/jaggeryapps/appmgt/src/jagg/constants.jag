@@ -19,7 +19,7 @@
 
 var TMP_UPLOADED_APPLICATIONS_PATH = "tmpUploadedApps";
 var ARTIFACT_UPLOAD_DIRECTORY = "/tmp/";
-var BASE_DIR_PATH = "/home/wso2/setup/wso2as-5.2.1/repository/deployment/server/jaggeryapps/appmgt/";
+var BASE_DIR_PATH = "/home/kasuns/Documents/repo/app-cloud/setup/wso2as-5.2.1/repository/deployment/server/jaggeryapps/appmgt/";
 var DOCKER_REGISTRY_URL = "registry.docker.appfactory.private.wso2.com:5000";
 var DOCKER_FILE_NAME = "Dockerfile";
 var TENANT_DOMAIN_NAME = "tenantDomainName";

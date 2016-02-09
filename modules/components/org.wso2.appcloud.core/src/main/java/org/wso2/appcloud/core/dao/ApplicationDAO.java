@@ -800,7 +800,7 @@ public class ApplicationDAO {
         return true;
     }
 
-    public ApplicationRuntime getRuntimeForAppType(String appType) throws AppCloudException {
+    public ApplicationRuntime getRuntime(int runtimeId) throws AppCloudException {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
@@ -810,7 +810,7 @@ public class ApplicationDAO {
         try {
 
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_RUNTIME_FOR_APP_TYPE);
-            preparedStatement.setString(1, appType);
+            preparedStatement.setInt(1, runtimeId);
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()){
@@ -822,7 +822,7 @@ public class ApplicationDAO {
             }
 
         } catch (SQLException e) {
-            String msg = "Error while retrieving runtime info from database for app type : " + appType;
+            String msg = "Error while retrieving runtime info from database for runtime : " + runtimeId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {

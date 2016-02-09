@@ -17,6 +17,9 @@
  *   under the License.
  */
 
+include("/jagg/constants.jag");
+include("/jagg/jagg.jag");
+
 jagg.template("application", function (inputs, outputs, jagg) {
         var runtimes = outputs.runtimes;
         var appType = outputs.appType;
@@ -26,6 +29,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
  <script type="text/javascript">
     var appTypeName = "<%=appType.type%>";
+    var retryCount = 0;
     $(document).ready(function()
         {
             $.each(<%=runtimes%>,function(key,value){
@@ -55,7 +59,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             $('#application-details').submit(function(e){
 
-                //executeAsync(drawProgressWindow());
+                executeAsync(drawProgressWindow());
 
                 e.preventDefault();
                 var runtimeProperties = [];
@@ -78,9 +82,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
                         url: $(this).attr("action"),
                         type: 'POST',
                         data: formData,
-                        async: false,
+                        async: true,
                         success: function (data) {
-                            alert(data)
                         },
                         cache: false,
                         contentType: false,
@@ -88,8 +91,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     });
 
                 return false;
-
-
             });
 
             $('#fileupload').fileupload({
@@ -120,32 +121,62 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             });
 
-            function drawProgressWindow(){
-                $("#app_creation_progress_modal").show();
+        function drawProgressWindow(){
+            $("#app_creation_progress_modal").show();
+            setInterval(pollEvents, 2000);
+        }
 
-                setInterval(pollEvents, 5000);
-            }
+        function executeAsync(func) {
+            setTimeout(func, 0);
+        }
 
-            function executeAsync(func) {
-                setTimeout(func, 0);
-            }
+        function pollEvents(){
 
-            function pollEvents(){
-                jagg.post("../blocks/application/application.jag", {
-                    action:"getApplicationCreationEvents",
-                    applicationName:$("#applicationName").val(),
-                    applicationRevision:$("#applicationRevision").val(),
+            jagg.post("../blocks/application/application.jag", {
+                action:"getApplicationCreationEvents",
+                applicationName:$("#applicationName").val(),
+                applicationRevision:$("#applicationRevision").val(),
 
-                },function (result) {
-                    alert(result);
-                });
-            }
+            },function (result) {
+                $("#progress_table").html("");
+                var result = jQuery.parseJSON(result);
+                var table = "<table class='table' style='width:100%; color:black'>" ;
+                for(var i = 0; i < result.length; i++){
+                    var statusStyle;
+                    var event = result[i];
 
-            $("#model_close_button_id").click(function(){
-                $("#app_creation_progress_modal").hide();
+                    if(event.status == "success"){
+                        statusStyle = "success";
+                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                        "<td>" + event.status + "</td><td><i class=\"fa fa-check\"></i></td></tr>";
+                    } else if (event.status == "failed") {
+                            statusStyle = "danger";
+                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                        "<td>" + event.status + "</td><td><i class=\"fa fa-times\"></i></td></tr>";
+                    } else if (event.status == "pending"){
+                        statusStyle = "active";
+                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                        "<td>" + event.status + "</td><td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                    }
+                }
+
+                table = table + "</table>";
+                $("#progress_table").html(table);
+
+                for(var i = 0; i < result.length; i++){
+                    var statusStyle;
+                    var event = result[i];
+                    if(event.name == "kube_deploy" && event.status == "success"){
+                        setTimeout(redirectAppHome, 2000);
+                        function redirectAppHome(){
+                            window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
+                        }
+                    }
+                }
             });
-        });
-     </script>
+        }
+    });
+ </script>
 
     <!-- BOF App factory menu actionbar -->
         <div class="action-bar">
@@ -224,9 +255,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <div class="progress-bar progress-bar-success" style="width: 0%;"></div>
             </div>
             </div>
-
-
-
             <div class="form-group">
             <div class="form-inline input_fields_wrap">
                 <button class="add_field_button btn btn-info">Add More Properties</button>
@@ -234,12 +262,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     <input type="text" class="form-control" name="key">
                     <input type="text" class="form-control" name="value">
                 </div>
-
             </div>
             </div>
-
-
-
             <div class="form-group">
                 <button class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" >
                     <span class="fw-stack fw-lg btn-action-ico">
@@ -261,33 +285,22 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.fileupload.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.iframe-transport.js'))%>"></script>
 
+    <!-- --------------------------------------- Overlay ----------------------------------------- -->
     <div id="app_creation_progress_modal" class="modal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button id="model_close_button_id" type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     <h4 class="modal-title" id="modal-title">Application Creation Progress</h4>
                 </div>
                 <div class="modal-body">
                     <div class="container-fluid">
                         <div class="row">
-                            <div class="col-xs-12 col-md-12 section-title">
-                                <table class="table" style="width:100%; color:black">
-                                  <tr class="success">
-                                    <td>File uploaded</td>
-                                    <td>Done</td>
-                                  </tr>
-                                  <tr class="danger">
-                                    <td>Image Created</td>
-                                    <td>In Progress</td>
-                                  </tr>
-                                </table>
+
+                            <div id="progress_table" class="col-xs-12 col-md-12 section-title">
+                            <i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
                             </div>
                         </div>
-
                     </div>
-
-
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
