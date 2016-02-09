@@ -86,9 +86,9 @@ jagg.template("header/default", function(inputs, outputs, jagg) {
                            <i class="fa fa-3x  fa-users"></i>
                            <div class="cloud-name">Members</div>
                        </a>
-                       <a class="cloud-block-invert">
-                            <i class="fa fa-3x  fa-envelope"></i>
-                            <div class="cloud-name">Support</div>
+                       <a class="cloud-block-invert" href="<%=jagg.getAbsoluteUrl("/site/pages/databases.jag")%>">
+                            <i class="fa fa-3x  fa-database"></i>
+                            <div class="cloud-name">Databases</div>
                         </a>
                    </div>
                 </div>
