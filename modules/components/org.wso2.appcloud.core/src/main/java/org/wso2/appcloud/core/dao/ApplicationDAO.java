@@ -775,6 +775,63 @@ public class ApplicationDAO {
         return true;
     }
 
+    public void updateApplicationRuntimeProperty(int applicationId, String oldKey, String newKey, String oldValue, String newValue, int tenantId)
+            throws AppCloudException {
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_RUNTIME_PROPERTIES);
+            preparedStatement.setString(1, newKey);
+            preparedStatement.setString(2, newValue);
+            preparedStatement.setInt(3, applicationId);
+            preparedStatement.setInt(4, tenantId);
+            preparedStatement.setString(5, oldKey);
+            preparedStatement.setString(6, oldValue);
+
+            preparedStatement.executeUpdate();
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while updating runtime property Key : " + oldKey + " for application : " + applicationId
+                          + " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public boolean deleteApplicationRuntimeProperty(int applicationId, String key, String value, int tenantId)
+            throws AppCloudException {
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        boolean deleted=false;
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_RUNTIME_PROPERTIES);
+            preparedStatement.setInt(1, applicationId);
+            preparedStatement.setInt(2, tenantId);
+            preparedStatement.setString(3, key);
+            preparedStatement.setString(4, value);
+
+            deleted = preparedStatement.execute();
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while deleting runtime property Key : " + key + " for application : " + applicationId
+                          + " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return deleted;
+    }
+
 
     /**
      * Method for updating number of replicas for an application
