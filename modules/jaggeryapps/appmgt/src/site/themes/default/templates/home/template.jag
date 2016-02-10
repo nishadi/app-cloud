@@ -138,8 +138,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                               <div class="btn-group ctrl-edit-button btn-edit-code">
                                   <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Stop</a>
                               </div>
-                              <button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-dashboard"
-                              url="<%=dashboardUrl%>">Dashboard</button>
+
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-12 col-lg-3">
@@ -154,45 +153,16 @@ jagg.template("home", function(inputs, outputs, jagg) {
                               </div>
                           </a>
                       </div>
-                  <div class="col-xs-12 col-md-12 col-lg-12">
-                      <h3 class="">Replicas</h3>
-                      <div class="clearfix"></div>
-                  </div>
-                  <div class="col-l-3">
-                               <table border="1" style="width:60%">
-                                <tr>
-                                  <td id="node">Nodes</td>
-                                  <td>Status</td>
-                                </tr>
-                                <tr>
-                                <td>Server 1</td>
-                                <td id="tableStatus"><%=selectedApplicationRevision.status%></td>
-                                </tr>
-                              </table>
+                      <div id="buildDeploy" class="col-xs-9 col-md-9 col-lg-12">
+                        <div class="block-repos">
+                            <h3><a class="block-anch" id="btn-dashboard" url="<%=dashboardUrl%>">Dashboard</a></h3>
+                            <div class="block-icon pull-left">
+                                <i class="fw fw-dashboard fw-5x"></i>
+                            </div>
+                        </div>
                       </div>
-                  <div class="col-xs-12 col-md-4 col-lg-3">
-                      <div class="block-replicas">
-                          <div class=""></div>
-                          <div class="replica-status">
-                              <div class="icon">✓</div>
-                              <div class="circle"></div>
-                          </div>
-                      </div>
-                  </div>
-
-                  <div class="col-xs-12 col-md-4 col-lg-3">
-                      <div class="block-replicas">
-                          <div class=""></div>
-
-                      </div>
-                  </div>
-                  <div class="col-xs-12 col-md-4 col-lg-3">
-                      <div class="block-replicas">
-                          <div class=""></div>
-                      </div>
-                  </div>
-                <div class="clearfix"></div>
               </div>
+
           </div>
           <div class="col-xs-12 col-md-3 col-lg-3">
               <div class="block-team pull-left">
