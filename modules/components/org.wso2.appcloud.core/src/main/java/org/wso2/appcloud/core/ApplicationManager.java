@@ -175,6 +175,20 @@ public class ApplicationManager {
         }
     }
 
+    public static RuntimeProperty[] getApplicationRuntimePropertiesByNameRevision(String applicationName, String revision) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            List<RuntimeProperty> runtimeProperties = applicationDAO.getAllRuntimePropertiesOfApplication(applicationName,revision,tenantId);
+            return runtimeProperties.toArray(new RuntimeProperty[runtimeProperties.size()]);
+        } catch (AppCloudException e) {
+            String msg = "Error while getting the runtime properties for application : " + applicationName + " revision :" +
+                         " " + revision + " in tenant : " + tenantId;
+            throw new AppCloudException(msg, e);
+        }
+    }
+
 
     /**
      * Method for getting all apptypes
