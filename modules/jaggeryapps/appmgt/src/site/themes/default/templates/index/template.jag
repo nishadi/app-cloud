@@ -99,7 +99,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
     }
 
     function NameComparator(a, b) {
-        return a.name.localeCompare(b.name);
+        return a.applicationName.localeCompare(b.applicationName);
     }
 
     function addTableColumnHeaders() {
