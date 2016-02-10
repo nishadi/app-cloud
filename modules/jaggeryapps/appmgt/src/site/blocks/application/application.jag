@@ -57,10 +57,53 @@ var applicationModule = jagg.module("application");
 
         var mod = jagg.module("application");
 
-        log.info("applicationName: " + applicationName);
-        log.info("applicationRevision: " + applicationRevision);
         var events = mod.getApplicationCreationEvents(applicationName, applicationRevision);
         print(events);
+
+    }else if (action == "getEnvVariablesByNameRevision"){
+
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+
+        var mod = jagg.module("application");
+
+        var events = mod.getEnvVariablesByNameRevision(applicationName, applicationRevision);
+        print(events);
+
+    }else if (action == "updateApplicationRuntimeProperty"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var prevKey = request.getParameter("prevKey");
+        var newKey = request.getParameter("newKey");
+        var prevValue = request.getParameter("prevValue");
+        var newValue = request.getParameter("newValue");
+
+        var mod = jagg.module("application");
+        mod.updateApplicationRuntimeProperty(applicationName, applicationRevision,prevKey,newKey,prevValue,newValue);
+        response.status = 200;
+        response.content = "Runtime property successfully updated.";
+
+    }else if (action == "deleteApplicationRuntimeProperty"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var key = request.getParameter("key");
+        var value = request.getParameter("value");
+
+        var mod = jagg.module("application");
+        mod.deleteApplicationRuntimeProperty(applicationName, applicationRevision,key,value);
+        response.status = 200;
+        response.content = "Runtime property successfully deleted.";
+
+    }else if (action == "addApplicationRuntimeProperty"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var key = request.getParameter("key");
+        var value = request.getParameter("value");
+
+        var mod = jagg.module("application");
+        mod.addApplicationRuntimeProperty(applicationName, applicationRevision,key,value);
+        response.status = 200;
+        response.content = "Runtime property successfully added.";
 
     }
 }());

@@ -361,6 +361,59 @@ var getApplicationByNameRevision = function(appName,appRevision){
     return applicationObject;
 }
 
+var getEnvVariablesByNameRevision = function(appName,appRevision){
+    var evnVariables = [];
+       try {
+        var envVars = ApplicationManager.getApplicationRuntimePropertiesByNameRevision(appName,appRevision);
+           for (var i = 0; i < envVars.length; i++) {
+               var envObj = {};
+               envObj.key = envVars[i].propertyName;
+               envObj.value = envVars[i].propertyValue;
+               evnVariables.push(envObj);
+           }
+    } catch(e){
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+    return evnVariables;
+};
+
+var updateApplicationRuntimeProperty = function (applicationName, applicationRevision, prevKey, newKey, prevValue, newValue) {
+    try {
+        ApplicationManager.updateApplicationRuntimeProperty(applicationName, applicationRevision, prevKey, newKey, prevValue, newValue);
+    } catch (e) {
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+};
+
+var deleteApplicationRuntimeProperty = function (applicationName, applicationRevision, key, value) {
+    try {
+        ApplicationManager.deleteApplicationRuntimeProperty(applicationName, applicationRevision, key, value);
+    } catch (e) {
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+};
+
+var addApplicationRuntimeProperty = function (applicationName, applicationRevision, key, value) {
+    try {
+        var runtimePropertyList = new java.util.ArrayList();
+        var runtimeProperty = new Packages.org.wso2.appcloud.core.dto.RuntimeProperty();
+        runtimeProperty.setPropertyName(key);
+        runtimeProperty.setPropertyValue(value);
+        runtimePropertyList.add(runtimeProperty);
+        ApplicationManager.addRuntimeProperties(applicationName, applicationRevision, runtimePropertyList);
+    } catch (e) {
+        log.error("Error while adding runtime property with Key:" + key);
+        log.error(e);
+        throw e;
+    }
+};
+
 var generateRuntimePropsArray=function(runtimeList){
     var size = runtimeList.size();
     var runtimePropsArray = [];
@@ -432,7 +485,7 @@ var getDeploymentURL = function (applicationName, applicationRevision, appTypeNa
     var deploymentPath = KubernetesProvisioningUtils.getDeploymentPath(applicationCtx);
     var baseURL = CloudUtil.getPropertyValue("ApplicationLaunchBaseURL");
 
-    log.info("Deployment URL: " + baseURL + deploymentPath);
+    log.debug("Deployment URL: " + baseURL + deploymentPath);
     return baseURL + deploymentPath;
 }
 
