@@ -16,22 +16,13 @@
 
 package org.wso2.appcloud.core;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
 import org.wso2.appcloud.core.dao.ApplicationDAO;
-import org.wso2.appcloud.core.dto.Application;
-import org.wso2.appcloud.core.dto.ApplicationRuntime;
-import org.wso2.appcloud.core.dto.ApplicationSummery;
-import org.wso2.appcloud.core.dto.ApplicationType;
-import org.wso2.appcloud.core.dto.Endpoint;
-import org.wso2.appcloud.core.dto.Label;
-import org.wso2.appcloud.core.dto.RuntimeProperty;
+import org.wso2.appcloud.core.dto.*;
 import org.wso2.carbon.context.CarbonContext;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -48,83 +39,52 @@ public class ApplicationManager {
      * @return
      * @throws AppCloudException
      */
-    public static boolean addApplication(Application application) throws AppCloudException {
+    public static void addApplication(Application application) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        int applicationId;
 
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-
-        Connection dbConnection = DBUtil.getDBConnection();
-
-        try {
-
-            applicationDAO.addApplication(application, tenantId, dbConnection);
-
-            dbConnection.commit();
-
-            applicationId = applicationDAO.getIdOfApplication(application.getApplicationName(), application.getRevision(),
-                    tenantId);
-            addLabels(application, applicationDAO, applicationId, tenantId);
-
-            addRuntimeProperties(application, applicationDAO, applicationId, tenantId);
-
-
-        } catch (AppCloudException e) {
-
-            DBUtil.rollbackTransaction(dbConnection);
-
-            String msg = "Error while adding application with application name : " + application.getApplicationName() +
-                         " for tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } catch (SQLException e) {
-
-            DBUtil.rollbackTransaction(dbConnection);
-
-            String msg = "Error while committing the addApplication transaction for application : " +
-                         application.getApplicationName() + " for tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closeConnection(dbConnection);
+        boolean isApplicationAdded = applicationDAO.addApplication(application, tenantId);
+        if (isApplicationAdded) {
+            String applicationName = application.getApplicationName();
+            String applicationRevision = application.getRevision();
+            List<Label> labels = application.getLabels();
+            addLabels(applicationName, applicationRevision, labels);
+            List<RuntimeProperty> propertyList = application.getRuntimeProperties();
+            addRuntimeProperties(applicationName, applicationRevision, propertyList);
         }
-
-        return true;
     }
 
     /**
      * Adding runtime properties for the application
+     *
      * @param application
-     * @param applicationDAO
      * @param applicationId
      * @param tenantId
      * @throws AppCloudException
      */
-    private static void addRuntimeProperties(Application application, ApplicationDAO applicationDAO, int applicationId,
-            int tenantId) throws AppCloudException {
-        List<RuntimeProperty> propertyList = application.getRuntimeProperties();
-        if(propertyList != null) {
-            for (RuntimeProperty runtimeProperty : propertyList) {
-                applicationDAO.addRunTimeProperty(runtimeProperty, applicationId, tenantId);
-            }
+    private static void addRuntimeProperties(String applicationName, String applicationRevision,
+            List<RuntimeProperty> runtimeProperties) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (runtimeProperties != null) {
+            applicationDAO.addRunTimeProperty(applicationName, applicationRevision, tenantId, runtimeProperties);
         }
     }
 
     /**
      * Adding label for the application
+     *
      * @param application
-     * @param applicationDAO
      * @param applicationId
      * @param tenantId
      * @throws AppCloudException
      */
-    private static void addLabels(Application application, ApplicationDAO applicationDAO, int applicationId,
-            int tenantId) throws AppCloudException {
-        List<Label> labelList = application.getLabels();
-        if(labelList != null) {
-            for (Label label : labelList) {
-                applicationDAO.addLabel(label, applicationId, tenantId);
-            }
+    private static void addLabels(String applicationName, String applicationRevision, List<Label> labels)
+            throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (labels != null) {
+            applicationDAO.addLabel(applicationName, applicationRevision, tenantId, labels);
         }
     }
 
