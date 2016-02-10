@@ -61,6 +61,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
                 executeAsync(drawProgressWindow());
 
+                $('#add-application').loadingButton('hide');
+                $('#add-application-loading').loadingButton('show');
+
                 e.preventDefault();
                 var runtimeProperties = [];
                 $('.runtime_property').each(function(){
@@ -118,10 +121,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
                         });
                         $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
                     }
-
             });
 
         function drawProgressWindow(){
+            $('#app_creation_progress_modal').modal({ backdrop: 'static', keyboard: false});
             $("#app_creation_progress_modal").show();
             setInterval(pollEvents, 2000);
         }
@@ -176,6 +179,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
             });
         }
     });
+
+
  </script>
 
     <!-- BOF App factory menu actionbar -->
@@ -265,19 +270,23 @@ jagg.template("application", function (inputs, outputs, jagg) {
             </div>
             </div>
             <div class="form-group">
-                <button class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" >
+                <button class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" id="add-application">
                     <span class="fw-stack fw-lg btn-action-ico">
                         <i class="fw fw-ring fw-stack-2x"></i>
                         <i class="fw fw-add fw-stack-1x"></i>
                     </span>
                         Create
                 </button>
+                <button type="button" class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" id="add-application-loading" style="display:none" >
+                    <span class="fw-stack fw-lg btn-action-ico">
+                        <i class="fw fw-ring fw-stack-2x"></i>
+                        <i class="fw fw-add fw-stack-1x"></i>
+                    </span>
+                    Creating
+                </button>
             </div>
-
         </form>
-
         </div>
-
         </div>
       </div><!-- /.container -->
 
@@ -286,8 +295,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.iframe-transport.js'))%>"></script>
 
     <!-- --------------------------------------- Overlay ----------------------------------------- -->
-    <div id="app_creation_progress_modal" class="modal">
-        <div class="modal-dialog">
+    <div class="modal fade build-logs-modal" id="app_creation_progress_modal">
+        <div class="modal-dialog modal-dialog-margin-top-md ">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="modal-title">Application Creation Progress</h4>
@@ -295,17 +304,14 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <div class="modal-body">
                     <div class="container-fluid">
                         <div class="row">
-
                             <div id="progress_table" class="col-xs-12 col-md-12 section-title">
                             <i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
-                            </div>
                         </div>
                     </div>
                 </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
+            </div>
+       </div><!-- /.modal-content -->
+     </div><!-- /.modal -->
 
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/custom/custom.js'))%>"></script>
     <%
