@@ -16,6 +16,12 @@ function initPageView() {
         var newWindow = window.open('','_blank');
         newWindow.location = appUrl;
     });
+
+    $('#btn-dashboard').click(function() {
+        var appUrl = $('#btn-dashboard').attr("url");
+        var newWindow = window.open('','_blank');
+        newWindow.location = appUrl;
+    });
 }
 
 
@@ -46,6 +52,9 @@ function changeSelectedRevision(newRevision){
     var repoUrlHtml = generateLunchUrl(deploymentURL);
     $("#version-url-link").html(repoUrlHtml);
     $('#btn-launchApp').attr({url:deploymentURL});
+
+    var dashboardUrl = dashboardBaseUrl + applicationName + "-" + newRevision;
+    $('#btn-dashboard').attr({url:dashboardUrl});
 
     //changing app description
     $("#app-description").text(selectedApplicationRevision.description?selectedApplicationRevision.description:'');
