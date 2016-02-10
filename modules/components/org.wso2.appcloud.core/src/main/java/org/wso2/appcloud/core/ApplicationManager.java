@@ -59,24 +59,15 @@ public class ApplicationManager {
         try {
 
             applicationDAO.addApplication(application, tenantId, dbConnection);
-            applicationId = applicationDAO.getIdOfApplication(application.getApplicationName(), application.getRevision(),
-                                                              tenantId);
-
-            List<Label> labelList = application.getLabels();
-            if(labelList != null) {
-                for (Label label : labelList) {
-                    applicationDAO.addLabel(label, applicationId, tenantId, dbConnection);
-                }
-            }
-
-            List<RuntimeProperty> propertyList = application.getRuntimeProperties();
-            if(propertyList != null) {
-                for (RuntimeProperty runtimeProperty : propertyList) {
-                    applicationDAO.addRunTimeProperty(runtimeProperty, applicationId, tenantId, dbConnection);
-                }
-            }
 
             dbConnection.commit();
+
+            applicationId = applicationDAO.getIdOfApplication(application.getApplicationName(), application.getRevision(),
+                    tenantId);
+            addLabels(application, applicationDAO, applicationId, tenantId);
+
+            addRuntimeProperties(application, applicationDAO, applicationId, tenantId);
+
 
         } catch (AppCloudException e) {
 
@@ -99,6 +90,42 @@ public class ApplicationManager {
         }
 
         return true;
+    }
+
+    /**
+     * Adding runtime properties for the application
+     * @param application
+     * @param applicationDAO
+     * @param applicationId
+     * @param tenantId
+     * @throws AppCloudException
+     */
+    private static void addRuntimeProperties(Application application, ApplicationDAO applicationDAO, int applicationId,
+            int tenantId) throws AppCloudException {
+        List<RuntimeProperty> propertyList = application.getRuntimeProperties();
+        if(propertyList != null) {
+            for (RuntimeProperty runtimeProperty : propertyList) {
+                applicationDAO.addRunTimeProperty(runtimeProperty, applicationId, tenantId);
+            }
+        }
+    }
+
+    /**
+     * Adding label for the application
+     * @param application
+     * @param applicationDAO
+     * @param applicationId
+     * @param tenantId
+     * @throws AppCloudException
+     */
+    private static void addLabels(Application application, ApplicationDAO applicationDAO, int applicationId,
+            int tenantId) throws AppCloudException {
+        List<Label> labelList = application.getLabels();
+        if(labelList != null) {
+            for (Label label : labelList) {
+                applicationDAO.addLabel(label, applicationId, tenantId);
+            }
+        }
     }
 
     /**

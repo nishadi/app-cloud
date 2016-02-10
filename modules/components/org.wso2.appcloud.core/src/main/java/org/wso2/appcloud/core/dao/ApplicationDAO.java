@@ -89,13 +89,13 @@ public class ApplicationDAO {
      * Method for adding label, which associated with an application, to database
      *
      * @param label        label object
-     * @param dbConnection database connection, since this is a part of full transaction using a common connection
      * @return
      * @throws AppCloudException
      */
-    public boolean addLabel(Label label, int applicationId, int tenantId, Connection dbConnection) throws AppCloudException {
+    public boolean addLabel(Label label, int applicationId, int tenantId) throws AppCloudException {
 
         PreparedStatement preparedStatement = null;
+        Connection dbConnection = DBUtil.getDBConnection();
 
         try {
 
@@ -107,7 +107,7 @@ public class ApplicationDAO {
             preparedStatement.setString(5, label.getDescription());
 
             preparedStatement.execute();
-
+            dbConnection.commit();
         } catch (SQLException e) {
 
             String msg =
@@ -127,14 +127,14 @@ public class ApplicationDAO {
      * Method for adding runtime property, which belongs to an application, to the database
      *
      * @param runtimeProperty runtime property object
-     * @param dbConnection    database connection, since this is a part of full transaction using a common connection
      * @return
      * @throws AppCloudException
      */
-    public boolean addRunTimeProperty(RuntimeProperty runtimeProperty, int applicationId, int tenantId, Connection dbConnection)
+    public boolean addRunTimeProperty(RuntimeProperty runtimeProperty, int applicationId, int tenantId)
             throws AppCloudException {
 
         PreparedStatement preparedStatement = null;
+        Connection dbConnection = DBUtil.getDBConnection();
 
         try {
 
@@ -146,7 +146,7 @@ public class ApplicationDAO {
             preparedStatement.setString(5, runtimeProperty.getDescription());
 
             preparedStatement.execute();
-
+            dbConnection.commit();
         } catch (SQLException e) {
 
             String msg = "Error occurred while adding the property : " + runtimeProperty.getPropertyName() +
