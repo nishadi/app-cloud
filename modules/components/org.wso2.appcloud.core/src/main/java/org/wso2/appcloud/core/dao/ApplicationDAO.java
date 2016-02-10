@@ -47,14 +47,14 @@ public class ApplicationDAO {
     /**
      * Method for adding application to database
      *
-     * @param application  application object
-     * @param dbConnection database connection, since this is a part of full transaction using a common connection
-     * @return
+     * @param application application object
+     * @param tenantId    tenant id
+     * @return true if application adding completed
      * @throws AppCloudException
      */
-    public boolean addApplication(Application application, int tenantId, Connection dbConnection) throws AppCloudException {
-
+    public boolean addApplication(Application application, int tenantId) throws AppCloudException {
         PreparedStatement preparedStatement = null;
+        Connection dbConnection = DBUtil.getDBConnection();
 
         try {
 
@@ -70,16 +70,18 @@ public class ApplicationDAO {
             preparedStatement.setInt(9, application.getNumberOfReplicas());
 
             preparedStatement.execute();
+            dbConnection.commit();
 
         } catch (SQLException e) {
 
             String msg =
                     "Error occurred while adding application : " + application.getApplicationName() + " to database " +
-                    "in tenant : " + tenantId;
+                            "in tenant : " + tenantId;
             throw new AppCloudException(msg, e);
 
         } finally {
             DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
         }
 
         return true;
@@ -88,75 +90,87 @@ public class ApplicationDAO {
     /**
      * Method for adding label, which associated with an application, to database
      *
-     * @param label        label object
-     * @param dbConnection database connection, since this is a part of full transaction using a common connection
-     * @return
+     * @param applicationName     name of the application
+     * @param applicationRevision revision of the application
+     * @param tenantId            tenant id
+     * @param labels              labels of the application
+     * @return true if label adding completed
      * @throws AppCloudException
      */
-    public boolean addLabel(Label label, int applicationId, int tenantId, Connection dbConnection) throws AppCloudException {
+    public boolean addLabel(String applicationName, String applicationRevision, int tenantId, List<Label> labels)
+            throws AppCloudException {
+        int applicationId = getIdOfApplication(applicationName, applicationRevision, tenantId);
 
         PreparedStatement preparedStatement = null;
+        Connection dbConnection = DBUtil.getDBConnection();
 
         try {
+            for (Label label : labels) {
+                preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_LABEL);
+                preparedStatement.setString(1, label.getLabelName());
+                preparedStatement.setString(2, label.getLabelValue());
+                preparedStatement.setInt(3, applicationId);
+                preparedStatement.setInt(4, tenantId);
+                preparedStatement.setString(5, label.getDescription());
 
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_LABEL);
-            preparedStatement.setString(1, label.getLabelName());
-            preparedStatement.setString(2, label.getLabelValue());
-            preparedStatement.setInt(3, applicationId);
-            preparedStatement.setInt(4, tenantId);
-            preparedStatement.setString(5, label.getDescription());
-
-            preparedStatement.execute();
-
+                preparedStatement.execute();
+            }
+            dbConnection.commit();
         } catch (SQLException e) {
 
-            String msg =
-                    "Error occurred while adding the label : " + label.getLabelName() + " to the database in tenant" +
+            String msg = "Error occurred while adding the label for application : " + applicationName
+                    + " to the database in tenant" +
                     " : " + tenantId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
             DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
         }
 
         return true;
     }
 
-
     /**
      * Method for adding runtime property, which belongs to an application, to the database
      *
-     * @param runtimeProperty runtime property object
-     * @param dbConnection    database connection, since this is a part of full transaction using a common connection
-     * @return
+     * @param applicationName     name of the application
+     * @param applicationRevision revision of the application
+     * @param tenantId            tenant id
+     * @param runtimeProperties   runtime properties
+     * @return true if runtime properties adding completed
      * @throws AppCloudException
      */
-    public boolean addRunTimeProperty(RuntimeProperty runtimeProperty, int applicationId, int tenantId, Connection dbConnection)
-            throws AppCloudException {
+    public boolean addRunTimeProperty(String applicationName, String applicationRevision, int tenantId,
+            List<RuntimeProperty> runtimeProperties) throws AppCloudException {
+        int applicationId = getIdOfApplication(applicationName, applicationRevision, tenantId);
 
         PreparedStatement preparedStatement = null;
+        Connection dbConnection = DBUtil.getDBConnection();
 
         try {
+            for (RuntimeProperty runtimeProperty : runtimeProperties) {
+                preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_RUNTIME_PROPERTY);
+                preparedStatement.setString(1, runtimeProperty.getPropertyName());
+                preparedStatement.setString(2, runtimeProperty.getPropertyValue());
+                preparedStatement.setInt(3, applicationId);
+                preparedStatement.setInt(4, tenantId);
+                preparedStatement.setString(5, runtimeProperty.getDescription());
 
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_RUNTIME_PROPERTY);
-            preparedStatement.setString(1, runtimeProperty.getPropertyName());
-            preparedStatement.setString(2, runtimeProperty.getPropertyValue());
-            preparedStatement.setInt(3, applicationId);
-            preparedStatement.setInt(4, tenantId);
-            preparedStatement.setString(5, runtimeProperty.getDescription());
-
-            preparedStatement.execute();
-
+                preparedStatement.execute();
+            }
+            dbConnection.commit();
         } catch (SQLException e) {
 
-            String msg = "Error occurred while adding the property : " + runtimeProperty.getPropertyName() +
-                         " to the database in tenant" +
-                         " : " + tenantId;
+            String msg = "Error occurred while adding the property for application : " + applicationName +
+                    " to the database in tenant" +
+                    " : " + tenantId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
 
         } finally {
             DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
         }
 
         return true;

@@ -178,6 +178,110 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 }
             });
         }
+
+        /*** application form validation ***/
+
+         // Classes to be added to parent div of the validated element
+        var errorFormGroupClasses = "has-error";        // if validation is failed
+        var successFormGroupClasses = "has-success";    // if validation is successful
+        var feedBack = "has-feedback";
+
+        // Setting validation options
+        // More info: http://jqueryvalidation.org/validate#validate-options
+
+
+        var creationFormValidationOpts = {
+            rules: {                                        // validation rules
+                applicationName: {                          // applicationName filed
+                    required: true,
+                    validateContent: true,
+                    maxlength: 8
+                },
+                applicationRevision: {
+                    required: true,
+                    validateContent: true,
+                    maxlength: 8
+                }
+            },
+            onsubmit: false,    // Since we are handling on submit validation on click event of the "Create" button,
+            onfocusout: function (element, event) {
+            $("#application-details").validate().form();
+                return false;
+            },                            // here we disabled the form validation on submit
+            highlight: function (element, errorClass, validClass) { // this is triggered when the "element" is invalid
+
+            },
+            unhighlight: function (element, errorClass, validClass) { // this is triggered when the "element" is valid
+
+            },
+            showErrors: function (event, validator) {
+                // Disable app creation button if the form is not valid
+                if (this.numberOfInvalids() > 0) {
+                    $("#add-application").prop("disabled", true);
+                } else {
+                    $("#add-application").prop("disabled", false);
+                }
+                this.defaultShowErrors();
+            }
+        };
+
+        // Register createAppForm with above options for validation
+        $("#application-details").validate(creationFormValidationOpts);
+
+        //Initially the create button is disabled
+        $("#add-application").prop("disabled", true);
+
+        $.validator.addMethod("validateContent",
+            validateContent, getAppCreationErrorMessage);
+
+        var appCreationErrorMsg = "Invalid value";
+
+        function validateAlphaNumericChar(value) {
+         var isValueValid = true;
+
+         var patternForSpace = / /g;
+         var isSpace = patternForSpace.test(value);
+
+         var patternForNonAlphaNumericChars = /[^\w\s]/gi;
+         var isInvalidChar = patternForNonAlphaNumericChars.test(value);
+
+         var patternForUnderscore = /_/g;
+         var isUnderScore = patternForUnderscore.test(value);
+
+         if (isSpace == true || isInvalidChar == true || isUnderScore == true) {
+             // Here we are setting the error message as duplicated app name since we are not allowing to change
+             // the app key
+             appCreationErrorMsg =  "Invalid value - Enter a value which has only alphanumeric characters"
+             isValueValid = false;
+         } else {
+             isValueValid = true;
+         }
+         return isValueValid;
+     }
+
+     function validateContent(value) {
+         var isValueValid = true;
+         var valueLength = (value).length;
+         if (valueLength == 0) {
+             // Here we are setting the error message as duplicated app name since we are not allowing to change
+             // the app key
+             appCreationErrorMsg = "Invalid value - Enter a value which is not empty";
+             isValueValid = false;
+         } else if (!isNaN(value)){
+             // Here we are setting the error message as duplicated app name since we are not allowing to change
+             // the app key
+             appCreationErrorMsg =  "Invalid value - Enter a value which has does not have only numeric characters";
+             isValueValid = false;
+         } else {
+             isValueValid = validateAlphaNumericChar(value);
+         }
+         return isValueValid;
+     }
+
+     function getAppCreationErrorMessage(){
+        return appCreationErrorMsg;
+    }
+
     });
 
 
@@ -293,6 +397,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/vendor/jquery.ui.widget.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.fileupload.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.iframe-transport.js'))%>"></script>
+      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.validate.min.js'))%>"></script>
+      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/additional-methods.min.js'))%>"></script>
 
     <!-- --------------------------------------- Overlay ----------------------------------------- -->
     <div class="modal fade build-logs-modal" id="app_creation_progress_modal">
