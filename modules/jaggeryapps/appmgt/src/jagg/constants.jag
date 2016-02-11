@@ -16,11 +16,12 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
-
 var TMP_UPLOADED_APPLICATIONS_PATH = "tmpUploadedApps";
 var ARTIFACT_UPLOAD_DIRECTORY = "/tmp/";
-var BASE_DIR_PATH = "/home/kasuns/Documents/repo/app-cloud/setup/wso2as-5.2.1/repository/deployment/server/jaggeryapps/appmgt/";
-var DOCKER_REGISTRY_URL = "registry.docker.appfactory.private.wso2.com:5000";
+var PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH="Appmgt.DeploymentDirPath";
+var PROPERTY_DOCKER_REGISTRY_URL="DockerRegistryURL";
+var PROPERTY_STORAGE_SERVER_URL="StorageServerURL";
+var PROPERTY_RSS_ENVIRONMENT_NAME="RSSEnvironmentName";
 var DOCKER_FILE_NAME = "Dockerfile";
 var TENANT_DOMAIN_NAME = "tenantDomainName";
 var SUPER_TENANT_DOMAIN_NAME = "carbon.super";
