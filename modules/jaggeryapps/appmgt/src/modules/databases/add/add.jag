@@ -24,8 +24,8 @@ var log = new Log('modules/databases/add/add.jag');
 
 var modManager = jagg.module("manager");
 var wso2_rss_instanceName = 'SYSTEM';
-var storageServerURL = modManager.getStorageServerServiceURL();
-var environmentName = "DEFAULT";
+var storageServerURL = modManager.getPropertyValue(PROPERTY_STORAGE_SERVER_URL);
+var environmentName = modManager.getPropertyValue(PROPERTY_RSS_ENVIRONMENT_NAME);
 
 /**
  * Create database
