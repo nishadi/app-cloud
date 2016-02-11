@@ -48,6 +48,18 @@ jagg.module("application", {
     addApplicationRuntimeProperty:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").addApplicationRuntimeProperty.apply(this, arguments);
     },
+    getTags:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getTags.apply(this, arguments);
+    },
+    updateTag:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").updateTag.apply(this, arguments);
+    },
+    deleteTag:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteTag.apply(this, arguments);
+    },
+    addTag:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").addTag.apply(this, arguments);
+    },
     getAllRevisionsOfApplication:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getAllRevisionsOfApplication.apply(this, arguments);
     },

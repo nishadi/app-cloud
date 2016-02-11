@@ -48,7 +48,7 @@ public class ApplicationManager {
             String applicationName = application.getApplicationName();
             String applicationRevision = application.getRevision();
             List<Label> labels = application.getLabels();
-            addLabels(applicationName, applicationRevision, labels);
+            addTags(applicationName, applicationRevision, labels);
             List<RuntimeProperty> propertyList = application.getRuntimeProperties();
             addRuntimeProperties(applicationName, applicationRevision, propertyList);
         }
@@ -79,7 +79,7 @@ public class ApplicationManager {
      * @param tenantId
      * @throws AppCloudException
      */
-    private static void addLabels(String applicationName, String applicationRevision, List<Label> labels)
+    public static void addTags(String applicationName, String applicationRevision, List<Label> labels)
             throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -175,6 +175,20 @@ public class ApplicationManager {
             throw new AppCloudException(msg, e);
         }
     }
+    public static Label[] getTags(String applicationName, String revision) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            List<Label> labels = applicationDAO.getAllLabelsOfApplication(applicationName, revision,
+                    tenantId);
+            return labels.toArray(new Label[labels.size()]);
+        } catch (AppCloudException e) {
+            String msg = "Error while getting the tags for application : " + applicationName + " revision :" +
+                         " " + revision + " in tenant : " + tenantId;
+            throw new AppCloudException(msg, e);
+        }
+    }
 
 
     public static void updateApplicationRuntimeProperty(String applicationName, String revision, String oldKey, String newKey, String oldValue, String newValue) throws AppCloudException {
@@ -192,6 +206,21 @@ public class ApplicationManager {
             throw new AppCloudException(msg, e);
         }
     }
+    public static void updateTag(String applicationName, String revision, String oldKey, String newKey, String oldValue, String newValue) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
+            applicationDAO.updateTag(applicationId, oldKey, newKey, oldValue, newValue,
+                    tenantId);
+
+        } catch (AppCloudException e) {
+            String msg = "Error while updating the tag for application : " + applicationName + " revision :" +
+                         " " + revision + " in tenant : " + tenantId;
+            throw new AppCloudException(msg, e);
+        }
+    }
     public static void deleteApplicationRuntimeProperty(String applicationName, String revision, String key, String value) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
 
@@ -199,6 +228,20 @@ public class ApplicationManager {
         try {
             int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
             applicationDAO.deleteApplicationRuntimeProperty(applicationId, key, value, tenantId);
+
+        } catch (AppCloudException e) {
+            String msg = "Error while getting the runtime properties for application : " + applicationName + " revision :" +
+                         " " + revision + " in tenant : " + tenantId;
+            throw new AppCloudException(msg, e);
+        }
+    }
+    public static void deleteTag(String applicationName, String revision, String key, String value) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
+            applicationDAO.deleteTag(applicationId, key, value, tenantId);
 
         } catch (AppCloudException e) {
             String msg = "Error while getting the runtime properties for application : " + applicationName + " revision :" +
