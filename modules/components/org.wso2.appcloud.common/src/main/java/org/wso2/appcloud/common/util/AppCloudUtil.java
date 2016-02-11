@@ -20,6 +20,7 @@ package org.wso2.appcloud.common.util;
  */
 
 import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudConstant;
@@ -28,6 +29,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.*;
+import java.net.URL;
 import java.security.SignatureException;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Properties;
@@ -130,6 +132,22 @@ public class AppCloudUtil {
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         }
+    }
+
+    public static void downloadFromUrl(String artifactUrl, String path) throws AppCloudException {
+
+        log.info("Inside cloud util... url: " + artifactUrl);
+        String [] urlArray = artifactUrl.split("://");
+        File filePath = new File(path);
+        try {
+            URL url = new URL("http://" + urlArray[1]);
+            FileUtils.copyURLToFile(url,filePath);
+        } catch (IOException e) {
+            String msg = "Failed to download the artifact from the provided url";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        }
+
     }
 
 }

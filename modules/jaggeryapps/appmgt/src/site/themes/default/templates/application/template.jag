@@ -30,8 +30,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
  <script type="text/javascript">
     var appTypeName = "<%=appType.type%>";
     var retryCount = 0;
-    $(document).ready(function()
-        {
+    $(document).ready(function(){
+
+            $("#file-upload-block").hide();
+            $("#url-upload-block").hide();
+
             $.each(<%=runtimes%>,function(key,value){
                 $("#runtime").append($('<option></option>').val(value.id).html(value.runtimeName));
             });
@@ -77,10 +80,25 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 });
 
                 var formData = new FormData($(this)[0]);
+                var selectedVal = $("#upload-method option:selected").val();
+
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
                 formData.append('action', 'createApplication');
                 formData.append('appTypeName', appTypeName);
-                formData.append('uploadedFileName', $("#uploadedFileName").val())
+
+
+                if(selectedVal == 1){
+                    formData.append('uploadedFileName', $("#uploadedFileName").val());
+                } else if (selectedVal == 2) {
+                    if (appTypeName == "war") {
+                        formData.append('uploadedFileName', $("#applicationName").val() + ".war");
+                    } else if (appTypeName == "mss") {
+                        formData.append('uploadedFileName', $("#applicationName").val() + ".jar");
+                    }
+
+                } else if (selectedVal == 3) {
+                    formData.append('uploadedFileName', $("#applicationName").val() + ".war");
+                }
                 $.ajax({
                         url: $(this).attr("action"),
                         type: 'POST',
@@ -99,13 +117,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
             $('#fileupload').fileupload({
 
                 submit: function(e, data){
-                      data.url = "<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")%>",
+                      data.url = "<%=jagg.getAbsoluteUrl('/site/blocks/application/application.jag')%>",
                           data.dataType = 'json',
                           data.formData = {action:'uploadExistingArchive',
                                 appTypeName:appTypeName,
                                 applicationName:$("#applicationName").val(),
                                 applicationRevision:$("#applicationRevision").val()
-                                }
+                          }
                     },
                     progressall: function (e, data) {
                         var progress = parseInt(data.loaded / data.total * 100, 10);
@@ -237,53 +255,80 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var appCreationErrorMsg = "Invalid value";
 
         function validateAlphaNumericChar(value) {
-         var isValueValid = true;
+             var isValueValid = true;
 
-         var patternForSpace = / /g;
-         var isSpace = patternForSpace.test(value);
+             var patternForSpace = / /g;
+             var isSpace = patternForSpace.test(value);
 
-         var patternForNonAlphaNumericChars = /[^\w\s]/gi;
-         var isInvalidChar = patternForNonAlphaNumericChars.test(value);
+             var patternForNonAlphaNumericChars = /[^\w\s]/gi;
+             var isInvalidChar = patternForNonAlphaNumericChars.test(value);
 
-         var patternForUnderscore = /_/g;
-         var isUnderScore = patternForUnderscore.test(value);
+             var patternForUnderscore = /_/g;
+             var isUnderScore = patternForUnderscore.test(value);
 
-         if (isSpace == true || isInvalidChar == true || isUnderScore == true) {
-             // Here we are setting the error message as duplicated app name since we are not allowing to change
-             // the app key
-             appCreationErrorMsg =  "Invalid value - Enter a value which has only alphanumeric characters"
-             isValueValid = false;
-         } else {
-             isValueValid = true;
-         }
-         return isValueValid;
-     }
+             if (isSpace == true || isInvalidChar == true || isUnderScore == true) {
+                 // Here we are setting the error message as duplicated app name since we are not allowing to change
+                 // the app key
+                 appCreationErrorMsg =  "Invalid value - Enter a value which has only alphanumeric characters"
+                 isValueValid = false;
+             } else {
+                 isValueValid = true;
+             }
+             return isValueValid;
+        }
 
-     function validateContent(value) {
-         var isValueValid = true;
-         var valueLength = (value).length;
-         if (valueLength == 0) {
-             // Here we are setting the error message as duplicated app name since we are not allowing to change
-             // the app key
-             appCreationErrorMsg = "Invalid value - Enter a value which is not empty";
-             isValueValid = false;
-         } else if (!isNaN(value)){
-             // Here we are setting the error message as duplicated app name since we are not allowing to change
-             // the app key
-             appCreationErrorMsg =  "Invalid value - Enter a value which has does not have only numeric characters";
-             isValueValid = false;
-         } else {
-             isValueValid = validateAlphaNumericChar(value);
-         }
-         return isValueValid;
-     }
+        function validateContent(value) {
+             var isValueValid = true;
+             var valueLength = (value).length;
+             if (valueLength == 0) {
+                 // Here we are setting the error message as duplicated app name since we are not allowing to change
+                 // the app key
+                 appCreationErrorMsg = "Invalid value - Enter a value which is not empty";
+                 isValueValid = false;
+             } else if (!isNaN(value)){
+                 // Here we are setting the error message as duplicated app name since we are not allowing to change
+                 // the app key
+                 appCreationErrorMsg =  "Invalid value - Enter a value which has does not have only numeric characters";
+                 isValueValid = false;
+             } else {
+                 isValueValid = validateAlphaNumericChar(value);
+             }
+             return isValueValid;
+        }
 
-     function getAppCreationErrorMessage(){
-        return appCreationErrorMsg;
-    }
+        function getAppCreationErrorMessage(){
+           return appCreationErrorMsg;
+        }
 
+        $('#url-upload').click(function(){
+            $("#url-upload-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
+            jagg.post("../blocks/application/application.jag", {
+                action:"downloadFromUrl",
+                artfactUrl:$("#artifactUrl").val(),
+                applicationName:$("#applicationName").val(),
+                applicationRevision:$("#applicationRevision").val(),
+                appTypeName:appTypeName,
+            },function (result) {
+                $("#url-upload-progress").html("<i class=\"fa fa-check\"></i>");
+            },function (jqXHR, textStatus, errorThrown) {
+                jagg.message({content: "Error occurred while downloading artifact from url.", type: 'error', id:'view_log'});
+            });
+        });
+
+        $( "#upload-method" ).change(function() {
+            var selectedVal = $("#upload-method option:selected").val();
+            if(selectedVal == 1){
+                $("#file-upload-block").show();
+                $("#url-upload-block").hide();
+            } else if (selectedVal == 2) {
+                $("#file-upload-block").hide();
+                $("#url-upload-block").show();
+            } else if (selectedVal == 3) {
+                $("#file-upload-block").hide();
+                $("#url-upload-block").hide();
+            }
+        });
     });
-
 
  </script>
 
@@ -350,20 +395,39 @@ jagg.template("application", function (inputs, outputs, jagg) {
             </select>
             </div>
 
-            <div class="form-group">
-            <label>Upload Artifact: </label>
-            <div class="input-group">
-                <input id="uploadedFileName" type="text" class="form-control" readonly>
-                <span class="input-group-btn">
-                   <span class="btn btn-primary btn-file">
-                       Upload&hellip; <input id="fileupload" type="file" name="fileUpload" multiple>
-                   </span>
-                </span>
+            <div class="form-group" id="upload-method">
+            <label>Artifact upload method:</label>
+            <select name="select-upload-method" id="select-upload-method" class="form-control" >
+                <option value="0" selected="Selected">Select upload method</option>
+                <option value="1">Upload from file system</option>
+                <option value="2">Upload from url</option>
+                <option value="3">Upload wso2 sample</option>
+            </select>
             </div>
-            <div id="progress" class="progress">
-                <div class="progress-bar progress-bar-success" style="width: 0%;"></div>
+
+            <div class="form-group" id="file-upload-block">
+                <label>Upload Artifact: </label>
+                <div class="input-group">
+                    <input id="uploadedFileName" type="text" class="form-control" readonly>
+                    <span class="input-group-btn">
+                       <span class="btn btn-primary btn-file">
+                           Upload&hellip; <input id="fileupload" type="file" name="fileUpload" multiple>
+                       </span>
+                    </span>
+                </div>
+                <div id="progress" class="progress">
+                    <div class="progress-bar progress-bar-success" style="width: 0%;"></div>
+                </div>
             </div>
+
+            <div class="form-group" id="url-upload-block">
+                <label for="artifactUrl">Upload from URL: </label>
+                    <input id="artifactUrl" name="artifactUrl" type="text" class="form-control" placeholder="Enter artifact url" />
+                    <a class="btn btn-info" id="url-upload">Upload From URL
+                        <span id="url-upload-progress"><span>
+                    </a>
             </div>
+
             <div class="form-group">
             <div class="form-inline input_fields_wrap">
                 <button class="add_field_button btn btn-info">Add More Properties</button>

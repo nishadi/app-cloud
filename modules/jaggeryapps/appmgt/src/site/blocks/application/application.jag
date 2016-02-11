@@ -105,6 +105,14 @@ var applicationModule = jagg.module("application");
         response.status = 200;
         response.content = "Runtime property successfully added.";
 
+    }else if (action == "downloadFromUrl"){
+        log.info("blocks downloadFromUrl");
+        var artfactUrl = request.getParameter("artfactUrl");
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var appTypeName = request.getParameter("appTypeName");
+        var mod = jagg.module("application");
+        mod.downloadFromUrl(artfactUrl,applicationName,applicationRevision,appTypeName);
     }
 }());
 
