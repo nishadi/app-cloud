@@ -1,5 +1,5 @@
 package org.wso2.carbon.mss.sample;/*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -28,6 +28,9 @@ import java.util.Map;
 public class BuzzWordManager {
 
 
+    public static final String WORD = "Word";
+    public static final String POPULARITY = "Popularity";
+
     /**
      * Add a new buzzword.
      * curl --data "Java" http://localhost:8080/buzzword
@@ -38,25 +41,25 @@ public class BuzzWordManager {
     public void addBuzzWords(String word) throws SQLException {
         Connection conn = DBUtil.getDBConnection();
         Statement statement = conn.createStatement();
-        Map<String, String> buzzWordList = getAllBuzzWords();
         int ranking = 1;
-        String sql = "INSERT INTO Buzzwords (Popularity ,Word) VALUES (?,?)";
-        // String sql = "UPDATE Buzzwords SET Popularity = ? WHERE Word = ?";
+        String sql = "INSERT INTO Buzzwords (" + POPULARITY + " , " + WORD + ") VALUES (?,?)";
+
+        Map<String, String> buzzWordList = getAllBuzzWords();
+
         for (Map.Entry<String, String> entry : buzzWordList.entrySet()) {
 
             if (word.equals(entry.getKey())) {
-                System.out.println(entry.getKey() + "***" + entry.getValue());
                 ranking = Integer.parseInt(entry.getValue());
                 ranking++;
-                sql = "UPDATE Buzzwords SET Popularity = ? WHERE Word = ?";
+                sql = "UPDATE Buzzwords SET" +  POPULARITY +" = ? WHERE " + WORD + " = ?";
             }
         }
 
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setInt(1, ranking);
-        stmt.setString(2, word);
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+        preparedStatement.setInt(1, ranking);
+        preparedStatement.setString(2, word);
 
-        stmt.executeUpdate();
+        preparedStatement.executeUpdate();
         DBUtil.closeConnection(conn);
         DBUtil.closeStatement(statement);
 
@@ -76,16 +79,15 @@ public class BuzzWordManager {
         Map buzzWordList = new HashMap();
         Connection conn = DBUtil.getDBConnection();
 
+        String sql = "select * from Buzzwords where " +  WORD + " like ?";
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+        preparedStatement.setString(1, "%" + regex + "%");
 
-        String sql = "select * from Buzzwords where Word like ?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, "%" + regex + "%");
-
-        ResultSet resultSet = stmt.executeQuery();
+        ResultSet resultSet = preparedStatement.executeQuery();
 
         while (resultSet.next()) {
-            String word = resultSet.getString("Word");
-            String ranking = resultSet.getString("Popularity");
+            String word = resultSet.getString(WORD);
+            String ranking = resultSet.getString(POPULARITY);
             buzzWordList.put(word, ranking);
         }
 
@@ -105,16 +107,45 @@ public class BuzzWordManager {
         Map buzzWordList = new HashMap();
         Connection conn = DBUtil.getDBConnection();
 
-
         String sql = "select * from Buzzwords";
-        PreparedStatement stmt = conn.prepareStatement(sql);
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
 
-
-        ResultSet resultSet = stmt.executeQuery();
+        ResultSet resultSet = preparedStatement.executeQuery();
 
         while (resultSet.next()) {
-            String word = resultSet.getString("Word");
-            String ranking = resultSet.getString("Popularity");
+            String word = resultSet.getString(WORD);
+            String ranking = resultSet.getString(POPULARITY);
+            buzzWordList.put(word, ranking);
+        }
+
+        return buzzWordList;
+    }
+
+
+    /**
+     * Retrieve all buzzwords with their popularity ranking.
+     * curl -v http://localhost:8080/buzzword/mostPopular
+     *
+     * @returnall buzzwords with their popularity ranking will be sent to the client as Json/xml
+     * according to the Accept header of the request.
+     */
+    @GET
+    @Path("/mostPopular")
+    public Map getMostPopularBuzzWords() throws SQLException {
+        Map buzzWordList = new HashMap();
+        Connection conn = DBUtil.getDBConnection();
+        int mostPopularCount = 10;
+
+        String sql = "select * from Buzzwords order by " +  POPULARITY + " desc limit ?";
+
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+        preparedStatement.setInt(1, mostPopularCount);
+
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        while (resultSet.next()) {
+            String word = resultSet.getString(WORD);
+            String ranking = resultSet.getString(POPULARITY);
             buzzWordList.put(word, ranking);
         }
 
