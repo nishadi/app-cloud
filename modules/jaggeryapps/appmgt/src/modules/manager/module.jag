@@ -18,11 +18,11 @@
  */
 
 jagg.module("manager", {
-    getStorageServerServiceURL:function () {
-        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getStorageServerServiceURL.apply(this, arguments);
-    },
     setAuthHeaders:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").setAuthHeaders.apply(this, arguments);
+    },
+    getPropertyValue:function () {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getPropertyValue.apply(this, arguments);
     },
 	getTenantDomain:function () {
 		return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getTenantDomain.apply(this, arguments);
