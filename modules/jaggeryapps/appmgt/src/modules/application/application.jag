@@ -29,7 +29,7 @@ var EventsManager = Packages.org.wso2.appcloud.core.EventsManager;
 var Event = Packages.org.wso2.appcloud.core.dto.Event;
 var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
 var RuntimeProperty = Packages.org.wso2.appcloud.core.dto.RuntimeProperty;
-
+var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
 /**
  * Add a application object
  *
@@ -568,6 +568,23 @@ var createDestinationDirsForUploadedApps = function (applicationName, revision) 
     if (!destinationDir.isExists()) {
         destinationDir.mkdir();
     }
+}
+
+var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
+    log.info("Inside modules downloadFromUrl");
+    createDestinationDirsForUploadedApps(applicationName, revision);
+    var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+                + modManager.getTenantDomain() + "/" + applicationName + "/" + revision + "/";
+    var CARBON_HOME = CarbonUtils.getCarbonHome();
+    var filePath = CARBON_HOME + "/repository/deployment/server/jaggeryapps/appmgt";
+
+    if (apptype == "war"){
+        filePath  = filePath + fileUploadPath + applicationName + ".war";
+    } else if (apptype == "mss") {
+        filePath  = filePath + fileUploadPath + applicationName + ".jar";
+    }
+    log.info("apptype: " + apptype);
+    CloudUtil.downloadFromUrl(artifactUrl , filePath);
 }
 
 %>
