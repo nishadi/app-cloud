@@ -140,6 +140,8 @@ public class SQLQueryConstants {
 
     public static final String UPDATE_RUNTIME_PROPERTIES =
             "UPDATE RuntimeProperties SET property_name=?, property_value=? WHERE application_id=? AND tenant_id=? AND property_name=? AND property_value=?";
+    public static final String UPDATE_TAG =
+            "UPDATE Label SET label_name=?, label_value=? WHERE application_id=? AND tenant_id=? AND label_name=? AND label_value=?";
 
     public static final String UPDATE_APPLICATION_STATUS =
             "UPDATE Application SET status=? WHERE application_name=? AND revision=? AND tenant_id=?";
@@ -150,4 +152,6 @@ public class SQLQueryConstants {
     /*Delete Queries*/
     public static final String DELETE_RUNTIME_PROPERTIES =
             "DELETE FROM RuntimeProperties WHERE application_id=? AND tenant_id=? AND property_name=? AND property_value=?";
+    public static final String DELETE_TAG =
+            "DELETE FROM Label WHERE application_id=? AND tenant_id=? AND label_name=? AND label_value=?";
 }

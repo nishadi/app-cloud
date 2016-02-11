@@ -379,6 +379,33 @@ var getEnvVariablesByNameRevision = function(appName,appRevision){
     return evnVariables;
 };
 
+var getTags = function(appName,appRevision){
+    var tags = [];
+       try {
+        var tagArr = ApplicationManager.getTags(appName,appRevision);
+           for (var i = 0; i < tagArr.length; i++) {
+               var tagObj = {};
+               tagObj.key = tagArr[i].labelName;
+               tagObj.value = tagArr[i].labelValue;
+               tags.push(tagObj);
+           }
+    } catch(e){
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+    return tags;
+};
+
+var updateTag = function (applicationName, applicationRevision, prevKey, newKey, prevValue, newValue) {
+    try {
+        ApplicationManager.updateTag(applicationName, applicationRevision, prevKey, newKey, prevValue, newValue);
+    } catch (e) {
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+};
 var updateApplicationRuntimeProperty = function (applicationName, applicationRevision, prevKey, newKey, prevValue, newValue) {
     try {
         ApplicationManager.updateApplicationRuntimeProperty(applicationName, applicationRevision, prevKey, newKey, prevValue, newValue);
@@ -398,7 +425,15 @@ var deleteApplicationRuntimeProperty = function (applicationName, applicationRev
         throw e;
     }
 };
-
+var deleteTag = function (applicationName, applicationRevision, key, value) {
+    try {
+        ApplicationManager.deleteTag(applicationName, applicationRevision, key, value);
+    } catch (e) {
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+};
 var addApplicationRuntimeProperty = function (applicationName, applicationRevision, key, value) {
     try {
         var runtimePropertyList = new java.util.ArrayList();
@@ -407,6 +442,21 @@ var addApplicationRuntimeProperty = function (applicationName, applicationRevisi
         runtimeProperty.setPropertyValue(value);
         runtimePropertyList.add(runtimeProperty);
         ApplicationManager.addRuntimeProperties(applicationName, applicationRevision, runtimePropertyList);
+    } catch (e) {
+        log.error("Error while adding runtime property with Key:" + key);
+        log.error(e);
+        throw e;
+    }
+};
+
+var addTag = function (applicationName, applicationRevision, key, value) {
+    try {
+        var tagList = new java.util.ArrayList();
+        var tag = new Packages.org.wso2.appcloud.core.dto.Label();
+        tag.setLabelName(key);
+        tag.setLabelValue(value);
+        tagList.add(tag);
+        ApplicationManager.addTags(applicationName, applicationRevision, tagList);
     } catch (e) {
         log.error("Error while adding runtime property with Key:" + key);
         log.error(e);
