@@ -16,6 +16,7 @@
 
 package org.wso2.appcloud.provisioning.runtime.Utils;
 
+import io.fabric8.kubernetes.api.KubernetesHelper;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -69,8 +70,6 @@ public class KubernetesProvisioningUtils {
         // todo: consider constraints of 24 character limit in namespace.
         String ns = applicationContext.getTenantInfo().getTenantDomain();
         ns = ns.replace(".", "-").toLowerCase();
-
-        log.info("Constructing a namespace with value: "+ns);
         ObjectMeta metadata = new ObjectMetaBuilder()
                 .withName(ns)
                 .build();
@@ -163,5 +162,28 @@ public class KubernetesProvisioningUtils {
         String appVersion = applicationContext.getVersion();
 
         return "/" + tenantDomain + "/webapps/" + appId + "-" + appVersion;
+    }
+
+    /**
+     * This utility method will return the pod status an application
+     *
+     * @param applicationContext application context object
+     * @return
+     */
+    public static boolean getPodStatus(ApplicationContext applicationContext){
+        PodList podList = getPods(applicationContext);
+
+        if (podList.getItems().size() == 0) {
+            return false;
+        } else {
+            for (Pod pod : podList.getItems()) {
+                String status = KubernetesHelper.getPodStatusText(pod);
+                if (!"Running".equals(status)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+
     }
 }

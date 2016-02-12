@@ -46,12 +46,6 @@ var addApplication = function (applicationName, applicationRevision, application
             "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " "
     );
 
-    //Create Docker file
-
-
-    var eventsManager = new EventsManager();
-    var event = new Event();
-
     //================================= Adding application to Database =========================================
     var application = new Application();
     application.setApplicationName(applicationName);
@@ -60,7 +54,7 @@ var addApplication = function (applicationName, applicationRevision, application
     application.setNumberOfReplicas(replicas);
     application.setRuntimeId(runtimeId);
     application.setApplicationType(appTypeName);
-
+    application.setStatus(APPLICATION_CREATED);
 
     if (runtimeProperties != null || runtimeProperties != "None") {
         var parsedRuntimeProperties = parse(runtimeProperties);
@@ -75,22 +69,14 @@ var addApplication = function (applicationName, applicationRevision, application
             application.setRuntimeProperties(runtimePropertyList);
         }
     }
-
     ApplicationManager.addApplication(application);
-
     //============================================================================================================
 
-
     //==================================== Create docker file block ==============================================
-
     //Adding docker file create pending event
-    event.setEventName(DOCKER_FILE_CREATE);
-    event.setEventStatus(EVENT_PENDING);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Docker file create successfully triggered in appcloud");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
+    var msg = "Docker file create successfully triggered in appcloud";
+    addEvent(DOCKER_FILE_CREATE, EVENT_PENDING, msg, applicationName, applicationRevision);
 
-    //Create Docker file
     var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
     var dockerOpClient = new DockerOpClient("http://127.0.0.1:2375");
     var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
@@ -99,105 +85,109 @@ var addApplication = function (applicationName, applicationRevision, application
     var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
     dockerOpClient.createDockerFile(runtimeId, appTypeName, uploadedFileName, dockerFilePath);
 
-
-
     //Adding docker file create success event
-    event.setEventName(DOCKER_FILE_CREATE);
-    event.setEventStatus(EVENT_SUCCEEDED);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Docker file successfully created for application");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-
+    var msg = "Docker file successfully created for application";
+    addEvent(DOCKER_FILE_CREATE, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
     //============================================================================================================
 
-
-
     //==================================== Build docker image block ==============================================
-
     //Adding docker build pending event
-    event.setEventName(DOCKER_IMAGE_BUILD);
-    event.setEventStatus(EVENT_PENDING);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Docker image build successfully triggered in appcloud");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
+    var msg = "Docker image build successfully triggered in appcloud";
+    addEvent(DOCKER_IMAGE_BUILD, EVENT_PENDING, msg, applicationName, applicationRevision);
 
     //Build Docker image
     var dockerRegTenantSpace = "super";
     var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
     dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,absFileUploadedPath);
 
-
-
-    //Adding docker build pending event
-    event.setEventName(DOCKER_IMAGE_BUILD);
-    event.setEventStatus(EVENT_SUCCEEDED);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Docker image build successfully built");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-
+    //Adding docker build success event
+    var msg = "Docker image build successfully built";
+    addEvent(DOCKER_IMAGE_BUILD, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
     //============================================================================================================
-
 
     //==================================== Push docker image block ===============================================
+    //Adding docker image push pending event
+    var msg = "Docker image push successfully triggered in triggered";
+    addEvent(DOCKER_REGISTRY_PUSH, EVENT_PENDING, msg, applicationName, applicationRevision);
 
-     //Adding docker image push pending event
-     event.setEventName(DOCKER_REGISTRY_PUSH);
-     event.setEventStatus(EVENT_PENDING);
-     event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-     event.setEventDescription("Docker image push successfully triggered in triggered");
-     eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
+    //Push Docker image
+    dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
 
-     //Push Docker image
-     dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
-
-     //Adding docker push success event
-     event.setEventName(DOCKER_REGISTRY_PUSH);
-     event.setEventStatus(EVENT_SUCCEEDED);
-     event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-     event.setEventDescription("Docker image successfully pushed to the remote registry");
-     eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-
+    //Adding docker push success event
+    var msg = "Docker image push successfully completed";
+    addEvent(DOCKER_REGISTRY_PUSH, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
     //============================================================================================================
 
-
     //==================================== Kubernetes deploy block ===============================================
-
     //Adding deployment pending event
-    event.setEventName(KUBE_DEPLOY);
-    event.setEventStatus(EVENT_PENDING);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Application deployment successfully triggered in Kubernetes");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
+    var msg = "Application deployment successfully triggered in Kubernetes";
+    addEvent(KUBE_DEPLOY, EVENT_PENDING, msg, applicationName, applicationRevision);
 
     //Creating basic deployment
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
-
     var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
              applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
-
     var kubService = new KubernetesRuntime(applicationCtx);
-
     var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision);
     var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
-
     log.info("Deploying application: " + applicationName);
-    kubService.deployApplication(deploymentConfig);
+    try{
+        kubService.deployApplication(deploymentConfig);
+    } catch(e){
+        var msg = "Error while submitting application deployment to Kubernetes";
+        addEvent(KUBE_DEPLOY, EVENT_FAILED, msg, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        throw e;
+    }
 
     //Adding deployment success event
-    event.setEventName(KUBE_DEPLOY);
-    event.setEventStatus(EVENT_SUCCEEDED);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Application deployment successfully triggered in Kubernetes");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-
+    var msg = "Application deployment successfull";
+    addEvent(KUBE_DEPLOY, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
     //============================================================================================================
 
+    //======================================= Creating Ingress ===================================================
+    //Adding deployment pending event
+    var msg = "Application ingress creation successfully triggered in Kubernetes";
+    addEvent(INGRESS, EVENT_PENDING, msg, applicationName, applicationRevision);
+    try{
+        var ingressCreated = kubService.createDeploymentUrl(modManager.getPropertyValue("ApplicationLaunchBaseURL"));
+        log.info("Deployment URL status: " + ingressCreated);
+        var msg = "Application ingress creation successful";
+        addEvent(INGRESS, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
+    } catch(e){
+        var msg = "Application ingress creation failed in Kubernetes";
+        addEvent(INGRESS, EVENT_FAILED, msg, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        throw e;
+    }
 
-    //Creating Ingress
-    var ingressCreated = kubService.createDeploymentUrl("appcloud.wso2.com");
-    log.info("Deployment URL status: " + ingressCreated);
+    //Adding pod status pending event
+    var msg = "Application pods created, still pending";
+    addEvent(POD_STATUS, EVENT_PENDING, msg, applicationName, applicationRevision);
+
+    var counter = 0;
+    while(counter < 180){ // Waiting 3 minutes to gets pods up and running
+        java.lang.Thread.sleep(1000);
+        var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
+        counter = counter + 1;
+        if (podStatus) {
+            //Adding pod status pending event
+            var msg = "Application started successfully";
+            addEvent(POD_STATUS, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
+            ApplicationManager.updateApplicationStatus(APPLICATION_RUNNING, applicationName, applicationRevision);
+            break;
+        }else if(counter == 180){ // if pods doesn't starts withing 3 minutes user redirected to user home
+            //Adding pod status error event
+            var msg = "Application starting failed";
+            addEvent(POD_STATUS, EVENT_FAILED, msg, applicationName, applicationRevision);
+            ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+
+            //Call application delete method
+        }
+    }
 };
-
 
 /**
  * Method for getting all the available application types. e.g : war, mss, car
@@ -225,7 +215,6 @@ function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName,
     return containerList;
 };
 
-
 function getDeploymentConfig(containersList, applicationName, replicas){
 
     var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
@@ -235,7 +224,6 @@ function getDeploymentConfig(containersList, applicationName, replicas){
 
     return deploymentConfig;
 }
-
 
 /**
  * Method for getting all the available application types e.g : war, mss, car
@@ -662,6 +650,18 @@ var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
     }
     log.info("apptype: " + apptype);
     CloudUtil.downloadFromUrl(artifactUrl , filePath);
+}
+
+var addEvent = function(name, status, description, applicationName, applicationRevision) {
+
+    var eventsManager = new EventsManager();
+    var event = new Event();
+
+    event.setEventName(name);
+    event.setEventStatus(status);
+    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
+    event.setEventDescription(description);
+    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
 }
 
 %>
