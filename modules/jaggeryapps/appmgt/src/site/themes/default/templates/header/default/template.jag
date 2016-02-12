@@ -20,11 +20,7 @@
 include("/jagg/constants.jag")
 include("/jagg/jagg.jag");
 
-jagg.template("header/default", function(inputs, outputs, jagg) {
-    // any jaggery logic goes here..
-    jagg.includeBlock("sso/filter", {});
-
-    %>
+jagg.template("header/default", function(inputs, outputs, jagg) { %>
 
 <!-- BOF cloud menu -->
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">

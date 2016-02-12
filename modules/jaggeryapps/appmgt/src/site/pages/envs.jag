@@ -24,10 +24,11 @@ var site = require("/site/conf/site.json");
 
 	var log = new Log();
 
-    var userName = jagg.getUser();
-	if(userName == null | userName == 'anonymous user') {
-		//do nothing
-	}
+    var user = jagg.getUser();
+    if (!user) {
+        jagg.includeBlock("sso/filter", {});
+        return;
+    }
 
 
     jagg.render({
