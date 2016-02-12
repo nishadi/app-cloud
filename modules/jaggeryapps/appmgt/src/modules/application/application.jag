@@ -40,7 +40,8 @@ var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
  * @param uploadedArtifact the uploaded artifact file
  * @param runtimeId runtime id of the application
  */
-var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas, runtimeId, appTypeName, runtimeProperties, uploadedFileName) {
+var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas,
+                               runtimeId, appTypeName, runtimeProperties, appIcon, uploadedFileName) {
     log.info("Started creating App => name: " + applicationName + " " +
             "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
             "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " "
@@ -61,7 +62,6 @@ var addApplication = function (applicationName, applicationRevision, application
     application.setRuntimeId(runtimeId);
     application.setApplicationType(appTypeName);
 
-
     if (runtimeProperties != null || runtimeProperties != "None") {
         var parsedRuntimeProperties = parse(runtimeProperties);
         if(Object.keys(parsedRuntimeProperties[0]).length > 0) {
@@ -77,7 +77,9 @@ var addApplication = function (applicationName, applicationRevision, application
     }
 
     ApplicationManager.addApplication(application);
-
+    if(appIcon){
+        changeApplicationIcon(applicationName, applicationRevision, appIcon);
+    }
     //============================================================================================================
 
 
@@ -383,9 +385,15 @@ function getApplicationIconAsBase64String(application) {
  * @param appIcon file object of the appIcon
  */
 function changeApplicationIcon(applicationName, revision, appIcon){
-    var streamHostObject = appIcon.getStream();
-    var inputStream = streamHostObject.getStream();
-    ApplicationManager.updateApplicationIcon(applicationName, inputStream);
+    if(appIcon){
+        var streamHostObject = appIcon.getStream();
+        var inputStream = streamHostObject.getStream();
+        ApplicationManager.updateApplicationIcon(applicationName, inputStream);
+    } else {
+        log.error("Provided app icon is Empty for application : "+applicationName);
+        throw "Provided app icon is Empty"
+    }
+
 }
 
 var getEnvVariablesByNameRevision = function(appName,appRevision){

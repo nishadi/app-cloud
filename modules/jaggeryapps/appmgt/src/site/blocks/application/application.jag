@@ -43,6 +43,7 @@ var log = new Log();
         var applicationRevision = request.getParameter("applicationRevision");
         var appTypeName = request.getParameter("appTypeName");
         var uploadedFileName = request.getParameter("uploadedFileName");
+        var appIcon = request.getFile("appIcon")
 
         var parsedRuntimeProperties;
         if(runtimeProperties != "None" || runtimeProperties != null ){
@@ -50,7 +51,7 @@ var log = new Log();
         }
 
         applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
-                runtimeId, appTypeName, JSON.stringify(parsedRuntimeProperties), uploadedFileName);
+                runtimeId, appTypeName, JSON.stringify(parsedRuntimeProperties), appIcon, uploadedFileName);
         response.status = 200;
         response.message = "Artifact is successfully uploaded!";
     }else if (action == "getApplicationCreationEvents"){
