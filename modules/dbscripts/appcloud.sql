@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`Label` (
   CONSTRAINT `fk_Label_Application1`
     FOREIGN KEY (`application_id`)
     REFERENCES `AppCloudDB`.`Application` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`RuntimeProperties` (
   CONSTRAINT `fk_RuntimeProperties_Application1`
     FOREIGN KEY (`application_id`)
     REFERENCES `AppCloudDB`.`Application` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`EndpointURL` (
   CONSTRAINT `fk_EndpointURL_Application1`
     FOREIGN KEY (`Application_id`)
     REFERENCES `AppCloudDB`.`Application` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
@@ -230,7 +230,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationEvents` (
   CONSTRAINT `fk_ApplicationEvents_Application1`
     FOREIGN KEY (`application_id`)
     REFERENCES `AppCloudDB`.`Application` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE 
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
