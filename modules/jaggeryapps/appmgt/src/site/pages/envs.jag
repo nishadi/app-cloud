@@ -43,7 +43,7 @@ var site = require("/site/conf/site.json");
                 {
                     "name":"layout/master",
                     "inputs":{
-                        "title":"WSO2 App Factory",
+                        "title":"WSO2 App Cloud",
                         "middle":[
                             {
                             	"name":"envs"

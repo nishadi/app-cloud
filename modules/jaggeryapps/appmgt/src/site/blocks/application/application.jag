@@ -105,6 +105,59 @@ var applicationModule = jagg.module("application");
         response.status = 200;
         response.content = "Runtime property successfully added.";
 
+    }else if (action == "downloadFromUrl"){
+        log.info("blocks downloadFromUrl");
+        var artfactUrl = request.getParameter("artfactUrl");
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var appTypeName = request.getParameter("appTypeName");
+        var mod = jagg.module("application");
+        mod.downloadFromUrl(artfactUrl,applicationName,applicationRevision,appTypeName);
+    }else if (action == "addTag"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var key = request.getParameter("key");
+        var value = request.getParameter("value");
+
+        var mod = jagg.module("application");
+        mod.addTag(applicationName, applicationRevision,key,value);
+        response.status = 200;
+        response.content = "Tag successfully added.";
+
+    }else if (action == "deleteTag"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var key = request.getParameter("key");
+        var value = request.getParameter("value");
+
+        var mod = jagg.module("application");
+        mod.deleteTag(applicationName, applicationRevision,key,value);
+        response.status = 200;
+        response.content = "Tag successfully deleted.";
+
+    }else if (action == "updateTag"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var prevKey = request.getParameter("prevKey");
+        var newKey = request.getParameter("newKey");
+        var prevValue = request.getParameter("prevValue");
+        var newValue = request.getParameter("newValue");
+
+        var mod = jagg.module("application");
+        mod.updateTag(applicationName, applicationRevision,prevKey,newKey,prevValue,newValue);
+        response.status = 200;
+        response.content = "Runtime property successfully updated.";
+
+    }else if (action == "getTags"){
+
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+
+        var mod = jagg.module("application");
+
+        var events = mod.getTags(applicationName, applicationRevision);
+        print(events);
+
     }
 }());
 

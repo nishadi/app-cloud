@@ -29,7 +29,7 @@ var EventsManager = Packages.org.wso2.appcloud.core.EventsManager;
 var Event = Packages.org.wso2.appcloud.core.dto.Event;
 var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
 var RuntimeProperty = Packages.org.wso2.appcloud.core.dto.RuntimeProperty;
-
+var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
 /**
  * Add a application object
  *
@@ -95,7 +95,7 @@ var addApplication = function (applicationName, applicationRevision, application
     var dockerOpClient = new DockerOpClient("http://127.0.0.1:2375");
     var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
             + modManager.getTenantDomain() + "/" + applicationName + "/" + applicationRevision + "/";
-    var absFileUploadedPath = modManager.getPropertyValue('PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH') + fileUploadPath;
+    var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
     var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
     dockerOpClient.createDockerFile(runtimeId, appTypeName, uploadedFileName, dockerFilePath);
 
@@ -123,7 +123,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     //Build Docker image
     var dockerRegTenantSpace = "super";
-    var tenantDockerRegistryUrl = modManager.getPropertyValue('PROPERTY_DOCKER_REGISTRY_URL') + "/" + dockerRegTenantSpace;
+    var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
     dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,absFileUploadedPath);
 
 
@@ -379,6 +379,33 @@ var getEnvVariablesByNameRevision = function(appName,appRevision){
     return evnVariables;
 };
 
+var getTags = function(appName,appRevision){
+    var tags = [];
+       try {
+        var tagArr = ApplicationManager.getTags(appName,appRevision);
+           for (var i = 0; i < tagArr.length; i++) {
+               var tagObj = {};
+               tagObj.key = tagArr[i].labelName;
+               tagObj.value = tagArr[i].labelValue;
+               tags.push(tagObj);
+           }
+    } catch(e){
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+    return tags;
+};
+
+var updateTag = function (applicationName, applicationRevision, prevKey, newKey, prevValue, newValue) {
+    try {
+        ApplicationManager.updateTag(applicationName, applicationRevision, prevKey, newKey, prevValue, newValue);
+    } catch (e) {
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+};
 var updateApplicationRuntimeProperty = function (applicationName, applicationRevision, prevKey, newKey, prevValue, newValue) {
     try {
         ApplicationManager.updateApplicationRuntimeProperty(applicationName, applicationRevision, prevKey, newKey, prevValue, newValue);
@@ -398,7 +425,15 @@ var deleteApplicationRuntimeProperty = function (applicationName, applicationRev
         throw e;
     }
 };
-
+var deleteTag = function (applicationName, applicationRevision, key, value) {
+    try {
+        ApplicationManager.deleteTag(applicationName, applicationRevision, key, value);
+    } catch (e) {
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+};
 var addApplicationRuntimeProperty = function (applicationName, applicationRevision, key, value) {
     try {
         var runtimePropertyList = new java.util.ArrayList();
@@ -407,6 +442,21 @@ var addApplicationRuntimeProperty = function (applicationName, applicationRevisi
         runtimeProperty.setPropertyValue(value);
         runtimePropertyList.add(runtimeProperty);
         ApplicationManager.addRuntimeProperties(applicationName, applicationRevision, runtimePropertyList);
+    } catch (e) {
+        log.error("Error while adding runtime property with Key:" + key);
+        log.error(e);
+        throw e;
+    }
+};
+
+var addTag = function (applicationName, applicationRevision, key, value) {
+    try {
+        var tagList = new java.util.ArrayList();
+        var tag = new Packages.org.wso2.appcloud.core.dto.Label();
+        tag.setLabelName(key);
+        tag.setLabelValue(value);
+        tagList.add(tag);
+        ApplicationManager.addTags(applicationName, applicationRevision, tagList);
     } catch (e) {
         log.error("Error while adding runtime property with Key:" + key);
         log.error(e);
@@ -568,6 +618,23 @@ var createDestinationDirsForUploadedApps = function (applicationName, revision) 
     if (!destinationDir.isExists()) {
         destinationDir.mkdir();
     }
+}
+
+var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
+    log.info("Inside modules downloadFromUrl");
+    createDestinationDirsForUploadedApps(applicationName, revision);
+    var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+                + modManager.getTenantDomain() + "/" + applicationName + "/" + revision + "/";
+    var CARBON_HOME = CarbonUtils.getCarbonHome();
+    var filePath = CARBON_HOME + "/repository/deployment/server/jaggeryapps/appmgt";
+
+    if (apptype == "war"){
+        filePath  = filePath + fileUploadPath + applicationName + ".war";
+    } else if (apptype == "mss") {
+        filePath  = filePath + fileUploadPath + applicationName + ".jar";
+    }
+    log.info("apptype: " + apptype);
+    CloudUtil.downloadFromUrl(artifactUrl , filePath);
 }
 
 %>
