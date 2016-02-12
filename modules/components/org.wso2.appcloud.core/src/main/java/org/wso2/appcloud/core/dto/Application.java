@@ -17,6 +17,7 @@
 
 package org.wso2.appcloud.core.dto;
 
+import java.sql.Blob;
 import java.util.List;
 
 public class Application {
@@ -34,6 +35,8 @@ public class Application {
     private List<RuntimeProperty> runtimeProperties;
     private List<Label> labels;
     private List<Endpoint> endpoints;
+    private Blob icon;
+
 
     public Application(){
 
@@ -141,5 +144,13 @@ public class Application {
 
     public void setRuntimeName(String runtimeName) {
         this.runtimeName = runtimeName;
+    }
+
+    public void setIcon(Blob icon) {
+        this.icon = icon;
+    }
+
+    public Blob getIcon() {
+        return icon;
     }
 }

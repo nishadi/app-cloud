@@ -44,4 +44,6 @@ var KUBE_DEPLOY = "kube_deploy";
 var EVENT_SUCCEEDED = "success";
 var EVENT_PENDING = "pending";
 var EVENT_FAILED = "failed";
+
+var UNAUTHORIZED_ERROR_RESPONSE ={"errorCode":"401","errorMessage":"Unauthorized access!!!"};
 %>

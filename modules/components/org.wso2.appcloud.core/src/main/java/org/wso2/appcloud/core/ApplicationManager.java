@@ -23,6 +23,8 @@ import org.wso2.appcloud.core.dao.ApplicationDAO;
 import org.wso2.appcloud.core.dto.*;
 import org.wso2.carbon.context.CarbonContext;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -247,6 +249,34 @@ public class ApplicationManager {
             String msg = "Error while getting the runtime properties for application : " + applicationName + " revision :" +
                          " " + revision + " in tenant : " + tenantId;
             throw new AppCloudException(msg, e);
+        }
+    }
+
+    public static void updateApplicationIcon(String applicationName, Object iconStream)
+            throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if( iconStream instanceof InputStream){
+            InputStream iconInputStream = (InputStream) iconStream;
+            try {
+                applicationDAO.updateApplicationIcon(iconInputStream, applicationName, tenantId);
+            } catch (AppCloudException e) {
+                String msg = "Error ouccered while updating application icon for application : " + applicationName +
+                             " in tenant : " + tenantId;
+                throw new AppCloudException(msg, e);
+            } finally {
+                try {
+                    iconInputStream.close();
+                } catch (IOException e) {
+                    log.error("Error occurred while closing input stream for application : " + applicationName +
+                              " in tenant : " + tenantId);
+                }
+            }
+        } else {
+            String msg = "Cannot read the provided icon stream for application : " + applicationName + " revision : " +
+                         " in tenant : " + tenantId;
+            log.error(msg);
+            throw new AppCloudException(msg);
         }
     }
 
