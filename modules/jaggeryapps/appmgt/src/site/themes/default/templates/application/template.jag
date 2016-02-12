@@ -30,6 +30,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
  <script type="text/javascript">
     var appTypeName = "<%=appType.type%>";
     var retryCount = 0;
+    var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
     $(document).ready(function(){
 
             $("#file-upload-block").hide();
@@ -230,6 +231,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     required: true,
                     validateContent: true,
                     maxlength: 8
+                },
+                icon: {                                     // app icon field
+                    validateAppIcon: true
                 }
             },
             onsubmit: false,    // Since we are handling on submit validation on click event of the "Create" button,
@@ -251,6 +255,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     $("#add-application").prop("disabled", false);
                 }
                 this.defaultShowErrors();
+            },
+            errorPlacement: function (error, element) {
+                if ($(element).parent().closest('div').hasClass("input-group")) {
+                    error.insertAfter($(element).closest('div'));
+                } else {
+                    error.insertAfter(element);
+                }
             }
         };
 
@@ -262,8 +273,24 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
         $.validator.addMethod("validateContent",
             validateContent, getAppCreationErrorMessage);
+        $.validator.addMethod("validateAppIcon",
+            validateAppIcon, getIconErrorMessage);
 
         var appCreationErrorMsg = "Invalid value";
+
+        $("#appIcon").change(function() {
+             $("#icon").val($("#appIcon").val());
+
+             // validate the app icon upon changes
+             var validator = $( "#application-details" ).validate();
+             validator.element( "#icon" );
+         });
+
+         // Validate Icon
+        $("#icon").change(function() {
+             var file = $('#icon');
+             validateIconImage(file.val(), this.files[0].size);
+        });
 
         function validateAlphaNumericChar(value) {
              var isValueValid = true;
@@ -344,6 +371,67 @@ jagg.template("application", function (inputs, outputs, jagg) {
         });
     });
 
+     function clearUploadIconField() {
+         document.getElementById("icon").value = "";
+         document.getElementById("appIcon").value = "";
+         var validator = $( "#application-details" ).validate();
+         validator.element( "#icon" );
+    }
+
+    // Return whether the app icon is validated or not
+    function validateAppIcon(value) {
+        var file = $("#appIcon");
+        if ($("#icon").val() && file.val() != "") {
+            return validateIconImage(file.val(), file[0].files[0].size);
+        } else {
+            return true;
+        }
+    }
+
+    function validateIconImage(filename, fileSize) {
+
+         var ext = getFileExtension(filename);
+         var maxSize = 5242880;
+         var isValidExtension = false;
+         var isValidIconSize = false;
+
+         // Check extension
+         switch (ext.toLowerCase()) {
+             case 'jpg':
+             case 'jpeg':
+             case 'gif':
+             case 'bmp':
+             case 'png':
+                 isValidExtension = true;
+                 break;
+             default:
+                iconErrorMsg = "Invalid image selected for Application Icon - Select a valid image";
+                isValidExtension = false;
+                break;
+         }
+         // Check size
+         if(!fileSize) {
+            iconErrorMsg = "Image file should be non-empty";
+            isValidIconSize = false;
+         } else if (fileSize != undefined && fileSize > maxSize) {
+            iconErrorMsg ="Image file should be less than 5MB";
+            isValidIconSize = false;
+         } else {
+             isValidIconSize = true;
+         }
+         return (isValidExtension && isValidIconSize);
+    }
+
+     // Utility Functions Goes Here
+    // extract file extension
+    function getFileExtension(filename) {
+        var parts = filename.split('.');
+        return parts[parts.length - 1];
+    }
+
+    function getIconErrorMessage(){
+        return iconErrorMsg;
+    }
  </script>
 
     <!-- BOF App factory menu actionbar -->
@@ -440,6 +528,24 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     <a class="btn btn-info" id="url-upload">Upload From URL
                         <span id="url-upload-progress"><span>
                     </a>
+            </div>
+
+            <div class="form-group">
+                <label for="application-icon">Icon:
+                    <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left"
+                title="Recommended image size : 300 x 300 pixels, file size 70 k (maximum)"></i>
+                </label>
+                <div class="input-group">
+                    <input type="text" id="icon" name="icon" class="form-control" readonly>
+                    <span class="input-group-btn">
+                        <span class="btn btn-primary btn-file">
+                            Browse <input type="file" id="appIcon" name="appIcon"/>
+                        </span>
+                        <span class="btn btn-primary btn-file" onclick="clearUploadIconField()" id="clear">
+                            Clear
+                        </span>
+                    </span>
+                </div>
             </div>
 
             <div class="form-group">

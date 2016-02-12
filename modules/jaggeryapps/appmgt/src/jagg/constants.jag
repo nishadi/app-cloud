@@ -35,11 +35,12 @@ var KUB_SERVICE_PROTOCOL = "TCP";
 var DASHBOARD_BASE_URL="https://localhost:9446/monitoring/webapps/";
 
 //events related constants
+var DATABASE_ADD = "Adding application to database";
 var DOCKER_FILE_CREATE = "Creating docker file";
 var DOCKER_IMAGE_BUILD = "Building docker image";
 var DOCKER_REGISTRY_PUSH = "Updating docker registry";
 var KUBE_DEPLOY = "Starting deployment";
-var INGRESS = "Service proxy creation"
+var INGRESS = "Service proxy creation";
 var POD_STATUS = "Status";
 
 var EVENT_SUCCEEDED = "success";

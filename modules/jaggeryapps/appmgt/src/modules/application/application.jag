@@ -40,36 +40,51 @@ var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
  * @param uploadedArtifact the uploaded artifact file
  * @param runtimeId runtime id of the application
  */
-var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas, runtimeId, appTypeName, runtimeProperties, uploadedFileName) {
+var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas,
+                               runtimeId, appTypeName, runtimeProperties, appIcon, uploadedFileName) {
     log.info("Started creating App => name: " + applicationName + " " +
             "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
             "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " "
     );
 
     //================================= Adding application to Database =========================================
-    var application = new Application();
-    application.setApplicationName(applicationName);
-    application.setRevision(applicationRevision);
-    application.setDescription(applicationDescription);
-    application.setNumberOfReplicas(replicas);
-    application.setRuntimeId(runtimeId);
-    application.setApplicationType(appTypeName);
-    application.setStatus(APPLICATION_CREATED);
+    try {
+        var application = new Application();
+        application.setApplicationName(applicationName);
+        application.setRevision(applicationRevision);
+        application.setDescription(applicationDescription);
+        application.setNumberOfReplicas(replicas);
+        application.setRuntimeId(runtimeId);
+        application.setApplicationType(appTypeName);
+        application.setStatus(APPLICATION_CREATED);
 
-    if (runtimeProperties != null || runtimeProperties != "None") {
-        var parsedRuntimeProperties = parse(runtimeProperties);
-        if(Object.keys(parsedRuntimeProperties[0]).length > 0) {
-            var runtimePropertyList = new java.util.ArrayList();
-            for (var i = 0; i < parsedRuntimeProperties.length; i++) {
-                var runtimeProperty = new RuntimeProperty();
-                runtimeProperty.setPropertyName(parsedRuntimeProperties[i].key);
-                runtimeProperty.setPropertyValue(parsedRuntimeProperties[i].value);
-                runtimePropertyList.add(runtimeProperty);
+        if (runtimeProperties != null || runtimeProperties != "None") {
+            var parsedRuntimeProperties = parse(runtimeProperties);
+            if(Object.keys(parsedRuntimeProperties[0]).length > 0) {
+                var runtimePropertyList = new java.util.ArrayList();
+                for (var i = 0; i < parsedRuntimeProperties.length; i++) {
+                    var runtimeProperty = new RuntimeProperty();
+                    runtimeProperty.setPropertyName(parsedRuntimeProperties[i].key);
+                    runtimeProperty.setPropertyValue(parsedRuntimeProperties[i].value);
+                    runtimePropertyList.add(runtimeProperty);
+                }
+                application.setRuntimeProperties(runtimePropertyList);
             }
-            application.setRuntimeProperties(runtimePropertyList);
         }
+        ApplicationManager.addApplication(application);
+
+        if(appIcon){
+            changeApplicationIcon(applicationName, applicationRevision, appIcon);
+        }
+    } catch (e){
+        var msg = "Error while adding application to database";
+        addEvent(DATABASE_ADD, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        //Call application delete method
+        throw e;
     }
-    ApplicationManager.addApplication(application);
     //============================================================================================================
 
     //==================================== Create docker file block ==============================================
@@ -77,13 +92,23 @@ var addApplication = function (applicationName, applicationRevision, application
     var msg = "Docker file create successfully triggered in appcloud";
     addEvent(DOCKER_FILE_CREATE, EVENT_PENDING, msg, applicationName, applicationRevision);
 
-    var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
-    var dockerOpClient = new DockerOpClient("http://127.0.0.1:2375");
-    var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-            + modManager.getTenantDomain() + "/" + applicationName + "/" + applicationRevision + "/";
-    var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
-    var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
-    dockerOpClient.createDockerFile(runtimeId, appTypeName, uploadedFileName, dockerFilePath);
+    try {
+        var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
+        var dockerOpClient = new DockerOpClient("http://127.0.0.1:2375");
+        var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+                + modManager.getTenantDomain() + "/" + applicationName + "/" + applicationRevision + "/";
+        var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
+        var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
+        dockerOpClient.createDockerFile(runtimeId, appTypeName, uploadedFileName, dockerFilePath);
+    } catch(e){
+        var msg = "Error while creating docker file";
+        addEvent(DOCKER_FILE_CREATE, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        //Call application delete method
+        throw e;
+    }
 
     //Adding docker file create success event
     var msg = "Docker file successfully created for application";
@@ -94,12 +119,19 @@ var addApplication = function (applicationName, applicationRevision, application
     //Adding docker build pending event
     var msg = "Docker image build successfully triggered in appcloud";
     addEvent(DOCKER_IMAGE_BUILD, EVENT_PENDING, msg, applicationName, applicationRevision);
-
-    //Build Docker image
-    var dockerRegTenantSpace = "super";
-    var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
-    dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,absFileUploadedPath);
-
+    try {
+        var dockerRegTenantSpace = "super";
+        var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
+        dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,absFileUploadedPath);
+    } catch (e){
+        var msg = "Error while building docker file";
+        addEvent(DOCKER_IMAGE_BUILD, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        //Call application delete method
+        throw e;
+    }
     //Adding docker build success event
     var msg = "Docker image build successfully built";
     addEvent(DOCKER_IMAGE_BUILD, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
@@ -109,10 +141,17 @@ var addApplication = function (applicationName, applicationRevision, application
     //Adding docker image push pending event
     var msg = "Docker image push successfully triggered in triggered";
     addEvent(DOCKER_REGISTRY_PUSH, EVENT_PENDING, msg, applicationName, applicationRevision);
-
-    //Push Docker image
-    dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
-
+    try {
+        dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
+    } catch (e) {
+        var msg = "Error uploading docker image to remote registry";
+        addEvent(DOCKER_REGISTRY_PUSH, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        //Call application delete method
+        throw e;
+    }
     //Adding docker push success event
     var msg = "Docker image push successfully completed";
     addEvent(DOCKER_REGISTRY_PUSH, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
@@ -136,11 +175,12 @@ var addApplication = function (applicationName, applicationRevision, application
     } catch(e){
         var msg = "Error while submitting application deployment to Kubernetes";
         addEvent(KUBE_DEPLOY, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
+        //Call application delete method
         throw e;
     }
-
     //Adding deployment success event
     var msg = "Application deployment successfull";
     addEvent(KUBE_DEPLOY, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
@@ -158,11 +198,13 @@ var addApplication = function (applicationName, applicationRevision, application
     } catch(e){
         var msg = "Application ingress creation failed in Kubernetes";
         addEvent(INGRESS, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
+        //Call application delete method
         throw e;
     }
-
+    //======================================= checking pod status =================================================
     //Adding pod status pending event
     var msg = "Application pods created, still pending";
     addEvent(POD_STATUS, EVENT_PENDING, msg, applicationName, applicationRevision);
@@ -187,6 +229,7 @@ var addApplication = function (applicationName, applicationRevision, application
             //Call application delete method
         }
     }
+    //=============================================================================================================
 };
 
 /**
@@ -371,9 +414,15 @@ function getApplicationIconAsBase64String(application) {
  * @param appIcon file object of the appIcon
  */
 function changeApplicationIcon(applicationName, revision, appIcon){
-    var streamHostObject = appIcon.getStream();
-    var inputStream = streamHostObject.getStream();
-    ApplicationManager.updateApplicationIcon(applicationName, inputStream);
+    if(appIcon){
+        var streamHostObject = appIcon.getStream();
+        var inputStream = streamHostObject.getStream();
+        ApplicationManager.updateApplicationIcon(applicationName, inputStream);
+    } else {
+        log.error("Provided app icon is Empty for application : "+applicationName);
+        throw "Provided app icon is Empty"
+    }
+
 }
 
 var getEnvVariablesByNameRevision = function(appName,appRevision){
