@@ -166,4 +166,9 @@ public class SQLQueryConstants {
             "DELETE FROM RuntimeProperties WHERE application_id=? AND tenant_id=? AND property_name=? AND property_value=?";
     public static final String DELETE_TAG =
             "DELETE FROM Label WHERE application_id=? AND tenant_id=? AND label_name=? AND label_value=?";
+
+    public static final String DELETE_APPLICATION = "DELETE FROM Application WHERE id = ?";
+
+    public static final String DELETE_APPLICATION_REVISION = "DELETE FROM Application "
+            + "WHERE application_name = ? and tenant_id = ?";
 }

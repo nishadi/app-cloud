@@ -987,4 +987,74 @@ public class ApplicationDAO {
         return applicationRuntime;
     }
 
+    /**
+     * Delete a application
+     *
+     * @param applicationName
+     * @param applicationRevision
+     * @param tenantId
+     * @return if delete a application
+     * @throws AppCloudException
+     */
+    public boolean deleteApplication(String applicationName, String applicationRevision, int tenantId)
+            throws AppCloudException {
+
+        int applicationId = getIdOfApplication(applicationName, applicationRevision, tenantId);
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        boolean deleted = false;
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_APPLICATION);
+            preparedStatement.setInt(1, applicationId);
+
+            deleted = preparedStatement.execute();
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg =
+                    "Error while deleting the application : " + applicationName + " revision : " + applicationRevision
+                            + " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return deleted;
+    }
+
+    /**
+     * Delete all aplication's revisions
+     *
+     * @param applicationName
+     * @param applicationRevision
+     * @param tenantId
+     * @return if delete a application
+     * @throws AppCloudException
+     */
+    public boolean deleteApplicationRevisions(String applicationName, int tenantId) throws AppCloudException {
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        boolean deleted = false;
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_APPLICATION_REVISION);
+            preparedStatement.setString(1, applicationName);
+            preparedStatement.setInt(2, tenantId);
+
+            deleted = preparedStatement.execute();
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while deleting the application : " + applicationName + " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return deleted;
+    }
+
 }
