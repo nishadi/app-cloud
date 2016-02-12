@@ -791,6 +791,7 @@ public class ApplicationDAO {
             preparedStatement.setInt(4, tenantId);
 
             preparedStatement.executeUpdate();
+            dbConnection.commit();
 
         } catch (SQLException e) {
             String msg = "Error while updating application status : " + status + " for application : " + applicationName

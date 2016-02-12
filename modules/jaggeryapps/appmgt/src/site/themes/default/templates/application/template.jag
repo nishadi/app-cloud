@@ -179,6 +179,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
                         statusStyle = "active";
                         table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
                                         "<td>" + event.status + "</td><td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                    } else if (event.status == "failed"){
+                        statusStyle = "active";
+                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                        "<td>" + event.status + "</td><td><i class=\"fa fa-times\"></i></td></tr>";
                     }
                 }
 
@@ -188,13 +192,20 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 for(var i = 0; i < result.length; i++){
                     var statusStyle;
                     var event = result[i];
-                    if(event.name == "kube_deploy" && event.status == "success"){
+                    if(event.name === "Status" && event.status == "success"){
                         setTimeout(redirectAppHome, 2000);
                         function redirectAppHome(){
                             window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
                         }
-                    }
+                    } else if(event.status == "failed"){
+                       setTimeout(redirectAppListing, 2000);
+                       function redirectAppListing(){
+                           window.location.replace("index.jag");
+                       }
+                   }
                 }
+            },function (jqXHR, textStatus, errorThrown) {
+                 jagg.message({content: "Error occurred while creating application.", type: 'error'});
             });
         }
 
@@ -354,6 +365,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 $("#file-upload-block").hide();
                 $("#url-upload-block").hide();
             }
+        });
+        $("#model_close_button_id").click(function(){
+            window.location.replace("index.jag");
         });
     });
 
@@ -575,6 +589,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
         <div class="modal-dialog modal-dialog-margin-top-md ">
             <div class="modal-content">
                 <div class="modal-header">
+                    <button id="model_close_button_id" type="button" class="close" data-dismiss="alert">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
                     <h4 class="modal-title" id="modal-title">Application Creation Progress</h4>
                 </div>
                 <div class="modal-body">

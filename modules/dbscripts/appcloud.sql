@@ -93,7 +93,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationIcon` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `application_name` varchar(45) NOT NULL,
-  `icon` BLOB DEFAULT NULL,
+  `icon` MEDIUMBLOB DEFAULT NULL,
   `tenant_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT uk_AppIcon UNIQUE( `application_name` ,  `tenant_id`),

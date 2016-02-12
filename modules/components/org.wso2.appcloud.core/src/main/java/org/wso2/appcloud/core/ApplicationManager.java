@@ -57,11 +57,11 @@ public class ApplicationManager {
     }
 
     /**
-     * Adding runtime properties for the application
+     *  Adding runtime properties for the application
      *
-     * @param application
-     * @param applicationId
-     * @param tenantId
+     * @param applicationName
+     * @param applicationRevision
+     * @param runtimeProperties
      * @throws AppCloudException
      */
     public static void addRuntimeProperties(String applicationName, String applicationRevision,
@@ -76,9 +76,9 @@ public class ApplicationManager {
     /**
      * Adding label for the application
      *
-     * @param application
-     * @param applicationId
-     * @param tenantId
+     * @param applicationName
+     * @param applicationRevision
+     * @param labels
      * @throws AppCloudException
      */
     public static void addTags(String applicationName, String applicationRevision, List<Label> labels)
