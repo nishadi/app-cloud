@@ -94,7 +94,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     try {
         var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
-        var dockerOpClient = new DockerOpClient("http://127.0.0.1:2375");
+        var dockerOpClient = new DockerOpClient(modManager.getPropertyValue("DockerClientURL"));
         var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
                 + modManager.getTenantDomain() + "/" + applicationName + "/" + applicationRevision + "/";
         var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
