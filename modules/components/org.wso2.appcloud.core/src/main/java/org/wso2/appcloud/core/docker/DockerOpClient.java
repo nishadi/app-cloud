@@ -79,11 +79,11 @@ public class DockerOpClient {
         FileUtils.writeLines(new File(dockerFilePath), dockerFileConfigs);
     }
 
-    public void buildDockerImage(String repoUrl, String imageName, String tag, String dockerFileUrl) throws
-            InterruptedException, IOException {
+    public void buildDockerImage(String repoUrl, String imageName, String tag, String dockerFileUrl)
+            throws InterruptedException, IOException, AppCloudException {
 
         String dockerImage = repoUrl + "/" + imageName + ":" + tag;
-
+        final boolean[] dockerStatusCheck = new boolean[1];
         handle = dockerClient.image().build()
                 .withRepositoryName(dockerImage)
                 .usingListener(new EventListener() {
@@ -91,12 +91,14 @@ public class DockerOpClient {
                     public void onSuccess(String message) {
                         log.info("Success:" + message);
                         buildDone.countDown();
+                        dockerStatusCheck[0] = true;
                     }
 
                     @Override
-                    public void onError(String messsage) {
-                        log.error("Failure:" +messsage);
+                    public void onError(String message) {
+                        log.error("Failure:" +message);
                         buildDone.countDown();
+                        dockerStatusCheck[0] = false;
                     }
 
                     @Override
@@ -107,22 +109,34 @@ public class DockerOpClient {
                 .fromFolder(dockerFileUrl);
         buildDone.await();
         handle.close();
+
+        if (!dockerStatusCheck[0]) {
+            log.error("Docker image building failed: " + imageName + " repo: " + repoUrl + " docker file: "
+                    + dockerFileUrl + " tag: " + tag);
+            throw new AppCloudException(
+                    "Docker image building failed: " + imageName + " repo: " + repoUrl + " docker file: "
+                            + dockerFileUrl + " tag: " + tag);
+        }
     }
 
-    public void pushDockerImage(String repoUrl, String imageName, String tag) throws InterruptedException, IOException {
-        String dockerImgeName = repoUrl + "/" + imageName;
+    public void pushDockerImage(String repoUrl, String imageName, String tag)
+            throws InterruptedException, IOException, AppCloudException {
 
+        final boolean[] dockerStatusCheck = new boolean[1];
+        String dockerImgeName = repoUrl + "/" + imageName;
         handle = dockerClient.image().withName(dockerImgeName).push().usingListener(new EventListener() {
             @Override
             public void onSuccess(String message) {
                 log.info("Success:" + message);
                 pushDone.countDown();
+                dockerStatusCheck[0] = true;
             }
 
             @Override
             public void onError(String message) {
                 log.error("Error:" + message);
                 pushDone.countDown();
+                dockerStatusCheck[0] = false;
             }
 
             @Override
@@ -130,9 +144,14 @@ public class DockerOpClient {
                 log.info(event);
             }
         }).toRegistry();
-
         pushDone.await();
         handle.close();
+
+        if (!dockerStatusCheck[0]) {
+            log.error("Docker image push failed: " + imageName + " repo: " + repoUrl + " tag: " + tag);
+            throw new AppCloudException(
+                    "Docker image push failed: " + imageName + " repo: " + repoUrl + " tag: " + tag);
+        }
     }
 
     public void clientClose() throws IOException {
