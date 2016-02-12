@@ -15,17 +15,23 @@ package org.wso2.carbon.mss.sample;/*
 *specific language governing permissions and limitations
 *under the License.
 */
-import org.wso2.msf4j.MicroservicesRunner;
 
-/**
- * This is the entry point to the Micro service. This initializes an instance of a
- * BuzzWordManager.
- * This Application.java class is referred in the pom.xml as a property.
- */
-public class Application {
-    public static void main(String[] args) {
-        new MicroservicesRunner()
-                .deploy(new BuzzWordManager())
-                .start();
+import java.util.Map;
+
+public class EnvUtil {
+
+    public String getEnvironmentVariable(String envVariableKey) {
+        Map<String, String> env = System.getenv();
+        String environmentVariableValue = null;
+        for (String envName : env.keySet()) {
+            if (envVariableKey.equals(envName)){
+                System.out.format("%s=%s%n",
+                        envName,
+                        env.get(envName));
+                environmentVariableValue = env.get(envName);
+            }
+
+        }
+        return environmentVariableValue;
     }
 }

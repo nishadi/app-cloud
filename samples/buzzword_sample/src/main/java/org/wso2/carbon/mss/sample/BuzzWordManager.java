@@ -24,6 +24,13 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/**
+ * This class is the main class that handles the business logic of the
+ * Micro Service. This does all the HTTP request processing and retrieve the
+ * requested data from the database
+ */
+
 @Path("/buzzword")
 public class BuzzWordManager {
 
