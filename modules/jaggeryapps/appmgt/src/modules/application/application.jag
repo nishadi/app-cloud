@@ -882,4 +882,49 @@ var deleteApplicationFromKubernetes = function(applicationName, revision) {
         log.error(e);
     }
 }
+var cleaApplicationUploadedPath = function(applicationName, revision){
+    var fileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+            + modManager.getTenantDomain() + "/" + applicationName;
+    var fileUtils = Packages.org.apache.commons.io.FileUtils;
+    var fileUploadPath = new Packages.java.io.File(fileUploadPath);
+    log.info(fileUploadPath.getAbsolutePath())
+    if(fileUploadPath.exists()){
+        fileUtils.deleteDirectory(fileUploadPath);
+    }
+}
+
+var cleanUpApplicationDeployment = function(applicationName, revision){
+    try {
+        cleaApplicationUploadedPath(applicationName, revision);
+        log.info("Successfully clean up the application uploaded directory");
+    }catch(e){
+        log.error("Error while cleaning up the application uploaded path");
+        log.error(e);
+    }
+
+    try{
+        ApplicationManager.deleteApplication(applicationName, revision);
+        log.info("Successfully deleted the application form the database");
+    }catch(e){
+        log.error("Error while deleting application from the database");
+        log.error(e);
+    }
+
+    try{
+        var KubernetesRuntimeProvisioningService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
+
+        var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
+                applicationName, revision, null, modManager.getTenantId(), modManager.getTenantDomain());
+
+        var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
+
+        kubernetesRuntimeProvisioningService.deleteDeployment();
+        log.error("Successfully clean up the kubernetes deployments");
+
+    }catch(e){
+        log.error("Error while cleaning up the Kubernetes deployment");
+        log.error(e);
+    }
+}
+
 %>
