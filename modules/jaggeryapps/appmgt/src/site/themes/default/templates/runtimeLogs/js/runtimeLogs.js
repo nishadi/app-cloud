@@ -62,9 +62,18 @@ function initData(selectedRevision){
     },function (result) {
         initelements();
         selectedRevisionLogMap = jQuery.parseJSON(result);
-        selectedRevisionReplicaList = Object.keys(selectedRevisionLogMap);
-        regerateReplicasList(selectedRevisionReplicaList);
-        setLogArea(selectedRevisionLogMap[selectedRevisionReplicaList[0]]);
+        if(!jQuery.isEmptyObject(selectedRevisionLogMap)){
+            selectedRevisionReplicaList = Object.keys(selectedRevisionLogMap);
+            regerateReplicasList(selectedRevisionReplicaList);
+            setLogArea(selectedRevisionLogMap[selectedRevisionReplicaList[0]]);
+        } else {
+            jagg.message({content: "Deployment in progress. Please wait",
+                                      type: 'information', id:'view_log', timeout:'5000'});
+            setTimeout(function(){
+                $.noty.closeAll();
+                initData(selectedRevision);
+            }, 5000);
+        }
     },function (jqXHR, textStatus, errorThrown) {
         $('#revision').prop("disabled", false);
         jagg.message({content: "Error occurred while loading the logs.", type: 'error', id:'view_log'});

@@ -24,6 +24,13 @@ var appTypeName = request.getParameter("appTypeName");
 
 
 (function () {
+
+    var user = jagg.getUser();
+    if (!user) {
+        jagg.includeBlock("sso/filter", {});
+        return;
+    }
+
     jagg.render({
         "name": "page/master",
         "inputs": {

@@ -38,10 +38,12 @@ var getFormattedRuntimeLogs = function (applicationKey, selectedRevision, applic
     var logMap = {};
     if (result instanceof Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentLogs){
         var map = result.getDeploymentLogs();
-        var iterator = map.entrySet().iterator();
-        while (iterator.hasNext()) {
-            var entry = iterator.next();
-            logMap[entry.getKey()] = entry.getValue().toString();
+        if(map && map.entrySet()) {
+            var iterator = map.entrySet().iterator();
+            while (iterator.hasNext()) {
+                var entry = iterator.next();
+                logMap[entry.getKey()] = entry.getValue().toString();
+            }
         }
         return logMap;
     } else {

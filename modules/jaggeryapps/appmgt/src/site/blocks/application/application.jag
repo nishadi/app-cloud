@@ -22,9 +22,12 @@ include('/jagg/constants.jag');
 
 var action = request.getParameter("action");
 var applicationModule = jagg.module("application");
-
+var log = new Log();
 (function(){
-
+    if (!jagg.getUser()) {
+        print(UNAUTHORIZED_ERROR_RESPONSE);
+        return;
+    }
     if(action == "uploadExistingArchive"){
         var uploadedArtifact = request.getFile("fileUpload");
         var applicationName = request.getParameter("applicationName");
@@ -158,6 +161,15 @@ var applicationModule = jagg.module("application");
         var events = mod.getTags(applicationName, applicationRevision);
         print(events);
 
+    } else if (action == "changeAppIcon"){
+        var appIcon = request.getFile("changeIcon");
+        var applicationName = request.getParameter("applicationName");
+        var revision = request.getParameter("selectedRevision");
+        var mod = jagg.module("application");
+        mod.changeApplicationIcon(applicationName, revision, appIcon);
+        print("<html><script>window.location.replace('/appmgt/site/pages/home.jag?applicationName=" + applicationName + "');</script><body></body></html>");
+    } else {
+        throw new Error("No action specified");
     }
 }());
 

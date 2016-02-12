@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`Application` (
   `status` VARCHAR(45) NULL,
   `number_of_replica` INT NULL,
   PRIMARY KEY (`id`),
+  CONSTRAINT uk_Application_NAME_TID_REV UNIQUE(`application_name`, `tenant_id`, `revision`),
   CONSTRAINT `fk_Application_ApplicationRuntime`
     FOREIGN KEY (`application_runtime_id`)
     REFERENCES `AppCloudDB`.`ApplicationRuntime` (`id`)
@@ -88,6 +89,17 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`Application` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationIcon` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_name` varchar(45) NOT NULL,
+  `icon` BLOB DEFAULT NULL,
+  `tenant_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT uk_AppIcon UNIQUE( `application_name` ,  `tenant_id`),
+  CONSTRAINT  `fk_ApplicationIcon_Application` FOREIGN KEY (`application_name`,`tenant_id`) REFERENCES `AppCloudDB`.`Application` (`application_name`,`tenant_id`)
+) ENGINE=InnoDB;
+
 
 
 -- -----------------------------------------------------

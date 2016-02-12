@@ -34,7 +34,7 @@ jagg.template("runtimeLogs", function (inputs, outputs, jagg) {
 <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/CodeMirror-5.7.0/codemirror.css'))%>">
 <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/CodeMirror-5.7.0/theme/icecoder.css'))%>">
 
-<script>
+<script type="text/javascript" xmlns="http://www.w3.org/1999/html" charset="utf-8">
     var applicationName = "<%=applicationName%>";
     var selectedRevision = "<%=selectedRevision%>";
     var revisionsList = jQuery.parseJSON('<%=revisionsList%>');

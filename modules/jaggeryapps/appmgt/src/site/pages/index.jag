@@ -19,41 +19,39 @@
 
 include("/jagg/jagg.jag");
 var site = require("/site/conf/site.json");
-
+var log = new Log();
 (function () {
 
-	var log = new Log();
-
-    var userName = jagg.getUser();
-	if(userName == null | userName == 'anonymous user') {
-		//do nothing
-	}
-
+    var user = jagg.getUser();
+    if (!user) {
+        jagg.includeBlock("sso/filter", {});
+        return;
+    }
 
     jagg.render({
-        "name":"page/master",
-        "inputs":{
-            "title":"WSO2 App Factory",
-            "pagePath":"/site/pages/index.jag",
-            "pageName":"User Home",
-            "header":{
-                "name":"header/default"
+        "name": "page/master",
+        "inputs": {
+            "title": "WSO2 App Factory",
+            "pagePath": "/site/pages/index.jag",
+            "pageName": "User Home",
+            "header": {
+                "name": "header/default"
             },
-            "body":[
+            "body": [
                 {
-                    "name":"layout/master",
-                    "inputs":{
-                        "title":"WSO2 App Factory",
-                        "middle":[
+                    "name": "layout/master",
+                    "inputs": {
+                        "title": "WSO2 App Factory",
+                        "middle": [
                             {
-                            	"name":"index"
+                                "name": "index"
                             }
                         ]
                     }
                 }
-            ],"footer":[
+            ], "footer": [
                 {
-                    "name":"footer"
+                    "name": "footer"
                 }
             ]
         }

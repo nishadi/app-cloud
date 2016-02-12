@@ -96,8 +96,14 @@ jagg.template("home", function(inputs, outputs, jagg) {
         <div class="row">
           <div class="col-xs-12 col-md-12 col-lg-12 app-preview">
               <div class="app-thumb">
-                  <img id="app-icon"  src="" />
-                  <span><i class="fa fa-pencil"></i></span>
+                  <img id="app-icon"  src="" width="100px"/>
+                  <span><i class="fa fa-pencil" onclick="document.getElementById('change_app_icon').click();"></i></span>
+                <form id="changeAppIcon" action="/appmgt/site/blocks/application/application.jag" method="post" enctype="multipart/form-data">
+                    <input id="change_app_icon" type="file" style="display:none" name="changeIcon" />
+                    <input id="action" type="hidden" name="action" value="changeAppIcon" />
+                    <input id="applicationName" type="hidden" name="applicationName" value="<%=applicationName%>"/>
+                    <input id="selectedRevision" type="hidden" name="selectedRevision" value="<%=selectedRevision%>"/>
+                </form>
               </div>
               <div class="app-desc">
                 <h2><%=selectedApplicationRevision.applicationName%></h2>

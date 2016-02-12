@@ -314,7 +314,7 @@ var getAllApplications = function(){
             applicationObject.applicationName = application.applicationName;
             applicationObject.runtimeName = application.runtimeName;
             applicationObject.status = application.status;
-
+            applicationObject.icon = getApplicationIconAsBase64String(application);
             applicationArray.push(applicationObject);
         }
     } catch(e){
@@ -349,6 +349,7 @@ var getApplicationByNameRevision = function(appName,appRevision){
             applicationObject.numberOfReplicas = application.numberOfReplicas;
             applicationObject.description = application.description;
             applicationObject.applicationType = application.applicationType;
+            applicationObject.icon = getApplicationIconAsBase64String(application);
             applicationObject.runtimeProperties = generateRuntimePropsArray(application.runtimeProperties);
             applicationObject.labels = generateLabelsArray(application.labels);
             applicationObject.endpoints = generateEndpointsArray(application.endpoints);
@@ -359,6 +360,32 @@ var getApplicationByNameRevision = function(appName,appRevision){
     }
 
     return applicationObject;
+}
+
+/**
+ * Get application icon as a base64 encoded string.
+ *
+ * @return base64 encoded string, null if icon is null
+ */
+function getApplicationIconAsBase64String(application) {
+    var icon = null;
+    if(application.icon){
+        icon = Packages.org.apache.commons.codec.binary.Base64.
+        encodeBase64String(application.icon.getBytes(1, application.icon.length()));
+    }
+    return icon;
+}
+
+/**
+ * Update application icon
+ *
+ * @param applicationKey application key
+ * @param appIcon file object of the appIcon
+ */
+function changeApplicationIcon(applicationName, revision, appIcon){
+    var streamHostObject = appIcon.getStream();
+    var inputStream = streamHostObject.getStream();
+    ApplicationManager.updateApplicationIcon(applicationName, inputStream);
 }
 
 var getEnvVariablesByNameRevision = function(appName,appRevision){

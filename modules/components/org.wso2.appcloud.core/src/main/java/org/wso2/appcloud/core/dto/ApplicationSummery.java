@@ -17,12 +17,15 @@
 
 package org.wso2.appcloud.core.dto;
 
+import java.sql.Blob;
+
 public class ApplicationSummery {
 
     private int applicationId;
     private String applicationName;
     private String runtimeName;
     private String status;
+    private Blob icon;
 
     public int getApplicationId() {
         return applicationId;
@@ -54,5 +57,13 @@ public class ApplicationSummery {
 
     public void setRuntimeName(String runtimeName) {
         this.runtimeName = runtimeName;
+    }
+
+    public Blob getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Blob icon) {
+        this.icon = icon;
     }
 }

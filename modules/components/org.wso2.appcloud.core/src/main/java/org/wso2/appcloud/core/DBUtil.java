@@ -21,6 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
 import org.wso2.appcloud.common.util.AppCloudUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -37,21 +39,27 @@ public class DBUtil {
     private static DataSource dataSource;
     private static final String DATASOURCE_NAME = "DataSourceName";
 
-    static {
+    public static void initDatasource() {
+
         try {
-            String datasourceName = AppCloudUtil.getPropertyValue(DATASOURCE_NAME);
-
-            InitialContext context = new InitialContext();
-            dataSource = (DataSource)context.lookup(datasourceName);
-
-            if(log.isDebugEnabled()){
-                log.debug("Initialized datasource : " + datasourceName + " successfully");
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext threadLocalCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            threadLocalCarbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID, true);
+            try {
+                String datasourceName = AppCloudUtil.getPropertyValue(DATASOURCE_NAME);
+                InitialContext context = new InitialContext();
+                dataSource = (DataSource)context.lookup(datasourceName);
+                if(log.isDebugEnabled()){
+                    log.debug("Initialized datasource : " + datasourceName + " successfully");
+                }
+            } catch (NamingException e) {
+                log.error("Error while initializing datasource : " + DATASOURCE_NAME, e);
+                throw new ExceptionInInitializerError(e);
             }
-
-        } catch (NamingException e) {
-            log.error("Error while initializing datasource : " + DATASOURCE_NAME, e);
-            throw new ExceptionInInitializerError(e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
+
     }
 
     public static Connection getDBConnection() throws AppCloudException {
@@ -59,7 +67,7 @@ public class DBUtil {
         Connection connection;
         try {
 
-            connection = dataSource.getConnection();
+            connection = getDataSource().getConnection();
             connection.setAutoCommit(false);
 
         } catch (SQLException e) {
@@ -68,6 +76,13 @@ public class DBUtil {
         }
 
         return connection;
+    }
+
+    private static DataSource getDataSource() {
+        if(dataSource == null){
+            initDatasource();
+        }
+        return dataSource;
     }
 
     public static void closeConnection(Connection dbConnection){

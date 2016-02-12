@@ -29,6 +29,7 @@ import org.wso2.appcloud.core.dto.Endpoint;
 import org.wso2.appcloud.core.dto.Label;
 import org.wso2.appcloud.core.dto.RuntimeProperty;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -259,6 +260,7 @@ public class ApplicationDAO {
                 applicationSummery.setApplicationName(resultSet.getString(SQLQueryConstants.APPLICATION_NAME));
                 applicationSummery.setStatus(resultSet.getString(SQLQueryConstants.APPLICATION_STATUS));
                 applicationSummery.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
+                applicationSummery.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
 
                 applicationSummeryList.add(applicationSummery);
             }
@@ -312,6 +314,7 @@ public class ApplicationDAO {
                 application.setNumberOfReplicas(resultSet.getInt(SQLQueryConstants.NUMBER_OF_REPLICA));
                 application.setApplicationType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
                 application.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
+                application.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
             }
 
         } catch (SQLException e) {
@@ -548,6 +551,32 @@ public class ApplicationDAO {
             throw new AppCloudException(msg, e);
         } finally {
             DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+
+    public void updateApplicationIcon(InputStream inputStream, String applicationName, int tenantId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+        Connection dbConnection = DBUtil.getDBConnection();
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_APPLICATION_ICON);
+            preparedStatement.setBlob(1, inputStream);
+            preparedStatement.setString(2, applicationName);
+            preparedStatement.setInt(3, tenantId);
+            preparedStatement.execute();
+            dbConnection.commit();
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while adding application icon for application : " + applicationName
+                         + " tenant id " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+
+        } finally {
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
