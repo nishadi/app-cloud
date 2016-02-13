@@ -337,4 +337,44 @@ public class ApplicationManager {
         ApplicationDAO applicationDAO = new ApplicationDAO();
         return applicationDAO.updateNumberOfReplicas(numberOfReplica, applicationName, revision, tenantId);
     }
+
+    /**
+     * Delete a application
+     *
+     * @param applicationName
+     * @param applicationRevision
+     * @throws AppCloudException
+     */
+    public static void deleteApplication(String applicationName, String applicationRevision) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            applicationDAO.deleteApplication(applicationName, applicationRevision, tenantId);
+
+        } catch (AppCloudException e) {
+            String msg = "Error while delete the application : " + applicationName + " revision :" + applicationRevision
+                    + " in tenant : " + tenantId;
+            throw new AppCloudException(msg, e);
+        }
+    }
+
+    /**
+     * Delete all revision for a application
+     *
+     * @param applicationName
+     * @throws AppCloudException
+     */
+    public static void deleteApplicationRevisions(String applicationName) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            applicationDAO.deleteApplicationRevisions(applicationName, tenantId);
+
+        } catch (AppCloudException e) {
+            String msg = "Error while delete the application : " + applicationName + " in tenant : " + tenantId;
+            throw new AppCloudException(msg, e);
+        }
+    }
 }
