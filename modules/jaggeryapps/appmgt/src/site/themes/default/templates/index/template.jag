@@ -84,11 +84,13 @@ jagg.template("index", function(inputs, outputs, jagg) {
     }
 
     var imgSrc = "<%=jagg.getAbsoluteUrl(jagg.getThemeFile('/images/dark-app-iconx256.jpg'))%>";
+
+    var theLi;
     if (application.icon) {
         imgSrc = "data:image/bmp;base64,"+application.icon;
     }
-
-        var theLi = '<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2" id="' + application.applicationName + '">' +
+    if(application.status == 'running' || application.status == 'stopped'){
+        theLi  = '<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2" id="' + application.applicationName + '">' +
                         '<a href="/appmgt/site/pages/home.jag?applicationName=' + application.applicationName + '">'+
                             '<div class="cloud-app-listing app-color-one">'+
                                 '<i class="fw fw-java fw-2x" data-toggle="tooltip" data-placement="right" title="Java Application"></i>' +
@@ -99,6 +101,33 @@ jagg.template("index", function(inputs, outputs, jagg) {
                             '</div>' +
                         '</a>' +
                     '</div>';
+    }else if(application.status == 'error'){
+        theLi  = '<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2" id="' + application.applicationName + '">' +
+                        '<a>'+
+                            '<div class="cloud-app-listing app-color-one">'+
+                                '<i class="fw fw-java fw-2x" data-toggle="tooltip" data-placement="right" title="Java Application"></i>' +
+                                    '<div class="app-icon">' +
+                                        '<img src="'+imgSrc+'" class="square-element">' +
+                                    '</div>' +
+                                    '<div class="app-name" ><i class="fw fw-error fw-2x"></i>' + displayName + '</div>' +
+                            '</div>' +
+                        '</a>' +
+                    '</div>';
+
+    }else if(application.status == 'created'){
+          theLi  = '<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2" id="' + application.applicationName + '">' +
+                        '<a>'+
+                            '<div class="cloud-app-listing app-color-one">'+
+                                '<i class="fw fw-java fw-2x" data-toggle="tooltip" data-placement="right" title="Java Application"></i>' +
+                                    '<div class="app-icon">' +
+                                        '<img src="'+imgSrc+'" class="square-element">' +
+                                    '</div>' +
+                                    '<div class="app-name" ><i class="fw fw-wso2-logo fw-pulse fw-2x"></i>' + displayName + '</div>' +
+                            '</div>' +
+                        '</a>' +
+                    '</div>';
+    }
+
 
         $("#item_list").append(theLi);
     }
