@@ -27,6 +27,9 @@ var Application = Packages.org.wso2.appcloud.core.dto.Application;
 var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
 var EventsManager = Packages.org.wso2.appcloud.core.EventsManager;
 var Event = Packages.org.wso2.appcloud.core.dto.Event;
+var Deployment = Packages.org.wso2.appcloud.core.dto.Deployment;
+var Container = Packages.org.wso2.appcloud.core.dto.Container;
+var ServiceProxy = Packages.org.wso2.appcloud.core.dto.ServiceProxy;
 var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
 var RuntimeProperty = Packages.org.wso2.appcloud.core.dto.RuntimeProperty;
 var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
@@ -161,6 +164,17 @@ var addApplication = function (applicationName, applicationRevision, application
     //============================================================================================================
 
     //==================================== Kubernetes deploy block ===============================================
+
+    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision);
+    var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
+    deployApplication(applicationName, applicationRevision, deploymentConfig, false);
+
+    //=============================================================================================================
+
+};
+
+var deployApplication = function(applicationName, applicationRevision, deploymentConfig, isRedeploy){
+  
     //Adding deployment pending event
     var msg = "Application deployment successfully triggered in Kubernetes";
     addEvent(KUBE_DEPLOY, EVENT_PENDING, msg, applicationName, applicationRevision);
@@ -168,13 +182,16 @@ var addApplication = function (applicationName, applicationRevision, application
     //Creating basic deployment
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
     var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
-             applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
+             applicationName, applicationRevision, null , modManager.getTenantId(), modManager.getTenantDomain());
     var kubService = new KubernetesRuntime(applicationCtx);
-    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision);
-    var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
+
     log.info("Deploying application: " + applicationName);
     try{
-        kubService.deployApplication(deploymentConfig);
+        kubService.deployApplication(deploymentConfig);       
+        if(!isRedeploy) {          
+            persistDeploymentConfig(deploymentConfig, applicationName, applicationRevision);
+        }
+
     } catch(e){
         var msg = "Error while submitting application deployment to Kubernetes";
         addEvent(KUBE_DEPLOY, EVENT_FAILED, msg, applicationName, applicationRevision);
@@ -233,11 +250,95 @@ var addApplication = function (applicationName, applicationRevision, application
             ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
 
             deleteApplicationUploadedPath(applicationName, applicationRevision);
+            deleteDeployment(applicationName, applicationRevision);
             deleteApplicationFromDatabase(applicationName, applicationRevision);
             deleteApplicationFromKubernetes(applicationName, applicationRevision);
         }
     }
-    //=============================================================================================================
+
+};
+
+var deleteDeployment = function(applicationName, applicationRevision){
+    ApplicationManager.deleteDeployment(applicationName, applicationRevision);
+};
+
+var updateApplicationStatus = function(applicationName, applicationRevision, status){
+    log.info(applicationName +' '+applicationRevision+' '+status);
+    ApplicationManager.updateApplicationStatus(status, applicationName, applicationRevision);
+};
+
+var redeployApplication = function(applicationName, applicationRevision){
+    var deploymentConfig = buildDeploymentConfigFromDB(applicationName, applicationRevision);
+    deployApplication(applicationName, applicationRevision, deploymentConfig, true);
+};
+var persistDeploymentConfig = function(deploymentConfig, applicationName, applicationRevision){
+
+    var containerList = deploymentConfig.getContainers();
+    var container1 = containerList.get(0);
+    var serviceProxies = container1.getServiceProxies();
+    var serviceProxy1 = serviceProxies.get(0);
+
+    var deployment = new Deployment();
+    deployment.setDeploymentName(deploymentConfig.getDeploymentName());
+    deployment.setReplicas(parseInt(deploymentConfig.getReplicas()));
+
+
+    var serviceProxy = new ServiceProxy();
+    serviceProxy.setServiceName(serviceProxy1.getServiceName());
+    serviceProxy.setServiceProtocol(serviceProxy1.getServiceProtocol());
+    serviceProxy.setServicePort(serviceProxy1.getServicePort());
+    serviceProxy.setServiceBackendPort(serviceProxy1.getServiceBackendPort());
+
+    var container = new Container();
+    container.setImageName(container1.getBaseImageName());
+    container.setImageVersion(container1.getBaseImageVersion());
+
+    var proxies = new java.util.HashSet();
+    proxies.add(serviceProxy);
+    container.setServiceProxies(proxies);
+
+    var containerSet = new java.util.HashSet();
+    containerSet.add(container);
+    deployment.setContainers(containerSet);
+    ApplicationManager.addDeployment(applicationName,applicationRevision, deployment );
+};
+
+var buildDeploymentConfigFromDB = function(applicationName, applicationRevision){
+    var deployment = ApplicationManager.getDeployment(applicationName,applicationRevision);
+
+    var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
+    deploymentConfig.setDeploymentName(deployment.getDeploymentName());
+    deploymentConfig.setReplicas(parseInt(deployment.getReplicas()));
+
+    var deploymentContainers = deployment.getContainers();
+    var provisioningConatainerList = new java.util.ArrayList();
+    var containerIterator = deploymentContainers.iterator();
+    while(containerIterator.hasNext()){
+        var deploymentContainer = containerIterator.next();
+        var provisioningContainer = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
+        provisioningContainer.setContainerName(applicationName);
+        provisioningContainer.setBaseImageName(deploymentContainer.getImageName());
+        provisioningContainer.setBaseImageVersion(deploymentContainer.getImageVersion());
+
+        var deploymentProxies = deploymentContainer.getServiceProxies();
+        var provisioningProxyList = new java.util.ArrayList();
+        var proxyIterator = deploymentProxies.iterator();
+        while(proxyIterator.hasNext()){
+            var deploymentProxy = proxyIterator.next();
+            var provisioningProxy = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
+            provisioningProxy.setServiceName(deploymentProxy.getServiceName());
+            provisioningProxy.setServiceProtocol(deploymentProxy.getServiceProtocol());
+            provisioningProxy.setServicePort(deploymentProxy.getServicePort());
+            provisioningProxy.setServiceBackendPort(parseInt(deploymentProxy.getServiceBackendPort()));
+            provisioningProxyList.add(provisioningProxy);
+        }
+        provisioningContainer.setServiceProxies(provisioningProxyList);
+        provisioningConatainerList.add(provisioningContainer);
+    }
+    deploymentConfig.setContainers(provisioningConatainerList);
+
+    return deploymentConfig;
+
 };
 
 /**

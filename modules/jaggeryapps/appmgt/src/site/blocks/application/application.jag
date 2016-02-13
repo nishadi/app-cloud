@@ -54,6 +54,26 @@ var log = new Log();
                 runtimeId, appTypeName, JSON.stringify(parsedRuntimeProperties), appIcon, uploadedFileName);
         response.status = 200;
         response.message = "Artifact is successfully uploaded!";
+    }else if(action == "stopApplication"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+
+        // delete application from kubernetes
+        applicationModule.deleteApplicationFromKubernetes(applicationName, applicationRevision);
+        // update application status to stopped
+        applicationModule.updateApplicationStatus(applicationName, applicationRevision, APPLICATION_STOPPED);
+
+        response.status = 200;
+        response.message = "Application is successfully stopped.";
+    }else if(action == "startApplication"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+
+        // redeploy application from kubernetes
+        applicationModule.redeployApplication(applicationName, applicationRevision);
+
+        response.status = 200;
+        response.message = "Application starting requested is completed successfully.";
     }else if (action == "getApplicationCreationEvents"){
 
         var applicationName = request.getParameter("applicationName");

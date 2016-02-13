@@ -52,5 +52,6 @@ var UNAUTHORIZED_ERROR_RESPONSE ={"errorCode":"401","errorMessage":"Unauthorized
 var APPLICATION_RUNNING = "running";
 var APPLICATION_CREATED = "created";
 var APPLICATION_ERROR = "error";
+var APPLICATION_STOPPED = "stopped";
 
 %>

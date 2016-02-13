@@ -137,15 +137,17 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     }
                 }
                 kubContainer.setPorts(containerPorts);
-                List<EnvVar> envVarList = new ArrayList<>();
-                for (Map.Entry envVarEntry : container.getEnvVariables().entrySet()) {
-                    EnvVar envVar = new EnvVarBuilder()
-                            .withName((String) envVarEntry.getKey())
-                            .withValue((String) envVarEntry.getValue())
-                            .build();
-                    envVarList.add(envVar);
+                if (container.getEnvVariables() != null) {
+                    List<EnvVar> envVarList = new ArrayList<>();
+                    for (Map.Entry envVarEntry : container.getEnvVariables().entrySet()) {
+                        EnvVar envVar = new EnvVarBuilder()
+                                .withName((String) envVarEntry.getKey())
+                                .withValue((String) envVarEntry.getValue())
+                                .build();
+                        envVarList.add(envVar);
+                    }
+                    kubContainer.setEnv(envVarList);
                 }
-                kubContainer.setEnv(envVarList);
                 kubContainerList.add(kubContainer);
             }
 
@@ -803,7 +805,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     .withName(
                             KubernetesProvisioningUtils.createIngressMetaName(applicationContext, environmentUrl,
                                     service.getMetadata().getName()))
-                    .withNamespace(namespace.getMetadata().getName())
+                    .withNamespace(namespace.getMetadata().getName()).withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
                     .endMetadata()
                     .withNewSpec()
                     .withRules()
