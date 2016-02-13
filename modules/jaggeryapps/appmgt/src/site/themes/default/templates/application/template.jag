@@ -198,11 +198,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
                             window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
                         }
                     } else if(event.status == "failed"){
-                       setTimeout(redirectAppListing, 2000);
-                       function redirectAppListing(){
-                           window.location.replace("index.jag");
-                       }
-                   }
+                        jagg.message({content: "Error occurred while creating application.", type: 'error'});
+                        setTimeout(redirectAppListing, 5000);
+                        function redirectAppListing(){
+                            window.location.replace("index.jag");
+                        }
+                    }
                 }
             },function (jqXHR, textStatus, errorThrown) {
                  jagg.message({content: "Error occurred while creating application.", type: 'error'});
