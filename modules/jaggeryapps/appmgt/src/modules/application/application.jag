@@ -82,7 +82,7 @@ var addApplication = function (applicationName, applicationRevision, application
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
-        //Call application delete method
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
         throw e;
     }
     //============================================================================================================
@@ -106,7 +106,8 @@ var addApplication = function (applicationName, applicationRevision, application
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
-        //Call application delete method
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        deleteApplicationFromDatabase(applicationName, applicationRevision);
         throw e;
     }
 
@@ -129,7 +130,8 @@ var addApplication = function (applicationName, applicationRevision, application
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
-        //Call application delete method
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        deleteApplicationFromDatabase(applicationName, applicationRevision);
         throw e;
     }
     //Adding docker build success event
@@ -149,7 +151,8 @@ var addApplication = function (applicationName, applicationRevision, application
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
-        //Call application delete method
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        deleteApplicationFromDatabase(applicationName, applicationRevision);
         throw e;
     }
     //Adding docker push success event
@@ -178,7 +181,8 @@ var addApplication = function (applicationName, applicationRevision, application
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
-        //Call application delete method
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        deleteApplicationFromDatabase(applicationName, applicationRevision);
         throw e;
     }
     //Adding deployment success event
@@ -199,9 +203,11 @@ var addApplication = function (applicationName, applicationRevision, application
         var msg = "Application ingress creation failed in Kubernetes";
         addEvent(INGRESS, EVENT_FAILED, msg, applicationName, applicationRevision);
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        deleteApplicationFromDatabase(applicationName, applicationRevision);
+        deleteApplicationFromKubernetes(applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
-        //Call application delete method
         throw e;
     }
     //======================================= checking pod status =================================================
@@ -226,7 +232,9 @@ var addApplication = function (applicationName, applicationRevision, application
             addEvent(POD_STATUS, EVENT_FAILED, msg, applicationName, applicationRevision);
             ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
 
-            //Call application delete method
+            deleteApplicationUploadedPath(applicationName, applicationRevision);
+            deleteApplicationFromDatabase(applicationName, applicationRevision);
+            deleteApplicationFromKubernetes(applicationName, applicationRevision);
         }
     }
     //=============================================================================================================
@@ -713,7 +721,7 @@ var addEvent = function(name, status, description, applicationName, applicationR
     eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
 }
 
-var cleaApplicationUploadedPath = function(applicationName, revision){
+var deleteApplicationUploadedPath = function(applicationName, revision) {
     var fileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
             + modManager.getTenantDomain() + "/" + applicationName;
     var fileUtils = Packages.org.apache.commons.io.FileUtils;
@@ -724,23 +732,18 @@ var cleaApplicationUploadedPath = function(applicationName, revision){
     }
 }
 
-var cleanUpApplicationDeployment = function(applicationName, revision){
-    try {
-        cleaApplicationUploadedPath(applicationName, revision);
-        log.info("Successfully clean up the application uploaded directory");
-    }catch(e){
-        log.error("Error while cleaning up the application uploaded path");
-        log.error(e);
-    }
-
+var deleteApplicationFromDatabase = function(applicationName, revision) {
     try{
+        java.lang.Thread.sleep(3000); // database at last after the transaction completes.
         ApplicationManager.deleteApplication(applicationName, revision);
         log.info("Successfully deleted the application form the database");
     }catch(e){
         log.error("Error while deleting application from the database");
         log.error(e);
     }
+}
 
+var deleteApplicationFromKubernetes = function(applicationName, revision) {
     try{
         var KubernetesRuntimeProvisioningService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
 
@@ -750,12 +753,11 @@ var cleanUpApplicationDeployment = function(applicationName, revision){
         var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
 
         kubernetesRuntimeProvisioningService.deleteDeployment();
-        log.error("Successfully clean up the kubernetes deployments");
+        log.info("Successfully clean up the kubernetes deployments");
 
     }catch(e){
         log.error("Error while cleaning up the Kubernetes deployment");
         log.error(e);
     }
 }
-
 %>
