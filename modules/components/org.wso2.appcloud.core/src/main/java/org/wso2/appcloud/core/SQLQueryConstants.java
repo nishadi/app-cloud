@@ -62,7 +62,7 @@ public class SQLQueryConstants {
     public static final String ADD_APPLICATION =
             "INSERT INTO Application (application_name, description, tenant_id, revision, application_runtime_id, " +
             "application_type_iD, endpoint_url, status, number_of_replica) values (?, ?, ?, ?, ?, (SELECT id FROM " +
-            "ApplicationType WHERE app_type_name=?), ?, ?, ? )";
+            "ApplicationType WHERE app_type_name=?), ?, ?, ?)";
 
     public static final String ADD_LABEL =
             "INSERT INTO Label (label_name, label_value, application_id, tenant_id, description) values (?, ?, ?, ?, ?)";

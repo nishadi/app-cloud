@@ -43,9 +43,9 @@ INSERT INTO `ApplicationType` (`id`, `app_type_name`, `description`) VALUES
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationRuntime` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `runtime_name` VARCHAR(45) NOT NULL,
-  `repo_url` VARCHAR(45) NULL,
-  `image_name` VARCHAR(45) NULL,
+  `runtime_name` VARCHAR(100) NOT NULL,
+  `repo_url` VARCHAR(100) NULL,
+  `image_name` VARCHAR(100) NULL,
   `tag` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
@@ -63,11 +63,22 @@ INSERT INTO `ApplicationRuntime` (`id`, `runtime_name`, `repo_url`, `image_name`
 
 
 -- -----------------------------------------------------
+-- Table `AppCloudDB`.`ApplicationDeployment`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationDeployment` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `deployment_name` VARCHAR(100) NULL,
+  `replicas` INT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `AppCloudDB`.`Application`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AppCloudDB`.`Application` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `application_name` VARCHAR(45) NOT NULL,
+  `application_name` VARCHAR(100) NOT NULL,
   `description` VARCHAR(1000) NULL,
   `tenant_id` INT NOT NULL,
   `revision` VARCHAR(45) NOT NULL,
@@ -76,6 +87,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`Application` (
   `endpoint_url` VARCHAR(1000) NULL,
   `status` VARCHAR(45) NULL,
   `number_of_replica` INT NULL,
+  `ApplicationDeployment_id` INT,
   PRIMARY KEY (`id`),
   CONSTRAINT uk_Application_NAME_TID_REV UNIQUE(`application_name`, `tenant_id`, `revision`),
   CONSTRAINT `fk_Application_ApplicationRuntime`
@@ -111,8 +123,8 @@ ENGINE=InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AppCloudDB`.`Label` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `label_name` VARCHAR(45) NOT NULL,
-  `label_value` VARCHAR(45) NULL,
+  `label_name` VARCHAR(100) NOT NULL,
+  `label_value` VARCHAR(100) NULL,
   `application_id` INT NOT NULL,
   `description` VARCHAR(1000) NULL,
   `tenant_id` INT NOT NULL,
@@ -130,8 +142,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AppCloudDB`.`RuntimeProperties` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `property_name` VARCHAR(45) NOT NULL,
-  `property_value` VARCHAR(45) NULL,
+  `property_name` VARCHAR(100) NOT NULL,
+  `property_value` VARCHAR(100) NULL,
   `application_id` INT NOT NULL,
   `description` VARCHAR(1000) NULL,
   `tenant_id` INT NOT NULL,
@@ -226,7 +238,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationEvents` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `application_id` INT NOT NULL,
-  `event_name` VARCHAR(45) NOT NULL,
+  `event_name` VARCHAR(100) NOT NULL,
   `event_status` VARCHAR(45) NULL,
   `timestamp` TIMESTAMP NOT NULL,
   `event_desc` VARCHAR(1000) NULL,
@@ -235,6 +247,42 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationEvents` (
     FOREIGN KEY (`application_id`)
     REFERENCES `AppCloudDB`.`Application` (`id`)
     ON DELETE CASCADE 
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `AppCloudDB`.`ApplicationContainer`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationContainer` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `image_name` VARCHAR(100) NULL,
+  `image_version` VARCHAR(45) NULL,
+  `ApplicationDeployment_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_ApplicationContainer_ApplicationDeployment1`
+    FOREIGN KEY (`ApplicationDeployment_id`)
+    REFERENCES `AppCloudDB`.`ApplicationDeployment` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `AppCloudDB`.`ApplicationServiceProxy`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationServiceProxy` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `service_name` VARCHAR(100) NULL,
+  `service_protocol` VARCHAR(100) NULL,
+  `service_port` INT NULL,
+  `service_backend_port` VARCHAR(45) NULL,
+  `ApplicationContainer_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_ApplicationServiceProxy_ApplicationContainer1`
+    FOREIGN KEY (`ApplicationContainer_id`)
+    REFERENCES `AppCloudDB`.`ApplicationContainer` (`id`)
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
