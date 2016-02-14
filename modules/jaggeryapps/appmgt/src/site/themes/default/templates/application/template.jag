@@ -31,6 +31,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
     var appTypeName = "<%=appType.type%>";
     var retryCount = 0;
     var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
+    var contentInvalidErrorMsg = "";
+    var validationFailErrorMsg = "";
     $(document).ready(function(){
 
             $("#file-upload-block").hide();
@@ -86,7 +88,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
                 formData.append('action', 'createApplication');
                 formData.append('appTypeName', appTypeName);
-
 
                 if(selectedVal == 1){
                     formData.append('uploadedFileName', $("#uploadedFileName").val());
@@ -226,11 +227,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 applicationName: {                          // applicationName filed
                     required: true,
                     validateContent: true,
+                    validateApplicationNameChar: true,
                     maxlength: 8
                 },
                 applicationRevision: {
                     required: true,
                     validateContent: true,
+                    validationApplicationRevisionChar: true,
                     maxlength: 8
                 },
                 icon: {                                     // app icon field
@@ -239,7 +242,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
             },
             onsubmit: false,    // Since we are handling on submit validation on click event of the "Create" button,
             onfocusout: function (element, event) {
-            $("#application-details").validate().form();
+            var validator = $("#application-details").validate();
+            validator.element(element);
                 return false;
             },                            // here we disabled the form validation on submit
             highlight: function (element, errorClass, validClass) { // this is triggered when the "element" is invalid
@@ -273,11 +277,14 @@ jagg.template("application", function (inputs, outputs, jagg) {
         $("#add-application").prop("disabled", true);
 
         $.validator.addMethod("validateContent",
-            validateContent, getAppCreationErrorMessage);
+            validateContent, getContentInvalidErrorMsg);
         $.validator.addMethod("validateAppIcon",
             validateAppIcon, getIconErrorMessage);
+        $.validator.addMethod("validateApplicationNameChar",
+            validateApplicationNameChar, getValidationFailErrorMsg);
+        $.validator.addMethod("validationApplicationRevisionChar",
+            validationApplicationRevisionChar, getValidationFailErrorMsg);
 
-        var appCreationErrorMsg = "Invalid value";
 
         $("#appIcon").change(function() {
              $("#icon").val($("#appIcon").val());
@@ -293,51 +300,66 @@ jagg.template("application", function (inputs, outputs, jagg) {
              validateIconImage(file.val(), this.files[0].size);
         });
 
-        function validateAlphaNumericChar(value) {
-             var isValueValid = true;
+        function validateApplicationNameChar(value){
+            var regexPattern = [];
 
-             var patternForSpace = / /g;
-             var isSpace = patternForSpace.test(value);
+             var patternNonAlphaNumExceptHyphen = /[^a-zA-Z\d-]/g;
+             var isPattern = patternNonAlphaNumExceptHyphen.test(value);
+             regexPattern.push(isPattern);
 
-             var patternForNonAlphaNumericChars = /[^\w\s]/gi;
-             var isInvalidChar = patternForNonAlphaNumericChars.test(value);
-
-             var patternForUnderscore = /_/g;
-             var isUnderScore = patternForUnderscore.test(value);
-
-             if (isSpace == true || isInvalidChar == true || isUnderScore == true) {
-                 // Here we are setting the error message as duplicated app name since we are not allowing to change
-                 // the app key
-                 appCreationErrorMsg =  "Invalid value - Enter a value which has only alphanumeric characters"
-                 isValueValid = false;
-             } else {
-                 isValueValid = true;
-             }
-             return isValueValid;
+             var message = "Invalid Application Name - Enter a value which has only alphanumeric characters";
+             return validateWithRegexPatters(regexPattern, message);
         }
 
-        function validateContent(value) {
+        function validationApplicationRevisionChar(value){
+            var regexPattern = [];
+
+             var patternNonAlphaNum = /[^a-zA-Z\d]/g;
+             var isPattern = patternNonAlphaNum.test(value);
+             regexPattern.push(isPattern);
+
+             var message = "Invalid Application Revision - Enter a value which has only alphanumeric characters";
+             return validateWithRegexPatters(regexPattern, message);
+        }
+
+
+        function validateWithRegexPatters(regexPatters, message){
+            var isValueValid = true;
+            for(var i = 0; i < regexPatters.length; i++){
+                if(regexPatters[i]){
+                   validationFailErrorMsg = message;
+                   return isValueValid = false;
+                }
+            }
+
+            return isValueValid;
+        }
+
+        function validateContent(value, element) {
              var isValueValid = true;
              var valueLength = (value).length;
              if (valueLength == 0) {
                  // Here we are setting the error message as duplicated app name since we are not allowing to change
                  // the app key
-                 appCreationErrorMsg = "Invalid value - Enter a value which is not empty";
+                 contentInvalidErrorMsg = "Invalid value - Enter a value which is not empty";
                  isValueValid = false;
              } else if (!isNaN(value)){
                  // Here we are setting the error message as duplicated app name since we are not allowing to change
                  // the app key
-                 appCreationErrorMsg =  "Invalid value - Enter a value which has does not have only numeric characters";
+                 contentInvalidErrorMsg =  "Invalid value - Enter a value which has does not have only numeric characters";
                  isValueValid = false;
-             } else {
-                 isValueValid = validateAlphaNumericChar(value);
              }
              return isValueValid;
         }
 
-        function getAppCreationErrorMessage(){
-           return appCreationErrorMsg;
+        function getContentInvalidErrorMsg(){
+           return contentInvalidErrorMsg;
         }
+
+        function getValidationFailErrorMsg(){
+           return validationFailErrorMsg;
+        }
+        /** end application creation form validations */
 
         $('#url-upload').click(function(){
             $("#url-upload-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
