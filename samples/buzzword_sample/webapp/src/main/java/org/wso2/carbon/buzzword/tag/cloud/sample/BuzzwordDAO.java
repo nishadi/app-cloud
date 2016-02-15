@@ -36,23 +36,24 @@ public class BuzzwordDAO {
 
     public Buzzword[] getBuzzWordList() {
 
-//        String apiManagerUrl = System.getenv("DB_URL");
-//        String apiEndpointUrl = System.getenv("API_ENDPOINT_URL");
-//        String apiConsumerKey = System.getenv("API_CONSUMER_KEY");
-//        String apiConsumerSecret = System.getenv("API_CONSUMER_SECRET");
-        String username = "admin";
-        String password = "admin";
+        String apiManagerUrl = System.getenv("API_MANAGER_URL");
+        String apiEndpointUrl = System.getenv("API_ENDPOINT_URL");
+        String apiConsumerKey = System.getenv("API_CONSUMER_KEY");
+        String apiConsumerSecret = System.getenv("API_CONSUMER_SECRET");
+        String username = System.getenv("TENANT_USERNAME");
+        String password = System.getenv("TENANT_PASSWORD");
+
+//        String apiManagerUrl = "http://172.17.0.1:9443";
+//        String apiEndpointUrl = "http://172.17.0.1:8280/buzzword/1.0.0/all";
+//        String apiConsumerKey = "YaBFwIgxfEPDzicCgkC8zlrcyHsa";
+//        String apiConsumerSecret = "QuJ2dEvTwdLe3q0ciXtD3ECu0O4a";
+//        String username = "admin";
+//        String password = "admin";
 
         String values = "";
         String accessToken = "";
 
-        String apiManagerUrl = "http://172.17.0.1:8280";
-        String apiEndpointUrl = "http://172.17.0.1:8280/buzzword/1.0.0/all";
-        String apiConsumerKey = "YaBFwIgxfEPDzicCgkC8zlrcyHsa";
-        String apiConsumerSecret = "QuJ2dEvTwdLe3q0ciXtD3ECu0O4a";
-
-        String submitUrl = "https://172.17.0.1:9443/oauth2/token";
-        //String submitUrl = apiManagerUrl.trim()+"/oauth2/token";
+        String submitUrl = apiManagerUrl.trim()+"/oauth2/token";
 
         logger.info("apiManagerUrl: " + apiManagerUrl);
         logger.info("apiEndpointUrl: " + apiEndpointUrl);

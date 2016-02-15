@@ -10,6 +10,21 @@ How to run this sample
         String apiEndpointUrl   = API_ENDPOINT_URL
         String consumerKey      = API_CONSUMER_KEY
         String consumerSecret   = API_CONSUMER_SECRET
+        String username         = TENANT_USERNAME
+        String password         = TENANT_PASSWORD
+
+    Example values for the above Environment variables:
+        DB_URL              = jdbc:mysql://localhost:3306/BuzzWordSampleDB
+        DB_USERNAME         = root
+        DB_PASSWORD         = root
+
+        API_MANAGER_URL     = http://172.17.0.1:9443
+        API_ENDPOINT_URL    = http://172.17.0.1:8280/buzzword/1.0.0/all
+        API_CONSUMER_KEY    = YaBFwIgxfEPDzicCgkC8zlrcyHsa
+        API_CONSUMER_SECRET = QuJ2dEvTwdLe3q0ciXtD3ECu0O4a
+        TENANT_USERNAME     = admin
+        TENANT_PASSWORD     = admin
+
 
 2.  Create the table "Buzzwords" as below:
     CREATE TABLE Buzzwords (ID INT NOT NULL AUTO_INCREMENT, Word VARCHAR(255) NOT NULL, Popularity	INT, PRIMARY KEY (ID));
