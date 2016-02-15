@@ -170,19 +170,19 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     if(event.status == "success"){
                         statusStyle = "success";
                         table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td>" + event.status + "</td><td><i class=\"fa fa-check\"></i></td></tr>";
+                                        "<td><i class=\"fa fa-check\"></i></td></tr>";
                     } else if (event.status == "failed") {
                             statusStyle = "danger";
                         table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td>" + event.status + "</td><td><i class=\"fa fa-times\"></i></td></tr>";
+                                        "<td><i class=\"fa fa-times\"></i></td></tr>";
                     } else if (event.status == "pending"){
                         statusStyle = "active";
                         table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td>" + event.status + "</td><td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                                        "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
                     } else if (event.status == "failed"){
                         statusStyle = "active";
                         table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td>" + event.status + "</td><td><i class=\"fa fa-times\"></i></td></tr>";
+                                        "<td><i class=\"fa fa-times\"></i></td></tr>";
                     }
                 }
 

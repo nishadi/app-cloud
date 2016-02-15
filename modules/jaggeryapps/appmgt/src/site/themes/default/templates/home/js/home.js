@@ -10,6 +10,9 @@ $(document).ready(function() {
 // wrapping functions
 function initPageView() {
     loadAppIcon(selectedApplicationRevision);
+    var deploymentURL = selectedApplicationRevision.deploymentURL;
+    var repoUrlHtml = generateLunchUrl(deploymentURL);
+    $("#version-url-link").html(repoUrlHtml);
     $('#appVersionList li').click(function() {
         var newRevision = this.textContent;
         changeSelectedRevision(newRevision);
