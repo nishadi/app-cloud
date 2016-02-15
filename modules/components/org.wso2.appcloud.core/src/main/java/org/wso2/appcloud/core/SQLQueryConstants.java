@@ -148,6 +148,9 @@ public class SQLQueryConstants {
             + "where A.application_id = ? "
             + "and A.id >= (select MAX(B.id) from ApplicationEvents B where B.application_id = A.application_id and B.event_name = A.event_name);";
 
+    public static final String GET_RUNTIME_PROPERTIES = "SELECT property_name, property_value FROM RuntimeProperties "
+            + "WHERE application_id = ?";
+
     /*Update Queries*/
 
     public static final String UPDATE_RUNTIME_PROPERTIES =

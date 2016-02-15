@@ -16,6 +16,7 @@
 
 package org.wso2.appcloud.core.dto;
 
+import java.util.List;
 import java.util.Set;
 
 public class Container {
@@ -23,7 +24,7 @@ public class Container {
     private String imageName;
     private String imageVersion;
     private Set<ServiceProxy> serviceProxies;
-    private Set<RuntimeProperty> runtimeProperties;
+    private List<RuntimeProperty> runtimeProperties;
 
     public int getId() {
         return id;
@@ -57,11 +58,11 @@ public class Container {
         this.serviceProxies = serviceProxies;
     }
 
-    public void setRuntimeProperties(Set<RuntimeProperty> runtimeProperties) {
+    public void setRuntimeProperties(List<RuntimeProperty> runtimeProperties) {
         this.runtimeProperties = runtimeProperties;
     }
 
-    public Set<RuntimeProperty> getRuntimeProperties() {
+    public List<RuntimeProperty> getRuntimeProperties() {
         return runtimeProperties;
     }
 }

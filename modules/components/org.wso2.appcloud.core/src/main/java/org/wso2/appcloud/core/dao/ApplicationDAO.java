@@ -1151,7 +1151,7 @@ public class ApplicationDAO {
             if(rs.next()) {
                deployment.setDeploymentName(rs.getString("deployment_name"));
                deployment.setReplicas(rs.getInt("replicas"));
-               deployment.setContainers(getContainers(rs.getInt("id")));
+               deployment.setContainers(getContainers(rs.getInt("id"), applicationId));
             }
 
             dbConnection.commit();
@@ -1196,7 +1196,7 @@ public class ApplicationDAO {
             DBUtil.closeConnection(dbConnection);
         }
     }
-    public Set<Container> getContainers(int deploymentId) throws AppCloudException{
+    public Set<Container> getContainers(int deploymentId, int applicationId) throws AppCloudException{
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
         Set<Container> containers = new HashSet<Container>();
@@ -1211,6 +1211,8 @@ public class ApplicationDAO {
                 container.setImageName(rs.getString("image_name"));
                 container.setImageVersion(rs.getString("image_version"));
                 container.setServiceProxies(getServiceProxies(rs.getInt("id")));
+                List<RuntimeProperty> runtimeProperties = getRuntimeProperties(applicationId);
+                container.setRuntimeProperties(runtimeProperties);
                 containers.add(container);
             }
             dbConnection.commit();
@@ -1277,6 +1279,41 @@ public class ApplicationDAO {
             DBUtil.closeConnection(dbConnection);
         }
         return serviceProxies;
+    }
+
+    /**
+     * Getting runtime properties from database
+     *
+     * @param applicationId id of the application
+     * @return list of runtime properties
+     * @throws AppCloudException
+     */
+    public List<RuntimeProperty> getRuntimeProperties(int applicationId) throws AppCloudException {
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        List<RuntimeProperty> runtimeProperties = new ArrayList<>();
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_RUNTIME_PROPERTIES);
+            preparedStatement.setInt(1, applicationId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                RuntimeProperty runtimeProperty = new RuntimeProperty();
+                runtimeProperty.setPropertyName(resultSet.getString(SQLQueryConstants.PROPERTY_NAME));
+                runtimeProperty.setPropertyValue(resultSet.getString(SQLQueryConstants.PROPERTY_VALUE));
+                runtimeProperties.add(runtimeProperty);
+            }
+
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while getting runtime properties";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return runtimeProperties;
     }
 
 
