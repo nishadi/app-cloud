@@ -536,7 +536,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <option value="0" selected="Selected">Select upload method</option>
                 <option value="1">Upload from file system</option>
                 <option value="2">Upload from url</option>
-                <option value="3">Upload wso2 sample</option>
             </select>
             </div>
 
