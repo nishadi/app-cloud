@@ -59,7 +59,8 @@ public class DockerOpClient {
         dockerClient = new DefaultDockerClient(config);
     }
 
-    public void createDockerFile(String runtimeId, String appType, String artifactName, String dockerFilePath)
+    public void createDockerFile(String runtimeId, String appType, String artifactName, String dockerFilePath,
+                                 String dockerTemplateFilePath)
             throws IOException, AppCloudException {
 
         ApplicationDAO applicationDAO = new ApplicationDAO();
@@ -68,14 +69,16 @@ public class DockerOpClient {
         String dockerRegistryUrl = DockerUtil.getDockerRegistryUrl();
         String dockerBaseImageName = applicationRuntime.getImageName();
         String dockerBaseImageVersion = applicationRuntime.getTag();
-        String baseImangeConfig = DockerOpClientConstants.DOCKER_COMMAND_FROM + " " + dockerRegistryUrl + "/" +
-                dockerBaseImageName + ":" + dockerBaseImageVersion + "\r\n";
         List<String> dockerFileConfigs = new ArrayList<String>();
-        dockerFileConfigs.add(baseImangeConfig);
-        String deploymentLocation = DockerUtil.getDeploymentLocation(appType);
-        String artifactCopyConfig = DockerOpClientConstants.DOCKER_COMMAND_COPY + " " + artifactName + " " +
-                deploymentLocation + "\r\n";
-        dockerFileConfigs.add(artifactCopyConfig);
+        String dockerFileTemplatePath = dockerTemplateFilePath + "/" + "Dockerfile"+ "." + dockerBaseImageName + "." +
+                dockerBaseImageVersion;
+        for(String line: FileUtils.readLines(new File(dockerFileTemplatePath))) {
+            if(line.contains("ARTIFACT_NAME")) {
+                dockerFileConfigs.add(line.replace("ARTIFACT_NAME", artifactName));
+            }else {
+                dockerFileConfigs.add(line);
+            }
+        }
         FileUtils.writeLines(new File(dockerFilePath), dockerFileConfigs);
     }
 
