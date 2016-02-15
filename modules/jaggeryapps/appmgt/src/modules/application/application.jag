@@ -102,7 +102,18 @@ var addApplication = function (applicationName, applicationRevision, application
                 + modManager.getTenantDomain() + "/" + applicationName + "/" + applicationRevision + "/";
         var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
         var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
-        dockerOpClient.createDockerFile(runtimeId, appTypeName, uploadedFileName, dockerFilePath);
+
+         var dockerTemplateFilePath = BASE_DIR_PATH + "/" + "DockerFiles";
+
+            var uploadArtifactTmpName;
+            var splitArtifactExt = uploadedFileName.split(".");
+            if(splitArtifactExt[1] == "zip"){
+                    uploadArtifactTmpName = splitArtifactExt[0] + ".upload";
+                }else{
+                    uploadArtifactTmpName = uploadedFileName;
+                }
+        dockerOpClient.createDockerFile(runtimeId, appTypeName, uploadArtifactTmpName, dockerFilePath,dockerTemplateFilePath);
+
     } catch(e){
         var msg = "Error while creating docker file";
         addEvent(DOCKER_FILE_CREATE, EVENT_FAILED, msg, applicationName, applicationRevision);
@@ -766,7 +777,16 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
     uploadedFileName = uploadedArtifact.getName();
     var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
             + modManager.getTenantDomain() + "/" + applicationName + "/" + revision + "/";
-    uploadApplicationTmpPath = fileUploadPath + uploadedFileName;
+    var uploadApplicationTmpPath;
+    var splitFileExt = uploadedFileName.split(".");
+    if(splitFileExt[1] == "zip"){
+        uploadApplicationTmpPath = fileUploadPath + splitFileExt[0] + ".upload";
+        log.info(uploadApplicationTmpPath);
+    }else{
+        uploadApplicationTmpPath = fileUploadPath + uploadedFileName;
+        log.info(uploadApplicationTmpPath);
+    }
+
     uploadedArtifact.move(uploadApplicationTmpPath);
 }
 
