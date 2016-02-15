@@ -1,6 +1,7 @@
 {
   "default":{"type":"default", "icon":"fw-java", "color":"app-color-one", "displayName":"Default Application"},
   "war":{"type":"war", "icon":"fw-java", "color":"app-color-one", "displayName":"Java Web Application"},
+  "php":{"type":"php", "icon":"fw-php", "color":"app-color-three", "displayName":"PHP Web Application"},
   "mss":{"type":"mss", "icon":"fw-rest-service", "color":"app-color-two", "displayName":"Java Microservice"},
   "car":{"type":"car", "icon":"fw-nodejs", "color":"app-color-three", "displayName":"WSO2 ESB Application"}
 }

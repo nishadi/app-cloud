@@ -1,0 +1,6 @@
+FROM tomcat:8.0
+
+ENV APP_WAR ARTIFACT_NAME
+ENV WEB_APP_HOME /usr/local/tomcat/webapps/
+
+COPY "$APP_WAR" "$WEB_APP_HOME/"

@@ -179,10 +179,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                         statusStyle = "active";
                         table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
                                         "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
-                    } else if (event.status == "failed"){
-                        statusStyle = "active";
-                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td><i class=\"fa fa-times\"></i></td></tr>";
                     }
                 }
 
