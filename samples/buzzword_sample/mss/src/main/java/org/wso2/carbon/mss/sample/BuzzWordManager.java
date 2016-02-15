@@ -58,7 +58,7 @@ public class BuzzWordManager {
             if (word.equals(entry.getKey())) {
                 ranking = Integer.parseInt(entry.getValue());
                 ranking++;
-                sql = "UPDATE Buzzwords SET" +  POPULARITY +" = ? WHERE " + WORD + " = ?";
+                sql = "UPDATE Buzzwords SET " +  POPULARITY +" = ? WHERE " + WORD + " = ?";
             }
         }
 
