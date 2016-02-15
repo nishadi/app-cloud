@@ -360,14 +360,16 @@ function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName,
     container1.setBaseImageName(appBaseImageName);
     container1.setBaseImageVersion(applicationRevision);
     //setting runtime properties to the container
-    var envs1 = new java.util.HashMap();
-    var runtimePropertyIterator = runtimeProperties.iterator();
-    while(runtimePropertyIterator.hasNext()){
-        var runtimeProperty = runtimePropertyIterator.next();
-        envs1.put(runtimeProperty.getPropertyName(), runtimeProperty.getPropertyValue());
+    if(runtimeProperties){
+        var envs1 = new java.util.HashMap();
+        var runtimePropertyIterator = runtimeProperties.iterator();
+        while(runtimePropertyIterator.hasNext()){
+            var runtimeProperty = runtimePropertyIterator.next();
+            envs1.put(runtimeProperty.getPropertyName(), runtimeProperty.getPropertyValue());
+        }
+        envs1.put("ORG","WSO2");
+        container1.setEnvVariables(envs1);
     }
-    envs1.put("ORG","WSO2");
-    container1.setEnvVariables(envs1);
     var serviceProxyList1 = new java.util.ArrayList();
     var serviceProxy1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
     serviceProxy1.setServiceName(appServiceName);
