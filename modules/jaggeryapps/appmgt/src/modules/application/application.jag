@@ -328,6 +328,11 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
         provisioningContainer.setBaseImageName(deploymentContainer.getImageName());
         provisioningContainer.setBaseImageVersion(deploymentContainer.getImageVersion());
 
+        //Adding runtime properties to k8 container
+        var runtimeProperties = deploymentContainer.getRuntimeProperties();
+        var envs = getRuntimeProperties(runtimeProperties);
+        provisioningContainer.setEnvVariables(envs);
+
         var deploymentProxies = deploymentContainer.getServiceProxies();
         var provisioningProxyList = new java.util.ArrayList();
         var proxyIterator = deploymentProxies.iterator();
@@ -359,17 +364,8 @@ function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName,
     container1.setContainerName(applicationName);
     container1.setBaseImageName(appBaseImageName);
     container1.setBaseImageVersion(applicationRevision);
-    //setting runtime properties to the container
-    if(runtimeProperties){
-        var envs1 = new java.util.HashMap();
-        var runtimePropertyIterator = runtimeProperties.iterator();
-        while(runtimePropertyIterator.hasNext()){
-            var runtimeProperty = runtimePropertyIterator.next();
-            envs1.put(runtimeProperty.getPropertyName(), runtimeProperty.getPropertyValue());
-        }
-        envs1.put("ORG","WSO2");
-        container1.setEnvVariables(envs1);
-    }
+    var envs = getRuntimeProperties(runtimeProperties);
+    container1.setEnvVariables(envs);
     var serviceProxyList1 = new java.util.ArrayList();
     var serviceProxy1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
     serviceProxy1.setServiceName(appServiceName);
@@ -382,6 +378,19 @@ function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName,
 
     return containerList;
 };
+
+function getRuntimeProperties(runtimeProperties){
+    //setting runtime properties to the container
+    var envs = new java.util.HashMap();
+    if(runtimeProperties) {
+        var runtimePropertyIterator = runtimeProperties.iterator();
+        while (runtimePropertyIterator.hasNext()) {
+            var runtimeProperty = runtimePropertyIterator.next();
+            envs.put(runtimeProperty.getPropertyName(), runtimeProperty.getPropertyValue());
+        }
+    }
+    return envs;
+}
 
 function getDeploymentConfig(containersList, applicationName, replicas){
 
