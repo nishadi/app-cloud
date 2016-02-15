@@ -44,7 +44,7 @@ var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
  * @param runtimeId runtime id of the application
  */
 var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas,
-                               runtimeId, appTypeName, runtimeProperties, appIcon, uploadedFileName) {
+                               runtimeId, appTypeName, runtimePropertiesArray, tagArray, appIcon, uploadedFileName) {
     log.info("Started creating App => name: " + applicationName + " " +
             "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
             "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " "
@@ -61,19 +61,16 @@ var addApplication = function (applicationName, applicationRevision, application
         application.setApplicationType(appTypeName);
         application.setStatus(APPLICATION_CREATED);
 
-        if (runtimeProperties != null || runtimeProperties != "None") {
-            var parsedRuntimeProperties = parse(runtimeProperties);
-            if(Object.keys(parsedRuntimeProperties[0]).length > 0) {
-                var runtimePropertyList = new java.util.ArrayList();
-                for (var i = 0; i < parsedRuntimeProperties.length; i++) {
-                    var runtimeProperty = new RuntimeProperty();
-                    runtimeProperty.setPropertyName(parsedRuntimeProperties[i].key);
-                    runtimeProperty.setPropertyValue(parsedRuntimeProperties[i].value);
-                    runtimePropertyList.add(runtimeProperty);
-                }
-                application.setRuntimeProperties(runtimePropertyList);
-            }
+        if(runtimePropertiesArray.length > 0) {
+            var runtimePropertyList = generateRuntimePropsList(runtimePropertiesArray);
+            application.setRuntimeProperties(runtimePropertyList);
         }
+
+        if(tagArray.length > 0){
+            var tagList = generateTagsList(tagArray);
+            application.setLabels(tagList);
+        }
+
         ApplicationManager.addApplication(application);
 
         if(appIcon){
@@ -649,6 +646,46 @@ var addTag = function (applicationName, applicationRevision, key, value) {
         ApplicationManager.addTags(applicationName, applicationRevision, tagList);
     } catch (e) {
         log.error("Error while adding runtime property with Key:" + key);
+        log.error(e);
+        throw e;
+    }
+};
+
+var generateTagsList = function (tagListArray) {
+    try {
+        var size = tagListArray.length;
+        var tagList = new java.util.ArrayList();
+        for (var i = 0; i < size; i++) {
+            var tagJsonObj = tagListArray[i];
+            var tag = new Packages.org.wso2.appcloud.core.dto.Label();
+            tag.setLabelName(tagJsonObj.key);
+            tag.setLabelValue(tagJsonObj.value);
+            tagList.add(tag);
+        }
+        return tagList;
+    } catch (e) {
+        log.error("Error while adding tags : ");
+        log.error(tagListArray);
+        log.error(e);
+        throw e;
+    }
+};
+
+var generateRuntimePropsList = function (runtimePropsArray) {
+    try {
+        var size = runtimePropsArray.length;
+        var propsList = new java.util.ArrayList();
+        for (var i = 0; i < size; i++) {
+            var runtimePropJsonObj = runtimePropsArray[i];
+            var runtimeProperty = new RuntimeProperty();
+            runtimeProperty.setPropertyName(runtimePropJsonObj.key);
+            runtimeProperty.setPropertyValue(runtimePropJsonObj.value);
+            propsList.add(runtimeProperty);
+        }
+        return propsList;
+    } catch (e) {
+        log.error("Error while adding runtime props : ");
+        log.error(propsList);
         log.error(e);
         throw e;
     }

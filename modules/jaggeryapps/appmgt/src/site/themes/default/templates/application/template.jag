@@ -28,6 +28,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
     %>
 
+<link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
+      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/fontwso2-1.2/css/font-wso2.css'))%>">
+      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/font-awesome-4.2.0/font-awesome.min.css'))%>">
+      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/web-fonts/Roboto.css'))%>">
+      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
+
  <script type="text/javascript">
     var appTypeName = "<%=appType.type%>";
     var applicationName = "<%=applicationName%>";
@@ -80,21 +86,14 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 $('#add-application-loading').loadingButton('show');
 
                 e.preventDefault();
-                var runtimeProperties = [];
-                $('.runtime_property').each(function(){
-                    var runtimeProperty = {};
-                    $(this).children('input').each(function(){
-                        if(this.value != ""){
-                            runtimeProperty[this.name] = this.value;
-                        }
-                    });
-                    runtimeProperties.push(runtimeProperty);
-                });
+                var runtimeProperties = getProperties("env-pane");
+                var tags = getProperties("tags-pane");
 
                 var formData = new FormData($(this)[0]);
                 var selectedVal = $("#upload-method option:selected").val();
 
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
+                formData.append('tags', JSON.stringify(tags));
                 formData.append('action', 'createApplication');
                 formData.append('appTypeName', appTypeName);
                 var optionReplicas =  $("#replicas option:selected").val();
@@ -580,14 +579,65 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 </div>
             </div>
 
-            <div class="form-group">
-            <div class="form-inline input_fields_wrap">
-                <button class="add_field_button btn btn-info">Add More Properties</button>
-                <div class="runtime_property">
-                    <input type="text" class="form-control" name="key">
-                    <input type="text" class="form-control" name="value">
-                </div>
-            </div>
+            <div class="panel-group property-accordion" id="property-accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                                    Env Variables
+                                    <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
+                                </a>
+
+                            </h4>
+
+                        </div>
+                        <div id="collapseOne" class="panel-collapse collapse in">
+                            <div class="panel-body" id="env-pane">
+                                <div class="form-inline property-seperator">
+                                    <div class="form-group">
+                                        <label class="sr-only" for="key">Key</label>
+                                        <input type="text" class="form-control element-add-key" placeholder="Key">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="sr-only" for="value">Value</label>
+                                        <input type="text" class="form-control element-add-value" placeholder="Value">
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-primary btn-primary-add btn-primary-add-val" disabled>Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                                    Tags
+                                    <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                                </a>
+
+                            </h4>
+                        </div>
+                        <div id="collapseTwo" class="panel-collapse collapse">
+                            <div class="panel-body " id="tags-pane">
+                                <div class="form-inline property-seperator">
+                                    <div class="form-group">
+                                        <label class="sr-only" for="key">Key</label>
+                                        <input type="text" class="form-control element-add-key" placeholder="Key">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="sr-only" for="value">Value</label>
+                                        <input type="text" class="form-control element-add-value" placeholder="Value">
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-primary btn-primary-add btn-primary-add-val" disabled>Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </div>
             <div class="form-group">
                 <button class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" id="add-application">
@@ -640,5 +690,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
      </div><!-- /.modal -->
 
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/custom/custom.js'))%>"></script>
+      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('templates/application/js/application.js'))%>"></script>
     <%
 }); %>
