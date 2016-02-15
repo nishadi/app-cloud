@@ -849,9 +849,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
     /**
      * Delete deployment
      *
-     * @param deploymentName name of the deployment
-     * @return false if one object deletion is fail
-     * @throws RuntimeProvisioningException
+     * @return false if one of the objects deletion is fail
      */
     @Override
     public boolean deleteDeployment() {
@@ -910,6 +908,15 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
         } catch (KubernetesClientException e) {
             String message = "Error while deleting kubernetes secrets in deployment";
+            log.warn(message, e);
+            deleted = false;
+        }
+
+        try {
+            kubernetesClient.pods().inNamespace(namespace)
+                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+        } catch (KubernetesClientException e) {
+            String message = "Error while deleting kubernetes pods in deployment";
             log.warn(message, e);
             deleted = false;
         }
