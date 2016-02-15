@@ -21,6 +21,7 @@ include("/jagg/jagg.jag");
 var site = require("/site/conf/site.json");
 
 var appTypeName = request.getParameter("appTypeName");
+var applicationName = request.getParameter("applicationName");
 
 
 (function () {
@@ -50,7 +51,8 @@ var appTypeName = request.getParameter("appTypeName");
                                 "name": "application",
                                 "inputs": {
                                     "pageName": "AppAdd",
-                                    "appTypeName" : appTypeName
+                                    "appTypeName" : appTypeName,
+                                    "applicationName" : applicationName
                                 }
                             }
                         ]

@@ -33,10 +33,12 @@ jagg.block("application", {
         var runtimes = applicationModule.getAllRuntimes(inputs.appTypeName);
         var appTypesProperties = require(APP_TYPES_PROPERTIES_CONFIG);
         var appType = appTypesProperties[inputs.appTypeName];
+        var applicationName = inputs.applicationName;
 
         return {
             "runtimes" : runtimes,
-            "appType" : appType
+            "appType" : appType,
+            "applicationName" : applicationName
         };
     }
 });
