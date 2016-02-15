@@ -103,7 +103,7 @@ var addApplication = function (applicationName, applicationRevision, application
         var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
         var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
 
-         var dockerTemplateFilePath = BASE_DIR_PATH + "/" + "DockerFiles";
+         var dockerTemplateFilePath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + "DockerFiles";
 
             var uploadArtifactTmpName;
             var splitArtifactExt = uploadedFileName.split(".");
