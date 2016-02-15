@@ -29,6 +29,7 @@ jagg.block("apptype/select", {
 
     getOutputs:function (inputs) {
 
+        var log = new Log();
         var applicationModule = jagg.module("application");
         var appTypes = applicationModule.getAllAppTypes();
 
