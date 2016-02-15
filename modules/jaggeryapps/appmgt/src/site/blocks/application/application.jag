@@ -38,20 +38,16 @@ var log = new Log();
         var applicationDescription = request.getParameter("applicationDescription");
         var replicas = 1;
         var runtimeId = request.getParameter("runtime");
-        var runtimeProperties = request.getParameter("runtimeProperties");
+        var runtimeProperties = parse(request.getParameter("runtimeProperties"));
+        var tags = parse(request.getParameter("tags"));
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
         var appTypeName = request.getParameter("appTypeName");
         var uploadedFileName = request.getParameter("uploadedFileName");
         var appIcon = request.getFile("appIcon")
 
-        var parsedRuntimeProperties;
-        if(runtimeProperties != "None" || runtimeProperties != null ){
-            parsedRuntimeProperties = parse(runtimeProperties);
-        }
-
         applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
-                runtimeId, appTypeName, JSON.stringify(parsedRuntimeProperties), appIcon, uploadedFileName);
+                runtimeId, appTypeName, runtimeProperties, tags, appIcon, uploadedFileName);
         response.status = 200;
         response.message = "Artifact is successfully uploaded!";
     }else if(action == "stopApplication"){
