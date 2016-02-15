@@ -163,10 +163,15 @@ var getDatabaseUsers = function (){
     var payload = '<ser:getDatabaseUsers  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org">' +
             '<ser:environmentName>' + environmentName + '</ser:environmentName>' +
             '</ser:getDatabaseUsers>';
-
-    getDatabaseUsersService.open(options, storageServerURL + 'RSSAdmin', false);
-    getDatabaseUsersService.send(payload);
-    var result = getDatabaseUsersService.responseE4X;
+    try {
+        getDatabaseUsersService.open(options, storageServerURL + 'RSSAdmin', false);
+        getDatabaseUsersService.send(payload);
+        var result = getDatabaseUsersService.responseE4X;
+    } catch(e) {
+        log.error("Error while retrieving all database users");
+        log.error(e);
+        throw e;
+    }
     return buildResponse(result);
 };
 
