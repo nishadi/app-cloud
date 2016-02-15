@@ -146,7 +146,9 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                 if(selectedApplicationRevision.status=='running'){
                                 %>
                                     <div class="btn-group ctrl-edit-button btn-edit-code">
-                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication(document.getElementById('applicationName').value, document.getElementById('selectedRevision').value);">Stop</a>
+                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication(document.getElementById('applicationName').value, document.getElementById('selectedRevision').value);">Stop
+                                        <span id="stop-in-progress"><span>
+                                      </a>
                                     </div>
                                 <%
                                 }else if(selectedApplicationRevision.status=='stopped'){
@@ -234,6 +236,29 @@ jagg.template("home", function(inputs, outputs, jagg) {
     </div><!-- /.container -->
     </div>
 
+    <!-- --------------------------------------- Overlay ----------------------------------------- -->
+    <div class="modal fade build-logs-modal" id="app_creation_progress_modal">
+        <div class="modal-dialog modal-dialog-margin-top-md ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button id="model_close_button_id" type="button" class="close" data-dismiss="alert">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="modal-title">Application Restarting Progress</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div id="progress_table" class="col-xs-12 col-md-12 section-title">
+                            <i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </div><!-- /.modal-content -->
+     </div><!-- /.modal -->
+
 
 
 <script>
@@ -254,6 +279,8 @@ jagg.template("home", function(inputs, outputs, jagg) {
 
     // stop application
     function stopApplication(applicationName, revision){
+        $("#stop-in-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
+        executeAsync(waitAndReloadAfterStop());
         jagg.post("../blocks/application/application.jag", {
             action: "stopApplication",
             applicationName: applicationName,
@@ -264,8 +291,19 @@ jagg.template("home", function(inputs, outputs, jagg) {
         });
     }
 
+    function waitAndReloadAfterStop(){
+        setTimeout(reloadAppHome, 5000);
+    }
+
+    function reloadAppHome(){
+        location.reload();
+    }
+
     // redeploy application
     function startApplication(applicationName, revision){
+
+        executeAsync(drawProgressWindow());
+
         jagg.post("../blocks/application/application.jag", {
             action: "startApplication",
             applicationName: applicationName,
@@ -277,6 +315,68 @@ jagg.template("home", function(inputs, outputs, jagg) {
     }
 
 
+    function drawProgressWindow(){
+        $('#app_creation_progress_modal').modal({ backdrop: 'static', keyboard: false});
+        $("#app_creation_progress_modal").show();
+        setInterval(pollEvents, 5000);
+    }
+
+    function executeAsync(func) {
+        setTimeout(func, 0);
+    }
+
+    function pollEvents(){
+        jagg.post("../blocks/application/application.jag", {
+            action:"getApplicationCreationEvents",
+            applicationName:applicationName,
+            applicationRevision:selectedRevision,
+
+        },function (result) {
+            $("#progress_table").html("");
+            var result = jQuery.parseJSON(result);
+            var table = "<table class='table' style='width:100%; color:black'>" ;
+            for(var i = 0; i < result.length; i++){
+                var statusStyle;
+                var event = result[i];
+
+                if (event.name === "Status" && event.status === "success" ){
+                    statusStyle = "success";
+                    table = table + "<tr class='" + statusStyle + "'><td>Restart Status</td>" +
+                                    "<td><i class=\"fa fa-check\"></i></td></tr>";
+                } else if (event.status == "failed"){
+                    statusStyle = "danger";
+                    table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                    "<td><i class=\"fa fa-times\"></i></td></tr>";
+                } else if (event.name === "Status" && event.status === "pending" ){
+                    statusStyle = "active";
+                    table = table + "<tr class='" + statusStyle + "'><td>Restarting</td>" +
+                                    "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                }
+            }
+
+            table = table + "</table>";
+            $("#progress_table").html(table);
+
+            for(var i = 0; i < result.length; i++){
+                var statusStyle;
+                var event = result[i];
+                if(event.name === "Status" && event.status === "success"){
+                    setTimeout(redirectAppHome, 2000);
+                    function redirectAppHome(){
+                        window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
+                    }
+                } else if(event.status == "failed"){
+                    jagg.message({content: "Error occurred while creating application.", type: 'error'});
+                    setTimeout(redirectAppListing, 5000);
+                    function redirectAppListing(){
+                        window.location.replace("index.jag");
+                    }
+                }
+            }
+        },function (jqXHR, textStatus, errorThrown) {
+             jagg.message({content: "Error occurred while restarting application.", type: 'error'});
+        });
+    }
 
     //Url text loaded from the span element
     var urlText = $('.version-url a span').text();
