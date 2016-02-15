@@ -356,7 +356,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
              } else if (!isNaN(value)){
                  // Here we are setting the error message as duplicated app name since we are not allowing to change
                  // the app key
-                 contentInvalidErrorMsg =  "Invalid value - Enter a value which has does not have only numeric characters";
+                 contentInvalidErrorMsg =  "Invalid value - Enter a value which has only alphanumeric characters";
                  isValueValid = false;
              }
              return isValueValid;
