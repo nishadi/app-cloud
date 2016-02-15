@@ -173,7 +173,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     //==================================== Kubernetes deploy block ===============================================
     var runtimeProperties = application.getRuntimeProperties();
-    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision,runtimeProperties);
+    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision, runtimeProperties, appTypeName);
     var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
     deployApplication(applicationName, applicationRevision, deploymentConfig, false);
 
@@ -357,7 +357,7 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
 /**
  * Method for getting all the available application types. e.g : war, mss, car
  */
-function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName, applicationRevision, runtimeProperties){
+function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName, applicationRevision, runtimeProperties, appTypeName){
     var containerList = new java.util.ArrayList();
     var container1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
     var appBaseImageName = tenantDockerRegistryUrl + "/" + applicationName;
@@ -371,7 +371,11 @@ function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName,
     serviceProxy1.setServiceName(appServiceName);
     serviceProxy1.setServiceProtocol(KUB_SERVICE_PROTOCOL);
     serviceProxy1.setServicePort(KUB_SERVICE_PORT);
-    serviceProxy1.setServiceBackendPort(KUB_SERVICE_BACKEND_PORT);
+    if(appTypeName == "php"){
+        serviceProxy1.setServiceBackendPort(KUB_SERVICE_PHP_BACKEND_PORT);
+    }else{
+        serviceProxy1.setServiceBackendPort(KUB_SERVICE_BACKEND_PORT);
+    }
     serviceProxyList1.add(serviceProxy1);
     container1.setServiceProxies(serviceProxyList1);
     containerList.add(container1);
