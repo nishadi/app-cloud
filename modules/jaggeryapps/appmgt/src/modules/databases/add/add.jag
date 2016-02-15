@@ -183,9 +183,17 @@ var getDatabases = function (){
     var payload = '<ser:getDatabases  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org">' +
             '<ser:environmentName>' + environmentName + '</ser:environmentName>' +
             '</ser:getDatabases>';
-    getDatabaseService.open(options, storageServerURL + 'RSSAdmin', false);
-    getDatabaseService.send(payload);
-    var result = getDatabaseService.responseE4X;
+
+    var result;
+    try {
+        getDatabaseService.open(options, storageServerURL + 'RSSAdmin', false);
+        getDatabaseService.send(payload);
+        result = getDatabaseService.responseE4X;
+    } catch (e) {
+        log.error("Error while retrieving all the databases");
+        log.error(e);
+        throw e;
+    }
     return buildResponse(result);
 };
 
@@ -233,25 +241,31 @@ function getUserList(result){
 */
 var generateDatabaseInfoForDataTable = function () {
     var allDBInfo = [];
-    var allDatabases = getDatabases();
-    for(var j in allDatabases) {
-        var singleDatabaseInfo = allDatabases[j];
-                singleDatabaseInfo.database_url = singleDatabaseInfo.url;
-                singleDatabaseInfo.notActive = 'false';
-			    // currently we dont record database type, support only MySQL.change this when multiple types are allowed
-			    singleDatabaseInfo.type = "MySQL";
-                var attachedUsersArray = getAttachedUsers(singleDatabaseInfo.dbName);
-                log.info(attachedUsersArray);
-                var attachedUsersString= "";
-                for(var k in attachedUsersArray) {
-                    if (k>0) {
-                        attachedUsersString = ", " + attachedUsersString;
-                    }
-                    attachedUsersString = attachedUsersArray[k] + attachedUsersString ;
+    try {
+        var allDatabases = getDatabases();
+        for (var j in allDatabases) {
+            var singleDatabaseInfo = allDatabases[j];
+            singleDatabaseInfo.database_url = singleDatabaseInfo.url;
+            singleDatabaseInfo.notActive = 'false';
+            // currently we dont record database type, support only MySQL.change this when multiple types are allowed
+            singleDatabaseInfo.type = "MySQL";
+            var attachedUsersArray = getAttachedUsers(singleDatabaseInfo.dbName);
+            log.info(attachedUsersArray);
+            var attachedUsersString = "";
+            for (var k in attachedUsersArray) {
+                if (k > 0) {
+                    attachedUsersString = ", " + attachedUsersString;
                 }
-                singleDatabaseInfo.attachedUsers = attachedUsersString;
-                allDBInfo.push(singleDatabaseInfo);
+                attachedUsersString = attachedUsersArray[k] + attachedUsersString;
             }
+            singleDatabaseInfo.attachedUsers = attachedUsersString;
+            allDBInfo.push(singleDatabaseInfo);
+        }
+    } catch(e){
+        log.error("Error while generating database info table");
+        log.error(e);
+        throw e;
+    }
     var jsonWithDataAttribute = {};
     jsonWithDataAttribute.data = allDBInfo;
     return stringify(jsonWithDataAttribute);
