@@ -28,39 +28,23 @@
 </head>
 <body>
 <% Logger logger = Logger.getLogger(this.getClass().getName());%>
-<h1>TagCanvas example page</h1>
+<h1>Tag Cloud</h1>
 <div id="myCanvasContainer">
-    <canvas width="300" height="300" id="myCanvas">
+    <canvas width="2000" height="800" id="myCanvas">
         <p>Anything in here will be replaced on browsers that support the canvas element</p>
     </canvas>
 </div>
-<div class="block">
-    <h2>Customers</h2>
-    <table border="1" class="data">
-        <tr><th>Name</th><th>Business</th><th>Region</th></tr>
+<div id="tags">
+    <ul>
         <%
             BuzzwordDAO dao = new BuzzwordDAO();
             Buzzword[] buzzwords = dao.getBuzzWordList();
 
-            HashMap<String,Integer> buzzwordMap=new HashMap<String, Integer>();
-            HashMap<String,Integer> rankingMap=new HashMap<String, Integer>();
-
-            for (Buzzword buzzword : buzzwords) {
-                logger.info("<tr><td>" + buzzword.getWord() + "</td><td>"
-                        + buzzword.getPopularity() + "</td><tr>");
-
-            }
-
-        %>
-    </table>
-</div>
-<div id="tags">
-    <ul>
-        <li><a style="font-size: 10pt" href="http://www.google.com" target="_blank">Google</a></li>
-        <li><a style="font-size: 12pt" href="/fish">Fish</a></li>
-        <li><a style="font-size: 18pt" href="/chips">Chips</a></li>
-        <li><a style="font-size: 25pt" href="/salt">Salt</a></li>
-        <li><a style="font-size: 8pt" href="/vinegar">Vinegar</a></li>
+            for (Buzzword buzzword : buzzwords) { %>
+                <li>
+                    <a style="font-size: <%=buzzword.getPopularity()%>" href="#"><%=buzzword.getWord()%></a>
+                </li>
+            <% } %>
     </ul>
 </div>
 </body>

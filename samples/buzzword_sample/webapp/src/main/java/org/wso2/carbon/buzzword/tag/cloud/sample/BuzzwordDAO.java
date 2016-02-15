@@ -22,16 +22,19 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.HttpStatus;
+
 import java.util.logging.Logger;
+
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class BuzzwordDAO {
-    private static final Logger logger =  Logger.getLogger(BuzzwordDAO.class.getName());
+    private static final Logger logger = Logger.getLogger(BuzzwordDAO.class.getName());
 
-    public Buzzword[] getBuzzWordList(){
+    public Buzzword[] getBuzzWordList() {
 
 //        String apiManagerUrl = System.getenv("DB_URL");
 //        String apiEndpointUrl = System.getenv("API_ENDPOINT_URL");
@@ -66,15 +69,10 @@ public class BuzzwordDAO {
         HttpClient client = new HttpClient();
 
         PostMethod postMethod = new PostMethod(submitUrl);
-
         postMethod.addRequestHeader("Authorization", applicationToken);
-
         postMethod.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
         postMethod.addParameter("grant_type", "password");
-
         postMethod.addParameter("username", username);
-
         postMethod.addParameter("password", password);
 
 //        String carbon_home = getProperty("carbon.home");
@@ -113,40 +111,41 @@ public class BuzzwordDAO {
                 } else {
                     logger.info("http status bad - 2");
                     values = "Error occurred invoking the service " + httpStatusCode;
+                    logger.info(values);
                 }
 
             } else {
                 logger.info("http status bad - 1");
                 values = "Error occurred invoking the service \n Http status : " + httpStatusCode;
-
+                logger.info(values);
             }
 
         } catch (Exception ex) {
             logger.info("http status bad - 3 : " + httpStatusCode);
             values = "Error occurred invoking the service \n Http status : " + ex;
+            logger.info(values);
         }
 
+
+        //values = {Eclipse=1, Hava=1, J2EE=3}
         List<Buzzword> list = new ArrayList<Buzzword>();
-//        try {
-//            DataSource dataSource = getDataSource();
-//            Connection connection = dataSource.getConnection();
-//
-//            PreparedStatement prepStmt = connection.prepareStatement("select * from Customer");
-//            ResultSet results = prepStmt.executeQuery();
-//            while (results.next()) {
-//                String name = results.getString("Name");
-//                String region = results.getString("Region");
-//                String category = results.getString("Category");
-//                Customer customer = new Customer(name, category, region);
-//                list.add(customer);
-//            }
-//            results.close();
-//            prepStmt.close();
-//            connection.close();
-//        } catch (Exception e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
+        String[] elements = values.split(",");
+        for (String element : elements) {
+
+
+            String words = element.split("=")[0].trim();
+            String ranks = element.split("=")[1].trim();
+            if (element.contains("{")) {
+                words = words.replace("{", "");
+            }
+            if (element.contains("}")) {
+                ranks = ranks.replace("}", "");
+            }
+            logger.info("words and ranks: " + words + " " + ranks);
+            Buzzword buzzword = new Buzzword(words, Integer.parseInt(ranks)*5);
+            list.add(buzzword);
+        }
+
         return list.toArray(new Buzzword[list.size()]);
     }
 }
