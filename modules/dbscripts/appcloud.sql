@@ -57,8 +57,8 @@ ENGINE = InnoDB;
 INSERT INTO `ApplicationRuntime` (`id`, `runtime_name`, `repo_url`, `image_name`, `tag`) VALUES
 (1, 'Apache Tomcat 8.0.30', 'https://github.com/', 'tomcat', '8.0'),
 (2, 'WSO2 Microservices Server 1.0.0', 'https://github.com/', 'msf4j', '1.0'),
-(3, 'Apache 2.4.10', 'https://github.com/','php','5.6');
-
+(3, 'Apache 2.4.10', 'https://github.com/','php','5.6'),
+(4, 'Apache 2.4.18', 'https://github.com/','php','5.7');
 
 -- -----------------------------------------------------
 -- Table `AppCloudDB`.`ApplicationDeployment`
@@ -211,7 +211,8 @@ ENGINE = InnoDB;
 INSERT INTO `ApplicationTypeRuntime` (`application_type_id`, `application_runtime_id`) VALUES
 (1, 1),
 (2, 2),
-(3, 3);
+(3, 3),
+(3, 4);
 
 
 -- -----------------------------------------------------
