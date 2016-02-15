@@ -706,7 +706,8 @@ var getDeploymentURL = function (applicationName, applicationRevision, appTypeNa
              applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
 
     var deploymentPath = KubernetesProvisioningUtils.getDeploymentPath(applicationCtx);
-    var baseURL = CloudUtil.getPropertyValue("ApplicationLaunchBaseURL");
+    var urlScheme = CloudUtil.getPropertyValue("DeploymentUrlScheme");
+    var baseURL = urlScheme + "://" + CloudUtil.getPropertyValue("ApplicationLaunchBaseURL");
 
     log.debug("Deployment URL: " + baseURL + deploymentPath);
     return baseURL + deploymentPath;
