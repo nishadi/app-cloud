@@ -16,11 +16,12 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
-
 var TMP_UPLOADED_APPLICATIONS_PATH = "tmpUploadedApps";
 var ARTIFACT_UPLOAD_DIRECTORY = "/tmp/";
-var BASE_DIR_PATH = "/home/kasuns/Documents/repo/app-cloud/setup/wso2as-5.2.1/repository/deployment/server/jaggeryapps/appmgt/";
-var DOCKER_REGISTRY_URL = "registry.docker.appfactory.private.wso2.com:5000";
+var PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH="Appmgt.DeploymentDirPath";
+var PROPERTY_DOCKER_REGISTRY_URL="DockerRegistryURL";
+var PROPERTY_STORAGE_SERVER_URL="StorageServerURL";
+var PROPERTY_RSS_ENVIRONMENT_NAME="RSSEnvironmentName";
 var DOCKER_FILE_NAME = "Dockerfile";
 var TENANT_DOMAIN_NAME = "tenantDomainName";
 var SUPER_TENANT_DOMAIN_NAME = "carbon.super";
@@ -34,13 +35,23 @@ var KUB_SERVICE_PROTOCOL = "TCP";
 var DASHBOARD_BASE_URL="https://localhost:9446/monitoring/webapps/";
 
 //events related constants
-var ARTIFACT_UPLOAD = "artifact_upload";
-var DOCKER_FILE_CREATE = "docker_file_create";
-var DOCKER_IMAGE_BUILD = "docker_image_build";
-var DOCKER_REGISTRY_PUSH = "docker_registry_push";
-var KUBE_DEPLOY = "kube_deploy";
+var DATABASE_ADD = "Adding application to database";
+var DOCKER_FILE_CREATE = "Creating docker file";
+var DOCKER_IMAGE_BUILD = "Building docker image";
+var DOCKER_REGISTRY_PUSH = "Updating docker registry";
+var KUBE_DEPLOY = "Starting deployment";
+var INGRESS = "Service proxy creation";
+var POD_STATUS = "Status";
 
 var EVENT_SUCCEEDED = "success";
 var EVENT_PENDING = "pending";
 var EVENT_FAILED = "failed";
+
+var UNAUTHORIZED_ERROR_RESPONSE ={"errorCode":"401","errorMessage":"Unauthorized access!!!"};
+
+var APPLICATION_RUNNING = "running";
+var APPLICATION_CREATED = "created";
+var APPLICATION_ERROR = "error";
+var APPLICATION_STOPPED = "stopped";
+
 %>

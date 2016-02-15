@@ -107,7 +107,7 @@ var messageTimer;
                  layout: 'topCenter',
                  type: params.type,
                  text: params.content,
-                 timeout: '5000',
+                 timeout: params.timeout?params.timeout:'5000',
                  animation: {
                      open: {height: 'toggle'}, // jQuery animate function property object
                      close: {height: 'toggle'}, // jQuery animate function property object

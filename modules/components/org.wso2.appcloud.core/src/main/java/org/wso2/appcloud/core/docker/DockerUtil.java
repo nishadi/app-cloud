@@ -16,10 +16,12 @@
 
 package org.wso2.appcloud.core.docker;
 
+import org.wso2.appcloud.common.util.AppCloudUtil;
+
 public class DockerUtil {
 
     public static String getDockerRegistryUrl() {
-        return DockerOpClientConstants.DEFAULT_DOCKER_REG_URL;
+        return AppCloudUtil.getPropertyValue("DockerRegistryURL");
     }
 
     public static String getDeploymentLocation(String appType) {

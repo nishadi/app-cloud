@@ -2468,3 +2468,15 @@ th.hide-column-data, td.hide-column-data {
   vertical-align: middle;
 }
 
+.custom-env-class-for-demo .form-group {
+    margin: 1em 3px 0px;
+}
+.custom-env-class-for-demo input[type=text] {
+    width: 350px;
+}
+.custom-env-class-for-demo .fw-lg{
+    margin: 0px 3px;
+}
+.demo-remove-padding{
+    padding: 0px;
+}

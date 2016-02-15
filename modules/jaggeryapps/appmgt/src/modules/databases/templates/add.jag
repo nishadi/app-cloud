@@ -22,8 +22,8 @@ include("/jagg/constants.jag");
 
 var log = new Log('modules/databases/templates/add.jag');
 var modManager = jagg.module("manager");
-var storageServerURL = "https://localhost:9445/services/";
-var environmentName = "DEFAULT";
+var storageServerURL = modManager.getPropertyValue(PROPERTY_STORAGE_SERVER_URL);
+var environmentName = modManager.getPropertyValue(PROPERTY_RSS_ENVIRONMENT_NAME);
 
 var createTemplateWithAllPermissions = function (templateName){
 	var ws = require('ws');

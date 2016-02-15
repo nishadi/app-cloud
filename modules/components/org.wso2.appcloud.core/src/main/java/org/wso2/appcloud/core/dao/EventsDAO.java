@@ -60,8 +60,6 @@ public class EventsDAO {
 
             boolean result = preparedStatement.execute();
             dbConnection.commit();
-            log.info("DB insert query result: " + result);
-
         } catch (SQLException e) {
             String msg = "Error occurred while adding app creation event: " + event.getEventName() + " status: " + event
                     .getEventStatus() + " timestamp: " + event.getTimestamp();

@@ -1,11 +1,18 @@
 // page initialization
 $(document).ready(function() {
+    // add upload app icon listener
+    $("#change_app_icon").change(function(event) {
+        submitChangeAppIcon(this);
+    });
     initPageView();
 });
 
 // wrapping functions
 function initPageView() {
-    loadAppIcon(applicationName, selectedRevision);
+    loadAppIcon(selectedApplicationRevision);
+    var deploymentURL = selectedApplicationRevision.deploymentURL;
+    var repoUrlHtml = generateLunchUrl(deploymentURL);
+    $("#version-url-link").html(repoUrlHtml);
     $('#appVersionList li').click(function() {
         var newRevision = this.textContent;
         changeSelectedRevision(newRevision);
@@ -27,16 +34,12 @@ function initPageView() {
 
 
 // Icon initialization
-function loadAppIcon(applicationName, selectedRevision) {
-    jagg.post("../blocks/home/ajax/get.jag", {
-        action: "getAppIconUrl",
-        applicationName: applicationName,
-        selectedRevision: selectedRevision
-    },function (result) {
-        $("#app-icon").attr('src', iconUrl);
-    }, function (jqXHR, textStatus, errorThrown) {
+function loadAppIcon(selectedApplicationRevision) {
+    if(selectedApplicationRevision.icon){
+        $("#app-icon").attr('src', 'data:image/bmp;base64,'+selectedApplicationRevision.icon);
+    } else {
         $("#app-icon").attr('src', defaultAppIconUrl);
-    });
+    }
 }
 
 function changeSelectedRevision(newRevision){
@@ -45,8 +48,8 @@ function changeSelectedRevision(newRevision){
     //Changing revision dropdown
     putSelectedRevisionToSession(applicationName, newRevision);
     $('#selected-version').html(newRevision+" ");
-
-    var selectedApplicationRevision = applicationRevisions[newRevision];
+    $("#selectedRevision").val(newRevision);
+    selectedApplicationRevision = applicationRevisions[newRevision];
     //Changing deploymentURL
     var deploymentURL = selectedApplicationRevision.deploymentURL;
     var repoUrlHtml = generateLunchUrl(deploymentURL);
@@ -63,7 +66,7 @@ function changeSelectedRevision(newRevision){
     $("#runtime").html(selectedApplicationRevision.runtimeName);
 
     //change icon
-    loadAppIcon(applicationName, newRevision)
+    loadAppIcon(selectedApplicationRevision);
 
     // Change replica status
     $("#tableStatus").html(selectedApplicationRevision.status);
@@ -106,4 +109,49 @@ function changeRuntimeProps(selectedApplicationRevision){
 
 function changeLabels(selectedApplicationRevision){
     $('#labelCount').html(selectedApplicationRevision.labels.length);
+}
+
+// Uploading application icon
+function submitChangeAppIcon(newIconObj) {
+    var validated = validateIconImage(newIconObj.value, newIconObj.files[0].size);
+    if(validated) {
+        $('#changeAppIcon').submit();
+    } else {
+        jagg.message({content: "Invalid image selected for Application Icon - Select a valid image", type: 'error', id:'notification'});
+    }
+}
+
+// check the file is an image file
+function validateIconImage(filename, fileSize) {
+    var ext = getFileExtension(filename);
+    var extStatus = false;
+    var fileSizeStatus = true;
+    switch (ext.toLowerCase()) {
+        case 'jpg':
+        case 'jpeg':
+        case 'gif':
+        case 'bmp':
+        case 'png':
+            extStatus = true;
+            break;
+        default:
+            jagg.message({content: "Invalid image selected for Application Icon - Select a valid image", type: 'error', id:'notification'});
+            break;
+    }
+
+    if((fileSize/1024) > 51200 && extStatus == true) {
+        fileSizeStatus = false;
+        jagg.message({content: "Image file should be less than 5MB", type: 'error', id:'notification'});
+    }
+    if(extStatus == true && fileSizeStatus == true) {
+        return true;
+    }
+    return false;
+}
+
+// Utility Functions Goes Here
+// extract file extension
+function getFileExtension(filename) {
+    var parts = filename.split('.');
+    return parts[parts.length - 1];
 }

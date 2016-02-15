@@ -137,15 +137,17 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     }
                 }
                 kubContainer.setPorts(containerPorts);
-                List<EnvVar> envVarList = new ArrayList<>();
-                for (Map.Entry envVarEntry : container.getEnvVariables().entrySet()) {
-                    EnvVar envVar = new EnvVarBuilder()
-                            .withName((String) envVarEntry.getKey())
-                            .withValue((String) envVarEntry.getValue())
-                            .build();
-                    envVarList.add(envVar);
+                if (container.getEnvVariables() != null) {
+                    List<EnvVar> envVarList = new ArrayList<>();
+                    for (Map.Entry envVarEntry : container.getEnvVariables().entrySet()) {
+                        EnvVar envVar = new EnvVarBuilder()
+                                .withName((String) envVarEntry.getKey())
+                                .withValue((String) envVarEntry.getValue())
+                                .build();
+                        envVarList.add(envVar);
+                    }
+                    kubContainer.setEnv(envVarList);
                 }
-                kubContainer.setEnv(envVarList);
                 kubContainerList.add(kubContainer);
             }
 
@@ -803,7 +805,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     .withName(
                             KubernetesProvisioningUtils.createIngressMetaName(applicationContext, environmentUrl,
                                     service.getMetadata().getName()))
-                    .withNamespace(namespace.getMetadata().getName())
+                    .withNamespace(namespace.getMetadata().getName()).withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
                     .endMetadata()
                     .withNewSpec()
                     .withRules()
@@ -852,16 +854,17 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
      * @throws RuntimeProvisioningException
      */
     @Override
-    public boolean deleteDeployment(String deploymentName) {
+    public boolean deleteDeployment() {
         boolean deleted = true;
         KubernetesClient kubernetesClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
         String namespace = this.namespace.getMetadata().getName();
 
         //If it is not deleted one object successfully, continue deleting others.
         try {
-            kubernetesClient.extensions().deployments().inNamespace(namespace).withName(deploymentName).delete();
+            kubernetesClient.extensions().deployments().inNamespace(namespace).withLabels(
+                    KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
         } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes deployment : " + deploymentName
+            String message = "Error while deleting kubernetes deployment : "
                     + " and continue deleting replication controller";
             log.warn(message, e);
             deleted = false;
@@ -872,7 +875,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             kubernetesClient.replicationControllers().inNamespace(namespace)
                     .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
         } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes replication controller in deployment : " + deploymentName
+            String message = "Error while deleting kubernetes replication controller in deployment"
                     + " and continue deleting services";
             log.warn(message, e);
             deleted = false;
@@ -884,7 +887,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             kubernetesClient.services().inNamespace(namespace)
                     .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
         } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes services in deployment : " + deploymentName
+            String message = "Error while deleting kubernetes services in deployment"
                     + " and continue deleting ingress";
             log.warn(message, e);
             deleted = false;
@@ -895,7 +898,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             kubernetesClient.extensions().ingress().inNamespace(namespace)
                     .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
         } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes ingress in deployment : " + deploymentName
+            String message = "Error while deleting kubernetes ingress in deployment"
                     + " and continue deleting secrets";
             log.warn(message, e);
             deleted = false;
@@ -906,7 +909,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             kubernetesClient.secrets().inNamespace(namespace)
                     .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
         } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes secrets in deployment : " + deploymentName;
+            String message = "Error while deleting kubernetes secrets in deployment";
             log.warn(message, e);
             deleted = false;
         }

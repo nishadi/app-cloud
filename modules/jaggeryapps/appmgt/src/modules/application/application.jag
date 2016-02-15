@@ -27,9 +27,12 @@ var Application = Packages.org.wso2.appcloud.core.dto.Application;
 var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
 var EventsManager = Packages.org.wso2.appcloud.core.EventsManager;
 var Event = Packages.org.wso2.appcloud.core.dto.Event;
+var Deployment = Packages.org.wso2.appcloud.core.dto.Deployment;
+var Container = Packages.org.wso2.appcloud.core.dto.Container;
+var ServiceProxy = Packages.org.wso2.appcloud.core.dto.ServiceProxy;
 var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
 var RuntimeProperty = Packages.org.wso2.appcloud.core.dto.RuntimeProperty;
-
+var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
 /**
  * Add a application object
  *
@@ -40,172 +43,314 @@ var RuntimeProperty = Packages.org.wso2.appcloud.core.dto.RuntimeProperty;
  * @param uploadedArtifact the uploaded artifact file
  * @param runtimeId runtime id of the application
  */
-var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas, runtimeId, appTypeName, runtimeProperties, uploadedFileName) {
+var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas,
+                               runtimeId, appTypeName, runtimeProperties, appIcon, uploadedFileName) {
     log.info("Started creating App => name: " + applicationName + " " +
             "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
             "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " "
     );
 
-    //Create Docker file
-
-
-    var eventsManager = new EventsManager();
-    var event = new Event();
-
     //================================= Adding application to Database =========================================
-    var application = new Application();
-    application.setApplicationName(applicationName);
-    application.setRevision(applicationRevision);
-    application.setDescription(applicationDescription);
-    application.setNumberOfReplicas(replicas);
-    application.setRuntimeId(runtimeId);
-    application.setApplicationType(appTypeName);
+    try {
+        var application = new Application();
+        application.setApplicationName(applicationName);
+        application.setRevision(applicationRevision);
+        application.setDescription(applicationDescription);
+        application.setNumberOfReplicas(replicas);
+        application.setRuntimeId(runtimeId);
+        application.setApplicationType(appTypeName);
+        application.setStatus(APPLICATION_CREATED);
 
-
-    if (runtimeProperties != null || runtimeProperties != "None") {
-        var parsedRuntimeProperties = parse(runtimeProperties);
-        if(Object.keys(parsedRuntimeProperties[0]).length > 0) {
-            var runtimePropertyList = new java.util.ArrayList();
-            for (var i = 0; i < parsedRuntimeProperties.length; i++) {
-                var runtimeProperty = new RuntimeProperty();
-                runtimeProperty.setPropertyName(parsedRuntimeProperties[i].key);
-                runtimeProperty.setPropertyValue(parsedRuntimeProperties[i].value);
-                runtimePropertyList.add(runtimeProperty);
+        if (runtimeProperties != null || runtimeProperties != "None") {
+            var parsedRuntimeProperties = parse(runtimeProperties);
+            if(Object.keys(parsedRuntimeProperties[0]).length > 0) {
+                var runtimePropertyList = new java.util.ArrayList();
+                for (var i = 0; i < parsedRuntimeProperties.length; i++) {
+                    var runtimeProperty = new RuntimeProperty();
+                    runtimeProperty.setPropertyName(parsedRuntimeProperties[i].key);
+                    runtimeProperty.setPropertyValue(parsedRuntimeProperties[i].value);
+                    runtimePropertyList.add(runtimeProperty);
+                }
+                application.setRuntimeProperties(runtimePropertyList);
             }
-            application.setRuntimeProperties(runtimePropertyList);
         }
+        ApplicationManager.addApplication(application);
+
+        if(appIcon){
+            changeApplicationIcon(applicationName, applicationRevision, appIcon);
+        }
+    } catch (e){
+        var msg = "Error while adding application to database";
+        addEvent(DATABASE_ADD, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        throw e;
     }
-
-    ApplicationManager.addApplication(application);
-
     //============================================================================================================
-
 
     //==================================== Create docker file block ==============================================
-
     //Adding docker file create pending event
-    event.setEventName(DOCKER_FILE_CREATE);
-    event.setEventStatus(EVENT_PENDING);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Docker file create successfully triggered in appcloud");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
+    var msg = "Docker file create successfully triggered in appcloud";
+    addEvent(DOCKER_FILE_CREATE, EVENT_PENDING, msg, applicationName, applicationRevision);
 
-    //Create Docker file
-    var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
-    var dockerOpClient = new DockerOpClient("http://127.0.0.1:2375");
-    var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-            + modManager.getTenantDomain() + "/" + applicationName + "/" + applicationRevision + "/";
-    var absFileUploadedPath = BASE_DIR_PATH + fileUploadPath;
-    var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
-    var dockerTemplateFilePath = BASE_DIR_PATH + "/" + "DockerFiles";
+    try {
+        var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
+        var dockerOpClient = new DockerOpClient(modManager.getPropertyValue("DockerClientURL"));
+        var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+                + modManager.getTenantDomain() + "/" + applicationName + "/" + applicationRevision + "/";
+        var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
+        var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
 
-    var uploadArtifactTmpName;
-    var splitArtifactExt = uploadedFileName.split(".");
-    if(splitArtifactExt[1] == "zip"){
-            uploadArtifactTmpName = splitArtifactExt[0] + ".upload";
-        }else{
-            uploadArtifactTmpName = uploadedFileName;
-        }
+         var dockerTemplateFilePath = BASE_DIR_PATH + "/" + "DockerFiles";
 
-    dockerOpClient.createDockerFile(runtimeId, appTypeName, uploadArtifactTmpName, dockerFilePath,dockerTemplateFilePath);
+            var uploadArtifactTmpName;
+            var splitArtifactExt = uploadedFileName.split(".");
+            if(splitArtifactExt[1] == "zip"){
+                    uploadArtifactTmpName = splitArtifactExt[0] + ".upload";
+                }else{
+                    uploadArtifactTmpName = uploadedFileName;
+                }
+        dockerOpClient.createDockerFile(runtimeId, appTypeName, uploadArtifactTmpName, dockerFilePath,dockerTemplateFilePath);
+
+    } catch(e){
+        var msg = "Error while creating docker file";
+        addEvent(DOCKER_FILE_CREATE, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        deleteApplicationFromDatabase(applicationName, applicationRevision);
+        throw e;
+    }
 
     //Adding docker file create success event
-    event.setEventName(DOCKER_FILE_CREATE);
-    event.setEventStatus(EVENT_SUCCEEDED);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Docker file successfully created for application");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-
+    var msg = "Docker file successfully created for application";
+    addEvent(DOCKER_FILE_CREATE, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
     //============================================================================================================
-
-
 
     //==================================== Build docker image block ==============================================
-
     //Adding docker build pending event
-    event.setEventName(DOCKER_IMAGE_BUILD);
-    event.setEventStatus(EVENT_PENDING);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Docker image build successfully triggered in appcloud");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-
-    //Build Docker image
-    var dockerRegTenantSpace = "super";
-    var tenantDockerRegistryUrl = DOCKER_REGISTRY_URL + "/" + dockerRegTenantSpace;
-    dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,absFileUploadedPath);
-
-
-
-    //Adding docker build pending event
-    event.setEventName(DOCKER_IMAGE_BUILD);
-    event.setEventStatus(EVENT_SUCCEEDED);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Docker image build successfully built");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-
+    var msg = "Docker image build successfully triggered in appcloud";
+    addEvent(DOCKER_IMAGE_BUILD, EVENT_PENDING, msg, applicationName, applicationRevision);
+    try {
+        var dockerRegTenantSpace = "super";
+        var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
+        dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,absFileUploadedPath);
+    } catch (e){
+        var msg = "Error while building docker file";
+        addEvent(DOCKER_IMAGE_BUILD, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        deleteApplicationFromDatabase(applicationName, applicationRevision);
+        throw e;
+    }
+    //Adding docker build success event
+    var msg = "Docker image build successfully built";
+    addEvent(DOCKER_IMAGE_BUILD, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
     //============================================================================================================
-
 
     //==================================== Push docker image block ===============================================
-
-     //Adding docker image push pending event
-     event.setEventName(DOCKER_REGISTRY_PUSH);
-     event.setEventStatus(EVENT_PENDING);
-     event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-     event.setEventDescription("Docker image push successfully triggered in triggered");
-     eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-
-     //Push Docker image
-     dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
-
-     //Adding docker push success event
-     event.setEventName(DOCKER_REGISTRY_PUSH);
-     event.setEventStatus(EVENT_SUCCEEDED);
-     event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-     event.setEventDescription("Docker image successfully pushed to the remote registry");
-     eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-
+    //Adding docker image push pending event
+    var msg = "Docker image push successfully triggered in triggered";
+    addEvent(DOCKER_REGISTRY_PUSH, EVENT_PENDING, msg, applicationName, applicationRevision);
+    try {
+        dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
+    } catch (e) {
+        var msg = "Error uploading docker image to remote registry";
+        addEvent(DOCKER_REGISTRY_PUSH, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        deleteApplicationFromDatabase(applicationName, applicationRevision);
+        throw e;
+    }
+    //Adding docker push success event
+    var msg = "Docker image push successfully completed";
+    addEvent(DOCKER_REGISTRY_PUSH, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
     //============================================================================================================
-
 
     //==================================== Kubernetes deploy block ===============================================
 
+    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision);
+    var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
+    deployApplication(applicationName, applicationRevision, deploymentConfig, false);
+
+    //=============================================================================================================
+
+};
+
+var deployApplication = function(applicationName, applicationRevision, deploymentConfig, isRedeploy){
+  
     //Adding deployment pending event
-    event.setEventName(KUBE_DEPLOY);
-    event.setEventStatus(EVENT_PENDING);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Application deployment successfully triggered in Kubernetes");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
+    var msg = "Application deployment successfully triggered in Kubernetes";
+    addEvent(KUBE_DEPLOY, EVENT_PENDING, msg, applicationName, applicationRevision);
 
     //Creating basic deployment
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
-
     var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
-             applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
-
+             applicationName, applicationRevision, null , modManager.getTenantId(), modManager.getTenantDomain());
     var kubService = new KubernetesRuntime(applicationCtx);
 
-    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision);
-    var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
-
     log.info("Deploying application: " + applicationName);
-    kubService.deployApplication(deploymentConfig);
+    try{
+        kubService.deployApplication(deploymentConfig);       
+        if(!isRedeploy) {          
+            persistDeploymentConfig(deploymentConfig, applicationName, applicationRevision);
+        }
 
+    } catch(e){
+        var msg = "Error while submitting application deployment to Kubernetes";
+        addEvent(KUBE_DEPLOY, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        deleteApplicationFromDatabase(applicationName, applicationRevision);
+        throw e;
+    }
     //Adding deployment success event
-    event.setEventName(KUBE_DEPLOY);
-    event.setEventStatus(EVENT_SUCCEEDED);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription("Application deployment successfully triggered in Kubernetes");
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-
+    var msg = "Application deployment successfull";
+    addEvent(KUBE_DEPLOY, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
     //============================================================================================================
 
+    //======================================= Creating Ingress ===================================================
+    //Adding deployment pending event
+    var msg = "Application ingress creation successfully triggered in Kubernetes";
+    addEvent(INGRESS, EVENT_PENDING, msg, applicationName, applicationRevision);
+    try{
+        var ingressCreated = kubService.createDeploymentUrl(modManager.getPropertyValue("ApplicationLaunchBaseURL"));
+        log.info("Deployment URL status: " + ingressCreated);
+        var msg = "Application ingress creation successful";
+        addEvent(INGRESS, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
+    } catch(e){
+        var msg = "Application ingress creation failed in Kubernetes";
+        addEvent(INGRESS, EVENT_FAILED, msg, applicationName, applicationRevision);
+        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        deleteApplicationUploadedPath(applicationName, applicationRevision);
+        deleteApplicationFromDatabase(applicationName, applicationRevision);
+        deleteApplicationFromKubernetes(applicationName, applicationRevision);
+        log.error(msg);
+        log.error(e);
+        throw e;
+    }
+    //======================================= checking pod status =================================================
+    //Adding pod status pending event
+    var msg = "Application pods created, still pending";
+    addEvent(POD_STATUS, EVENT_PENDING, msg, applicationName, applicationRevision);
 
-    //Creating Ingress
-    var ingressCreated = kubService.createDeploymentUrl("appcloud.wso2.com");
-    log.info("Deployment URL status: " + ingressCreated);
+    var counter = 0;
+    while(counter < 180){ // Waiting 3 minutes to gets pods up and running
+        java.lang.Thread.sleep(1000);
+        var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
+        counter = counter + 1;
+        if (podStatus) {
+            //Adding pod status pending event
+            var msg = "Application started successfully";
+            addEvent(POD_STATUS, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
+            ApplicationManager.updateApplicationStatus(APPLICATION_RUNNING, applicationName, applicationRevision);
+            break;
+        }else if(counter == 180){ // if pods doesn't starts withing 3 minutes user redirected to user home
+            //Adding pod status error event
+            var msg = "Application starting failed";
+            addEvent(POD_STATUS, EVENT_FAILED, msg, applicationName, applicationRevision);
+            ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+
+            deleteApplicationUploadedPath(applicationName, applicationRevision);
+            deleteDeployment(applicationName, applicationRevision);
+            deleteApplicationFromDatabase(applicationName, applicationRevision);
+            deleteApplicationFromKubernetes(applicationName, applicationRevision);
+        }
+    }
+
 };
 
+var deleteDeployment = function(applicationName, applicationRevision){
+    ApplicationManager.deleteDeployment(applicationName, applicationRevision);
+};
+
+var updateApplicationStatus = function(applicationName, applicationRevision, status){
+    log.info(applicationName +' '+applicationRevision+' '+status);
+    ApplicationManager.updateApplicationStatus(status, applicationName, applicationRevision);
+};
+
+var redeployApplication = function(applicationName, applicationRevision){
+    var deploymentConfig = buildDeploymentConfigFromDB(applicationName, applicationRevision);
+    deployApplication(applicationName, applicationRevision, deploymentConfig, true);
+};
+var persistDeploymentConfig = function(deploymentConfig, applicationName, applicationRevision){
+
+    var containerList = deploymentConfig.getContainers();
+    var container1 = containerList.get(0);
+    var serviceProxies = container1.getServiceProxies();
+    var serviceProxy1 = serviceProxies.get(0);
+
+    var deployment = new Deployment();
+    deployment.setDeploymentName(deploymentConfig.getDeploymentName());
+    deployment.setReplicas(parseInt(deploymentConfig.getReplicas()));
+
+
+    var serviceProxy = new ServiceProxy();
+    serviceProxy.setServiceName(serviceProxy1.getServiceName());
+    serviceProxy.setServiceProtocol(serviceProxy1.getServiceProtocol());
+    serviceProxy.setServicePort(serviceProxy1.getServicePort());
+    serviceProxy.setServiceBackendPort(serviceProxy1.getServiceBackendPort());
+
+    var container = new Container();
+    container.setImageName(container1.getBaseImageName());
+    container.setImageVersion(container1.getBaseImageVersion());
+
+    var proxies = new java.util.HashSet();
+    proxies.add(serviceProxy);
+    container.setServiceProxies(proxies);
+
+    var containerSet = new java.util.HashSet();
+    containerSet.add(container);
+    deployment.setContainers(containerSet);
+    ApplicationManager.addDeployment(applicationName,applicationRevision, deployment );
+};
+
+var buildDeploymentConfigFromDB = function(applicationName, applicationRevision){
+    var deployment = ApplicationManager.getDeployment(applicationName,applicationRevision);
+
+    var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
+    deploymentConfig.setDeploymentName(deployment.getDeploymentName());
+    deploymentConfig.setReplicas(parseInt(deployment.getReplicas()));
+
+    var deploymentContainers = deployment.getContainers();
+    var provisioningConatainerList = new java.util.ArrayList();
+    var containerIterator = deploymentContainers.iterator();
+    while(containerIterator.hasNext()){
+        var deploymentContainer = containerIterator.next();
+        var provisioningContainer = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
+        provisioningContainer.setContainerName(applicationName);
+        provisioningContainer.setBaseImageName(deploymentContainer.getImageName());
+        provisioningContainer.setBaseImageVersion(deploymentContainer.getImageVersion());
+
+        var deploymentProxies = deploymentContainer.getServiceProxies();
+        var provisioningProxyList = new java.util.ArrayList();
+        var proxyIterator = deploymentProxies.iterator();
+        while(proxyIterator.hasNext()){
+            var deploymentProxy = proxyIterator.next();
+            var provisioningProxy = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
+            provisioningProxy.setServiceName(deploymentProxy.getServiceName());
+            provisioningProxy.setServiceProtocol(deploymentProxy.getServiceProtocol());
+            provisioningProxy.setServicePort(deploymentProxy.getServicePort());
+            provisioningProxy.setServiceBackendPort(parseInt(deploymentProxy.getServiceBackendPort()));
+            provisioningProxyList.add(provisioningProxy);
+        }
+        provisioningContainer.setServiceProxies(provisioningProxyList);
+        provisioningConatainerList.add(provisioningContainer);
+    }
+    deploymentConfig.setContainers(provisioningConatainerList);
+
+    return deploymentConfig;
+
+};
 
 /**
  * Method for getting all the available application types. e.g : war, mss, car
@@ -233,7 +378,6 @@ function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName,
     return containerList;
 };
 
-
 function getDeploymentConfig(containersList, applicationName, replicas){
 
     var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
@@ -243,7 +387,6 @@ function getDeploymentConfig(containersList, applicationName, replicas){
 
     return deploymentConfig;
 }
-
 
 /**
  * Method for getting all the available application types e.g : war, mss, car
@@ -322,7 +465,7 @@ var getAllApplications = function(){
             applicationObject.applicationName = application.applicationName;
             applicationObject.runtimeName = application.runtimeName;
             applicationObject.status = application.status;
-
+            applicationObject.icon = getApplicationIconAsBase64String(application);
             applicationArray.push(applicationObject);
         }
     } catch(e){
@@ -357,6 +500,7 @@ var getApplicationByNameRevision = function(appName,appRevision){
             applicationObject.numberOfReplicas = application.numberOfReplicas;
             applicationObject.description = application.description;
             applicationObject.applicationType = application.applicationType;
+            applicationObject.icon = getApplicationIconAsBase64String(application);
             applicationObject.runtimeProperties = generateRuntimePropsArray(application.runtimeProperties);
             applicationObject.labels = generateLabelsArray(application.labels);
             applicationObject.endpoints = generateEndpointsArray(application.endpoints);
@@ -368,6 +512,141 @@ var getApplicationByNameRevision = function(appName,appRevision){
 
     return applicationObject;
 }
+
+/**
+ * Get application icon as a base64 encoded string.
+ *
+ * @return base64 encoded string, null if icon is null
+ */
+function getApplicationIconAsBase64String(application) {
+    var icon = null;
+    if(application.icon){
+        icon = Packages.org.apache.commons.codec.binary.Base64.
+        encodeBase64String(application.icon.getBytes(1, application.icon.length()));
+    }
+    return icon;
+}
+
+/**
+ * Update application icon
+ *
+ * @param applicationKey application key
+ * @param appIcon file object of the appIcon
+ */
+function changeApplicationIcon(applicationName, revision, appIcon){
+    if(appIcon){
+        var streamHostObject = appIcon.getStream();
+        var inputStream = streamHostObject.getStream();
+        ApplicationManager.updateApplicationIcon(applicationName, inputStream);
+    } else {
+        log.error("Provided app icon is Empty for application : "+applicationName);
+        throw "Provided app icon is Empty"
+    }
+
+}
+
+var getEnvVariablesByNameRevision = function(appName,appRevision){
+    var evnVariables = [];
+       try {
+        var envVars = ApplicationManager.getApplicationRuntimePropertiesByNameRevision(appName,appRevision);
+           for (var i = 0; i < envVars.length; i++) {
+               var envObj = {};
+               envObj.key = envVars[i].propertyName;
+               envObj.value = envVars[i].propertyValue;
+               evnVariables.push(envObj);
+           }
+    } catch(e){
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+    return evnVariables;
+};
+
+var getTags = function(appName,appRevision){
+    var tags = [];
+       try {
+        var tagArr = ApplicationManager.getTags(appName,appRevision);
+           for (var i = 0; i < tagArr.length; i++) {
+               var tagObj = {};
+               tagObj.key = tagArr[i].labelName;
+               tagObj.value = tagArr[i].labelValue;
+               tags.push(tagObj);
+           }
+    } catch(e){
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+    return tags;
+};
+
+var updateTag = function (applicationName, applicationRevision, prevKey, newKey, prevValue, newValue) {
+    try {
+        ApplicationManager.updateTag(applicationName, applicationRevision, prevKey, newKey, prevValue, newValue);
+    } catch (e) {
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+};
+var updateApplicationRuntimeProperty = function (applicationName, applicationRevision, prevKey, newKey, prevValue, newValue) {
+    try {
+        ApplicationManager.updateApplicationRuntimeProperty(applicationName, applicationRevision, prevKey, newKey, prevValue, newValue);
+    } catch (e) {
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+};
+
+var deleteApplicationRuntimeProperty = function (applicationName, applicationRevision, key, value) {
+    try {
+        ApplicationManager.deleteApplicationRuntimeProperty(applicationName, applicationRevision, key, value);
+    } catch (e) {
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+};
+var deleteTag = function (applicationName, applicationRevision, key, value) {
+    try {
+        ApplicationManager.deleteTag(applicationName, applicationRevision, key, value);
+    } catch (e) {
+        log.error("Error while getting the application");
+        log.error(e);
+        throw e;
+    }
+};
+var addApplicationRuntimeProperty = function (applicationName, applicationRevision, key, value) {
+    try {
+        var runtimePropertyList = new java.util.ArrayList();
+        var runtimeProperty = new Packages.org.wso2.appcloud.core.dto.RuntimeProperty();
+        runtimeProperty.setPropertyName(key);
+        runtimeProperty.setPropertyValue(value);
+        runtimePropertyList.add(runtimeProperty);
+        ApplicationManager.addRuntimeProperties(applicationName, applicationRevision, runtimePropertyList);
+    } catch (e) {
+        log.error("Error while adding runtime property with Key:" + key);
+        log.error(e);
+        throw e;
+    }
+};
+
+var addTag = function (applicationName, applicationRevision, key, value) {
+    try {
+        var tagList = new java.util.ArrayList();
+        var tag = new Packages.org.wso2.appcloud.core.dto.Label();
+        tag.setLabelName(key);
+        tag.setLabelValue(value);
+        tagList.add(tag);
+        ApplicationManager.addTags(applicationName, applicationRevision, tagList);
+    } catch (e) {
+        log.error("Error while adding runtime property with Key:" + key);
+        log.error(e);
+        throw e;
+    }
+};
 
 var generateRuntimePropsArray=function(runtimeList){
     var size = runtimeList.size();
@@ -438,9 +717,10 @@ var getDeploymentURL = function (applicationName, applicationRevision, appTypeNa
              applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
 
     var deploymentPath = KubernetesProvisioningUtils.getDeploymentPath(applicationCtx);
-    var baseURL = CloudUtil.getPropertyValue("ApplicationLaunchBaseURL");
+    var urlScheme = CloudUtil.getPropertyValue("DeploymentUrlScheme");
+    var baseURL = urlScheme + "://" + CloudUtil.getPropertyValue("ApplicationLaunchBaseURL");
 
-    log.info("Deployment URL: " + baseURL + deploymentPath);
+    log.debug("Deployment URL: " + baseURL + deploymentPath);
     return baseURL + deploymentPath;
 }
 
@@ -534,4 +814,72 @@ var createDestinationDirsForUploadedApps = function (applicationName, revision) 
     }
 }
 
+var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
+    log.info("Inside modules downloadFromUrl");
+    createDestinationDirsForUploadedApps(applicationName, revision);
+    var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+                + modManager.getTenantDomain() + "/" + applicationName + "/" + revision + "/";
+    var CARBON_HOME = CarbonUtils.getCarbonHome();
+    var filePath = CARBON_HOME + "/repository/deployment/server/jaggeryapps/appmgt";
+
+    if (apptype == "war"){
+        filePath  = filePath + fileUploadPath + applicationName + ".war";
+    } else if (apptype == "mss") {
+        filePath  = filePath + fileUploadPath + applicationName + ".jar";
+    }
+    log.info("apptype: " + apptype);
+    CloudUtil.downloadFromUrl(artifactUrl , filePath);
+}
+
+var addEvent = function(name, status, description, applicationName, applicationRevision) {
+
+    var eventsManager = new EventsManager();
+    var event = new Event();
+
+    event.setEventName(name);
+    event.setEventStatus(status);
+    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
+    event.setEventDescription(description);
+    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
+}
+
+var deleteApplicationUploadedPath = function(applicationName, revision) {
+    var fileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+            + modManager.getTenantDomain() + "/" + applicationName;
+    var fileUtils = Packages.org.apache.commons.io.FileUtils;
+    var fileUploadPath = new Packages.java.io.File(fileUploadPath);
+    log.info(fileUploadPath.getAbsolutePath())
+    if(fileUploadPath.exists()){
+        fileUtils.deleteDirectory(fileUploadPath);
+    }
+}
+
+var deleteApplicationFromDatabase = function(applicationName, revision) {
+    try{
+        java.lang.Thread.sleep(3000); // database at last after the transaction completes.
+        ApplicationManager.deleteApplication(applicationName, revision);
+        log.info("Successfully deleted the application form the database");
+    }catch(e){
+        log.error("Error while deleting application from the database");
+        log.error(e);
+    }
+}
+
+var deleteApplicationFromKubernetes = function(applicationName, revision) {
+    try{
+        var KubernetesRuntimeProvisioningService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
+
+        var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
+                applicationName, revision, null, modManager.getTenantId(), modManager.getTenantDomain());
+
+        var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
+
+        kubernetesRuntimeProvisioningService.deleteDeployment();
+        log.info("Successfully clean up the kubernetes deployments");
+
+    }catch(e){
+        log.error("Error while cleaning up the Kubernetes deployment");
+        log.error(e);
+    }
+}
 %>

@@ -25,9 +25,12 @@ var carbon = require('carbon');
 var server = carbon.server;
 var multitenancy = carbon.multitenancy;
 
-var getStorageServerServiceURL = function(){
-    return "https://localhost:9445/services/";
-}
+
+var getPropertyValue = function(propertyName){
+    var AppCloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
+    return AppCloudUtil.getPropertyValue(propertyName);
+
+};
 var setAuthHeaders = function (options, httpHeaders, username) {
     if(!username){
         username = jagg.getUser();

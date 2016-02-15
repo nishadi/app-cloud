@@ -41,6 +41,7 @@ public class SQLQueryConstants {
     public static final String PROPERTY_VALUE = "property_value";
     public static final String APPLICATION_TYPE_NAME = "app_type_name";
     public static final String RUNTIME_NAME = "runtime_name";
+    public static final String ICON = "icon";
     public static final String RUNTIME_REPO_URL = "repo_url";
     public static final String RUNTIME_IMAGE_NAME = "image_name";
     public static final String RUNTIME_TAG = "tag";
@@ -61,7 +62,7 @@ public class SQLQueryConstants {
     public static final String ADD_APPLICATION =
             "INSERT INTO Application (application_name, description, tenant_id, revision, application_runtime_id, " +
             "application_type_iD, endpoint_url, status, number_of_replica) values (?, ?, ?, ?, ?, (SELECT id FROM " +
-            "ApplicationType WHERE app_type_name=?), ?, ?, ? )";
+            "ApplicationType WHERE app_type_name=?), ?, ?, ?)";
 
     public static final String ADD_LABEL =
             "INSERT INTO Label (label_name, label_value, application_id, tenant_id, description) values (?, ?, ?, ?, ?)";
@@ -81,15 +82,22 @@ public class SQLQueryConstants {
 
     public static final String GET_ALL_APPLICATIONS_LIST =
             "SELECT MAX(Application.id) as id, Application.application_name as application_name, ApplicationRuntime.runtime_name" +
-            " as runtime_name, Application.status as status FROM Application JOIN ApplicationRuntime ON " +
-            "Application.application_runtime_id = ApplicationRuntime.id WHERE Application.tenant_id=? GROUP BY " +
+            " as runtime_name, Application.status as status, ApplicationIcon.icon as icon " +
+            "FROM Application JOIN ApplicationRuntime ON " +
+            "Application.application_runtime_id = ApplicationRuntime.id " +
+            "LEFT OUTER JOIN ApplicationIcon ON (Application.application_name=ApplicationIcon.application_name AND " +
+            "Application.tenant_id=ApplicationIcon.tenant_id) "+
+            "WHERE Application.tenant_id=? GROUP BY " +
             "Application.application_name";
 
     public static final String GET_APPLICATION_By_NAME_REVISION =
-            "SELECT Application.*, ApplicationType.app_type_name, ApplicationRuntime.runtime_name  "+
+            "SELECT Application.*, ApplicationType.app_type_name, " +
+            "ApplicationRuntime.runtime_name, ApplicationIcon.icon  "+
             "FROM Application INNER JOIN ApplicationType ON Application.application_type_id=ApplicationType.id " +
             "INNER JOIN ApplicationRuntime ON Application.application_runtime_id=ApplicationRuntime.id "+
-            "WHERE application_name=? AND revision=? AND tenant_id=? ";
+            "LEFT OUTER JOIN ApplicationIcon ON (Application.application_name=ApplicationIcon.application_name AND " +
+            "Application.tenant_id=ApplicationIcon.tenant_id) "+
+            "WHERE Application.application_name=? AND Application.revision=? AND Application.tenant_id=? ";
 
     public static final String GET_APPLICATION_ID =
             "SELECT id FROM Application WHERE application_name=? AND revision=? AND tenant_id=?";
@@ -110,6 +118,10 @@ public class SQLQueryConstants {
 
     public static final String GET_ALL_LABELS_OF_APPLICATION_BY_ID =
             "SELECT * FROM Label WHERE application_id=?";
+
+    public static final String UPDATE_APPLICATION_ICON =
+            "INSERT INTO ApplicationIcon (icon, application_name, tenant_id) VALUES (?, ?, ?) " +
+            "ON DUPLICATE KEY UPDATE icon= VALUES(icon) ";
 
     public static final String GET_ALL_RUNTIME_PROPERTIES_OF_APPLICATION =
             "SELECT * FROM RuntimeProperties WHERE application_id=(SELECT id FROM Application WHERE application_name=? " +
@@ -138,11 +150,25 @@ public class SQLQueryConstants {
 
     /*Update Queries*/
 
+    public static final String UPDATE_RUNTIME_PROPERTIES =
+            "UPDATE RuntimeProperties SET property_name=?, property_value=? WHERE application_id=? AND tenant_id=? AND property_name=? AND property_value=?";
+    public static final String UPDATE_TAG =
+            "UPDATE Label SET label_name=?, label_value=? WHERE application_id=? AND tenant_id=? AND label_name=? AND label_value=?";
+
     public static final String UPDATE_APPLICATION_STATUS =
             "UPDATE Application SET status=? WHERE application_name=? AND revision=? AND tenant_id=?";
 
     public static final String UPDATE_NUMBER_OF_REPLICA =
             "UPDATE Application SET number_of_replica=? WHERE application_name=? AND revision=? AND tenant_id=?";
 
+    /*Delete Queries*/
+    public static final String DELETE_RUNTIME_PROPERTIES =
+            "DELETE FROM RuntimeProperties WHERE application_id=? AND tenant_id=? AND property_name=? AND property_value=?";
+    public static final String DELETE_TAG =
+            "DELETE FROM Label WHERE application_id=? AND tenant_id=? AND label_name=? AND label_value=?";
 
+    public static final String DELETE_APPLICATION = "DELETE FROM Application WHERE id = ?";
+
+    public static final String DELETE_APPLICATION_REVISION = "DELETE FROM Application "
+            + "WHERE application_name = ? and tenant_id = ?";
 }

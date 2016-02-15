@@ -21,6 +21,13 @@
  var site = require("/site/conf/site.json");
 
  (function () {
+
+     var user = jagg.getUser();
+     if (!user) {
+         jagg.includeBlock("sso/filter", {});
+         return;
+     }
+
      var applicationName = request.getParameter('applicationName');
      var applicationRevision = request.getParameter('applicationRevision');
      jagg.render({

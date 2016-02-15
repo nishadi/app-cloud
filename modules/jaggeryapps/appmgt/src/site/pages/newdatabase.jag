@@ -20,6 +20,13 @@
 include("/jagg/jagg.jag");
 
 (function () {
+
+    var user = jagg.getUser();
+    if (!user) {
+        jagg.includeBlock("sso/filter", {});
+        return;
+    }
+
     jagg.render({
         "name":"page/master",
         "inputs":{

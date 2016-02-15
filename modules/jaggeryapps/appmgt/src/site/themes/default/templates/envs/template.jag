@@ -1,0 +1,225 @@
+<%
+/*
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
+include("/jagg/jagg.jag");
+
+jagg.template("envs", function(inputs, outputs, jagg) {
+    var applicationName = request.getParameter("applicationName");
+    var applicationRevision = request.getParameter("revision");
+
+    %>
+     <!-- Bootstrap -->
+      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
+      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/fontwso2-1.2/css/font-wso2.css'))%>">
+      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/font-awesome-4.2.0/font-awesome.min.css'))%>">
+      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/web-fonts/Roboto.css'))%>">
+      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
+
+    <div class="action-bar">
+        <a href="/appmgt/site/pages/home.jag?applicationName=<%=applicationName%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-left-arrow fw-stack-1x"></i>
+                </span> <span class="hidden-xs">Back to Application</span>
+        </a>
+        <a class="btn-action add-env" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-add fw-stack-1x"></i>
+                </span> <span class="hidden-xs">Add Environment Variable</span>
+        </a>
+
+    </div>
+
+ <div class="container-fluid app-content-section">
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 msg-issues">
+                This allows you to set environment variables which is used in your application.
+            </div>
+        </div>
+        <div class="env-list">
+
+        </div>
+ </div>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+<script >
+$(document).ready(function () {
+    var prevKey, prevValue;
+    jagg.post("../blocks/application/application.jag", {
+        action: "getEnvVariablesByNameRevision",
+        applicationName: '<%=applicationName%>',
+        applicationRevision: '<%=applicationRevision%>'
+
+    }, function (result) {
+        var parsedResult = JSON.parse(result);
+        for (var i = 0; i < parsedResult.length; i++) {
+            $(".env-list").append(
+                '<div class="form-inline  property-seperator custom-env-class-for-demo">' +
+                '<div class="form-group">' +
+                '<label class="sr-only" for="key">Key</label>' +
+                '<input type="text" class="form-control env-key" id="key" placeholder="Key" readonly value="' + parsedResult[i].key + '">' +
+                '</div>' +
+                '<div class="form-group">' +
+                '<label class="sr-only" for="value">Value</label>' +
+                '<input type="text" class="form-control env-value" id="value" placeholder="Value" readonly value="' + parsedResult[i].value + '">' +
+                '</div>' +
+                '<div class="form-group edit-key-values">' +
+                '<span class="fw-stack fw-lg">' +
+                '<i class="fw fw-ring fw-stack-2x"></i>' +
+                '<i id="editIcon" class="fw  fw-edit fw-stack-1x"></i>' +
+                '<i id="saveIcon" class="fw  fw-save fw-stack-1x" style="display: none"></i>' +
+                '</span>' +
+                '<span class="fw-stack fw-lg">' +
+                '<i class="fw fw-ring fw-stack-2x"></i>' +
+                '<i class="fw fw-cancel fw-stack-1x"></i>' +
+                '</span>' +
+                '</div>' +
+                '</div>');
+        }
+
+        $(".add-env").click(function () {
+            $(".env-list").append(
+                '<div class="form-inline  property-seperator custom-env-class-for-demo">' +
+                '<div class="form-group">' +
+                '<label class="sr-only" for="key">Key</label>' +
+                '<input type="text" class="form-control" id="key" placeholder="Key">' +
+                '</div>' +
+                '<div class="form-group">' +
+                '<label class="sr-only" for="value">Value</label>' +
+                '<input type="text" class="form-control" id="value" placeholder="Value">' +
+                '</div>' +
+                '<div class="form-group edit-key-values">' +
+                '<span class="fw-stack fw-lg">' +
+                '<i class="fw fw-ring fw-stack-2x"></i>' +
+                '<i id="editIcon" class="fw  fw-edit fw-stack-1x" style="display: none"></i>' +
+                '<i id="saveIcon" class="fw  fw-save fw-stack-1x save-new-entry"></i>' +
+                '</span>' +
+                '<span class="fw-stack fw-lg">' +
+                '<i class="fw fw-ring fw-stack-2x"></i>' +
+                '<i class="fw fw-cancel fw-stack-1x cancel-new-entry"></i>' +
+                '</span>' +
+                '</div>' +
+                '</div>');
+        });
+
+        $(document).on('click', '.fw-edit', function () {
+            $(this).parent().parent().parent().find('#key')[0].readOnly = false;
+            $(this).parent().parent().parent().find('#value')[0].readOnly = false;
+            $(this).hide();
+            $(this).parent().find('#saveIcon').show();
+            prevKey = $(this).parent().parent().parent().find('#key')[0].value;
+            prevValue = $(this).parent().parent().parent().find('#value')[0].value;
+        });
+
+        $(document).on('click', '.fw-cancel', function () {
+            var isNewRow = $(this).hasClass('cancel-new-entry');
+            if (isNewRow) {
+                $(this).parent().parent().parent().remove();
+                return;
+            }
+            var key = $(this).parent().parent().parent().find('#key')[0].value;
+            var value = $(this).parent().parent().parent().find('#value')[0].value;
+            deleteRuntimeAttribute(key, value);
+            $(this).parent().parent().parent().remove();
+        });
+
+        $(document).on('click', '.fw-save', function () {
+            var updatedKey = $(this).parent().parent().parent().find('#key')[0].value;
+            var updatedValue = $(this).parent().parent().parent().find('#value')[0].value;
+
+            var isNewAddition = $(this).hasClass('save-new-entry');
+            if (isNewAddition) {
+                addRuntimeAttribute(updatedKey, updatedValue);
+                $(this).removeClass('save-new-entry');
+                $(this).parent().parent().find('.cancel-new-entry').removeClass('cancel-new-entry');
+            } else {
+                updateRuntimeAttribute(prevKey, updatedKey, prevValue, updatedValue);
+            }
+            $(this).parent().find('#saveIcon').hide();
+            $(this).parent().find('#editIcon').show();
+            $(this).parent().parent().parent().find('#key')[0].readOnly = true;
+            $(this).parent().parent().parent().find('#value')[0].readOnly = true;
+
+        });
+    });
+
+    function updateRuntimeAttribute(prevKey, newKey, prevValue, newValue) {
+        jagg.post("../blocks/application/application.jag", {
+            action: "updateApplicationRuntimeProperty",
+            applicationName: '<%=applicationName%>',
+            applicationRevision: '<%=applicationRevision%>',
+            prevKey: prevKey,
+            newKey: newKey,
+            prevValue: prevValue,
+            newValue: newValue
+
+        }, function (result) {
+
+        });
+    }
+
+    function addRuntimeAttribute(newKey, newValue) {
+        jagg.post("../blocks/application/application.jag", {
+            action: "addApplicationRuntimeProperty",
+            applicationName: '<%=applicationName%>',
+            applicationRevision: '<%=applicationRevision%>',
+            key: newKey,
+            value: newValue
+
+        }, function (result) {
+
+        });
+    }
+
+    function deleteRuntimeAttribute(key, value) {
+        jagg.post("../blocks/application/application.jag", {
+            action: "deleteApplicationRuntimeProperty",
+            applicationName: '<%=applicationName%>',
+            applicationRevision: '<%=applicationRevision%>',
+            key: key,
+            value: value
+
+        }, function (result) {
+
+        });
+    }
+
+
+});
+
+$(document).on('click', '.panel-heading a', function (e) {
+    var $this = $(this);
+    if ($this.hasClass('collapsed')) {
+        $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+    } else {
+        $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+    }
+});
+
+
+</script >
+<%
+}); %>

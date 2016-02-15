@@ -30,8 +30,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
  <script type="text/javascript">
     var appTypeName = "<%=appType.type%>";
     var retryCount = 0;
-    $(document).ready(function()
-        {
+    var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
+    $(document).ready(function(){
+
+            $("#file-upload-block").hide();
+            $("#url-upload-block").hide();
+
             $.each(<%=runtimes%>,function(key,value){
                 $("#runtime").append($('<option></option>').val(value.id).html(value.runtimeName));
             });
@@ -40,7 +44,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             var wrapper         = $(".input_fields_wrap"); //Fields wrapper
             var add_button      = $(".add_field_button"); //Add button ID
 
-            var x = 1; //initlal text box count
+            var x = 1; //initial text box count
             $(add_button).click(function(e){ //on add input button click
                 e.preventDefault();
                 if(x < max_fields){ //max input box allowed
@@ -77,10 +81,25 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 });
 
                 var formData = new FormData($(this)[0]);
+                var selectedVal = $("#upload-method option:selected").val();
+
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
                 formData.append('action', 'createApplication');
                 formData.append('appTypeName', appTypeName);
-                formData.append('uploadedFileName', $("#uploadedFileName").val())
+
+
+                if(selectedVal == 1){
+                    formData.append('uploadedFileName', $("#uploadedFileName").val());
+                } else if (selectedVal == 2) {
+                    if (appTypeName == "war") {
+                        formData.append('uploadedFileName', $("#applicationName").val() + ".war");
+                    } else if (appTypeName == "mss") {
+                        formData.append('uploadedFileName', $("#applicationName").val() + ".jar");
+                    }
+
+                } else if (selectedVal == 3) {
+                    formData.append('uploadedFileName', $("#applicationName").val() + ".war");
+                }
                 $.ajax({
                         url: $(this).attr("action"),
                         type: 'POST',
@@ -99,13 +118,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
             $('#fileupload').fileupload({
 
                 submit: function(e, data){
-                      data.url = "<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")%>",
+                      data.url = "<%=jagg.getAbsoluteUrl('/site/blocks/application/application.jag')%>",
                           data.dataType = 'json',
                           data.formData = {action:'uploadExistingArchive',
                                 appTypeName:appTypeName,
                                 applicationName:$("#applicationName").val(),
                                 applicationRevision:$("#applicationRevision").val()
-                                }
+                          }
                     },
                     progressall: function (e, data) {
                         var progress = parseInt(data.loaded / data.total * 100, 10);
@@ -151,15 +170,19 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     if(event.status == "success"){
                         statusStyle = "success";
                         table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td>" + event.status + "</td><td><i class=\"fa fa-check\"></i></td></tr>";
+                                        "<td><i class=\"fa fa-check\"></i></td></tr>";
                     } else if (event.status == "failed") {
                             statusStyle = "danger";
                         table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td>" + event.status + "</td><td><i class=\"fa fa-times\"></i></td></tr>";
+                                        "<td><i class=\"fa fa-times\"></i></td></tr>";
                     } else if (event.status == "pending"){
                         statusStyle = "active";
                         table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td>" + event.status + "</td><td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                                        "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                    } else if (event.status == "failed"){
+                        statusStyle = "active";
+                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                        "<td><i class=\"fa fa-times\"></i></td></tr>";
                     }
                 }
 
@@ -169,13 +192,21 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 for(var i = 0; i < result.length; i++){
                     var statusStyle;
                     var event = result[i];
-                    if(event.name == "kube_deploy" && event.status == "success"){
+                    if(event.name === "Status" && event.status == "success"){
                         setTimeout(redirectAppHome, 2000);
                         function redirectAppHome(){
                             window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
                         }
+                    } else if(event.status == "failed"){
+                        jagg.message({content: "Error occurred while creating application.", type: 'error'});
+                        setTimeout(redirectAppListing, 5000);
+                        function redirectAppListing(){
+                            window.location.replace("index.jag");
+                        }
                     }
                 }
+            },function (jqXHR, textStatus, errorThrown) {
+                 jagg.message({content: "Error occurred while creating application.", type: 'error'});
             });
         }
 
@@ -201,6 +232,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     required: true,
                     validateContent: true,
                     maxlength: 8
+                },
+                icon: {                                     // app icon field
+                    validateAppIcon: true
                 }
             },
             onsubmit: false,    // Since we are handling on submit validation on click event of the "Create" button,
@@ -222,6 +256,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     $("#add-application").prop("disabled", false);
                 }
                 this.defaultShowErrors();
+            },
+            errorPlacement: function (error, element) {
+                if ($(element).parent().closest('div').hasClass("input-group")) {
+                    error.insertAfter($(element).closest('div'));
+                } else {
+                    error.insertAfter(element);
+                }
             }
         };
 
@@ -233,58 +274,165 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
         $.validator.addMethod("validateContent",
             validateContent, getAppCreationErrorMessage);
+        $.validator.addMethod("validateAppIcon",
+            validateAppIcon, getIconErrorMessage);
 
         var appCreationErrorMsg = "Invalid value";
 
+        $("#appIcon").change(function() {
+             $("#icon").val($("#appIcon").val());
+
+             // validate the app icon upon changes
+             var validator = $( "#application-details" ).validate();
+             validator.element( "#icon" );
+         });
+
+         // Validate Icon
+        $("#icon").change(function() {
+             var file = $('#icon');
+             validateIconImage(file.val(), this.files[0].size);
+        });
+
         function validateAlphaNumericChar(value) {
-         var isValueValid = true;
+             var isValueValid = true;
 
-         var patternForSpace = / /g;
-         var isSpace = patternForSpace.test(value);
+             var patternForSpace = / /g;
+             var isSpace = patternForSpace.test(value);
 
-         var patternForNonAlphaNumericChars = /[^\w\s]/gi;
-         var isInvalidChar = patternForNonAlphaNumericChars.test(value);
+             var patternForNonAlphaNumericChars = /[^\w\s]/gi;
+             var isInvalidChar = patternForNonAlphaNumericChars.test(value);
 
-         var patternForUnderscore = /_/g;
-         var isUnderScore = patternForUnderscore.test(value);
+             var patternForUnderscore = /_/g;
+             var isUnderScore = patternForUnderscore.test(value);
 
-         if (isSpace == true || isInvalidChar == true || isUnderScore == true) {
-             // Here we are setting the error message as duplicated app name since we are not allowing to change
-             // the app key
-             appCreationErrorMsg =  "Invalid value - Enter a value which has only alphanumeric characters"
-             isValueValid = false;
-         } else {
-             isValueValid = true;
-         }
-         return isValueValid;
-     }
+             if (isSpace == true || isInvalidChar == true || isUnderScore == true) {
+                 // Here we are setting the error message as duplicated app name since we are not allowing to change
+                 // the app key
+                 appCreationErrorMsg =  "Invalid value - Enter a value which has only alphanumeric characters"
+                 isValueValid = false;
+             } else {
+                 isValueValid = true;
+             }
+             return isValueValid;
+        }
 
-     function validateContent(value) {
-         var isValueValid = true;
-         var valueLength = (value).length;
-         if (valueLength == 0) {
-             // Here we are setting the error message as duplicated app name since we are not allowing to change
-             // the app key
-             appCreationErrorMsg = "Invalid value - Enter a value which is not empty";
-             isValueValid = false;
-         } else if (!isNaN(value)){
-             // Here we are setting the error message as duplicated app name since we are not allowing to change
-             // the app key
-             appCreationErrorMsg =  "Invalid value - Enter a value which has does not have only numeric characters";
-             isValueValid = false;
-         } else {
-             isValueValid = validateAlphaNumericChar(value);
-         }
-         return isValueValid;
-     }
+        function validateContent(value) {
+             var isValueValid = true;
+             var valueLength = (value).length;
+             if (valueLength == 0) {
+                 // Here we are setting the error message as duplicated app name since we are not allowing to change
+                 // the app key
+                 appCreationErrorMsg = "Invalid value - Enter a value which is not empty";
+                 isValueValid = false;
+             } else if (!isNaN(value)){
+                 // Here we are setting the error message as duplicated app name since we are not allowing to change
+                 // the app key
+                 appCreationErrorMsg =  "Invalid value - Enter a value which has does not have only numeric characters";
+                 isValueValid = false;
+             } else {
+                 isValueValid = validateAlphaNumericChar(value);
+             }
+             return isValueValid;
+        }
 
-     function getAppCreationErrorMessage(){
-        return appCreationErrorMsg;
-    }
+        function getAppCreationErrorMessage(){
+           return appCreationErrorMsg;
+        }
 
+        $('#url-upload').click(function(){
+            $("#url-upload-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
+            jagg.post("../blocks/application/application.jag", {
+                action:"downloadFromUrl",
+                artfactUrl:$("#artifactUrl").val(),
+                applicationName:$("#applicationName").val(),
+                applicationRevision:$("#applicationRevision").val(),
+                appTypeName:appTypeName,
+            },function (result) {
+                $("#url-upload-progress").html("<i class=\"fa fa-check\"></i>");
+            },function (jqXHR, textStatus, errorThrown) {
+                jagg.message({content: "Error occurred while downloading artifact from url.", type: 'error', id:'view_log'});
+            });
+        });
+
+        $( "#upload-method" ).change(function() {
+            var selectedVal = $("#upload-method option:selected").val();
+            if(selectedVal == 1){
+                $("#file-upload-block").show();
+                $("#url-upload-block").hide();
+            } else if (selectedVal == 2) {
+                $("#file-upload-block").hide();
+                $("#url-upload-block").show();
+            } else if (selectedVal == 3) {
+                $("#file-upload-block").hide();
+                $("#url-upload-block").hide();
+            }
+        });
+        $("#model_close_button_id").click(function(){
+            window.location.replace("index.jag");
+        });
     });
 
+     function clearUploadIconField() {
+         document.getElementById("icon").value = "";
+         document.getElementById("appIcon").value = "";
+         var validator = $( "#application-details" ).validate();
+         validator.element( "#icon" );
+    }
 
+    // Return whether the app icon is validated or not
+    function validateAppIcon(value) {
+        var file = $("#appIcon");
+        if ($("#icon").val() && file.val() != "") {
+            return validateIconImage(file.val(), file[0].files[0].size);
+        } else {
+            return true;
+        }
+    }
+
+    function validateIconImage(filename, fileSize) {
+
+         var ext = getFileExtension(filename);
+         var maxSize = 5242880;
+         var isValidExtension = false;
+         var isValidIconSize = false;
+
+         // Check extension
+         switch (ext.toLowerCase()) {
+             case 'jpg':
+             case 'jpeg':
+             case 'gif':
+             case 'bmp':
+             case 'png':
+                 isValidExtension = true;
+                 break;
+             default:
+                iconErrorMsg = "Invalid image selected for Application Icon - Select a valid image";
+                isValidExtension = false;
+                break;
+         }
+         // Check size
+         if(!fileSize) {
+            iconErrorMsg = "Image file should be non-empty";
+            isValidIconSize = false;
+         } else if (fileSize != undefined && fileSize > maxSize) {
+            iconErrorMsg ="Image file should be less than 5MB";
+            isValidIconSize = false;
+         } else {
+             isValidIconSize = true;
+         }
+         return (isValidExtension && isValidIconSize);
+    }
+
+     // Utility Functions Goes Here
+    // extract file extension
+    function getFileExtension(filename) {
+        var parts = filename.split('.');
+        return parts[parts.length - 1];
+    }
+
+    function getIconErrorMessage(){
+        return iconErrorMsg;
+    }
  </script>
 
     <!-- BOF App factory menu actionbar -->
@@ -341,29 +489,66 @@ jagg.template("application", function (inputs, outputs, jagg) {
             <select name="runtime" id="runtime" class="form-control" ><option value="None" selected="Selected">Select runtime</option></select>
             </div>
 
-            <div class="form-group">
+            <!--div class="form-group">
             <label>No Of Replicas: </label>
-            <select name="replicas" id="replicas" class="form-control" >
+            <select name="replicas" id="replicas" class="form-control">
                 <option value="None" selected="Selected">Select replicas</option>
                 <option value="1" >1</option>
                 <option value="2" >2</option>
             </select>
+            </div-->
+
+            <div class="form-group" id="upload-method">
+            <label>Artifact upload method:</label>
+            <select name="select-upload-method" id="select-upload-method" class="form-control" >
+                <option value="0" selected="Selected">Select upload method</option>
+                <option value="1">Upload from file system</option>
+                <option value="2">Upload from url</option>
+                <option value="3">Upload wso2 sample</option>
+            </select>
+            </div>
+
+            <div class="form-group" id="file-upload-block">
+                <label>Upload Artifact: </label>
+                <div class="input-group">
+                    <input id="uploadedFileName" type="text" class="form-control" readonly>
+                    <span class="input-group-btn">
+                       <span class="btn btn-primary btn-file">
+                           Upload&hellip; <input id="fileupload" type="file" name="fileUpload" multiple>
+                       </span>
+                    </span>
+                </div>
+                <div id="progress" class="progress">
+                    <div class="progress-bar progress-bar-success" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="form-group" id="url-upload-block">
+                <label for="artifactUrl">Upload from URL: </label>
+                    <input id="artifactUrl" name="artifactUrl" type="text" class="form-control" placeholder="Enter artifact url" />
+                    <a class="btn btn-info" id="url-upload">Upload From URL
+                        <span id="url-upload-progress"><span>
+                    </a>
             </div>
 
             <div class="form-group">
-            <label>Upload Artifact: </label>
-            <div class="input-group">
-                <input id="uploadedFileName" type="text" class="form-control" readonly>
-                <span class="input-group-btn">
-                   <span class="btn btn-primary btn-file">
-                       Upload&hellip; <input id="fileupload" type="file" name="fileUpload" multiple>
-                   </span>
-                </span>
+                <label for="application-icon">Icon:
+                    <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left"
+                title="Recommended image size : 300 x 300 pixels, file size 70 k (maximum)"></i>
+                </label>
+                <div class="input-group">
+                    <input type="text" id="icon" name="icon" class="form-control" readonly>
+                    <span class="input-group-btn">
+                        <span class="btn btn-primary btn-file">
+                            Browse <input type="file" id="appIcon" name="appIcon"/>
+                        </span>
+                        <span class="btn btn-primary btn-file" onclick="clearUploadIconField()" id="clear">
+                            Clear
+                        </span>
+                    </span>
+                </div>
             </div>
-            <div id="progress" class="progress">
-                <div class="progress-bar progress-bar-success" style="width: 0%;"></div>
-            </div>
-            </div>
+
             <div class="form-group">
             <div class="form-inline input_fields_wrap">
                 <button class="add_field_button btn btn-info">Add More Properties</button>
@@ -405,6 +590,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
         <div class="modal-dialog modal-dialog-margin-top-md ">
             <div class="modal-content">
                 <div class="modal-header">
+                    <button id="model_close_button_id" type="button" class="close" data-dismiss="alert">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
                     <h4 class="modal-title" id="modal-title">Application Creation Progress</h4>
                 </div>
                 <div class="modal-body">

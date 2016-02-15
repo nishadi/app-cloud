@@ -63,13 +63,13 @@ jagg.template("home", function(inputs, outputs, jagg) {
     <div class="left-pane ">
         <ul>
             <li class="selected">
-                <a href="#" target="_blank"><i class="fa fa-laptop"></i> Overview</a>
+                <a href="#"><i class="fa fa-laptop"></i> Overview</a>
             </li>
             <li>
-                <a><i class="fa fa-wrench"></i> Env Variables</a>
+                <a href="/appmgt/site/pages/envs.jag?applicationName=<%=applicationName%>&revision=<%=selectedRevision%>"><i class="fa fa-wrench"></i> Env Variables</a>
             </li>
             <li>
-                <a><i class="fa fa-tag"></i> Tags</a>
+                <a href="/appmgt/site/pages/tags.jag?applicationName=<%=applicationName%>&revision=<%=selectedRevision%>"><i class="fa fa-tag"></i> Tags</a>
             </li>
             <li>
                 <a href="/appmgt/site/pages/runtimeLogs.jag?applicationName=<%=applicationName%>&selectedRevision=<%=selectedRevision%>"><i class="fa
@@ -96,8 +96,14 @@ jagg.template("home", function(inputs, outputs, jagg) {
         <div class="row">
           <div class="col-xs-12 col-md-12 col-lg-12 app-preview">
               <div class="app-thumb">
-                  <img id="app-icon"  src="" />
-                  <span><i class="fa fa-pencil"></i></span>
+                  <img id="app-icon"  src="" width="100px"/>
+                  <span><i class="fa fa-pencil" onclick="document.getElementById('change_app_icon').click();"></i></span>
+                <form id="changeAppIcon" action="/appmgt/site/blocks/application/application.jag" method="post" enctype="multipart/form-data">
+                    <input id="change_app_icon" type="file" style="display:none" name="changeIcon" />
+                    <input id="action" type="hidden" name="action" value="changeAppIcon" />
+                    <input id="applicationName" type="hidden" name="applicationName" value="<%=applicationName%>"/>
+                    <input id="selectedRevision" type="hidden" name="selectedRevision" value="<%=selectedRevision%>"/>
+                </form>
               </div>
               <div class="app-desc">
                 <h2><%=selectedApplicationRevision.applicationName%></h2>
@@ -130,14 +136,35 @@ jagg.template("home", function(inputs, outputs, jagg) {
                               </ul>
                           </div>
                           <div id="version-url-link" class="version-url">
-                          <a href="#"><span>URL:<%=selectedApplicationRevision.deploymentURL%></span></a>
+                          <a href="<%=selectedApplicationRevision.deploymentURL%>" target="_blank"><span>
+                          <b>URL : </b><%=selectedApplicationRevision.deploymentURL%></span></a>
                           </div>
                           <div class="sec">
                               <button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"
                               url="<%=selectedApplicationRevision.deploymentURL%>">Launch App</button>
-                              <div class="btn-group ctrl-edit-button btn-edit-code">
-                                  <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Stop</a>
-                              </div>
+                              <%
+                                if(selectedApplicationRevision.status=='running'){
+                                %>
+                                    <div class="btn-group ctrl-edit-button btn-edit-code">
+                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication(document.getElementById('applicationName').value, document.getElementById('selectedRevision').value);">Stop</a>
+                                    </div>
+                                <%
+                                }else if(selectedApplicationRevision.status=='stopped'){
+                                %>
+                                    <div class="btn-group ctrl-edit-button btn-edit-code">
+                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-blue" onclick="startApplication(document.getElementById('applicationName').value, document.getElementById('selectedRevision').value);">Start</a>
+                                    </div>
+                                <%
+
+                                }else {
+                                %>
+                                    <div class="btn-group ctrl-edit-button btn-edit-code">
+                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Error has occurred.</a>
+                                    </div>
+                                <%
+                                }
+                               %>
+
 
                           </div>
                       </div>
@@ -174,7 +201,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                    <span id="runtimePropCount"><%=selectedApplicationRevision.runtimeProperties.length.toString()%></span>
                   </div>
                   <div class="clearfix"></div>
-                  <a href="team_invite.html">
+                  <a href="/appmgt/site/pages/envs.jag?applicationName=<%=applicationName%>&revision=<%=selectedRevision%>">
                       <div class="block-action-button">
                             <span class="fw-stack fw-lg btn-action-ico">
                                 <i class="fw fw-ring fw-stack-2x"></i>
@@ -192,7 +219,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                     <span id="labelCount"><%=selectedApplicationRevision.labels.length.toString()%></span>
                   </div>
                   <div class="clearfix"></div>
-                  <a href="database_new.html">
+                  <a href="/appmgt/site/pages/tags.jag?applicationName=<%=applicationName%>&revision=<%=selectedRevision%>">
                       <div class="block-action-button">
                         <span class="fw-stack fw-lg btn-action-ico">
                             <i class="fw fw-ring fw-stack-2x"></i>
@@ -224,6 +251,31 @@ jagg.template("home", function(inputs, outputs, jagg) {
             $(this).find('i').removeClass('fa-reorder').addClass('fa-arrow-left');
         }
     });
+
+    // stop application
+    function stopApplication(applicationName, revision){
+        jagg.post("../blocks/application/application.jag", {
+            action: "stopApplication",
+            applicationName: applicationName,
+            applicationRevision: revision
+
+        }, function (result) {
+            jagg.message({content: "Application stop request is submitted successfully.", type: 'info'});
+        });
+    }
+
+    // redeploy application
+    function startApplication(applicationName, revision){
+        jagg.post("../blocks/application/application.jag", {
+            action: "startApplication",
+            applicationName: applicationName,
+            applicationRevision: revision
+
+        }, function (result) {
+             jagg.message({content: "Application start request is submitted successfully.", type: 'info'});
+        });
+    }
+
 
 
     //Url text loaded from the span element
