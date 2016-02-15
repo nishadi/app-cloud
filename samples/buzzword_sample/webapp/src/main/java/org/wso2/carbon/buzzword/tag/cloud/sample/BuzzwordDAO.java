@@ -43,12 +43,13 @@ public class BuzzwordDAO {
         String values = "";
         String accessToken = "";
 
-        String apiManagerUrl = "https://apimanager.appfactorypreview.wso2.com/";
-        String apiEndpointUrl = "http://apimanager.appfactorypreview.wso2.com:8280/yahooweather/1.0.0";
-        String apiConsumerKey = "7809808jjdadaf";
-        String apiConsumerSecret = "7809808jjdadaf";
+        String apiManagerUrl = "http://172.17.0.1:8280";
+        String apiEndpointUrl = "http://172.17.0.1:8280/buzzword/1.0.0/all";
+        String apiConsumerKey = "YaBFwIgxfEPDzicCgkC8zlrcyHsa";
+        String apiConsumerSecret = "QuJ2dEvTwdLe3q0ciXtD3ECu0O4a";
 
-        String submitUrl = apiManagerUrl.trim()+"/oauth2/token";
+        String submitUrl = "https://172.17.0.1:9443/oauth2/token";
+        //String submitUrl = apiManagerUrl.trim()+"/oauth2/token";
 
         logger.info("apiManagerUrl: " + apiManagerUrl);
         logger.info("apiEndpointUrl: " + apiEndpointUrl);
@@ -64,17 +65,17 @@ public class BuzzwordDAO {
 
         HttpClient client = new HttpClient();
 
-        PostMethod method = new PostMethod(submitUrl);
+        PostMethod postMethod = new PostMethod(submitUrl);
 
-        method.addRequestHeader("Authorization", applicationToken);
+        postMethod.addRequestHeader("Authorization", applicationToken);
 
-        method.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        postMethod.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-        method.addParameter("grant_type", "password");
+        postMethod.addParameter("grant_type", "password");
 
-        method.addParameter("username", username);
+        postMethod.addParameter("username", username);
 
-        method.addParameter("password", password);
+        postMethod.addParameter("password", password);
 
 //        String carbon_home = getProperty("carbon.home");
 //
@@ -84,13 +85,13 @@ public class BuzzwordDAO {
         int httpStatusCode = 0;
         try {
 
-            httpStatusCode = client.executeMethod(method);
+            httpStatusCode = client.executeMethod(postMethod);
             logger.info("Http status code : " + httpStatusCode);
             String accessTokenJson = "";
 
             if (HttpStatus.SC_OK == httpStatusCode) {
                 logger.info("http status ok - 1");
-                accessTokenJson = method.getResponseBodyAsString();
+                accessTokenJson = postMethod.getResponseBodyAsString();
                 logger.info("Json : " + accessTokenJson);
                 JSONParser parser = new JSONParser();
                 Object obj = parser.parse(accessTokenJson);
@@ -107,6 +108,7 @@ public class BuzzwordDAO {
                 if (HttpStatus.SC_OK == httpStatusCode) {
                     logger.info("http status ok - 2");
                     values = apiMethod.getResponseBodyAsString();
+                    logger.info("***************" + values);
 
                 } else {
                     logger.info("http status bad - 2");
