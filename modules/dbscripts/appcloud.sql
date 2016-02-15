@@ -34,7 +34,7 @@ ENGINE = InnoDB;
 INSERT INTO `ApplicationType` (`id`, `app_type_name`, `description`) VALUES
 (1, 'war', 'Allows you to create dynamic websites using Servlets and JSPs, instead of the static HTML webpages and JAX-RS/JAX-WS services.'),
 (2, 'mss', 'WSO2 Microservices Framework for Java (WSO2 MSF4J) offers the best option to create microservices in Java using annotation-based programming model.'),
-(3,'php','PHP Web Applications');
+(3, 'php', 'Allows you to create dynamic web page content using PHP web applications.');
 
 
 -- -----------------------------------------------------
@@ -57,7 +57,7 @@ ENGINE = InnoDB;
 INSERT INTO `ApplicationRuntime` (`id`, `runtime_name`, `repo_url`, `image_name`, `tag`) VALUES
 (1, 'Apache Tomcat 8.0.30', 'https://github.com/', 'tomcat', '8.0'),
 (2, 'WSO2 Microservices Server 1.0.0', 'https://github.com/', 'msf4j', '1.0'),
-(3,'php','https://github.com/','php','5.6');
+(3, 'Apache 2.4.10', 'https://github.com/','php','5.6');
 
 
 -- -----------------------------------------------------
