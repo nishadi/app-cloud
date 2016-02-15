@@ -24,16 +24,25 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var runtimes = outputs.runtimes;
         var appType = outputs.appType;
         var appTypeName = appType.type;
+        var applicationName = outputs.applicationName;
 
     %>
 
  <script type="text/javascript">
     var appTypeName = "<%=appType.type%>";
+    var applicationName = "<%=applicationName%>";
     var retryCount = 0;
     var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
     var contentInvalidErrorMsg = "";
     var validationFailErrorMsg = "";
     $(document).ready(function(){
+
+            //check if application name available
+            if(applicationName != "null"){
+                $("#applicationName").val(applicationName);
+                $("#applicationName").attr("disabled", true);
+
+            }
 
             $("#file-upload-block").hide();
             $("#url-upload-block").hide();
@@ -88,6 +97,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
                 formData.append('action', 'createApplication');
                 formData.append('appTypeName', appTypeName);
+                var optionReplicas =  $("#replicas option:selected").val();
+                formData.append('replicas', optionReplicas);
+                formData.append('applicationName', $("#applicationName").val());
+                var optionRuntime = $("#runtime option:selected").val();
+                formData.append('runtime', optionRuntime);
 
                 if(selectedVal == 1){
                     formData.append('uploadedFileName', $("#uploadedFileName").val());

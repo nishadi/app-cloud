@@ -73,7 +73,7 @@ function changeSelectedRevision(newRevision){
 
     // Set upload revision btn
     var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+selectedApplicationRevision.applicationType +
-                        "&pplicationName="+applicationName;
+                        "&applicationName="+applicationName;
     $('#upload-revision').attr("href", uploadRevisionUrl);
 
     changeRuntimeProps(selectedApplicationRevision);
