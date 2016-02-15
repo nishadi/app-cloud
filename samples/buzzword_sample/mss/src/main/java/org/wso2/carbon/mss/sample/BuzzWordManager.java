@@ -47,7 +47,7 @@ public class BuzzWordManager {
     @POST
     public void addBuzzWords(String word) throws SQLException {
         Connection conn = DBUtil.getDBConnection();
-        Statement statement = conn.createStatement();
+
         int ranking = 1;
         String sql = "INSERT INTO Buzzwords (" + POPULARITY + " , " + WORD + ") VALUES (?,?)";
 
@@ -65,10 +65,10 @@ public class BuzzWordManager {
         PreparedStatement preparedStatement = conn.prepareStatement(sql);
         preparedStatement.setInt(1, ranking);
         preparedStatement.setString(2, word);
-
         preparedStatement.executeUpdate();
+
         DBUtil.closeConnection(conn);
-        DBUtil.closeStatement(statement);
+        DBUtil.closePreparedStatement(preparedStatement);
 
     }
 
@@ -98,6 +98,9 @@ public class BuzzWordManager {
             buzzWordList.put(word, ranking);
         }
 
+        DBUtil.closeConnection(conn);
+        DBUtil.closePreparedStatement(preparedStatement);
+
         return buzzWordList;
     }
 
@@ -124,6 +127,9 @@ public class BuzzWordManager {
             String ranking = resultSet.getString(POPULARITY);
             buzzWordList.put(word, ranking);
         }
+
+        DBUtil.closeConnection(conn);
+        DBUtil.closePreparedStatement(preparedStatement);
 
         return buzzWordList;
     }
@@ -155,6 +161,9 @@ public class BuzzWordManager {
             String ranking = resultSet.getString(POPULARITY);
             buzzWordList.put(word, ranking);
         }
+
+        DBUtil.closeConnection(conn);
+        DBUtil.closePreparedStatement(preparedStatement);
 
         return buzzWordList;
     }

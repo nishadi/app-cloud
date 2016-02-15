@@ -1,10 +1,15 @@
 How to run this sample
 =========================
 
-1. Create the Database related attributes with the below Environment Variable Names:
+1. Create the Database related attributes and API Management related attributes with the below Environment Variable Names:
         String jdbcUrl      = DB_URL
-        String dbUsername   = "DB_USERNAME";
-        String dbPassword   = "DB_PASSWORD";
+        String dbUsername   = DB_USERNAME;
+        String dbPassword   = DB_PASSWORD;
+
+        String apiManagerUrl    = API_MANAGER_URL
+        String apiEndpointUrl   = API_ENDPOINT_URL
+        String consumerKey      = API_CONSUMER_KEY
+        String consumerSecret   = API_CONSUMER_SECRET
 
 2.  Create the table "Buzzwords" as below:
     CREATE TABLE Buzzwords (ID INT NOT NULL AUTO_INCREMENT, Word VARCHAR(255) NOT NULL, Popularity	INT, PRIMARY KEY (ID));

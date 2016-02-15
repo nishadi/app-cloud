@@ -34,9 +34,7 @@ public class DBUtil {
         String dbPassword = envUtil.getEnvironmentVariable("DB_PASSWORD");
 
         Connection connection = null;
-//        jdbcUrl = "jdbc:mysql://localhost:3306/BuzzWordSampleDB";
-//        dbUsername = "root";
-//        dbPassword = "root";
+
         try {
             connection = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
         } catch (SQLException e) {

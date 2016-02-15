@@ -24,7 +24,7 @@ public class EnvUtil {
         Map<String, String> env = System.getenv();
         String environmentVariableValue = null;
         for (String envName : env.keySet()) {
-            if (envVariableKey.equals(envName)){
+            if (envVariableKey.equals(envName)) {
                 System.out.format("%s=%s%n",
                         envName,
                         env.get(envName));
@@ -33,5 +33,6 @@ public class EnvUtil {
 
         }
         return environmentVariableValue;
+
     }
 }
