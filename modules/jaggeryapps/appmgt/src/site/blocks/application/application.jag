@@ -36,7 +36,7 @@ var log = new Log();
         applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName, applicationRevision);
     }else if(action == "createApplication"){
         var applicationDescription = request.getParameter("applicationDescription");
-        var replicas = request.getParameter("replicas");
+        var replicas = 1;
         var runtimeId = request.getParameter("runtime");
         var runtimeProperties = request.getParameter("runtimeProperties");
         var applicationName = request.getParameter("applicationName");
