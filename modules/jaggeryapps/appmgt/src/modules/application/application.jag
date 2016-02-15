@@ -51,8 +51,8 @@ var addApplication = function (applicationName, applicationRevision, application
     );
 
     //================================= Adding application to Database =========================================
+    var application = new Application();
     try {
-        var application = new Application();
         application.setApplicationName(applicationName);
         application.setRevision(applicationRevision);
         application.setDescription(applicationDescription);
@@ -175,8 +175,8 @@ var addApplication = function (applicationName, applicationRevision, application
     //============================================================================================================
 
     //==================================== Kubernetes deploy block ===============================================
-
-    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision);
+    var runtimeProperties = application.getRuntimeProperties();
+    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision,runtimeProperties);
     var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
     deployApplication(applicationName, applicationRevision, deploymentConfig, false);
 
@@ -355,14 +355,20 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
 /**
  * Method for getting all the available application types. e.g : war, mss, car
  */
-function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName, applicationRevision){
+function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName, applicationRevision, runtimeProperties){
     var containerList = new java.util.ArrayList();
     var container1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
     var appBaseImageName = tenantDockerRegistryUrl + "/" + applicationName;
     container1.setContainerName(applicationName);
     container1.setBaseImageName(appBaseImageName);
     container1.setBaseImageVersion(applicationRevision);
+    //setting runtime properties to the container
     var envs1 = new java.util.HashMap();
+    var runtimePropertyIterator = runtimeProperties.iterator();
+    while(runtimePropertyIterator.hasNext()){
+        var runtimeProperty = runtimePropertyIterator.next();
+        envs1.put(runtimeProperty.getPropertyName(), runtimeProperty.getPropertyValue());
+    }
     envs1.put("ORG","WSO2");
     container1.setEnvVariables(envs1);
     var serviceProxyList1 = new java.util.ArrayList();
