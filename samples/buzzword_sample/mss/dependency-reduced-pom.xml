@@ -3,7 +3,7 @@
   <parent>
     <artifactId>msf4j-service</artifactId>
     <groupId>org.wso2.msf4j</groupId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.wso2.carbon.mss.sample</groupId>
