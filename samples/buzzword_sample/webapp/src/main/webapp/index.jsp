@@ -39,12 +39,14 @@
         <%
             BuzzwordDAO dao = new BuzzwordDAO();
             Buzzword[] buzzwords = dao.getBuzzWordList();
+            if(buzzwords != null){
+                for (Buzzword buzzword : buzzwords) { %>
 
-            for (Buzzword buzzword : buzzwords) { %>
                 <li>
                     <a style="font-size: <%=buzzword.getPopularity()%>" href="#"><%=buzzword.getWord()%></a>
                 </li>
-            <% } %>
+            <% } // end of for loop
+            }%>
     </ul>
 </div>
 </body>

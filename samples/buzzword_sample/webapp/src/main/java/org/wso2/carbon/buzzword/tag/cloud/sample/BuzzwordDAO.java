@@ -17,19 +17,18 @@ package org.wso2.carbon.buzzword.tag.cloud.sample;
 *under the License.
 */
 
-import sun.misc.BASE64Encoder;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.HttpStatus;
-
-import java.util.logging.Logger;
-
-import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import sun.misc.BASE64Encoder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BuzzwordDAO {
     private static final Logger logger = Logger.getLogger(BuzzwordDAO.class.getName());
@@ -40,46 +39,27 @@ public class BuzzwordDAO {
         String apiEndpointUrl = System.getenv("API_ENDPOINT_URL");
         String apiConsumerKey = System.getenv("API_CONSUMER_KEY");
         String apiConsumerSecret = System.getenv("API_CONSUMER_SECRET");
-        String username = System.getenv("TENANT_USERNAME");
-        String password = System.getenv("TENANT_PASSWORD");
-
-//        String apiManagerUrl = "http://172.17.0.1:9443";
-//        String apiEndpointUrl = "http://172.17.0.1:8280/buzzword/1.0.0/all";
-//        String apiConsumerKey = "YaBFwIgxfEPDzicCgkC8zlrcyHsa";
-//        String apiConsumerSecret = "QuJ2dEvTwdLe3q0ciXtD3ECu0O4a";
-//        String username = "admin";
-//        String password = "admin";
 
         String values = "";
-        String accessToken = "";
 
-        String submitUrl = apiManagerUrl.trim()+"/oauth2/token";
+        String submitUrl = apiManagerUrl.trim()+"/token";
 
         logger.info("apiManagerUrl: " + apiManagerUrl);
         logger.info("apiEndpointUrl: " + apiEndpointUrl);
         logger.info("apiConsumerKey: " + apiConsumerKey);
         logger.info("apiConsumerSecret: " + apiConsumerSecret);
-
         String applicationToken = apiConsumerKey + ":" + apiConsumerSecret;
         logger.info("applicationToken: " + applicationToken);
 
         BASE64Encoder base64Encoder = new BASE64Encoder();
-        applicationToken = "Basic " + base64Encoder.encode(applicationToken.getBytes()).trim();
+        applicationToken = "Bearer " + base64Encoder.encode(applicationToken.getBytes()).trim();
         logger.info("applicationToken after encoding: " + applicationToken);
-
         HttpClient client = new HttpClient();
 
         PostMethod postMethod = new PostMethod(submitUrl);
         postMethod.addRequestHeader("Authorization", applicationToken);
         postMethod.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        postMethod.addParameter("grant_type", "password");
-        postMethod.addParameter("username", username);
-        postMethod.addParameter("password", password);
-
-//        String carbon_home = getProperty("carbon.home");
-//
-//        System.setProperty("javax.net.ssl.trustStore", carbon_home + "/repository/resources/security/client-truststore.jks");
-
+        postMethod.addParameter("grant_type", "client_credentials");
 
         int httpStatusCode = 0;
         try {
@@ -89,15 +69,12 @@ public class BuzzwordDAO {
             String accessTokenJson = "";
 
             if (HttpStatus.SC_OK == httpStatusCode) {
-                logger.info("http status ok - 1");
                 accessTokenJson = postMethod.getResponseBodyAsString();
-                logger.info("Json : " + accessTokenJson);
+                logger.info("Access token response : " + accessTokenJson);
                 JSONParser parser = new JSONParser();
                 Object obj = parser.parse(accessTokenJson);
                 JSONObject jsonObject = (JSONObject) obj;
-
-                accessToken = (String) jsonObject.get("access_token");
-                String refreshToken = (String) jsonObject.get("refresh_token");
+                String accessToken = (String) jsonObject.get("access_token");
                 logger.info("Access Token Received - " + accessToken);
                 GetMethod apiMethod = new GetMethod(apiEndpointUrl);
                 apiMethod.addRequestHeader("Authorization", "Bearer " + accessToken);
@@ -105,30 +82,24 @@ public class BuzzwordDAO {
                 logger.info("Api Endpoint : " + apiEndpointUrl);
                 httpStatusCode = client.executeMethod(apiMethod);
                 if (HttpStatus.SC_OK == httpStatusCode) {
-                    logger.info("http status ok - 2");
+                    logger.info("Successfully retrieved data from the api endpoint");
                     values = apiMethod.getResponseBodyAsString();
-                    logger.info("***************" + values);
-
+                    logger.info("data: " + values);
                 } else {
-                    logger.info("http status bad - 2");
-                    values = "Error occurred invoking the service " + httpStatusCode;
-                    logger.info(values);
+                    logger.log(Level.SEVERE, "Error occurred invoking the api endpoint. Http Status : " + httpStatusCode);
+                    return null;
                 }
 
             } else {
-                logger.info("http status bad - 1");
-                values = "Error occurred invoking the service \n Http status : " + httpStatusCode;
-                logger.info(values);
+                logger.log(Level.SEVERE, "Error occurred invoking the token endpoint \n Http status : " + httpStatusCode);
+                return null;
             }
 
         } catch (Exception ex) {
-            logger.info("http status bad - 3 : " + httpStatusCode);
-            values = "Error occurred invoking the service \n Http status : " + ex;
-            logger.info(values);
+            logger.log(Level.SEVERE, "Error occurred", ex);
+            return null;
         }
 
-
-        //values = {Eclipse=1, Hava=1, J2EE=3}
         List<Buzzword> list = new ArrayList<Buzzword>();
         String[] elements = values.split(",");
         for (String element : elements) {
@@ -147,6 +118,10 @@ public class BuzzwordDAO {
             list.add(buzzword);
         }
 
-        return list.toArray(new Buzzword[list.size()]);
+        if(list.size() > 0){
+            return list.toArray(new Buzzword[list.size()]);
+        } else {
+            return null;
+        }
     }
 }
