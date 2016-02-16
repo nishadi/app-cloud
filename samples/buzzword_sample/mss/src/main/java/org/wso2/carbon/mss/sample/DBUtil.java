@@ -27,7 +27,11 @@ public class DBUtil {
     private static final Logger log = LoggerFactory.getLogger(DBUtil.class);
 
     public static Connection getDBConnection() {
-
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            log.error(e.getMessage());
+        }
         EnvUtil envUtil = new EnvUtil();
         String jdbcUrl = envUtil.getEnvironmentVariable("DB_URL");
         String dbUsername = envUtil.getEnvironmentVariable("DB_USERNAME");
@@ -39,7 +43,6 @@ public class DBUtil {
             connection = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
         } catch (SQLException e) {
             log.error(e.getMessage());
-            e.printStackTrace();
         }
         return connection;
     }
