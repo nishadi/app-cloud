@@ -21,6 +21,7 @@ jagg.template("page/master", function(inputs, outputs, jagg) {%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>WSO2 AppCloud</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
@@ -31,7 +32,7 @@ jagg.template("page/master", function(inputs, outputs, jagg) {%>
     <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/select2-4.0.0/select2.min.css'))%>">
     <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/select2-4.0.0/select2.override.css'))%>">
     <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
-     <link rel="shortcut icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/img/favicon.png'))%>" type="image/x-icon"/>
+    <link rel="shortcut icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/img/favicon.png'))%>" type="image/x-icon"/>
 </head>
 <body>
     <div class="top-notification">This app cloud offering is currently in pre-alpha stage. Your applications will be stopped automatically after 24 hours. Please do not deploy any production applications.</div>

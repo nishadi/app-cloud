@@ -61,6 +61,7 @@ function initData(selectedRevision){
         selectedRevision:selectedRevision
     },function (result) {
         initelements();
+        result = result.replace(/\t+/g, "    ");
         selectedRevisionLogMap = jQuery.parseJSON(result);
         if(!jQuery.isEmptyObject(selectedRevisionLogMap)){
             selectedRevisionReplicaList = Object.keys(selectedRevisionLogMap);
