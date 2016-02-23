@@ -144,6 +144,8 @@ $(document).ready(function () {
             var value = $(this).parent().parent().parent().find('#value')[0].value;
             deleteRuntimeAttribute(key, value);
             $(this).parent().parent().parent().remove();
+
+            displayAppRedeployNotification();
         });
 
         $(document).on('click', '.fw-save', function () {
@@ -162,6 +164,8 @@ $(document).ready(function () {
             $(this).parent().find('#editIcon').show();
             $(this).parent().parent().parent().find('#key')[0].readOnly = true;
             $(this).parent().parent().parent().find('#value')[0].readOnly = true;
+
+            displayAppRedeployNotification();
 
         });
     });
@@ -218,6 +222,10 @@ $(document).on('click', '.panel-heading a', function (e) {
         $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
     }
 });
+
+function displayAppRedeployNotification(){
+    jagg.message({content: "Please redeploy the application for effect updated runtime variables", type: 'info'});
+}
 
 
 </script >
