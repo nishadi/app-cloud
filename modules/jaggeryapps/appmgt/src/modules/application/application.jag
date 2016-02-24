@@ -132,7 +132,7 @@ var addApplication = function (applicationName, applicationRevision, application
     var msg = "Docker image build successfully triggered in appcloud";
     addEvent(DOCKER_IMAGE_BUILD, EVENT_PENDING, msg, applicationName, applicationRevision);
     try {
-        var dockerRegTenantSpace = "super";
+        var dockerRegTenantSpace = modManager.getTenantDomain().replace(".","-");
         var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
         dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,absFileUploadedPath);
     } catch (e){
