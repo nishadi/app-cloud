@@ -41,7 +41,7 @@ jagg.template("header/default", function(inputs, outputs, jagg) { %>
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav menu-right">
-                <li><a href="<%=DOCUMENTATION_REDIRECTION_URL%>" target=_blank><i class="fa fa-book"></i> Documentation</a></li>
+                <!--li><a href="<%=DOCUMENTATION_REDIRECTION_URL%>" target=_blank><i class="fa fa-book"></i> Documentation</a></li-->
                 <li><a href="<%=SUPPORT_REDIRECTION_URL%>" target=_blank><i class="fa fa-envelope"></i> Support</a></li>
                 <li class="dropdown user-name">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=jagg.getUser()%>
