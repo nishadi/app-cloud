@@ -34,6 +34,7 @@ var log = new Log();
         var appTypeName = request.getParameter("appTypeName");
         var applicationRevision = request.getParameter("applicationRevision");
         applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName, applicationRevision);
+
     }else if(action == "createApplication"){
         var applicationDescription = request.getParameter("applicationDescription");
         var replicas = 1;
@@ -44,12 +45,13 @@ var log = new Log();
         var applicationRevision = request.getParameter("applicationRevision");
         var appTypeName = request.getParameter("appTypeName");
         var uploadedFileName = request.getParameter("uploadedFileName");
-        var appIcon = request.getFile("appIcon")
+        var appIcon = request.getFile("appIcon");
 
         applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
                 runtimeId, appTypeName, runtimeProperties, tags, appIcon, uploadedFileName);
         response.status = 200;
         response.message = "Artifact is successfully uploaded!";
+
     }else if(action == "stopApplication"){
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
@@ -61,6 +63,7 @@ var log = new Log();
 
         response.status = 200;
         response.message = "Application is successfully stopped.";
+
     }else if(action == "startApplication"){
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
@@ -70,6 +73,7 @@ var log = new Log();
 
         response.status = 200;
         response.message = "Application starting requested is completed successfully.";
+
     }else if (action == "getApplicationCreationEvents"){
 
         var applicationName = request.getParameter("applicationName");
