@@ -247,25 +247,25 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 },
                 icon: {                                     // app icon field
                     validateAppIcon: true
+                },
+                runtime: {
+                    validateRuntimeSelection: true
                 }
             },
             onsubmit: false,    // Since we are handling on submit validation on click event of the "Create" button,
             onfocusout: function (element, event) {
-            var validator = $("#application-details").validate();
-
-            //Converting application name to lowercase, this should be removed after application name and application key separation from backend.
-            if (element.name == 'applicationName') {
-                var lowercaseAppName = element.value.toLowerCase();
-                element.value = lowercaseAppName;
-            }
-            validator.element(element);
+                var validator = $("#application-details").validate();
+                //Converting application name to lowercase, this should be removed after application name and application key separation from backend.
+                if (element.name == 'applicationName') {
+                    var lowercaseAppName = element.value.toLowerCase();
+                    element.value = lowercaseAppName;
+                }
+                validator.element(element);
                 return false;
             },                            // here we disabled the form validation on submit
             highlight: function (element, errorClass, validClass) { // this is triggered when the "element" is invalid
-
             },
             unhighlight: function (element, errorClass, validClass) { // this is triggered when the "element" is valid
-
             },
             showErrors: function (event, validator) {
                 // Disable app creation button if the form is not valid
@@ -299,7 +299,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
             validateApplicationNameChar, getValidationFailErrorMsg);
         $.validator.addMethod("validationApplicationRevisionChar",
             validationApplicationRevisionChar, getValidationFailErrorMsg);
-
+        $.validator.addMethod("validateRuntimeSelection",
+                    validateRuntimeSelection, "Please select a valid runtime");
 
         $("#appIcon").change(function() {
              $("#icon").val($("#appIcon").val());
@@ -337,6 +338,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
              return validateWithRegexPatters(regexPattern, message);
         }
 
+        function validateRuntimeSelection(value){
+            return (value > 0 ) ? true : false;
+        }
 
         function validateWithRegexPatters(regexPatters, message){
             var isValueValid = true;
@@ -399,13 +403,24 @@ jagg.template("application", function (inputs, outputs, jagg) {
             } else if (selectedVal == 2) {
                 $("#file-upload-block").hide();
                 $("#url-upload-block").show();
-            } else if (selectedVal == 3) {
+            } else if (selectedVal == 0) {
                 $("#file-upload-block").hide();
                 $("#url-upload-block").hide();
             }
         });
         $("#model_close_button_id").click(function(){
             window.location.replace("index.jag");
+        });
+
+        var createNewAppForm = $("#application-details");
+        //createNewAppForm.validate(getValidationOptions());     // adding form validation options
+
+        createNewAppForm.on('focusout keyup blur', function () { // fires on every keyup & blur
+            if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0) {// checks form for validity
+                $("#add-application").prop("disabled", false);     // disables button
+            } else {
+                $("#add-application").prop("disabled", true);      // enables button
+            }
         });
     });
 
@@ -523,7 +538,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             <div class="form-group">
             <label for="runtime">Runtime: </label>
-            <select name="runtime" id="runtime" class="form-control" ><option value="None" selected="Selected">Select runtime</option></select>
+            <select name="runtime" id="runtime" class="form-control" ><option value="" disabled="true" selected="Selected">Select runtime</option></select>
             </div>
 
             <!--div class="form-group">
@@ -531,14 +546,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
             <select name="replicas" id="replicas" class="form-control">
                 <option value="None" selected="Selected">Select replicas</option>
                 <option value="1" >1</option>
-                <option value="2" >2</option>
             </select>
             </div-->
 
             <div class="form-group" id="upload-method">
             <label>Artifact upload method:</label>
-            <select name="select-upload-method" id="select-upload-method" class="form-control" >
-                <option value="0" selected="Selected">Select upload method</option>
+            <select name="selectUploadMethod" id="selectUploadMethod" class="form-control" >
+                <option value="" disabled="true" selected="Selected">Select upload method</option>
                 <option value="1">Upload from file system</option>
                 <option value="2">Upload from url</option>
             </select>
@@ -593,9 +607,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                                     Env Variables
                                     <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
                                 </a>
-
                             </h4>
-
                         </div>
                         <div id="collapseOne" class="panel-collapse collapse in">
                             <div class="panel-body" id="env-pane">
