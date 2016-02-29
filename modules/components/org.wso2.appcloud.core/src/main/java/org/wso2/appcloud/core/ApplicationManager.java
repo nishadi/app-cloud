@@ -395,7 +395,7 @@ public class ApplicationManager {
         applicationDAO.deleteDeployment(applicationName, revision, tenantId);
     }
 
-    public static ApplicationRuntime getApplicationRuntime(int runtimeId) throws AppCloudException{
+    public static ApplicationRuntime getApplicationRuntime(int runtimeId) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
         return applicationDAO.getRuntime(runtimeId);
     }

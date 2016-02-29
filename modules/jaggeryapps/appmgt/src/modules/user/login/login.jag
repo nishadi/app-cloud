@@ -1,6 +1,6 @@
 <%
 /*
- * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -34,10 +34,7 @@ function login(userName, password){
 	} else {	// else assume super tenant
 		tenantDomain = SUPER_TENANT_DOMAIN_NAME;
 	}
-	log.info("user logs in module called for user " + userName);
 	var ws = require('ws');
-	var finalResult={
-	};
 	var context=multitenancy.getPrivilegedCarbonContext();
  	var tenantManager= multitenancy.getTenantManager();
 	var finalResult={};
@@ -46,9 +43,7 @@ function login(userName, password){
         	context.getThreadLocalCarbonContext().setTenantId(tenantManager.getTenantId(tenantDomain));
         	context.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
         	context.getThreadLocalCarbonContext().setUsername(userName);
-        log.info('==='+tenantDomain+'====='+userName+'='+password+'===');
 		var result = server.Server.prototype.authenticate(userName,password);
-        log.info(result);
 		if(result === true){
 			jagg.setUser(userName);
 			finalResult.error="false";
