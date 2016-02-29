@@ -174,16 +174,32 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
                     if(event.status == "success"){
                         statusStyle = "success";
-                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td><i class=\"fa fa-check\"></i></td></tr>";
+                        if (event.name === "Status") {
+                                table = table + "<tr class='" + statusStyle + "'><td>Starting up containers</td>" +
+                                                "<td><i class=\"fa fa-check\"></i></td></tr>";
+                        } else {
+                                table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                                "<td><i class=\"fa fa-check\"></i></td></tr>";
+                        }
                     } else if (event.status == "failed") {
-                            statusStyle = "danger";
-                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td><i class=\"fa fa-times\"></i></td></tr>";
+                        statusStyle = "danger";
+                        if (event.name === "Status") {
+                                table = table + "<tr class='" + statusStyle + "'><td>Starting up containers</td>" +
+                                                "<td><i class=\"fa fa-times\"></i></td></tr>";
+                        } else {
+                                table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                                "<td><i class=\"fa fa-times\"></i></td></tr>";
+                        }
                     } else if (event.status == "pending"){
-                        statusStyle = "active";
-                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                        if (event.name === "Status") {
+                            statusStyle = "active";
+                                table = table + "<tr class='" + statusStyle + "'><td>Starting up containers</td>" +
+                                                "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                        } else {
+                            statusStyle = "active";
+                                table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                                "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                        }
                     }
                 }
 
@@ -381,10 +397,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
             });
         });
 
-        $("#model_close_button_id").click(function(){
-            window.location.replace("index.jag");
-        });
-
         var createNewAppForm = $("#application-details");
         createNewAppForm.on('focusout keyup blur', function () { // fires on every keyup & blur
             if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0) {// checks form for validity
@@ -429,9 +441,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
                  isValidExtension = true;
                  break;
              default:
-                iconErrorMsg = "Invalid image selected for Application Icon - Select a valid image";
-                isValidExtension = false;
-                break;
+                 iconErrorMsg = "Invalid image selected for Application Icon - Select a valid image";
+                 isValidExtension = false;
+                 break;
          }
          // Check size
          if(!fileSize) {
@@ -675,10 +687,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
         <div class="modal-dialog modal-dialog-margin-top-md ">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button id="model_close_button_id" type="button" class="close" data-dismiss="alert">
-                        <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Close</span>
-                    </button>
                     <h4 class="modal-title" id="modal-title">Application Creation Progress</h4>
                 </div>
                 <div class="modal-body">
