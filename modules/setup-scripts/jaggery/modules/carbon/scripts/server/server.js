@@ -77,9 +77,15 @@
                 username: username
             }),
             realm = realmService.getTenantUserRealm(tenantId);
-        return realm.getUserStoreManager().authenticate(username, password);
+        return realm.getUserStoreManager().authenticate(getTenantAwareUsername(username), password);
     };
-
+        var getTenantAwareUsername = function (username) {		
+		var tenantAwareUsername = username;
+		if (username.indexOf("@") != -1) {
+		    tenantAwareUsername = username.substring(0, username.lastIndexOf('@'));
+		}
+		return tenantAwareUsername;
+	};
     Server.prototype.login = function (username, password) {
         var cookie = login(this.url, username, password);
         return new Cookie(cookie);

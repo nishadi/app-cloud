@@ -131,10 +131,15 @@ var addApplication = function (applicationName, applicationRevision, application
     //Adding docker build pending event
     var msg = "Docker image build successfully triggered in appcloud";
     addEvent(DOCKER_IMAGE_BUILD, EVENT_PENDING, msg, applicationName, applicationRevision);
+
+    var applicationRuntime = ApplicationManager.getApplicationRuntime(runtimeId);
+    var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
+    var tagName = applicationRuntime.getTag() +"-"+ modManager.getTenantDomain() +"-"+applicationName+"-"+applicationRevision;
+    
+
     try {
         var dockerRegTenantSpace = modManager.getTenantDomain().replace(".","-");
-        var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
-        dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,absFileUploadedPath);
+        dockerOpClient.buildDockerImage(applicationRuntime.getRepoURL() ,applicationRuntime.getImageName(), tagName, absFileUploadedPath);
     } catch (e){
         var msg = "Error while building docker file";
         addEvent(DOCKER_IMAGE_BUILD, EVENT_FAILED, msg, applicationName, applicationRevision);
@@ -155,7 +160,7 @@ var addApplication = function (applicationName, applicationRevision, application
     var msg = "Docker image push successfully triggered in triggered";
     addEvent(DOCKER_REGISTRY_PUSH, EVENT_PENDING, msg, applicationName, applicationRevision);
     try {
-        dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
+        dockerOpClient.pushDockerImage(applicationRuntime.getRepoURL(),applicationRuntime.getImageName(), tagName);
     } catch (e) {
         var msg = "Error uploading docker image to remote registry";
         addEvent(DOCKER_REGISTRY_PUSH, EVENT_FAILED, msg, applicationName, applicationRevision);
