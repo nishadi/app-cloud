@@ -269,7 +269,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                         <span aria-hidden="true">&times;</span>
                         <span class="sr-only">Close</span>
                     </button>
-                    <h4 class="modal-title" id="modal-title">Application Restarting Progress</h4>
+                    <h4 class="modal-title" id="modal-title">Application Restarting</h4>
                 </div>
                 <div class="modal-body">
                     <div class="container-fluid">
@@ -373,7 +373,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                     "<td><i class=\"fa fa-times\"></i></td></tr>";
                 } else if (event.name === "Status" && event.status === "pending" ){
                     statusStyle = "active";
-                    table = table + "<tr class='" + statusStyle + "'><td>Restarting</td>" +
+                    table = table + "<tr class='" + statusStyle + "'><td>Starting Containers</td>" +
                                     "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
                 }
             }
