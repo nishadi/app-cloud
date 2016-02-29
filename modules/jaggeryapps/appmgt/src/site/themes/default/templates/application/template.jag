@@ -76,18 +76,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
             });
 
             $('#application-details').submit(function(e){
-
                 executeAsync(drawProgressWindow());
-
-                $('#add-application').loadingButton('hide');
-                $('#add-application-loading').loadingButton('show');
-
+                $('#add-application').loadingButton({action:'show'});
                 e.preventDefault();
                 var runtimeProperties = getProperties("env-pane");
                 var tags = getProperties("tags-pane");
-
                 var formData = new FormData($(this)[0]);
-
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
                 formData.append('tags', JSON.stringify(tags));
                 formData.append('action', 'createApplication');
@@ -157,7 +151,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             setTimeout(func, 0);
         }
 
-        function pollEvents(){
+        function pollEvents() {
 
             jagg.post("../blocks/application/application.jag", {
                 action:"getApplicationCreationEvents",
@@ -215,15 +209,25 @@ jagg.template("application", function (inputs, outputs, jagg) {
                             window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
                         }
                     } else if(event.status == "failed"){
-                        jagg.message({content: "Error occurred while creating application.", type: 'error'});
-                        setTimeout(redirectAppListing, 5000);
-                        function redirectAppListing(){
-                            window.location.replace("index.jag");
+                        var alert = "<p>Application creation failed. " + event.description + "</p>";
+                        var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">Back</button>" +
+                                           "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"activateDeploymentBtn();\">Retry</button>";
+                        setTimeout(showErrorPopup, 2000);
+                        function showErrorPopup(){
+                            $("#app-creation-model-body").html(alert);
+                            $("#app-creation-model-footer").html(retry_button);
                         }
                     }
                 }
             },function (jqXHR, textStatus, errorThrown) {
-                 jagg.message({content: "Error occurred while creating application.", type: 'error'});
+                 var alert = "<p>Application creation failed. " + errorThrown + "</p>";
+                 var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">Back</button>" +
+                                    "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"activateDeploymentBtn();\">Retry</button>";
+                 setTimeout(showErrorPopup, 1000);
+                 function showErrorPopup(){
+                     $("#app-creation-model-body").html(alert);
+                     $("#app-creation-model-footer").html(retry_button);
+                 }
             });
         }
 
@@ -480,6 +484,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
         $("#url-upload-block").show();
         uploadMethod = "url";
     }
+
+    function redirectAppListing() {
+        window.location.replace("index.jag");
+    }
+    function activateDeploymentBtn() {
+        $('#add-application').loadingButton({action:'hide'});
+    }
  </script>
 
     <!-- BOF App factory menu actionbar -->
@@ -553,7 +564,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             <div class="form-group" id="upload-method-button-group">
             <label>Artifact upload method:</label></br>
                 <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-primary active" value="1" id="upload-from-file" onclick="showUploadFromFileSystem();" >Upload artifact</pbutton>
+                    <button type="button" class="btn btn-primary" value="1" id="upload-from-file" onclick="showUploadFromFileSystem();" autofocus="true">Upload artifact</pbutton>
                     <button type="button" class="btn btn-primary" value="2" id="upload-from-url" onclick="showUploadFromURL();">Get from URL</button>
                 </div>
             </div>
@@ -663,13 +674,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     </span>
                         Create
                 </button>
-                <button type="button" class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" id="add-application-loading" style="display:none" >
-                    <span class="fw-stack fw-lg btn-action-ico">
-                        <i class="fw fw-ring fw-stack-2x"></i>
-                        <i class="fw fw-add fw-stack-1x"></i>
-                    </span>
-                    Creating
-                </button>
             </div>
         </form>
         </div>
@@ -689,16 +693,18 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <div class="modal-header">
                     <h4 class="modal-title" id="modal-title">Application Creation Progress</h4>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" id="app-creation-model-body">
                     <div class="container-fluid">
                         <div class="row">
                             <div id="progress_table" class="col-xs-12 col-md-12 section-title">
-                            <i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
+                                <i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-       </div><!-- /.modal-content -->
+                <div class="modal-body" id="app-creation-model-footer"></div>
+            </div><!-- /.modal-content -->
+        </div>
      </div><!-- /.modal -->
 
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/custom/custom.js'))%>"></script>
