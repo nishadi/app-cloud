@@ -178,7 +178,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     //==================================== Kubernetes deploy block ===============================================
     var runtimeProperties = application.getRuntimeProperties();
-    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision, runtimeProperties, appTypeName);
+    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, applicationName,applicationName, applicationRevision, runtimeProperties, appTypeName);
     var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
     deployApplication(applicationName, applicationRevision, deploymentConfig, false);
 
@@ -362,13 +362,13 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
 /**
  * Method for getting all the available application types. e.g : war, mss, car
  */
-function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName, applicationRevision, runtimeProperties, appTypeName){
+function getContainers(tenantDockerRegistryUrl, baseImageName, tag, applicationName, appServiceName, applicationRevision, runtimeProperties, appTypeName){
     var containerList = new java.util.ArrayList();
     var container1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
-    var appBaseImageName = tenantDockerRegistryUrl + "/" + applicationName;
+    var appBaseImageName = tenantDockerRegistryUrl + "/" + baseImageName;
     container1.setContainerName(applicationName);
     container1.setBaseImageName(appBaseImageName);
-    container1.setBaseImageVersion(applicationRevision);
+    container1.setBaseImageVersion(tag);
     var envs = getRuntimeProperties(runtimeProperties);
     container1.setEnvVariables(envs);
     var serviceProxyList1 = new java.util.ArrayList();
