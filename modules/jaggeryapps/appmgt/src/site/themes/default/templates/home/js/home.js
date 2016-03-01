@@ -35,7 +35,10 @@ function initPageView() {
 
 function listTags(){
     var tags = selectedApplicationRevision.labels;
-    var tagListLength = tags.length;
+    var tagListLength;
+    if(tags) {
+        tagListLength = tags.length;
+    }
     var tagString = '';
     for(var i = 0; i < tagListLength; i++){
         if(i >= 3){
