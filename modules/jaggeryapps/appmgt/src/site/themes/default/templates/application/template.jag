@@ -571,7 +571,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 </label>
                 <label class="radio-inline">
                     <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="upload-from-url"
-                           class="custom-radio"> Upload from url
+                           class="custom-radio"> Upload from URL
                 </label>
             </div>
 
