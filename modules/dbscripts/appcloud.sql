@@ -328,7 +328,6 @@ INSERT INTO `Service` (`id`, `service_name`, `service_port`, `service_protocol`,
 -- -----------------------------------------------------
 INSERT INTO `ApplicationRuntimeService` (`service_id`, `application_runtime_id`) VALUES
 (3, 1),
-(4, 1),
 (3, 2),
 (1, 3),
 (1, 4);
