@@ -179,6 +179,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             for (Container container : containers) {
                 List<ServiceProxy> serviceProxies = container.getServiceProxies();
                 for (ServiceProxy serviceProxy : serviceProxies) {
+
                     ServicePort servicePorts = new ServicePortBuilder()
                             .withName(serviceProxy.getServiceName())
                             .withProtocol(serviceProxy.getServiceProtocol())
@@ -190,7 +191,9 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                             .withPorts(servicePorts)
                             .build();
                     //Deployment Unique service name is built using deployment name and the service name.
-                    String serviceName = config.getDeploymentName() + "-" + serviceProxy.getServiceName();
+                    String srvBackendPort = Integer.toString(serviceProxy.getServiceBackendPort());
+                    String serviceName = config.getDeploymentName() + "-" + serviceProxy.getServiceName() + "-" +
+                            srvBackendPort;
                     Service service = new ServiceBuilder()
                             .withKind(KubernetesPovisioningConstants.KIND_SERVICE)
                             .withSpec(serviceSpec)
@@ -816,7 +819,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     .addNewPathLike(ingressPath)
                     .withNewBackend()
                     .withServiceName(service.getMetadata().getName())
-                    .withServicePort(new IntOrString(80))
+                    .withServicePort(new IntOrString(service.getSpec().getPorts().get(0).getPort()))
                     .endBackend()
                     .endPath()
                     .endHttp()

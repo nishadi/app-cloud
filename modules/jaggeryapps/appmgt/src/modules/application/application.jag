@@ -186,7 +186,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     //==================================== Kubernetes deploy block ===============================================
     var runtimeProperties = application.getRuntimeProperties();
-    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, applicationName,applicationName, applicationRevision, runtimeProperties, appTypeName);
+    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, applicationName,applicationName, applicationRevision, runtimeProperties, runtimeId);
     var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
     deployApplication(applicationName, applicationRevision, deploymentConfig, false);
 
@@ -300,9 +300,9 @@ var redeployApplication = function(applicationName, applicationRevision){
 var persistDeploymentConfig = function(deploymentConfig, applicationName, applicationRevision){
 
     var containerList = deploymentConfig.getContainers();
-    var container1 = containerList.get(0);
-    var serviceProxies = container1.getServiceProxies();
-    var serviceProxy1 = serviceProxies.get(0);
+    var container = containerList.get(0);
+    var serviceProxies = container.getServiceProxies();
+    var serviceProxy = serviceProxies.get(0);
 
     var deployment = new Deployment();
     deployment.setDeploymentName(deploymentConfig.getDeploymentName());
@@ -310,14 +310,14 @@ var persistDeploymentConfig = function(deploymentConfig, applicationName, applic
 
 
     var serviceProxy = new ServiceProxy();
-    serviceProxy.setServiceName(serviceProxy1.getServiceName());
-    serviceProxy.setServiceProtocol(serviceProxy1.getServiceProtocol());
-    serviceProxy.setServicePort(serviceProxy1.getServicePort());
-    serviceProxy.setServiceBackendPort(serviceProxy1.getServiceBackendPort());
+    serviceProxy.setServiceName(serviceProxy.getServiceName());
+    serviceProxy.setServiceProtocol(serviceProxy.getServiceProtocol());
+    serviceProxy.setServicePort(serviceProxy.getServicePort());
+    serviceProxy.setServiceBackendPort(serviceProxy.getServiceBackendPort());
 
     var container = new Container();
-    container.setImageName(container1.getBaseImageName());
-    container.setImageVersion(container1.getBaseImageVersion());
+    container.setImageName(container.getImageName());
+    container.setImageVersion(container.getImageVersion());
 
     var proxies = new java.util.HashSet();
     proxies.add(serviceProxy);
@@ -337,7 +337,7 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
     deploymentConfig.setReplicas(parseInt(deployment.getReplicas()));
 
     var deploymentContainers = deployment.getContainers();
-    var provisioningConatainerList = new java.util.ArrayList();
+    var provisioningContainerList = new java.util.ArrayList();
     var containerIterator = deploymentContainers.iterator();
     while(containerIterator.hasNext()){
         var deploymentContainer = containerIterator.next();
@@ -364,9 +364,9 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
             provisioningProxyList.add(provisioningProxy);
         }
         provisioningContainer.setServiceProxies(provisioningProxyList);
-        provisioningConatainerList.add(provisioningContainer);
+        provisioningContainerList.add(provisioningContainer);
     }
-    deploymentConfig.setContainers(provisioningConatainerList);
+    deploymentConfig.setContainers(provisioningContainerList);
 
     return deploymentConfig;
 
@@ -375,28 +375,29 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
 /**
  * Method for getting all the available application types. e.g : war, mss, car
  */
-function getContainers(tenantDockerRegistryUrl, baseImageName, tag, applicationName, appServiceName, applicationRevision, runtimeProperties, appTypeName){
+function getContainers(tenantDockerRegistryUrl, baseImageName, tag, applicationName, appServiceName, applicationRevision, runtimeProperties, runtimeId){
     var containerList = new java.util.ArrayList();
-    var container1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
+    var container = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
     var appBaseImageName = tenantDockerRegistryUrl + "/" + baseImageName;
-    container1.setContainerName(applicationName);
-    container1.setBaseImageName(appBaseImageName);
-    container1.setBaseImageVersion(tag);
+    container.setContainerName(applicationName);
+    container.setBaseImageName(appBaseImageName);
+    container.setBaseImageVersion(tag);
     var envs = getRuntimeProperties(runtimeProperties);
-    container1.setEnvVariables(envs);
-    var serviceProxyList1 = new java.util.ArrayList();
-    var serviceProxy1 = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
-    serviceProxy1.setServiceName(appServiceName);
-    serviceProxy1.setServiceProtocol(KUB_SERVICE_PROTOCOL);
-    serviceProxy1.setServicePort(KUB_SERVICE_PORT);
-    if(appTypeName == "php"){
-        serviceProxy1.setServiceBackendPort(KUB_SERVICE_PHP_BACKEND_PORT);
-    }else{
-        serviceProxy1.setServiceBackendPort(KUB_SERVICE_BACKEND_PORT);
+    container.setEnvVariables(envs);
+    var serviceProxyList = new java.util.ArrayList();
+    var services = ApplicationManager.getServices(runtimeId);
+
+    for(var i = 0; i < services.length; i++){
+        var serviceProxy = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
+        var service = services[i];
+        serviceProxy.setServiceName(appServiceName);
+        serviceProxy.setServiceProtocol(service.getServiceProtocol());
+        serviceProxy.setServicePort(getIngressPort(service.getServiceName()));
+        serviceProxy.setServiceBackendPort(service.getServicePort());
+        serviceProxyList.add(serviceProxy);
     }
-    serviceProxyList1.add(serviceProxy1);
-    container1.setServiceProxies(serviceProxyList1);
-    containerList.add(container1);
+    container.setServiceProxies(serviceProxyList);
+    containerList.add(container);
 
     return containerList;
 };
@@ -793,6 +794,7 @@ var getDeploymentURL = function (applicationName, applicationRevision, appTypeNa
              applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
 
     var deploymentPath = KubernetesProvisioningUtils.getDeploymentPath(applicationCtx);
+    ///
     var urlScheme = CloudUtil.getPropertyValue("DeploymentUrlScheme");
     var baseURL = urlScheme + "://" + CloudUtil.getPropertyValue("ApplicationLaunchBaseURL");
 
@@ -1006,6 +1008,17 @@ var cleanUpApplicationDeployment = function(applicationName, revision){
     }catch(e){
         log.error("Error while cleaning up the Kubernetes deployment");
         log.error(e);
+    }
+}
+
+var getIngressPort = function(serviceName){
+
+    if(serviceName == "http" || serviceName == "http-alt"){
+        return  80;
+    }else if(serviceName == "https" || serviceName == "https-alt"){
+        return 443;
+    } else{
+        return 80;
     }
 }
 

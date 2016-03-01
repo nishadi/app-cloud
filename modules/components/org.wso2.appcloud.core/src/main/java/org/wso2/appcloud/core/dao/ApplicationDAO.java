@@ -1316,5 +1316,37 @@ public class ApplicationDAO {
         return runtimeProperties;
     }
 
+    public List<Service> getServices(int runtimeId) throws AppCloudException{
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        List<Service> services = new ArrayList<Service>();
+        try {
+            String SELECT_SERVICE_PROXY = "select service_name, service_port,service_protocol from Service where id in " +
+                    "(select service_id from ApplicationRuntimeService where application_runtime_id=?)";
+            preparedStatement = dbConnection.prepareStatement(SELECT_SERVICE_PROXY);
+            preparedStatement.setInt(1, runtimeId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()){
+                Service service = new Service();
+                service.setServiceName(resultSet.getString("service_name"));
+                service.setServiceProtocol(resultSet.getString("service_protocol"));
+                service.setServicePort(resultSet.getInt("service_port"));
+                services.add(service);
+            }
+
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while retrieving runtime service records.";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return services;
+    }
+
+
 
 }
