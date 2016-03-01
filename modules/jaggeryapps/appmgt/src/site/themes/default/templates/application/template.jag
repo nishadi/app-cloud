@@ -115,7 +115,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
             });
 
             $('#fileupload').fileupload({
-
                 submit: function(e, data){
                       data.url = "<%=jagg.getAbsoluteUrl('/site/blocks/application/application.jag')%>",
                           data.dataType = 'json',
@@ -131,6 +130,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
                             'width',
                             progress + '%'
                         );
+                        //alert(progress);
+                        if(progress == 100){
+                            activateCreateApplication();
+                        }
                     },
 
                     change:function (e, data) {
@@ -209,7 +212,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                             window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
                         }
                     } else if(event.status == "failed"){
-                        var alert = "<p>Application creation failed. " + event.description + "</p>";
+                        var alert = "<p>Application creation failed. </p><p>Reason: " + event.description + "</p>";
                         var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">Back</button>" +
                                            "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"activateDeploymentBtn();\">Retry</button>";
                         setTimeout(showErrorPopup, 2000);
@@ -424,14 +427,18 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
         var createNewAppForm = $("#application-details");
         createNewAppForm.on('focusout keyup blur click', function () { // fires on every keyup & blur
-            if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0
-                                                         && ($("#uploadedFileName").val() || $("#artifactUrl").val())) {// checks form for validity
-                $("#add-application").prop("disabled", false);     // disables button
-            } else {
-                $("#add-application").prop("disabled", true);      // enables button
-            }
+            activateCreateApplication();
         });
     });
+
+    function activateCreateApplication() {
+        if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0
+                                                         && ($("#uploadedFileName").val() || $("#artifactUrl").val())) {// checks form for validity
+            $("#add-application").prop("disabled", false);     // disables button
+        } else {
+            $("#add-application").prop("disabled", true);      // enables button
+        }
+    }
 
      function clearUploadIconField() {
          document.getElementById("icon").value = "";
