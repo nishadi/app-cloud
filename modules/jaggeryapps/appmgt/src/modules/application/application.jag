@@ -378,16 +378,13 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
 function getContainers(tenantDockerRegistryUrl, baseImageName, tag, applicationName, appServiceName, applicationRevision, runtimeProperties, runtimeId){
     var containerList = new java.util.ArrayList();
     var container = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
-    var appBaseImageName = tenantDockerRegistryUrl + "/" + applicationName;
+    var appBaseImageName = tenantDockerRegistryUrl + "/" + baseImageName;
     container.setContainerName(applicationName);
     container.setBaseImageName(appBaseImageName);
-    container.setBaseImageVersion(applicationRevision);
     container.setBaseImageVersion(tag);
     var envs = getRuntimeProperties(runtimeProperties);
     container.setEnvVariables(envs);
     var serviceProxyList = new java.util.ArrayList();
-
-
     var services = ApplicationManager.getServices(runtimeId);
 
     for(var i = 0; i < services.length; i++){
