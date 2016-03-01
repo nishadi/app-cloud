@@ -84,7 +84,7 @@ $(document).ready(function () {
     }, function (result) {
         var parsedResult = JSON.parse(result);
         for (var i = 0; i < parsedResult.length; i++) {
-            $(".tag-list").append(
+            $(".tag-list").prepend(
                 '<div class="form-inline  property-seperator custom-env-class-for-demo">' +
                 '<div class="form-group">' +
                 '<label class="sr-only" for="key">Key</label>' +
@@ -109,7 +109,7 @@ $(document).ready(function () {
         }
 
         $(".add-tag").click(function () {
-            $(".tag-list").append(
+            $(".tag-list").prepend(
                 '<div class="form-inline  property-seperator custom-env-class-for-demo">' +
                 '<div class="form-group">' +
                 '<label class="sr-only" for="key">Key</label>' +

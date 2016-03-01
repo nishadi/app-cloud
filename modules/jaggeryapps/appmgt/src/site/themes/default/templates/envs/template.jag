@@ -76,7 +76,7 @@ $(document).ready(function () {
     }, function (result) {
         var parsedResult = JSON.parse(result);
         for (var i = 0; i < parsedResult.length; i++) {
-            $(".env-list").append(
+            $(".env-list").prepend(
                 '<div class="form-inline  property-seperator custom-env-class-for-demo">' +
                 '<div class="form-group">' +
                 '<label class="sr-only" for="key">Key</label>' +
@@ -101,7 +101,7 @@ $(document).ready(function () {
         }
 
         $(".add-env").click(function () {
-            $(".env-list").append(
+            $(".env-list").prepend(
                 '<div class="form-inline  property-seperator custom-env-class-for-demo">' +
                 '<div class="form-group">' +
                 '<label class="sr-only" for="key">Key</label>' +
