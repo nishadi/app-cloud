@@ -934,7 +934,9 @@ var deleteApplicationUploadedPath = function(applicationName, revision) {
     var fileUploadPath = new Packages.java.io.File(fileUploadPath);
     log.info("Deleting the uploaded file at:"+fileUploadPath.getAbsolutePath());
     if(fileUploadPath.exists()){
-        fileUtils.deleteDirectory(fileUploadPath);
+        //Commenting deleting upload path inorder to work retry app deployment correctly.
+        // Upload path clean up force to upload the artifact again in the retying.
+        //fileUtils.deleteDirectory(fileUploadPath);
     }
 };
 
@@ -973,15 +975,15 @@ var cleaApplicationUploadedPath = function(applicationName, revision){
     var fileUploadPath = new Packages.java.io.File(fileUploadPath);
     log.info(fileUploadPath.getAbsolutePath())
     if(fileUploadPath.exists()){
-        fileUtils.deleteDirectory(fileUploadPath);
+        //Commenting deleting upload path inorder to work retry app deployment correctly.
+        // Upload path clean up force to upload the artifact again in the retying.
+        //fileUtils.deleteDirectory(fileUploadPath);
     }
 }
 
 var cleanUpApplicationDeployment = function(applicationName, revision){
     try {
-        //Commenting deleting upload path inorder to work retry app deployment correctly.
-        // Upload path clean up force to upload the artifact again in the retying.
-        //cleaApplicationUploadedPath(applicationName, revision);
+        cleaApplicationUploadedPath(applicationName, revision);
         log.info("Successfully clean up the application uploaded directory");
     }catch(e){
         log.error("Error while cleaning up the application uploaded path");
