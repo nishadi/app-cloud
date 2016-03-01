@@ -77,7 +77,20 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 e.preventDefault(); $(this).parent('div').remove(); x--;
             });
 
+            var modalBody = '<div class="container-fluid">'+
+                                '<div class="row">'+
+                                    '<div id="progress_table" class="col-xs-12 col-md-12 section-title">' +
+                                        '<i class="fa fa-2x fa-circle-o-notch fa-spin"></i>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+
+
             $('#application-details').submit(function(e){
+
+                $("#app-creation-model-footer").html("");
+                $("#app-creation-model-body").html(modalBody);
+
                 executeAsync(drawProgressWindow());
                 $('#add-application').loadingButton({action:'show'});
                 e.preventDefault();
@@ -214,7 +227,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     } else if(event.status == "failed"){
                         var alert = "<p>Application creation failed. </p><p>Reason: " + event.description + "</p>";
                         var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">Back</button>" +
-                                           "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"activateDeploymentBtn();\">Retry</button>";
+                                           "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"retryAppCreation();\">Retry</button>";
                         setTimeout(showErrorPopup, 2000);
                         function showErrorPopup(){
                             $("#app-creation-model-body").html(alert);
@@ -225,7 +238,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             },function (jqXHR, textStatus, errorThrown) {
                  var alert = "<p>Application creation failed. " + errorThrown + "</p>";
                  var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">Back</button>" +
-                                    "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"activateDeploymentBtn();\">Retry</button>";
+                                    "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"retryAppCreation();\">Retry</button>";
                  setTimeout(showErrorPopup, 1000);
                  function showErrorPopup(){
                      $("#app-creation-model-body").html(alert);
@@ -553,7 +566,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
     function redirectAppListing() {
         window.location.replace("index.jag");
     }
-    function activateDeploymentBtn() {
+    function retryAppCreation() {
+
+
         $('#add-application').loadingButton({action:'hide'});
     }
  </script>
@@ -765,13 +780,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     <h4 class="modal-title" id="modal-title">Application Creation Progress</h4>
                 </div>
                 <div class="modal-body" id="app-creation-model-body">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div id="progress_table" class="col-xs-12 col-md-12 section-title">
-                                <i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 <div class="modal-body" id="app-creation-model-footer"></div>
             </div><!-- /.modal-content -->
