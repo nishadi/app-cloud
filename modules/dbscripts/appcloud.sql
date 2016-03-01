@@ -56,7 +56,7 @@ ENGINE = InnoDB;
 
 INSERT INTO `ApplicationRuntime` (`id`, `runtime_name`, `repo_url`, `image_name`, `tag`) VALUES
 (1, 'Apache Tomcat 8.0.30', 'registry.docker.appfactory.private.wso2.com:5000', 'tomcat', '8.0'),
-(2, 'WSO2 Microservices Server 1.0.0', 'registry.docker.appfactory.private.wso2.com:5000', 'msf4j', '1.0'),
+(2, 'OpenJDK 8', 'registry.docker.appfactory.private.wso2.com:5000', 'msf4j', '1.0'),
 (3, 'Apache 2.4.10', 'registry.docker.appfactory.private.wso2.com:5000','php','5.6'),
 (4, 'Apache 2.4.18', 'registry.docker.appfactory.private.wso2.com:5000','php','5.7');
 
