@@ -125,20 +125,27 @@ jagg.template("index", function(inputs, outputs, jagg) {
         application.highlightedName = "";
     }
 
-    var imgSrc = "<%=jagg.getAbsoluteUrl(jagg.getThemeFile('/images/dark-app-iconx256.jpg'))%>";
 
     var theLi;
+    var appIcon;
     if (application.icon) {
         imgSrc = "data:image/bmp;base64,"+application.icon;
+        appIcon = '<div class="app-icon">' +
+            '<img src="'+imgSrc+'" class="square-element">' +
+            '</div>';
+    } else {
+        appIcon = '<div class="app-icon" style="background:'+ application.uniqueColor + ';">' +
+            '<div class="app-name-icon square-element">' + application.nameToChar + '</div>' +
+         '</div>';
     }
+
+
     if(application.status == 'running' || application.status == 'stopped'){
         theLi  = '<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2" id="' + application.applicationName + '">' +
                         '<a href="/appmgt/site/pages/home.jag?applicationName=' + application.applicationName + '">'+
                             '<div class="cloud-app-listing app-color-one">'+
                                 '<i class="fw fw-java fw-2x" data-toggle="tooltip" data-placement="right" title="Java Application"></i>' +
-                                    '<div class="app-icon-bck" style="background:'+ application.uniqueColor + ';">' +
-                                        '<div class="app-name-icon">' + application.nameToChar + '</div>' +
-                                    '</div>' +
+                                     appIcon +
                                     '<div class="app-name" >' + displayName + '</div>' +
                             '</div>' +
                         '</a>' +
@@ -148,9 +155,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
                         '<a>'+
                             '<div class="cloud-app-listing app-color-one">'+
                                 '<i class="fw fw-java fw-2x" data-toggle="tooltip" data-placement="right" title="Java Application"></i>' +
-                                    '<div class="app-icon-bck" style="background:'+ application.uniqueColor + ';">' +
-                                        '<div class="app-name-icon">' + application.nameToChar + '</div>' +
-                                    '</div>' +
+                                    appIcon +
                                     '<div class="app-name" ><i class="fw fw-error fw-2x"></i>' + displayName + '</div>' +
                             '</div>' +
                         '</a>' +
@@ -161,9 +166,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
                         '<a>'+
                             '<div class="cloud-app-listing app-color-one">'+
                                 '<i class="fw fw-java fw-2x" data-toggle="tooltip" data-placement="right" title="Java Application"></i>' +
-                                    '<div class="app-icon-bck" style="background:'+ application.uniqueColor + ';">' +
-                                        '<div class="app-name-icon">' + application.nameToChar + '</div>' +
-                                    '</div>' +
+                                    appIcon +
                                     '<div class="app-name" ><i class="fw fw-wso2-logo fw-pulse fw-2x"></i>' + displayName + '</div>' +
                             '</div>' +
                         '</a>' +

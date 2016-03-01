@@ -751,13 +751,6 @@ a.btn-action {
     transform: translate(-50%, -50%);
 }
 
-.app-icon-bck {
-    width: 100%;
-    background: #ffffff;
-    height:175px;
-    overflow-y: hidden;
-}
-
 .app-name-icon{
     color:#fff;
     width:100%;
