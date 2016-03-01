@@ -1061,8 +1061,8 @@ a.btn-action {
 .block-action-button {
     width: 100%;
     margin-top:10px;
-    text-align: right;
-    float: right;
+    text-align: left;
+    float: left;
     padding: 8px;
     cursor: pointer;
 }
@@ -2083,6 +2083,16 @@ a.btn-action {
     }
 }
 
+.tag-list{
+    float: left;
+    padding-left: 30px;
+}
+
+.view-tag{
+    font-size: 11px;
+    background-color: #0B4C5F;
+    padding: .5em;
+}
 
 .new-tag{
     position:absolute;

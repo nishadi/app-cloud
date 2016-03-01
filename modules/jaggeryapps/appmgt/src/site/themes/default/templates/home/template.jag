@@ -241,9 +241,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                   <div class="block-icon pull-left">
                     <i class="fa fa-tags fa-5x"></i>
                   </div>
-                  <div class="block-number pull-right">
-                    <span id="labelCount"><%=selectedApplicationRevision.labels.length.toString()%></span>
-                  </div>
+                  <div class="tag-list" id="tag-list"></div>
                   <div class="clearfix"></div>
                   <a href="/appmgt/site/pages/tags.jag?applicationName=<%=applicationName%>&revision=<%=selectedRevision%>">
                       <div class="block-action-button">

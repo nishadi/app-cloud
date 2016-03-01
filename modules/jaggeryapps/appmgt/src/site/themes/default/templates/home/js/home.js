@@ -29,9 +29,27 @@ function initPageView() {
         var newWindow = window.open('','_blank');
         newWindow.location = appUrl;
     });
+
+    listTags();
 }
 
+function listTags(){
+    var tags = selectedApplicationRevision.labels;
+    var tagListLength = tags.length;
+    var tagString = '';
+    for(var i = 0; i < tagListLength; i++){
+        if(i >= 3){
+            break;
+        }
+        tagString += tags[i].labelName + " : " + tags[i].labelValue + "</br>";
+    }
+    if(tagListLength > 3) {
+        tagString += "</br><a class='view-tag' href='/appmgt/site/pages/tags.jag?applicationName=" + applicationName + "&revision=" +
+                     selectedRevision + "'>View All Tags</a>";
+    }
 
+    $('#tag-list').html(tagString);
+}
 
 // Icon initialization
 function loadAppIcon(selectedApplicationRevision) {
