@@ -29,7 +29,7 @@ var log = new Log();
         return;
     }
     if(action == "uploadExistingArchive"){
-        var uploadedArtifact = request.getFile("fileUpload");
+        var uploadedArtifact = request.getFile("fileupload");
         var applicationName = request.getParameter("applicationName");
         var appTypeName = request.getParameter("appTypeName");
         var applicationRevision = request.getParameter("applicationRevision");

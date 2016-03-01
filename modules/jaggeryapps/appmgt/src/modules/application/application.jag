@@ -979,7 +979,9 @@ var cleaApplicationUploadedPath = function(applicationName, revision){
 
 var cleanUpApplicationDeployment = function(applicationName, revision){
     try {
-        cleaApplicationUploadedPath(applicationName, revision);
+        //Commenting deleting upload path inorder to work retry app deployment correctly.
+        // Upload path clean up force to upload the artifact again in the retying.
+        //cleaApplicationUploadedPath(applicationName, revision);
         log.info("Successfully clean up the application uploaded directory");
     }catch(e){
         log.error("Error while cleaning up the application uploaded path");
