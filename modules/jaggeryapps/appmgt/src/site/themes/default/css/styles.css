@@ -750,15 +750,32 @@ a.btn-action {
     -o-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
 }
+
+.app-icon-bck {
+    width: 100%;
+    background: #ffffff;
+    height:175px;
+    overflow-y: hidden;
+}
+
+.app-name-icon{
+    color:#fff;
+    width:100%;
+    font-size:6.5em;
+    text-align:center;
+    font-weight:200;
+    text-transform:capitalize;
+}
+
 .app-name {
     position: absolute;
-    color:#fff;
+    color:#000;
     bottom: 0;
     padding: 9px 5px 2px;
     width: 100%;
     min-height: 3em;
     font-size: 17px;
-    background-color: #383d44;
+    background-color: #fff;
     font-weight: 300;
 }
 

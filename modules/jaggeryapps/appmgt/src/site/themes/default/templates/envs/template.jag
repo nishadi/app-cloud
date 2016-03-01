@@ -155,7 +155,7 @@ $(document).ready(function () {
             if(!updatedKey || !updatedValue){
                 return;
             }
-            
+
             var isNewAddition = $(this).hasClass('save-new-entry');
             if (isNewAddition) {
                 addRuntimeAttribute(updatedKey, updatedValue);
