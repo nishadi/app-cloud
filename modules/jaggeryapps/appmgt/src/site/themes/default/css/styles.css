@@ -751,19 +751,13 @@ a.btn-action {
     transform: translate(-50%, -50%);
 }
 
-.app-icon-bck {
-    width: 100%;
-    background: #ffffff;
-    height:175px;
-    overflow-y: hidden;
-}
-
 .app-name-icon{
     color:#fff;
     width:100%;
+    padding: 20px;
     font-size:6.5em;
     text-align:center;
-    font-weight:200;
+    font-weight:300;
     text-transform:capitalize;
 }
 
