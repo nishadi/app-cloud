@@ -754,9 +754,10 @@ a.btn-action {
 .app-name-icon{
     color:#fff;
     width:100%;
+    padding: 20px;
     font-size:6.5em;
     text-align:center;
-    font-weight:200;
+    font-weight:300;
     text-transform:capitalize;
 }
 
