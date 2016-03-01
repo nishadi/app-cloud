@@ -195,7 +195,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                         <figcaption>
                                           <span class="fw-stack fw-lg ">
                                               <i class="fw fw-ring fw-stack-2x"></i>
-                                              <i class="fw fw-add fw-stack-1x"></i>
+                                              <i class="fw fw-add fw-stack-1x" data-toggle="tooltip" title="Adding replicas to your application will not support in this release."></i>
                                           </span>
                                         </figcaption>
                                     </figure>
