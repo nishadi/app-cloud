@@ -422,8 +422,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             });
         });
 
-        var createNewAppForm = $("#application-details");
-        createNewAppForm.on('focusout keyup blur click', function () { // fires on every keyup & blur
+        $(document).on('focusout keyup blur click', function () { // fires on every keyup & blur
             if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0
                                                          && ($("#uploadedFileName").val() || $("#artifactUrl").val())) {// checks form for validity
                 $("#add-application").prop("disabled", false);     // disables button
@@ -571,7 +570,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 </label>
                 <label class="radio-inline">
                     <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="upload-from-url"
-                           class="custom-radio"> Upload from url
+                           class="custom-radio"> Upload from URL
                 </label>
             </div>
 
