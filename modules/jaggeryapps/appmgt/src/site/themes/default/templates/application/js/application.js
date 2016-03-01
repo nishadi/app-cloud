@@ -79,7 +79,7 @@ $(document).on('click', '.btn-primary-add-val', function () {
             '</div>\n'
     );
     addBlock.remove();
-    panelBody.append(
+    panelBody.prepend(
             '<div class="form-inline property-seperator">\n'+
                 '<div class="form-group">\n'+
                     '<label class="sr-only" for="key">Key</label>\n'+
