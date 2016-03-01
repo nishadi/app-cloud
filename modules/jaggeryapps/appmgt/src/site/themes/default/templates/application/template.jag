@@ -253,8 +253,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 applicationRevision: {
                     required: true,
                     validateContent: true,
-                    validationApplicationRevisionChar: true,
-                    maxlength: 8
+                    validationApplicationRevisionChar: true
                 },
                 icon: {                                     // app icon field
                     validateAppIcon: true
@@ -357,8 +356,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
         function validationApplicationRevisionChar(value){
             var regexPattern = [];
-            var patternNonAlphaNum = /^[\d{1,2}\.]{2}[\d{1,5}]$/g;
-            var isPattern = patternNonAlphaNum.test(value);
+            //alert(value);
+            var patternNonAlphaNum = /^(?:(\d{1,3})\.)?(?:(\d{1,3})\.)?(\*|\d{1,5})$/g;
+            var isPattern = !patternNonAlphaNum.test(value);
+            //alert(isPattern);
             regexPattern.push(isPattern);
             var message = "Invalid version number - Provide version number in format major.minor.patch";
             return validateWithRegexPatters(regexPattern, message);
