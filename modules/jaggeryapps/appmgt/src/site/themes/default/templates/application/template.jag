@@ -330,11 +330,16 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
         function validateApplicationNameChar(value){
             var regexPattern = [];
-            var patternNonAlphaNumExceptHyphen = /[^a-zA-Z\d-]/g;
+            var patternNonAlphaNumExceptHyphen = /[^\w -]/g;
             var isPattern = patternNonAlphaNumExceptHyphen.test(value);
             regexPattern.push(isPattern);
             var message = "Invalid Application Name - Enter a value which has only alphanumeric characters";
-            return validateWithRegexPatters(regexPattern, message);
+            var isValid = validateWithRegexPatters(regexPattern, message);
+            if(isValid){
+                value = value.replace(/[^a-zA-Z0-9]+/g,'-');
+                $('#applicationName').val(value);
+            }
+            return isValid;
         }
 
         function validationApplicationRevisionChar(value){
