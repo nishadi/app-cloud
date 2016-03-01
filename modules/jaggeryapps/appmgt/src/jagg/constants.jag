@@ -40,8 +40,8 @@ var DATABASE_ADD = "Adding application to database";
 var DOCKER_FILE_CREATE = "Creating docker file";
 var DOCKER_IMAGE_BUILD = "Building docker image";
 var DOCKER_REGISTRY_PUSH = "Updating docker registry";
-var KUBE_DEPLOY = "Starting deployment";
-var INGRESS = "Service proxy creation";
+var KUBE_DEPLOY = "Initializing deployment";
+var INGRESS = "Creating ingress";
 var POD_STATUS = "Status";
 
 var EVENT_SUCCEEDED = "success";

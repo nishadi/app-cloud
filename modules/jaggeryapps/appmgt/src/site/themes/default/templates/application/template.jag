@@ -169,7 +169,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     if(event.status == "success"){
                         statusStyle = "success";
                         if (event.name === "Status") {
-                                table = table + "<tr class='" + statusStyle + "'><td>Starting up containers</td>" +
+                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
                                                 "<td><i class=\"fa fa-check\"></i></td></tr>";
                         } else {
                                 table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
@@ -178,7 +178,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     } else if (event.status == "failed") {
                         statusStyle = "danger";
                         if (event.name === "Status") {
-                                table = table + "<tr class='" + statusStyle + "'><td>Starting up containers</td>" +
+                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
                                                 "<td><i class=\"fa fa-times\"></i></td></tr>";
                         } else {
                                 table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
@@ -187,7 +187,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     } else if (event.status == "pending"){
                         if (event.name === "Status") {
                             statusStyle = "active";
-                                table = table + "<tr class='" + statusStyle + "'><td>Starting up containers</td>" +
+                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
                                                 "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
                         } else {
                             statusStyle = "active";
@@ -407,6 +407,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         /** end application creation form validations */
 
         $('#url-upload').click(function(){
+        alert("url");
             $("#url-upload-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
             jagg.post("../blocks/application/application.jag", {
                 action:"downloadFromUrl",
@@ -589,10 +590,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
             </div>
 
             <div class="form-group" id="url-upload-block">
-                <input id="artifactUrl" name="artifactUrl" type="text" class="form-control" placeholder="Enter artifact url" />
-                <a class="btn btn-info" id="url-upload">Upload From URL
-                    <span id="url-upload-progress"><span>
-                </a>
+                <div class="input-group">
+                    <input id="artifactUrl" name="artifactUrl" type="text" class="form-control" placeholder="Enter artifact url" />
+                    <span class="input-group-btn">
+                        <a class="btn btn-primary" id="url-upload" type="button">Upload from URL
+                        <span id="url-upload-progress"><span></a>
+                    </span>
+                </div>
             </div>
 
             <div class="form-group">
