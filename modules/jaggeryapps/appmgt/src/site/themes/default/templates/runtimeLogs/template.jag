@@ -40,7 +40,17 @@ jagg.template("runtimeLogs", function (inputs, outputs, jagg) {
     var revisionsList = jQuery.parseJSON('<%=revisionsList%>');
 </script>
 
-    <div class="container-fluid app-content-section">
+        <!-- BOF App factory menu actionbar -->
+        <div class="action-bar">
+            <a href="/appmgt/site/pages/home.jag?applicationName=<%=applicationName%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
+                    <span class="fw-stack fw-lg btn-action-ico">
+                        <i class="fw fw-ring fw-stack-2x"></i>
+                        <i class="fw fw-left-arrow fw-stack-1x"></i>
+                    </span> <span class="hidden-xs">Back to Application</span>
+            </a>
+        </div><!-- EOF App factory menu actionbar-->
+
+        <div class="container-fluid app-content-section">
 
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 msg-issues">
@@ -84,13 +94,12 @@ jagg.template("runtimeLogs", function (inputs, outputs, jagg) {
                         </div><!-- /.col-lg-6 -->
                     </div>
                 </div>
-
             </div>
             <div class="col-xs-12 col-md-12">
                 <div class="scroll-container" style="margin-top: 1.2em;">
-                                <textarea id="build-logs" name="build-logs" style="display: none">
-Loading...
-</textarea>
+                    <textarea id="build-logs" name="build-logs" style="display: none">
+                        Loading...
+                    </textarea>
                 </div>
             </div>
         </div>

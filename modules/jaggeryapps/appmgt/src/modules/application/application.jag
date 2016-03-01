@@ -82,6 +82,8 @@ var addApplication = function (applicationName, applicationRevision, application
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
+        log.info("Application creation failed because initial application metadata persistence failed and roll back process" +
+                " is started for application:"+applicationName+" with revision:"+applicationRevision);
         deleteApplicationUploadedPath(applicationName, applicationRevision);
         throw e;
     }
@@ -117,6 +119,8 @@ var addApplication = function (applicationName, applicationRevision, application
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
+        log.info("Application creation failed because docker file creation failed and roll back process" +
+                " is started for application:"+applicationName+" with revision:"+applicationRevision);
         deleteApplicationUploadedPath(applicationName, applicationRevision);
         deleteApplicationFromDatabase(applicationName, applicationRevision);
         throw e;
@@ -131,16 +135,23 @@ var addApplication = function (applicationName, applicationRevision, application
     //Adding docker build pending event
     var msg = "Docker image build successfully triggered in appcloud";
     addEvent(DOCKER_IMAGE_BUILD, EVENT_PENDING, msg, applicationName, applicationRevision);
+
+    var applicationRuntime = ApplicationManager.getApplicationRuntime(runtimeId);
+    var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
+    var tagName = applicationRuntime.getTag() +"-"+ modManager.getTenantDomain() +"-"+applicationName+"-"+applicationRevision;
+    
+
     try {
         var dockerRegTenantSpace = modManager.getTenantDomain().replace(".","-");
-        var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
-        dockerOpClient.buildDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision,absFileUploadedPath);
+        dockerOpClient.buildDockerImage(applicationRuntime.getRepoURL() ,applicationRuntime.getImageName(), tagName, absFileUploadedPath);
     } catch (e){
         var msg = "Error while building docker file";
         addEvent(DOCKER_IMAGE_BUILD, EVENT_FAILED, msg, applicationName, applicationRevision);
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
+        log.info("Application creation failed because dokcer image build failed and roll back process" +
+                " is started for application:"+applicationName+" with revision:"+applicationRevision);
         deleteApplicationUploadedPath(applicationName, applicationRevision);
         deleteApplicationFromDatabase(applicationName, applicationRevision);
         throw e;
@@ -155,13 +166,15 @@ var addApplication = function (applicationName, applicationRevision, application
     var msg = "Docker image push successfully triggered in triggered";
     addEvent(DOCKER_REGISTRY_PUSH, EVENT_PENDING, msg, applicationName, applicationRevision);
     try {
-        dockerOpClient.pushDockerImage(tenantDockerRegistryUrl,applicationName, applicationRevision);
+        dockerOpClient.pushDockerImage(applicationRuntime.getRepoURL(),applicationRuntime.getImageName(), tagName);
     } catch (e) {
         var msg = "Error uploading docker image to remote registry";
         addEvent(DOCKER_REGISTRY_PUSH, EVENT_FAILED, msg, applicationName, applicationRevision);
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
+        log.info("Application creation failed because docker image push failed and roll back process" +
+                " is started for application:"+applicationName+" with revision:"+applicationRevision);
         deleteApplicationUploadedPath(applicationName, applicationRevision);
         deleteApplicationFromDatabase(applicationName, applicationRevision);
         throw e;
@@ -173,7 +186,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     //==================================== Kubernetes deploy block ===============================================
     var runtimeProperties = application.getRuntimeProperties();
-    var containers = getContainers(tenantDockerRegistryUrl,applicationName,applicationName, applicationRevision, runtimeProperties, runtimeId);
+    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, applicationName,applicationName, applicationRevision, runtimeProperties, runtimeId);
     var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
     deployApplication(applicationName, applicationRevision, deploymentConfig, false);
 
@@ -206,6 +219,8 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
         log.error(msg);
         log.error(e);
+        log.info("Application deployment failed because kubernetes deployment was failed and roll back process" +
+                " is started for application:"+applicationName+" with revision:"+applicationRevision);
         deleteApplicationUploadedPath(applicationName, applicationRevision);
         deleteApplicationFromDatabase(applicationName, applicationRevision);
         throw e;
@@ -228,6 +243,8 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
         var msg = "Application ingress creation failed in Kubernetes";
         addEvent(INGRESS, EVENT_FAILED, msg, applicationName, applicationRevision);
         ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        log.info("Application deployment failed because ingress is not created successfully and roll back process" +
+                " is started for application:"+applicationName+" with revision:"+applicationRevision);
         deleteApplicationUploadedPath(applicationName, applicationRevision);
         deleteApplicationFromDatabase(applicationName, applicationRevision);
         deleteApplicationFromKubernetes(applicationName, applicationRevision);
@@ -256,7 +273,8 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
             var msg = "Application starting failed";
             addEvent(POD_STATUS, EVENT_FAILED, msg, applicationName, applicationRevision);
             ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
-
+            log.info("Application rollback started for application:"+applicationName + " with revision:"+
+                    applicationRevision +" because pods are not running even after 3 minutes.");
             deleteApplicationUploadedPath(applicationName, applicationRevision);
             deleteDeployment(applicationName, applicationRevision);
             deleteApplicationFromDatabase(applicationName, applicationRevision);
@@ -357,13 +375,14 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
 /**
  * Method for getting all the available application types. e.g : war, mss, car
  */
-function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName, applicationRevision, runtimeProperties, runtimeId){
+function getContainers(tenantDockerRegistryUrl, baseImageName, tag, applicationName, appServiceName, applicationRevision, runtimeProperties, runtimeId){
     var containerList = new java.util.ArrayList();
     var container = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
     var appBaseImageName = tenantDockerRegistryUrl + "/" + applicationName;
     container.setContainerName(applicationName);
     container.setBaseImageName(appBaseImageName);
     container.setBaseImageVersion(applicationRevision);
+    container.setBaseImageVersion(tag);
     var envs = getRuntimeProperties(runtimeProperties);
     container.setEnvVariables(envs);
     var serviceProxyList = new java.util.ArrayList();
@@ -378,7 +397,6 @@ function getContainers(tenantDockerRegistryUrl, applicationName, appServiceName,
         serviceProxy.setServiceProtocol(service.getServiceProtocol());
         serviceProxy.setServicePort(getIngressPort(service.getServiceName()));
         serviceProxy.setServiceBackendPort(service.getServicePort());
-        log.info("Service Name" + service.getServiceName());
         serviceProxyList.add(serviceProxy);
     }
     container.setServiceProxies(serviceProxyList);
@@ -895,27 +913,33 @@ var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
 }
 
 var addEvent = function(name, status, description, applicationName, applicationRevision) {
+    try {
+        var eventsManager = new EventsManager();
+        var event = new Event();
 
-    var eventsManager = new EventsManager();
-    var event = new Event();
-
-    event.setEventName(name);
-    event.setEventStatus(status);
-    event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
-    event.setEventDescription(description);
-    eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
-}
+        event.setEventName(name);
+        event.setEventStatus(status);
+        event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
+        event.setEventDescription(description);
+        eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
+    } catch (e) {
+        log.error("Error while adding app creation event for application:"+applicationName + " with revision:"+
+                applicationRevision+" event name:"+name+" ,event status:"+status+" ,event description:"+description);
+        log.error(e);
+        throw e;
+    }
+};
 
 var deleteApplicationUploadedPath = function(applicationName, revision) {
     var fileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
             + modManager.getTenantDomain() + "/" + applicationName;
     var fileUtils = Packages.org.apache.commons.io.FileUtils;
     var fileUploadPath = new Packages.java.io.File(fileUploadPath);
-    log.info(fileUploadPath.getAbsolutePath())
+    log.info("Deleting the uploaded file at:"+fileUploadPath.getAbsolutePath());
     if(fileUploadPath.exists()){
         fileUtils.deleteDirectory(fileUploadPath);
     }
-}
+};
 
 var deleteApplicationFromDatabase = function(applicationName, revision) {
     try{

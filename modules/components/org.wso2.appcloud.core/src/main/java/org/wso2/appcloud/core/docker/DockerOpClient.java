@@ -149,7 +149,7 @@ public class DockerOpClient {
             public void onEvent(String event) {
                 log.info(event);
             }
-        }).toRegistry();
+        }).withTag(tag).toRegistry();
         pushDone.await();
         handle.close();
 

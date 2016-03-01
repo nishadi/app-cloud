@@ -200,26 +200,6 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                         </figcaption>
                                     </figure>
                                 </div>
-                                <div class="block-replicas">
-                                    <figure class="node-cicle">
-                                        <figcaption>
-                                          <span class="fw-stack fw-lg ">
-                                              <i class="fw fw-ring fw-stack-2x"></i>
-                                              <i class="fw fw-add fw-stack-1x"></i>
-                                          </span>
-                                        </figcaption>
-                                    </figure>
-                                </div>
-                                <div class="block-replicas">
-                                    <figure class="node-cicle">
-                                        <figcaption>
-                                          <span class="fw-stack fw-lg ">
-                                              <i class="fw fw-ring fw-stack-2x"></i>
-                                              <i class="fw fw-add fw-stack-1x"></i>
-                                          </span>
-                                        </figcaption>
-                                    </figure>
-                                </div>
                             </div>
                         </div>
                         <div class="col-xs-12 col-md-3 col-lg-3">
@@ -285,11 +265,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
         <div class="modal-dialog modal-dialog-margin-top-md ">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button id="model_close_button_id" type="button" class="close" data-dismiss="alert">
-                        <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Close</span>
-                    </button>
-                    <h4 class="modal-title" id="modal-title">Application Restarting Progress</h4>
+                    <h4 class="modal-title" id="modal-title">Application Restarting</h4>
                 </div>
                 <div class="modal-body">
                     <div class="container-fluid">
@@ -302,9 +278,6 @@ jagg.template("home", function(inputs, outputs, jagg) {
             </div>
        </div><!-- /.modal-content -->
      </div><!-- /.modal -->
-
-
-
 <script>
 
     $('.side-pane-trigger').click(function(){
@@ -358,7 +331,6 @@ jagg.template("home", function(inputs, outputs, jagg) {
         });
     }
 
-
     function drawProgressWindow(){
         $('#app_creation_progress_modal').modal({ backdrop: 'static', keyboard: false});
         $("#app_creation_progress_modal").show();
@@ -393,7 +365,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                     "<td><i class=\"fa fa-times\"></i></td></tr>";
                 } else if (event.name === "Status" && event.status === "pending" ){
                     statusStyle = "active";
-                    table = table + "<tr class='" + statusStyle + "'><td>Restarting</td>" +
+                    table = table + "<tr class='" + statusStyle + "'><td>Starting up containers</td>" +
                                     "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
                 }
             }

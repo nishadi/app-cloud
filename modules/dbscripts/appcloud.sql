@@ -55,10 +55,10 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 
 INSERT INTO `ApplicationRuntime` (`id`, `runtime_name`, `repo_url`, `image_name`, `tag`) VALUES
-(1, 'Apache Tomcat 8.0.30', 'https://github.com/', 'tomcat', '8.0'),
-(2, 'WSO2 Microservices Server 1.0.0', 'https://github.com/', 'msf4j', '1.0'),
-(3, 'Apache 2.4.10', 'https://github.com/','php','5.6'),
-(4, 'Apache 2.4.18', 'https://github.com/','php','5.7');
+(1, 'Apache Tomcat 8.0.30', 'registry.docker.appfactory.private.wso2.com:5000', 'tomcat', '8.0'),
+(2, 'OpenJDK 8', 'registry.docker.appfactory.private.wso2.com:5000', 'msf4j', '1.0'),
+(3, 'Apache 2.4.10', 'registry.docker.appfactory.private.wso2.com:5000','php','5.6'),
+(4, 'Apache 2.4.18', 'registry.docker.appfactory.private.wso2.com:5000','php','5.7');
 
 -- -----------------------------------------------------
 -- Table `AppCloudDB`.`ApplicationDeployment`
@@ -282,6 +282,56 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationServiceProxy` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `AppCloudDB`.`Service`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`Service` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `service_name` VARCHAR(20) NOT NULL,
+  `service_port` INT NOT NULL,
+  `service_protocol` VARCHAR(4) NOT NULL,
+  `description` VARCHAR(1000) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `AppCloudDB`.`ApplicationRuntimeServices`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationRuntimeService` (
+  `service_id` INT NOT NULL,
+  `application_runtime_id` INT NOT NULL,
+  CONSTRAINT `fk_Service_id`
+    FOREIGN KEY (`service_id`)
+    REFERENCES `AppCloudDB`.`Service` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ApplicationRuntime_id`
+    FOREIGN KEY (`application_runtime_id`)
+    REFERENCES `AppCloudDB`.`ApplicationRuntime` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Populate Data to `AppCloudDB`.`ApplicationRuntime`
+-- -----------------------------------------------------
+
+INSERT INTO `Service` (`id`, `service_name`, `service_port`, `service_protocol`, `description`) VALUES
+(1, 'http', 80, 'TCP', 'HTTP Protocol'),
+(2, 'https', 443, 'TCP', 'HTTPS Protocol'),
+(3, 'http-alt', 8080, 'TCP', 'HTTP Alternate Protocol'),
+(4, 'https-alt', 8443, 'TCP', 'HTTPS Alternate Protocol');
+
+-- -----------------------------------------------------
+-- Populate Data to `AppCloudDB`.`ApplicationRuntimeService`
+-- -----------------------------------------------------
+INSERT INTO `ApplicationRuntimeService` (`service_id`, `application_runtime_id`) VALUES
+(3, 1),
+(4, 1),
+(3, 2),
+(1, 3),
+(1, 4);
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

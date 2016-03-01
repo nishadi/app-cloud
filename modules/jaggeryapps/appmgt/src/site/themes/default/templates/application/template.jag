@@ -25,7 +25,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var appType = outputs.appType;
         var appTypeName = appType.type;
         var applicationName = outputs.applicationName;
-
     %>
 
 <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
@@ -41,16 +40,15 @@ jagg.template("application", function (inputs, outputs, jagg) {
     var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
     var contentInvalidErrorMsg = "";
     var validationFailErrorMsg = "";
+    var uploadMethod = "file";
     $(document).ready(function(){
 
             //check if application name available
             if(applicationName != "null"){
                 $("#applicationName").val(applicationName);
                 $("#applicationName").attr("disabled", true);
-
             }
 
-            $("#file-upload-block").hide();
             $("#url-upload-block").hide();
 
             $.each(<%=runtimes%>,function(key,value){
@@ -77,42 +75,29 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 e.preventDefault(); $(this).parent('div').remove(); x--;
             });
 
-
             $('#application-details').submit(function(e){
-
                 executeAsync(drawProgressWindow());
-
-                $('#add-application').loadingButton('hide');
-                $('#add-application-loading').loadingButton('show');
-
+                $('#add-application').loadingButton({action:'show'});
                 e.preventDefault();
                 var runtimeProperties = getProperties("env-pane");
                 var tags = getProperties("tags-pane");
-
                 var formData = new FormData($(this)[0]);
-                var selectedVal = $("#upload-method option:selected").val();
-
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
                 formData.append('tags', JSON.stringify(tags));
                 formData.append('action', 'createApplication');
                 formData.append('appTypeName', appTypeName);
-                var optionReplicas =  $("#replicas option:selected").val();
-                formData.append('replicas', optionReplicas);
                 formData.append('applicationName', $("#applicationName").val());
                 var optionRuntime = $("#runtime option:selected").val();
                 formData.append('runtime', optionRuntime);
 
-                if(selectedVal == 1){
+                if(uploadMethod === "file"){
                     formData.append('uploadedFileName', $("#uploadedFileName").val());
-                } else if (selectedVal == 2) {
+                } else if (uploadMethod === "url" ) {
                     if (appTypeName == "war") {
                         formData.append('uploadedFileName', $("#applicationName").val() + ".war");
                     } else if (appTypeName == "mss") {
                         formData.append('uploadedFileName', $("#applicationName").val() + ".jar");
                     }
-
-                } else if (selectedVal == 3) {
-                    formData.append('uploadedFileName', $("#applicationName").val() + ".war");
                 }
                 $.ajax({
                         url: $(this).attr("action"),
@@ -166,7 +151,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             setTimeout(func, 0);
         }
 
-        function pollEvents(){
+        function pollEvents() {
 
             jagg.post("../blocks/application/application.jag", {
                 action:"getApplicationCreationEvents",
@@ -183,16 +168,32 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
                     if(event.status == "success"){
                         statusStyle = "success";
-                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td><i class=\"fa fa-check\"></i></td></tr>";
+                        if (event.name === "Status") {
+                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                                "<td><i class=\"fa fa-check\"></i></td></tr>";
+                        } else {
+                                table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                                "<td><i class=\"fa fa-check\"></i></td></tr>";
+                        }
                     } else if (event.status == "failed") {
-                            statusStyle = "danger";
-                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td><i class=\"fa fa-times\"></i></td></tr>";
+                        statusStyle = "danger";
+                        if (event.name === "Status") {
+                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                                "<td><i class=\"fa fa-times\"></i></td></tr>";
+                        } else {
+                                table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                                "<td><i class=\"fa fa-times\"></i></td></tr>";
+                        }
                     } else if (event.status == "pending"){
-                        statusStyle = "active";
-                        table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                        "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                        if (event.name === "Status") {
+                            statusStyle = "active";
+                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                                "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                        } else {
+                            statusStyle = "active";
+                                table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                                "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                        }
                     }
                 }
 
@@ -208,15 +209,25 @@ jagg.template("application", function (inputs, outputs, jagg) {
                             window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
                         }
                     } else if(event.status == "failed"){
-                        jagg.message({content: "Error occurred while creating application.", type: 'error'});
-                        setTimeout(redirectAppListing, 5000);
-                        function redirectAppListing(){
-                            window.location.replace("index.jag");
+                        var alert = "<p>Application creation failed. " + event.description + "</p>";
+                        var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">Back</button>" +
+                                           "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"activateDeploymentBtn();\">Retry</button>";
+                        setTimeout(showErrorPopup, 2000);
+                        function showErrorPopup(){
+                            $("#app-creation-model-body").html(alert);
+                            $("#app-creation-model-footer").html(retry_button);
                         }
                     }
                 }
             },function (jqXHR, textStatus, errorThrown) {
-                 jagg.message({content: "Error occurred while creating application.", type: 'error'});
+                 var alert = "<p>Application creation failed. " + errorThrown + "</p>";
+                 var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">Back</button>" +
+                                    "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"activateDeploymentBtn();\">Retry</button>";
+                 setTimeout(showErrorPopup, 1000);
+                 function showErrorPopup(){
+                     $("#app-creation-model-body").html(alert);
+                     $("#app-creation-model-footer").html(retry_button);
+                 }
             });
         }
 
@@ -237,29 +248,34 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     required: true,
                     validateContent: true,
                     validateApplicationNameChar: true,
-                    maxlength: 8
+                    maxlength: 11
                 },
                 applicationRevision: {
                     required: true,
                     validateContent: true,
-                    validationApplicationRevisionChar: true,
-                    maxlength: 8
+                    validationApplicationRevisionChar: true
                 },
                 icon: {                                     // app icon field
                     validateAppIcon: true
+                },
+                runtime: {
+                    validateRuntimeSelection: true
                 }
             },
             onsubmit: false,    // Since we are handling on submit validation on click event of the "Create" button,
             onfocusout: function (element, event) {
-            var validator = $("#application-details").validate();
-            validator.element(element);
+                var validator = $("#application-details").validate();
+                //Converting application name to lowercase, this should be removed after application name and application key separation from backend.
+                if (element.name == 'applicationName') {
+                    var lowercaseAppName = element.value.toLowerCase();
+                    element.value = lowercaseAppName;
+                }
+                validator.element(element);
                 return false;
             },                            // here we disabled the form validation on submit
             highlight: function (element, errorClass, validClass) { // this is triggered when the "element" is invalid
-
             },
             unhighlight: function (element, errorClass, validClass) { // this is triggered when the "element" is valid
-
             },
             showErrors: function (event, validator) {
                 // Disable app creation button if the form is not valid
@@ -293,7 +309,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
             validateApplicationNameChar, getValidationFailErrorMsg);
         $.validator.addMethod("validationApplicationRevisionChar",
             validationApplicationRevisionChar, getValidationFailErrorMsg);
-
+        $.validator.addMethod("validateRuntimeSelection",
+                    validateRuntimeSelection, "Please select a valid runtime");
 
         $("#appIcon").change(function() {
              $("#icon").val($("#appIcon").val());
@@ -303,34 +320,54 @@ jagg.template("application", function (inputs, outputs, jagg) {
              validator.element( "#icon" );
          });
 
-         // Validate Icon
+        // Validate Icon
         $("#icon").change(function() {
              var file = $('#icon');
              validateIconImage(file.val(), this.files[0].size);
         });
 
+        $('.radio-inline input:radio').click(function() {
+
+            var selection = $(this);
+            if(selection.val() == 'upload-from-file'){
+                $('#file-upload-block').fadeIn();
+                $('#url-upload-block').hide();
+                uploadMethod = "file";
+            }else if(selection.val() == 'upload-from-url'){
+                $('#file-upload-block').hide();
+                $('#url-upload-block').fadeIn();
+                uploadMethod = "url";
+            }
+        });
+
         function validateApplicationNameChar(value){
             var regexPattern = [];
-
-             var patternNonAlphaNumExceptHyphen = /[^a-zA-Z\d-]/g;
-             var isPattern = patternNonAlphaNumExceptHyphen.test(value);
-             regexPattern.push(isPattern);
-
-             var message = "Invalid Application Name - Enter a value which has only alphanumeric characters";
-             return validateWithRegexPatters(regexPattern, message);
+            var patternNonAlphaNumExceptHyphen = /[^\w -]/g;
+            var isPattern = patternNonAlphaNumExceptHyphen.test(value);
+            regexPattern.push(isPattern);
+            var message = "Application Name has invalid characters. Valid characters are a-z A-Z 0-9 -";
+            var isValid = validateWithRegexPatters(regexPattern, message);
+            if(isValid){
+                value = value.replace(/[^a-zA-Z0-9]+/g,'-');
+                $('#applicationName').val(value);
+            }
+            return isValid;
         }
 
         function validationApplicationRevisionChar(value){
             var regexPattern = [];
-
-             var patternNonAlphaNum = /[^a-zA-Z\d]/g;
-             var isPattern = patternNonAlphaNum.test(value);
-             regexPattern.push(isPattern);
-
-             var message = "Invalid Application Revision - Enter a value which has only alphanumeric characters";
-             return validateWithRegexPatters(regexPattern, message);
+            //alert(value);
+            var patternNonAlphaNum = /^(?:(\d{1,3})\.)?(?:(\d{1,3})\.)?(\*|\d{1,5})$/g;
+            var isPattern = !patternNonAlphaNum.test(value);
+            //alert(isPattern);
+            regexPattern.push(isPattern);
+            var message = "Invalid version number - Provide version number in format major.minor.patch";
+            return validateWithRegexPatters(regexPattern, message);
         }
 
+        function validateRuntimeSelection(value){
+            return (value > 0 ) ? true : false;
+        }
 
         function validateWithRegexPatters(regexPatters, message){
             var isValueValid = true;
@@ -340,7 +377,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                    return isValueValid = false;
                 }
             }
-
             return isValueValid;
         }
 
@@ -371,6 +407,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         /** end application creation form validations */
 
         $('#url-upload').click(function(){
+        alert("url");
             $("#url-upload-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
             jagg.post("../blocks/application/application.jag", {
                 action:"downloadFromUrl",
@@ -385,21 +422,14 @@ jagg.template("application", function (inputs, outputs, jagg) {
             });
         });
 
-        $( "#upload-method" ).change(function() {
-            var selectedVal = $("#upload-method option:selected").val();
-            if(selectedVal == 1){
-                $("#file-upload-block").show();
-                $("#url-upload-block").hide();
-            } else if (selectedVal == 2) {
-                $("#file-upload-block").hide();
-                $("#url-upload-block").show();
-            } else if (selectedVal == 3) {
-                $("#file-upload-block").hide();
-                $("#url-upload-block").hide();
+        var createNewAppForm = $("#application-details");
+        createNewAppForm.on('focusout keyup blur click', function () { // fires on every keyup & blur
+            if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0
+                                                         && ($("#uploadedFileName").val() || $("#artifactUrl").val())) {// checks form for validity
+                $("#add-application").prop("disabled", false);     // disables button
+            } else {
+                $("#add-application").prop("disabled", true);      // enables button
             }
-        });
-        $("#model_close_button_id").click(function(){
-            window.location.replace("index.jag");
         });
     });
 
@@ -408,7 +438,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
          document.getElementById("appIcon").value = "";
          var validator = $( "#application-details" ).validate();
          validator.element( "#icon" );
-    }
+     }
 
     // Return whether the app icon is validated or not
     function validateAppIcon(value) {
@@ -437,9 +467,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
                  isValidExtension = true;
                  break;
              default:
-                iconErrorMsg = "Invalid image selected for Application Icon - Select a valid image";
-                isValidExtension = false;
-                break;
+                 iconErrorMsg = "Invalid image selected for Application Icon - Select a valid image";
+                 isValidExtension = false;
+                 break;
          }
          // Check size
          if(!fileSize) {
@@ -454,7 +484,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
          return (isValidExtension && isValidIconSize);
     }
 
-     // Utility Functions Goes Here
+    // Utility Functions Goes Here
     // extract file extension
     function getFileExtension(filename) {
         var parts = filename.split('.');
@@ -463,6 +493,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
     function getIconErrorMessage(){
         return iconErrorMsg;
+    }
+
+    function redirectAppListing() {
+        window.location.replace("index.jag");
+    }
+    function activateDeploymentBtn() {
+        $('#add-application').loadingButton({action:'hide'});
     }
  </script>
 
@@ -502,22 +539,21 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <form id="application-details" method="post" action='<%=jagg.getAbsoluteUrl("/site/blocks/application/application.jag")%>' enctype="multipart/form-data">
             <div class="form-group">
             <label for="application-name">Application Name: </label>
-            <input id="applicationName" name="applicationName" type="text" class="form-control" placeholder="Enter Application name" />
+            <input id="applicationName" name="applicationName" type="text" class="form-control" placeholder="Enter Application Name" />
             </div>
 
             <div class="form-group">
-            <label for="application-revision">Application Revision: </label>
-            <input id="applicationRevision" name="applicationRevision" type="text" class="form-control" placeholder="Enter Application revision" />
+            <label for="application-version">Application Version:
+                <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left" title="Set the version in the form of <Major>.<Minor>.<Patch>"></i>
+            </label>
+            <input id="applicationRevision" name="applicationRevision" type="text" class="form-control" placeholder="Enter Application Version (ex: 1.0.0)" />
             </div>
 
             <div class="form-group">
-            <label for="application-description" >Description: </label>
-            <textarea name="applicationDescription" class="form-control" rows="3" ></textarea>
-            </div>
-
-            <div class="form-group">
-            <label for="runtime">Runtime: </label>
-            <select name="runtime" id="runtime" class="form-control" ><option value="None" selected="Selected">Select runtime</option></select>
+            <label for="application-description" >Description:
+                <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left" title="Supported upto 1000 characters"></i>
+            </label>
+            <textarea name="applicationDescription" class="form-control" rows="3" placeholder="Application description goes here. (Optional)"></textarea>
             </div>
 
             <!--div class="form-group">
@@ -525,21 +561,21 @@ jagg.template("application", function (inputs, outputs, jagg) {
             <select name="replicas" id="replicas" class="form-control">
                 <option value="None" selected="Selected">Select replicas</option>
                 <option value="1" >1</option>
-                <option value="2" >2</option>
             </select>
             </div-->
 
-            <div class="form-group" id="upload-method">
-            <label>Artifact upload method:</label>
-            <select name="select-upload-method" id="select-upload-method" class="form-control" >
-                <option value="0" selected="Selected">Select upload method</option>
-                <option value="1">Upload from file system</option>
-                <option value="2">Upload from url</option>
-            </select>
+            <div class="form-group col-md-12">
+                <label class="radio-inline">
+                    <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="upload-from-file"
+                           checked="checked" class="custom-radio"> Upload from file system
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="upload-from-url"
+                           class="custom-radio"> Upload from url
+                </label>
             </div>
 
             <div class="form-group" id="file-upload-block">
-                <label>Upload Artifact: </label>
                 <div class="input-group">
                     <input id="uploadedFileName" type="text" class="form-control" readonly>
                     <span class="input-group-btn">
@@ -554,11 +590,20 @@ jagg.template("application", function (inputs, outputs, jagg) {
             </div>
 
             <div class="form-group" id="url-upload-block">
-                <label for="artifactUrl">Upload from URL: </label>
+                <div class="input-group">
                     <input id="artifactUrl" name="artifactUrl" type="text" class="form-control" placeholder="Enter artifact url" />
-                    <a class="btn btn-info" id="url-upload">Upload From URL
-                        <span id="url-upload-progress"><span>
-                    </a>
+                    <span class="input-group-btn">
+                        <a class="btn btn-primary" id="url-upload" type="button">Upload from URL
+                        <span id="url-upload-progress"><span></a>
+                    </span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="runtime">Runtime:
+                    <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left" title="Select an appropriate runtime to run your application"></i>
+                </label>
+                <select name="runtime" id="runtime" class="form-control" ></select>
             </div>
 
             <div class="form-group">
@@ -587,9 +632,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                                     Env Variables
                                     <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
                                 </a>
-
                             </h4>
-
                         </div>
                         <div id="collapseOne" class="panel-collapse collapse in">
                             <div class="panel-body" id="env-pane">
@@ -647,13 +690,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     </span>
                         Create
                 </button>
-                <button type="button" class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" id="add-application-loading" style="display:none" >
-                    <span class="fw-stack fw-lg btn-action-ico">
-                        <i class="fw fw-ring fw-stack-2x"></i>
-                        <i class="fw fw-add fw-stack-1x"></i>
-                    </span>
-                    Creating
-                </button>
             </div>
         </form>
         </div>
@@ -671,22 +707,20 @@ jagg.template("application", function (inputs, outputs, jagg) {
         <div class="modal-dialog modal-dialog-margin-top-md ">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button id="model_close_button_id" type="button" class="close" data-dismiss="alert">
-                        <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Close</span>
-                    </button>
                     <h4 class="modal-title" id="modal-title">Application Creation Progress</h4>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" id="app-creation-model-body">
                     <div class="container-fluid">
                         <div class="row">
                             <div id="progress_table" class="col-xs-12 col-md-12 section-title">
-                            <i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
+                                <i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-       </div><!-- /.modal-content -->
+                <div class="modal-body" id="app-creation-model-footer"></div>
+            </div><!-- /.modal-content -->
+        </div>
      </div><!-- /.modal -->
 
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/custom/custom.js'))%>"></script>

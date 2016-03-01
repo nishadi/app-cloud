@@ -1,5 +1,4 @@
-package org.wso2.appcloud.common;/*
- *
+/*
  *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
@@ -17,6 +16,8 @@ package org.wso2.appcloud.common;/*
  *  under the License.
  *
  */
+
+package org.wso2.appcloud.common;
 
 /**
  * Constant for AppCloudUtil

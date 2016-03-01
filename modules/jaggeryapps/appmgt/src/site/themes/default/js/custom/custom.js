@@ -77,7 +77,7 @@ $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
      * ======================================================================== */
     $.fn.loadingButton = function(options) {
 
-        var settings = $.extend({
+        var settings = $.extend({}, {
                     // defaults.
                     action: "show",
                     width: "3em",
