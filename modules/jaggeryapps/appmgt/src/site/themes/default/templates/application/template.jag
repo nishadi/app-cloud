@@ -139,6 +139,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                         });
                         $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
                     }
+
             });
 
         function drawProgressWindow(){
@@ -407,8 +408,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
         });
 
         var createNewAppForm = $("#application-details");
-        createNewAppForm.on('focusout keyup blur', function () { // fires on every keyup & blur
-            if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0) {// checks form for validity
+        createNewAppForm.on('focusout keyup blur click', function () { // fires on every keyup & blur
+            if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0
+                                                         && ($("#uploadedFileName").val() || $("#artifactUrl").val())) {// checks form for validity
                 $("#add-application").prop("disabled", false);     // disables button
             } else {
                 $("#add-application").prop("disabled", true);      // enables button
@@ -551,13 +553,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
             <textarea name="applicationDescription" class="form-control" rows="3" placeholder="Application description goes here. (Optional)"></textarea>
             </div>
 
-            <div class="form-group">
-            <label for="runtime">Runtime:
-                <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left" title="Select an appropriate runtime to run your application"></i>
-            </label>
-            <select name="runtime" id="runtime" class="form-control" ><option value="" disabled="true" selected="Selected">Select runtime</option></select>
-            </div>
-
             <!--div class="form-group">
             <label>No Of Replicas: </label>
             <select name="replicas" id="replicas" class="form-control">
@@ -593,6 +588,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <a class="btn btn-info" id="url-upload">Upload From URL
                     <span id="url-upload-progress"><span>
                 </a>
+            </div>
+
+            <div class="form-group">
+                <label for="runtime">Runtime:
+                    <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left" title="Select an appropriate runtime to run your application"></i>
+                </label>
+                <select name="runtime" id="runtime" class="form-control" ><option value="" disabled="true" selected="Selected">Select runtime</option></select>
             </div>
 
             <div class="form-group">
