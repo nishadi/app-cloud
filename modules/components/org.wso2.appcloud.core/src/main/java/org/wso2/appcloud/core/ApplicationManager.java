@@ -394,4 +394,11 @@ public class ApplicationManager {
         ApplicationDAO applicationDAO = new ApplicationDAO();
         applicationDAO.deleteDeployment(applicationName, revision, tenantId);
     }
+
+    public static Service[] getServices(int runtimeId) throws AppCloudException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        List<Service> services = applicationDAO.getServices(runtimeId);
+        return services.toArray(new Service[services.size()]);
+    }
 }

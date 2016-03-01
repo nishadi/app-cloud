@@ -55,6 +55,9 @@ public class DockerOpClient {
     public DockerOpClient(String uri) {
         Config config = new ConfigBuilder()
                 .withMasterUrl(uri)
+                .withConnectionTimeout(10*60*1000)
+                .withRequestTimeout(10*60*1000)
+                .withImagePushTimeout(10*60*1000)
                 .build();
         dockerClient = new DefaultDockerClient(config);
     }
