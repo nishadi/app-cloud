@@ -38,9 +38,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
     var applicationName = "<%=applicationName%>";
     var retryCount = 0;
     var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
+    var artifactErrorMsg = "Invalid Artifact"
     var contentInvalidErrorMsg = "";
     var validationFailErrorMsg = "";
     var uploadMethod = "file";
+    var urlUploadComplete = false;
     $(document).ready(function(){
 
             //check if application name available
@@ -130,12 +132,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
                             'width',
                             progress + '%'
                         );
-                        //alert(progress);
                         if(progress == 100){
                             activateCreateApplication();
                         }
                     },
-
                     change:function (e, data) {
                          $.each(data.files, function (index, file) {
                             $("#uploadedFileName").val(file.name);
@@ -261,6 +261,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 icon: {                                     // app icon field
                     validateAppIcon: true
                 },
+                fileupload: {
+                    validateArtifact: true
+                },
                 runtime: {
                     validateRuntimeSelection: true
                 }
@@ -314,6 +317,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
             validationApplicationRevisionChar, getValidationFailErrorMsg);
         $.validator.addMethod("validateRuntimeSelection",
                     validateRuntimeSelection, "Please select a valid runtime");
+        $.validator.addMethod("validateArtifact",
+                            validateArtifact, getArtifactErrorMessage);
 
         $("#appIcon").change(function() {
              $("#icon").val($("#appIcon").val());
@@ -359,10 +364,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
         function validationApplicationRevisionChar(value){
             var regexPattern = [];
-            //alert(value);
             var patternNonAlphaNum = /^(?:(\d{1,3})\.)?(?:(\d{1,3})\.)?(\*|\d{1,5})$/g;
             var isPattern = !patternNonAlphaNum.test(value);
-            //alert(isPattern);
             regexPattern.push(isPattern);
             var message = "Invalid version number - Provide version number in format major.minor.patch";
             return validateWithRegexPatters(regexPattern, message);
@@ -410,7 +413,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
         /** end application creation form validations */
 
         $('#url-upload').click(function(){
-        alert("url");
             $("#url-upload-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
             jagg.post("../blocks/application/application.jag", {
                 action:"downloadFromUrl",
@@ -420,6 +422,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 appTypeName:appTypeName,
             },function (result) {
                 $("#url-upload-progress").html("<i class=\"fa fa-check\"></i>");
+                urlUploadComplete = true;
+                activateCreateApplication();
             },function (jqXHR, textStatus, errorThrown) {
                 jagg.message({content: "Error occurred while downloading artifact from url.", type: 'error', id:'view_log'});
             });
@@ -432,9 +436,21 @@ jagg.template("application", function (inputs, outputs, jagg) {
     });
 
     function activateCreateApplication() {
-        if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0
-                                                         && ($("#uploadedFileName").val() || $("#artifactUrl").val())) {// checks form for validity
-            $("#add-application").prop("disabled", false);     // disables button
+        if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0 && ($("#uploadedFileName").val() || $("#artifactUrl").val())) {// checks form for validity
+
+            if($("#uploadedFileName").val()){
+                if(validateArtifactType($("#uploadedFileName").val())){
+                    $("#add-application").prop("disabled", false);
+                }else{
+                    $("#add-application").prop("disabled", true);
+                }
+            }else if ($("#artifactUrl").val()){
+                if(urlUploadComplete){
+                    $("#add-application").prop("disabled", false);
+                } else {
+                    $("#add-application").prop("disabled", true);
+                }
+            }
         } else {
             $("#add-application").prop("disabled", true);      // enables button
         }
@@ -452,6 +468,16 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var file = $("#appIcon");
         if ($("#icon").val() && file.val() != "") {
             return validateIconImage(file.val(), file[0].files[0].size);
+        } else {
+            return true;
+        }
+    }
+
+    // Return whether the artifact is validated or not
+    function validateArtifact(value) {
+        var file = $("#uploadedFileName");
+        if (file.val() != "") {
+            return validateArtifactType(file.val());
         } else {
             return true;
         }
@@ -491,6 +517,24 @@ jagg.template("application", function (inputs, outputs, jagg) {
          return (isValidExtension && isValidIconSize);
     }
 
+    function validateArtifactType(filename) {
+         var ext = getFileExtension(filename);
+         var isValidExtension = false;
+
+         // Check extension
+         switch (ext.toLowerCase()) {
+             case 'war':
+             case 'jar':
+                 isValidExtension = true;
+                 break;
+             default:
+                 artifactErrorMsg= "Invalid artifact selected for Application - Select a valid artifact";
+                 isValidExtension = false;
+                 break;
+         }
+         return (isValidExtension);
+    }
+
     // Utility Functions Goes Here
     // extract file extension
     function getFileExtension(filename) {
@@ -500,6 +544,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
     function getIconErrorMessage(){
         return iconErrorMsg;
+    }
+
+    function getArtifactErrorMessage(){
+        return artifactErrorMsg;
     }
 
     function redirectAppListing() {
@@ -587,7 +635,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     <input id="uploadedFileName" type="text" class="form-control" readonly>
                     <span class="input-group-btn">
                        <span class="btn btn-primary btn-file">
-                           Upload&hellip; <input id="fileupload" type="file" name="fileUpload" multiple>
+                           Upload&hellip; <input id="fileupload" type="file" name="fileupload" multiple>
                        </span>
                     </span>
                 </div>
@@ -598,7 +646,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             <div class="form-group" id="url-upload-block">
                 <div class="input-group">
-                    <input id="artifactUrl" name="artifactUrl" type="text" class="form-control" placeholder="Enter artifact url" />
+                    <input id="artifactUrl" name="artifactUrl" type="text" class="form-control" placeholder="Enter artifact URL" />
                     <span class="input-group-btn">
                         <a class="btn btn-primary" id="url-upload" type="button">Upload from URL
                         <span id="url-upload-progress"><span></a>
