@@ -1,6 +1,6 @@
 <%
 /*
- * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -22,8 +22,7 @@ include("/jagg/jagg.jag");
 jagg.template("tags", function(inputs, outputs, jagg) {
     var applicationName = request.getParameter("applicationName");
     var applicationRevision = request.getParameter("revision");
-
-    %>
+%>
      <!-- Bootstrap -->
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/fontwso2-1.2/css/font-wso2.css'))%>">
@@ -31,6 +30,19 @@ jagg.template("tags", function(inputs, outputs, jagg) {
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/web-fonts/Roboto.css'))%>">
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
 
+    <div class="navbar navbar-secondary">
+        <div class="container-fliud">
+            <div class="row">
+                 <div class="side-pane-trigger">
+                    <i class="fa fa-reorder"></i>
+                </div>
+                <div class="col-md-3 breadcrumb-secondary">
+                    <a href="/appmgt/site/pages/index.jag"><i class="fa fa-cubes visible-xs visible-lg"></i></a>
+                    <span class="hidden-xs"><a href="/appmgt/site/pages/index.jag">Application Cloud</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="action-bar">
         <a href="/appmgt/site/pages/home.jag?applicationName=<%=applicationName%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
                 <span class="fw-stack fw-lg btn-action-ico">
@@ -44,20 +56,16 @@ jagg.template("tags", function(inputs, outputs, jagg) {
                     <i class="fw fw-add fw-stack-1x"></i>
                 </span> <span class="hidden-xs">Add Tag</span>
         </a>
-
     </div>
-
- <div class="container-fluid app-content-section">
-
+    <div class="container-fluid app-content-section">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 msg-issues">
                 This allows you to add tags to identify your application revisions. eg. Stage=Development, Version:1.0.0
             </div>
         </div>
         <div class="tag-list">
-
         </div>
- </div>
+    </div>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
