@@ -40,5 +40,10 @@ public class DockerOpClientConstants {
 
     public static final String DOCKER_WAR_LOCATION = "/usr/local/tomcat/webapps/";
 
+    public static final String DOCKER_CONNECTION_TIMEOUT = "Docker.Connection.Timeout";
+    public static final String DOCKER_REQUEST_TIMEOUT = "Docker.Request.Timeout";
+    public static final String DOCKER_PUSH_TIMEOUT = "Docker.Push.Timeout";
+    public static final String DOCKER_BUILLD_TIMEOUT = "Docker.Build.Timeout";
+    public static final String DOCKER_SEARCH_TIMEOUT = "Docker.Search.Timeout";
 }
 

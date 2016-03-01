@@ -26,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
+import org.wso2.appcloud.common.util.AppCloudUtil;
 import org.wso2.appcloud.core.dao.ApplicationDAO;
 import org.wso2.appcloud.core.dto.ApplicationRuntime;
 
@@ -55,9 +56,16 @@ public class DockerOpClient {
     public DockerOpClient(String uri) {
         Config config = new ConfigBuilder()
                 .withMasterUrl(uri)
-                .withConnectionTimeout(10*60*1000)
-                .withRequestTimeout(10*60*1000)
-                .withImagePushTimeout(10*60*1000)
+                .withConnectionTimeout(Integer.parseInt(AppCloudUtil.getPropertyValue(DockerOpClientConstants
+                        .DOCKER_CONNECTION_TIMEOUT)))
+                .withRequestTimeout(Integer.parseInt(AppCloudUtil.getPropertyValue(DockerOpClientConstants
+                        .DOCKER_REQUEST_TIMEOUT)))
+                .withImagePushTimeout(Integer.parseInt(AppCloudUtil.getPropertyValue(DockerOpClientConstants
+                        .DOCKER_PUSH_TIMEOUT)))
+                .withImageBuildTimeout(Integer.parseInt(AppCloudUtil.getPropertyValue(DockerOpClientConstants
+                        .DOCKER_BUILLD_TIMEOUT)))
+                .withImageSearchTimeout(Integer.parseInt(AppCloudUtil.getPropertyValue(DockerOpClientConstants
+                        .DOCKER_SEARCH_TIMEOUT)))
                 .build();
         dockerClient = new DefaultDockerClient(config);
     }
