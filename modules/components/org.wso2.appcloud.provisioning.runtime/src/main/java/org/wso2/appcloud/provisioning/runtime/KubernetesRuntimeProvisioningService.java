@@ -615,7 +615,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                         .withKind(KubernetesPovisioningConstants.KIND_INGRESS)
                         .withNewMetadata()
                         .withName(KubernetesProvisioningUtils
-                                .createIngressMetaName(applicationContext, domain, service.getMetadata().getName()))
+                                .createIngressMetaName(domain))
                         .withNamespace(namespace.getMetadata().getName())
                         .endMetadata()
                         .withNewSpec()
@@ -635,7 +635,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
 
                 createdIng = kubClient.extensions().ingress().inNamespace(namespace.getMetadata().getName()).create(ing);
                 if(createdIng != null && KubernetesProvisioningUtils
-                        .createIngressMetaName(applicationContext, domain, service.getMetadata().getName())
+                        .createIngressMetaName(domain)
                         .equals(createdIng.getMetadata().getName())){
                     created = true;
                     log.info("Kubernetes ingress : " + ing + "created for service : " +
@@ -671,10 +671,10 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
         for (Service service : serviceList.getItems()) {
 
             String oldIngName =  KubernetesProvisioningUtils
-                    .createIngressMetaName(applicationContext, oldDomain, service.getMetadata().getName());
+                    .createIngressMetaName(oldDomain);
 
             String newIngName =  KubernetesProvisioningUtils
-                    .createIngressMetaName(applicationContext, newDomain, service.getMetadata().getName());
+                    .createIngressMetaName(newDomain);
             Ingress oldIng = new IngressBuilder().withApiVersion(Ingress.ApiVersion.EXTENSIONS_V_1_BETA_1)
                     .withKind(KubernetesPovisioningConstants.KIND_INGRESS)
                     .withNewMetadata()
@@ -759,7 +759,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
 
         for (Service service : serviceList.getItems()) {
             String ingName = KubernetesProvisioningUtils
-                    .createIngressMetaName(applicationContext, domain, service.getMetadata().getName());
+                    .createIngressMetaName(domain);
             Ingress ing = new IngressBuilder()
                     .withApiVersion(Ingress.ApiVersion.EXTENSIONS_V_1_BETA_1)
                     .withKind(KubernetesPovisioningConstants.KIND_INGRESS)
@@ -793,7 +793,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             log.debug("Ingress path: " + ingressPathStr);
         }
 
-        HTTPIngressPath ingressPath = new HTTPIngressPath(new IngressBackend(), ingressPathStr);
+        HTTPIngressPath ingressPath = new HTTPIngressPath(new IngressBackend(), KubernetesPovisioningConstants.DEFAULT_INGRESS_PATH);
 
         for (Service service : serviceList.getItems()) {
             if (log.isDebugEnabled()){
@@ -805,8 +805,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     .withKind(KubernetesPovisioningConstants.KIND_INGRESS)
                     .withNewMetadata()
                     .withName(
-                            KubernetesProvisioningUtils.createIngressMetaName(applicationContext, environmentUrl,
-                                    service.getMetadata().getName()))
+                            KubernetesProvisioningUtils.createIngressMetaName(environmentUrl))
                     .withNamespace(namespace.getMetadata().getName()).withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
                     .endMetadata()
                     .withNewSpec()
@@ -832,7 +831,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     .create(ing);
 
             if (createdIng != null && KubernetesProvisioningUtils
-                    .createIngressMetaName(applicationContext, environmentUrl, service.getMetadata().getName())
+                    .createIngressMetaName(environmentUrl)
                     .equals(createdIng.getMetadata().getName())) {
                 created = true;
                 if (log.isDebugEnabled()){

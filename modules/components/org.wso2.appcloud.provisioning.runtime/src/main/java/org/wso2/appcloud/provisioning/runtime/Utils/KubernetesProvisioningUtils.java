@@ -124,15 +124,12 @@ public class KubernetesProvisioningUtils {
 
     /**
      * Generate a unique name for an ingress
-     * @param applicationContext
      * @param domain
-     * @param serviceName
      * @return generated unique name for ingress (appName-appVersion-service)
      */
-    public static String createIngressMetaName(ApplicationContext applicationContext, String domain, String serviceName){
+    public static String createIngressMetaName(String domain){
 
-        return (applicationContext.getId() + "-" + applicationContext.getVersion() + "-" + domain + "-" + serviceName)
-                .replace(".","-").toLowerCase();
+        return (domain).replace(".","-").toLowerCase();
     }
 
     public static ApplicationContext getApplicationContext(String id, String version, String type, int tenantId,
