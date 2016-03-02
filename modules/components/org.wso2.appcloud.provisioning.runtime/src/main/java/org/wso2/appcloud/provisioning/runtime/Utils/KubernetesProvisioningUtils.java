@@ -131,7 +131,7 @@ public class KubernetesProvisioningUtils {
      */
     public static String createIngressMetaName(ApplicationContext applicationContext, String domain, String serviceName){
 
-        return (applicationContext.getId() + "-" + applicationContext.getVersion() + "-" + domain + "-" + serviceName)
+        return (domain)
                 .replace(".","-").toLowerCase();
     }
 

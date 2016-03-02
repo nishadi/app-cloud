@@ -793,7 +793,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             log.debug("Ingress path: " + ingressPathStr);
         }
 
-        HTTPIngressPath ingressPath = new HTTPIngressPath(new IngressBackend(), ingressPathStr);
+        HTTPIngressPath ingressPath = new HTTPIngressPath(new IngressBackend(), KubernetesPovisioningConstants.DEFAULT_INGRESS_PATH);
 
         for (Service service : serviceList.getItems()) {
             if (log.isDebugEnabled()){
