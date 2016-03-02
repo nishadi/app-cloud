@@ -361,9 +361,7 @@ a.btn-action {
     .version-url{
         width:41.8%;
     }
-    .app-name-icon{
-        font-size: 6.5em;
-    }
+
 }
 /* use for landing page blocks*/
 
@@ -756,11 +754,12 @@ a.btn-action {
 
 .app-name-icon{
     color:#fff;
-    width:100%;
     font-size: 8em;
-    text-align:center;
     font-weight:300;
     text-transform:capitalize;
+    position:absolute;
+    left:36%;
+    top:18%;
 }
 
 .app-name {
@@ -1737,9 +1736,7 @@ a.btn-action {
     .modal-md{
         width: 80%;
     }
-    .app-name-icon{
-        font-size: 10em;
-    }
+
 }
 @media (max-width: 992px) {
  .version-url{
@@ -1769,9 +1766,7 @@ a.btn-action {
     .btn-create-version + .popover .popover-title{
         font-size:14px;
     }
-    .app-name-icon{
-        font-size: 10em;
-    }
+
 }
 @media (max-width: 768px) {
     .version-url{
@@ -1799,9 +1794,7 @@ a.btn-action {
     .modal-md{
         width: auto;
     }
-    .app-name-icon{
-        font-size: 10em;
-    }
+
 }
 @media (max-width: 480px) {
     .version-url{
@@ -1825,9 +1818,7 @@ a.btn-action {
     .app-desc h2{
         margin-top:20px;
     }
-    .app-name-icon{
-        font-size: 6.5em;
-    }
+
 }
 .btn-launch-app,.btn-edit-code{
     border:none;
