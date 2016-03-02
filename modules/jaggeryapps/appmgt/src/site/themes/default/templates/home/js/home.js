@@ -56,11 +56,19 @@ function listTags(){
 
 // Icon initialization
 function loadAppIcon(selectedApplicationRevision) {
+
+    selectedApplicationRevision = getIconDetail(selectedApplicationRevision);
+
+    var iconDiv;
     if(selectedApplicationRevision.icon){
-        $("#app-icon").attr('src', 'data:image/bmp;base64,'+selectedApplicationRevision.icon);
+        iconDiv = '<img id="app-icon"  src="data:image/bmp;base64,' + selectedApplicationRevision.icon + '" width="100px"/>'
     } else {
-        $("#app-icon").attr('src', defaultAppIconUrl);
+        iconDiv = '<div class="app-icon" style="background:' + selectedApplicationRevision.uniqueColor + '">' +
+                      '<i class="fw ' + selectedApplicationRevision.appTypeIcon + ' fw-4x" data-toggle="tooltip" ></i>' +
+                      '</div>';
     }
+
+    $("#app-icon").html(iconDiv);
 }
 
 function changeSelectedRevision(newRevision){
