@@ -25,6 +25,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var appType = outputs.appType;
         var appTypeName = appType.type;
         var applicationName = outputs.applicationName;
+        var encodedLabels = request.getParameter("encodedLabels");
+        var encodedEnvs = request.getParameter("encodedEnvs");
+        var log = new Log();
+        var decodedLabels = parse(decodeURIComponent(encodedLabels, "UTF-8"));
+        var decodedEnvs = parse(decodeURIComponent(encodedEnvs, "UTF-8"));
     %>
 
 <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
@@ -38,7 +43,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
     var applicationName = "<%=applicationName%>";
     var retryCount = 0;
     var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
-    var artifactErrorMsg = "Invalid Artifact"
+    var artifactErrorMsg = "Invalid Artifact";
     var contentInvalidErrorMsg = "";
     var validationFailErrorMsg = "";
     var uploadMethod = "file";
@@ -50,7 +55,24 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 $("#applicationName").val(applicationName);
                 $("#applicationName").attr("disabled", true);
             }
+            // add existing envs
+            var prevEnvs =jQuery.parseJSON('<%=decodedEnvs%>');
+            if(prevEnvs){
+                // add existing env variables
+                for(x=0; x<prevEnvs.length; x++){
+                   var envVar = prevEnvs[x];
+                    drawEnvTagPane($("#env-pane"), envVar.propertyName, envVar.propertyValue);
+                }
+            }
 
+            // add existing labels
+            var prevLabels =jQuery.parseJSON('<%=decodedLabels%>');
+            if(prevLabels){
+                for(x=0; x<prevLabels.length; x++){
+                    var label = prevLabels[x];
+                    drawEnvTagPane($("#tags-pane"), label.labelName, label.labelValue);
+                }
+            }
             $("#url-upload-block").hide();
 
             $.each(<%=runtimes%>,function(key,value){
