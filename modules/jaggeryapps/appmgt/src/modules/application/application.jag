@@ -509,6 +509,7 @@ var getAllApplications = function(){
             applicationObject.applicationName = application.applicationName;
             applicationObject.runtimeName = application.runtimeName;
             applicationObject.status = application.status;
+            applicationObject.appType = application.appType;
             applicationObject.icon = getApplicationIconAsBase64String(application);
             applicationObject.appTypeIcon = appTypesProperties[application.appType].icon;
             applicationObject.appTypeTitle = appTypesProperties[application.appType].displayName;

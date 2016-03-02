@@ -76,6 +76,8 @@ jagg.template("index", function(inputs, outputs, jagg) {
 
         var getIconDetail = function(application){
             var appName = application.applicationName;
+            var appType = application.appType;
+
             if (appName) {
                 var str = appName.trim().split(" ");
                 try {
@@ -92,14 +94,19 @@ jagg.template("index", function(inputs, outputs, jagg) {
                 }
 
                 application.nameToChar = firstChar + secondChar;
-                application.uniqueColor = getColorCode(application.nameToChar);
+                application.uniqueColor = getColorCode(application.nameToChar, appType);
             }
             return application;
         };
 
-        var getColorCode = function (nameToChar) {
+        var getColorCode = function (nameToChar, type) {
             var colorArr = nameToChar.split('');
+            var typeArr = type.split('');
+
             var intValue = 0;
+            for (i = 0; i < typeArr.length; i++) {
+            intValue += typeArr[i].charCodeAt(0);
+            }
             for (var i = 0; i < colorArr.length; i++) {
                 intValue += colorArr[i].charCodeAt(0);
             }
@@ -135,7 +142,9 @@ jagg.template("index", function(inputs, outputs, jagg) {
             '</div>';
     } else {
         appIcon = '<div class="app-icon" style="background:'+ application.uniqueColor + ';">' +
-            '<div class="app-name-icon square-element">' + application.nameToChar + '</div>' +
+            '<div class="square-element">' +
+             '<div class="app-name-icon">' + application.nameToChar + '</div>' +
+            '</div>' +
          '</div>';
     }
 
