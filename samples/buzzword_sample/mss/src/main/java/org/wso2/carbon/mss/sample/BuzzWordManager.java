@@ -16,6 +16,9 @@ package org.wso2.carbon.mss.sample;/*
 *under the License.
 */
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -34,42 +37,35 @@ import java.util.Map;
 @Path("/buzzword")
 public class BuzzWordManager {
 
+    private static final Logger log = LoggerFactory.getLogger(BuzzWordManager.class);
 
     public static final String WORD = "Word";
     public static final String POPULARITY = "Popularity";
 
     /**
      * Add a new buzzword.
-     * curl --data "Java" http://localhost:8080/buzzword
      *
      * @param word the new buzzword.
      */
     @POST
-    public void addBuzzWords(String word) throws SQLException {
-        Connection conn = DBUtil.getDBConnection();
+    @Path("/{word}")
+    public void addBuzzWords(@PathParam("word") String word) throws SQLException {
+        Connection conn=null;
+        PreparedStatement preparedStatement=null;
+        try{
+            conn = DBUtil.getDBConnection();
+            String sql = "INSERT INTO Buzzwords (" + POPULARITY + " , " + WORD + ") VALUES (1,?) ON DUPLICATE KEY UPDATE "+POPULARITY+" = "+POPULARITY+" + 1";
 
-        int ranking = 1;
-        String sql = "INSERT INTO Buzzwords (" + POPULARITY + " , " + WORD + ") VALUES (?,?)";
-
-        Map<String, String> buzzWordList = getAllBuzzWords();
-
-        for (Map.Entry<String, String> entry : buzzWordList.entrySet()) {
-
-            if (word.equals(entry.getKey())) {
-                ranking = Integer.parseInt(entry.getValue());
-                ranking++;
-                sql = "UPDATE Buzzwords SET " +  POPULARITY +" = ? WHERE " + WORD + " = ?";
-            }
+            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setString(1, word);
+            preparedStatement.executeUpdate();
+            log.info("Popularity of buzzword:"+word +" is successfully updated.");
+        }catch (Exception e){
+            log.error("Failed to add buzzword:" + word, e);
+        }finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(conn);
         }
-
-        PreparedStatement preparedStatement = conn.prepareStatement(sql);
-        preparedStatement.setInt(1, ranking);
-        preparedStatement.setString(2, word);
-        preparedStatement.executeUpdate();
-
-        DBUtil.closeConnection(conn);
-        DBUtil.closePreparedStatement(preparedStatement);
-
     }
 
     /**
@@ -84,22 +80,30 @@ public class BuzzWordManager {
     @Path("/{regex}")
     public Map getBuzzWords(@PathParam("regex") String regex) throws SQLException {
         Map buzzWordList = new HashMap();
-        Connection conn = DBUtil.getDBConnection();
+        Connection conn = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            conn = DBUtil.getDBConnection();
+            String sql = "select * from Buzzwords where " + WORD + " like ?";
+            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setString(1, "%" + regex + "%");
 
-        String sql = "select * from Buzzwords where " +  WORD + " like ?";
-        PreparedStatement preparedStatement = conn.prepareStatement(sql);
-        preparedStatement.setString(1, "%" + regex + "%");
+            resultSet = preparedStatement.executeQuery();
 
-        ResultSet resultSet = preparedStatement.executeQuery();
-
-        while (resultSet.next()) {
-            String word = resultSet.getString(WORD);
-            String ranking = resultSet.getString(POPULARITY);
-            buzzWordList.put(word, ranking);
+            while (resultSet.next()) {
+                String word = resultSet.getString(WORD);
+                String ranking = resultSet.getString(POPULARITY);
+                buzzWordList.put(word, ranking);
+            }
+            log.info("Popularity of buzzword:"+regex+" is requested.");
+        }catch (Exception e){
+            log.error("Failed to get buzzwords with regex:" + regex, e);
+        }finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(conn);
         }
-
-        DBUtil.closeConnection(conn);
-        DBUtil.closePreparedStatement(preparedStatement);
 
         return buzzWordList;
     }
@@ -115,21 +119,30 @@ public class BuzzWordManager {
     @Path("/all")
     public Map getAllBuzzWords() throws SQLException {
         Map buzzWordList = new HashMap();
-        Connection conn = DBUtil.getDBConnection();
+        Connection conn = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            conn = DBUtil.getDBConnection();
 
-        String sql = "select * from Buzzwords";
-        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            String sql = "select * from Buzzwords";
+            preparedStatement = conn.prepareStatement(sql);
 
-        ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
 
-        while (resultSet.next()) {
-            String word = resultSet.getString(WORD);
-            String ranking = resultSet.getString(POPULARITY);
-            buzzWordList.put(word, ranking);
+            while (resultSet.next()) {
+                String word = resultSet.getString(WORD);
+                String ranking = resultSet.getString(POPULARITY);
+                buzzWordList.put(word, ranking);
+            }
+            log.info("Popularity of all buzzwords is requested.");
+        } catch (Exception e) {
+            log.error("Failed to get all buzzwords.", e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(conn);
         }
-
-        DBUtil.closeConnection(conn);
-        DBUtil.closePreparedStatement(preparedStatement);
 
         return buzzWordList;
     }
@@ -146,25 +159,33 @@ public class BuzzWordManager {
     @Path("/mostPopular")
     public Map getMostPopularBuzzWords() throws SQLException {
         Map buzzWordList = new HashMap();
-        Connection conn = DBUtil.getDBConnection();
-        int mostPopularCount = 10;
+        Connection conn = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            conn = DBUtil.getDBConnection();
+            int mostPopularCount = 10;
 
-        String sql = "select * from Buzzwords order by " +  POPULARITY + " desc limit ?";
+            String sql = "select * from Buzzwords order by " + POPULARITY + " desc limit ?";
 
-        PreparedStatement preparedStatement = conn.prepareStatement(sql);
-        preparedStatement.setInt(1, mostPopularCount);
+            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setInt(1, mostPopularCount);
 
-        ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
 
-        while (resultSet.next()) {
-            String word = resultSet.getString(WORD);
-            String ranking = resultSet.getString(POPULARITY);
-            buzzWordList.put(word, ranking);
+            while (resultSet.next()) {
+                String word = resultSet.getString(WORD);
+                String ranking = resultSet.getString(POPULARITY);
+                buzzWordList.put(word, ranking);
+            }
+            log.info("Popularity of most popular buzzwords is requested.");
+        } catch (Exception e) {
+            log.error("Failed to get most popular buzzwords.", e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(conn);
         }
-
-        DBUtil.closeConnection(conn);
-        DBUtil.closePreparedStatement(preparedStatement);
-
         return buzzWordList;
     }
 }

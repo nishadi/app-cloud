@@ -28,7 +28,7 @@
 </head>
 <body>
 <% Logger logger = Logger.getLogger(this.getClass().getName());%>
-<h1>Tag Cloud</h1>
+<h1>Buzzword Cloud</h1>
 <div id="myCanvasContainer">
     <canvas width="2000" height="800" id="myCanvas">
         <p>Anything in here will be replaced on browsers that support the canvas element</p>

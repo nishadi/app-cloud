@@ -26,25 +26,23 @@ public class DBUtil {
 
     private static final Logger log = LoggerFactory.getLogger(DBUtil.class);
 
-    public static Connection getDBConnection() {
+    public static Connection getDBConnection() throws SQLException {
+        String jdbcUrl = System.getenv().get("DB_URL");
+        String dbUsername = System.getenv().get("DB_USERNAME");
+        String dbPassword = System.getenv().get("DB_PASSWORD");
+
         try {
             Class.forName("com.mysql.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            log.error(e.getMessage());
-        }
-        EnvUtil envUtil = new EnvUtil();
-        String jdbcUrl = envUtil.getEnvironmentVariable("DB_URL");
-        String dbUsername = envUtil.getEnvironmentVariable("DB_USERNAME");
-        String dbPassword = envUtil.getEnvironmentVariable("DB_PASSWORD");
-
-        Connection connection = null;
-
-        try {
-            connection = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
+            return DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
         } catch (SQLException e) {
-            log.error(e.getMessage());
+            String errorMsg = "Failed to get database connection to database:"+jdbcUrl;
+            log.error(errorMsg, e);
+            throw new SQLException(errorMsg, e);
+        } catch (ClassNotFoundException e) {
+            String errorMsg = "Failed to load jdbc driver class.";
+            log.error(errorMsg, e);
+            throw new SQLException(errorMsg, e);
         }
-        return connection;
     }
 
     public static void closeConnection(Connection dbConnection) {
@@ -54,6 +52,18 @@ public class DBUtil {
                 dbConnection.close();
             } catch (SQLException e) {
                 String msg = "Error while closing the database connection";
+                log.error(msg, e);
+            }
+        }
+    }
+
+    public static void closeResultSet(ResultSet resultSet) {
+
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                String msg = "Error while closing the resul set.";
                 log.error(msg, e);
             }
         }
