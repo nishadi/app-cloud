@@ -757,6 +757,7 @@ a.btn-action {
 .app-name-icon{
     color:#fff;
     width:100%;
+    font-size: 8em;
     text-align:center;
     font-weight:300;
     text-transform:capitalize;
@@ -1737,7 +1738,7 @@ a.btn-action {
         width: 80%;
     }
     .app-name-icon{
-        font-size: 6.5em;
+        font-size: 10em;
     }
 }
 @media (max-width: 992px) {
@@ -2671,4 +2672,12 @@ svg .outer {
 .custom-radio:checked {
     color: #99a1a7;
     border: 1px solid #0196D8 !important;
+}
+
+.app-name-icon > .square-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
