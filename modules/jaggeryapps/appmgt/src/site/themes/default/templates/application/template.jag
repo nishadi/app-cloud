@@ -538,6 +538,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
          switch (ext.toLowerCase()) {
              case 'war':
              case 'jar':
+             case 'zip':
                  isValidExtension = true;
                  break;
              default:
