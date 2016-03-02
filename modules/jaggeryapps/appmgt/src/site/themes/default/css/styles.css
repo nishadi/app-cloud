@@ -617,8 +617,9 @@ a.btn-action {
     font-size: 1em;
 }
 .app-preview .app-thumb {
-    width: 140px;
+    width: 110px;
     padding-top: 5px;
+    margin-right: 20px;
     float: left;
     max-height: 100px;
     overflow: hidden;
@@ -716,6 +717,27 @@ a.btn-action {
 .app-thumb span i {
     padding-left: 4px;
 }
+
+.home-app-icon{
+    width: 110px;
+    padding-top: 5px;
+    margin-right: 20px;
+    float: left;
+    max-height: 100px;
+    overflow: hidden;
+}
+
+.home-app-icon i{
+    position: absolute;
+    z-index: 98;
+    right: 16px;
+    padding: 16px;
+    padding-top: 16px;
+    background-color: transparent;
+    top: 0;
+    color:#fff;
+}
+
 .app-icon {
     border: none;
     margin: 0;

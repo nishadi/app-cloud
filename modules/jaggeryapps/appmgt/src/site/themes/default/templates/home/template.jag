@@ -30,6 +30,8 @@ jagg.template("home", function(inputs, outputs, jagg) {
     var appCreationPageBaseUrl = jagg.getAbsoluteUrl("/site/pages/application.jag");
     var dashboardBaseUrl = DASHBOARD_BASE_URL;
     var dashboardUrl = dashboardBaseUrl + applicationName + "-" + selectedRevision;
+    var encodedLabels = encodeURIComponent(stringify(selectedApplicationRevision.labels), "UTF-8");
+    var encodedEnvs = encodeURIComponent(stringify(selectedApplicationRevision.runtimeProperties), "UTF-8");
 %>
 
 <script>
@@ -95,7 +97,8 @@ jagg.template("home", function(inputs, outputs, jagg) {
         <div class="row">
           <div class="col-xs-12 col-md-12 col-lg-12 app-preview">
               <div class="app-thumb">
-                  <img id="app-icon"  src="" width="100px"/>
+                  <div id="app-icon" class="home-app-icon">
+                  </div>
                   <span><i class="fa fa-pencil" onclick="document.getElementById('change_app_icon').click();"></i></span>
                 <form id="changeAppIcon" action="/appmgt/site/blocks/application/application.jag" method="post" enctype="multipart/form-data">
                     <input id="change_app_icon" type="file" style="display:none" name="changeIcon" />
@@ -168,8 +171,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-12 col-lg-3">
-                          <a id="upload-revision"
-                          href="<%=appCreationPageBaseUrl%>?appTypeName=<%=selectedApplicationRevision.applicationType%>&applicationName=<%=applicationName%>">
+                         <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=selectedApplicationRevision.applicationType%>&applicationName=<%=applicationName%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
                                     <i class="fw fw-ring fw-stack-2x"></i>
@@ -413,6 +415,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
 
 </script>
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('templates/home/js/home.js'))%>"></script>
+<script src="/appmgt/site/themes/default/js/app-listing-tile-icon.js"></script>
 
 <%
 }); %>

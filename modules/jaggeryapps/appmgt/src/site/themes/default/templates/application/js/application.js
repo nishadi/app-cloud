@@ -58,43 +58,65 @@ $(document).on('click', '.btn-primary-add-val', function () {
     var addBlock = $(this).parent().parent();
     var key = addBlock.find('.element-add-key')[0].value;
     var value = addBlock.find('.element-add-value')[0].value;
-
+    drawInitialEnvTagPane(addBlock, key, value);
+});
+function drawInitialEnvTagPane(addBlock, key, value){
     var panelBody = addBlock.parent();
     panelBody.append(
-            '<div class="form-inline  property-seperator prop-key-vals-holder">\n'+
-                '<div class="form-group">\n'+
-                    '<label class="sr-only" for="key">Key</label>\n'+
-                    '<input type="text" class="form-control element-key-holder" id="key" placeholder="Key" value="' + key + '">\n'+
-                '</div>\n'+
-                '<div class="form-group">\n'+
-                    '<label class="sr-only" for="value">Value</label>\n'+
-                    '<input type="text" class="form-control element-value-holder" id="value" placeholder="Value" value="' + value + '">\n'+
-                '</div>\n'+
-                '<div class="form-group edit-key-values">\n'+
-                    '<span class="fw-stack fw-lg">\n'+
-                        '<i class="fw fw-ring fw-stack-2x"></i>\n'+
-                        '<i class="fw fw-cancel fw-stack-1x"></i>\n'+
-                    '</span>\n'+
-                '</div>\n'+
-            '</div>\n'
+        '<div class="form-inline  property-seperator prop-key-vals-holder">\n'+
+        '<div class="form-group">\n'+
+        '<label class="sr-only" for="key">Key</label>\n'+
+        '<input type="text" class="form-control element-key-holder" id="key" placeholder="Key" value="' + key + '">\n'+
+        '</div>\n'+
+        '<div class="form-group">\n'+
+        '<label class="sr-only" for="value">Value</label>\n'+
+        '<input type="text" class="form-control element-value-holder" id="value" placeholder="Value" value="' + value + '">\n'+
+        '</div>\n'+
+        '<div class="form-group edit-key-values">\n'+
+        '<span class="fw-stack fw-lg">\n'+
+        '<i class="fw fw-ring fw-stack-2x"></i>\n'+
+        '<i class="fw fw-cancel fw-stack-1x"></i>\n'+
+        '</span>\n'+
+        '</div>\n'+
+        '</div>\n'
     );
     addBlock.remove();
     panelBody.prepend(
-            '<div class="form-inline property-seperator">\n'+
-                '<div class="form-group">\n'+
-                    '<label class="sr-only" for="key">Key</label>\n'+
-                    '<input type="text" class="form-control element-add-key" id="key" placeholder="Key">\n'+
-                '</div>\n'+
-                '<div class="form-group">\n'+
-                    '<label class="sr-only" for="value">Value</label>\n'+
-                    '<input type="text" class="form-control element-add-value" id="value" placeholder="Value">\n'+
-                '</div>\n'+
-                '<div class="form-group">\n'+
-                    '<button class="btn btn-primary btn-primary-add btn-primary-add-val" disabled>Add</button>\n'+
-                '</div>\n'+
-            '</div>\n'
+        '<div class="form-inline property-seperator">\n'+
+        '<div class="form-group">\n'+
+        '<label class="sr-only" for="key">Key</label>\n'+
+        '<input type="text" class="form-control element-add-key" id="key" placeholder="Key">\n'+
+        '</div>\n'+
+        '<div class="form-group">\n'+
+        '<label class="sr-only" for="value">Value</label>\n'+
+        '<input type="text" class="form-control element-add-value" id="value" placeholder="Value">\n'+
+        '</div>\n'+
+        '<div class="form-group">\n'+
+        '<button class="btn btn-primary btn-primary-add btn-primary-add-val" disabled>Add</button>\n'+
+        '</div>\n'+
+        '</div>\n'
     );
-});
+}
+function drawEnvTagPane(panelBody, key, value){
+    panelBody.append(
+        '<div class="form-inline  property-seperator prop-key-vals-holder">\n'+
+        '<div class="form-group">\n'+
+        '<label class="sr-only" for="key">Key</label>\n'+
+        '<input type="text" class="form-control element-key-holder" id="key" placeholder="Key" value="' + key + '">\n'+
+        '</div>\n'+
+        '<div class="form-group">\n'+
+        '<label class="sr-only" for="value">Value</label>\n'+
+        '<input type="text" class="form-control element-value-holder" id="value" placeholder="Value" value="' + value + '">\n'+
+        '</div>\n'+
+        '<div class="form-group edit-key-values">\n'+
+        '<span class="fw-stack fw-lg">\n'+
+        '<i class="fw fw-ring fw-stack-2x"></i>\n'+
+        '<i class="fw fw-cancel fw-stack-1x"></i>\n'+
+        '</span>\n'+
+        '</div>\n'+
+        '</div>\n'
+    );
+}
 
 /**
  * Get a json object array with key-val pair for given pane repsented by {@code elementId}
