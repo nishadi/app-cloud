@@ -44,4 +44,6 @@ public class KubernetesPovisioningConstants {
 
     public static final String VOLUME_MOUNT = "default";
     public static final String VOLUME_MOUNT_PATH = "/etc/";
+
+    public static final String DEFAULT_INGRESS_PATH = "/";
 }

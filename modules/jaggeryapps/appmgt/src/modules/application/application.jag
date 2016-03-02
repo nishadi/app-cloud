@@ -235,7 +235,9 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
     var msg = "Application ingress creation successfully triggered in Kubernetes";
     addEvent(INGRESS, EVENT_PENDING, msg, applicationName, applicationRevision);
     try{
-        var ingressCreated = kubService.createDeploymentUrl(modManager.getPropertyValue("ApplicationLaunchBaseURL"));
+        var appLaunchURL = constructAppLaunchURL(applicationName, applicationRevision);
+
+        var ingressCreated = kubService.createDeploymentUrl(appLaunchURL);
         log.info("Deployment URL status: " + ingressCreated);
         var msg = "Application ingress creation successful";
         addEvent(INGRESS, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
@@ -281,6 +283,17 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
             deleteApplicationFromKubernetes(applicationName, applicationRevision);
         }
     }
+};
+
+var constructAppLaunchURL = function(applicationName, applicationRevision){
+    var urlPrefix = modManager.getTenantDomain()
+            + "-" + applicationName + "-" + applicationRevision;
+    var appLaunchURL = urlPrefix.replace(/\./g, '-')
+            +  "." + modManager.getPropertyValue("ApplicationLaunchBaseURL");
+
+    log.info("Application Launch URL: " + appLaunchURL);
+
+    return appLaunchURL;
 };
 
 var deleteDeployment = function(applicationName, applicationRevision){
@@ -792,17 +805,12 @@ var getAllRevisionsOfApplication =function(appName){
 }
 
 var getDeploymentURL = function (applicationName, applicationRevision, appTypeName){
-
-    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
-             applicationName, applicationRevision, appTypeName, modManager.getTenantId(), modManager.getTenantDomain());
-
-    var deploymentPath = KubernetesProvisioningUtils.getDeploymentPath(applicationCtx);
-    ///
     var urlScheme = CloudUtil.getPropertyValue("DeploymentUrlScheme");
-    var baseURL = urlScheme + "://" + CloudUtil.getPropertyValue("ApplicationLaunchBaseURL");
+    var baseURL = constructAppLaunchURL(applicationName, applicationRevision);
+    var applicationLaunchURL = urlScheme + "://" + baseURL;
 
-    log.debug("Deployment URL: " + baseURL + deploymentPath);
-    return baseURL + deploymentPath;
+    log.debug("Deployment URL: " + applicationLaunchURL);
+    return applicationLaunchURL;
 }
 
 
