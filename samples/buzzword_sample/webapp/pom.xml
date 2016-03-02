@@ -218,10 +218,15 @@
             <version>2.3</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.1</version>
+        </dependency>
+        <!--<dependency>
             <artifactId>commons-httpclient</artifactId>
             <groupId>commons-httpclient.wso2</groupId>
             <version>3.1.0.wso2v2</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

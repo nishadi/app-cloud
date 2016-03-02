@@ -11,14 +11,13 @@
 	        mysql -h <mysql_hostname> -u <username> -p<password>
     e. Run the script to populate tables
         USE DATABASE <DB_NAME>;
-        CREATE TABLE Buzzwords (ID INT NOT NULL AUTO_INCREMENT, Word VARCHAR(255) NOT NULL, Popularity INT, PRIMARY KEY (ID));
-            +------------+--------------+------+-----+---------+----------------+
-            | Field      | Type         | Null | Key | Default | Extra          |
-            +------------+--------------+------+-----+---------+----------------+
-            | ID         | int(11)      | NO   | PRI | NULL    | auto_increment |
-            | Word       | varchar(255) | NO   |     | NULL    |                |
-            | Popularity | int(11)      | YES  |     | NULL    |                |
-            +------------+--------------+------+-----+---------+----------------+
+        CREATE TABLE Buzzwords (Word VARCHAR(255) NOT NULL, Popularity INT, PRIMARY KEY (Word));
+        +------------+--------------+------+-----+---------+-------+
+        | Field      | Type         | Null | Key | Default | Extra |
+        +------------+--------------+------+-----+---------+-------+
+        | Word       | varchar(255) | NO   | PRI | NULL    |       |
+        | Popularity | int(11)      | YES  |     | NULL    |       |
+        +------------+--------------+------+-----+---------+-------+
 
 
 2. Create the MSS App

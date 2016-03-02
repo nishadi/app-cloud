@@ -237,7 +237,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationEvents` (
   `application_id` INT NOT NULL,
   `event_name` VARCHAR(100) NOT NULL,
   `event_status` VARCHAR(45) NULL,
-  `timestamp` TIMESTAMP NOT NULL,
+  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `event_desc` VARCHAR(1000) NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_ApplicationEvents_Application1`

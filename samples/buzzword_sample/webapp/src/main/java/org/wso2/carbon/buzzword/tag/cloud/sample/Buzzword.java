@@ -19,11 +19,10 @@ package org.wso2.carbon.buzzword.tag.cloud.sample;
 
 public class Buzzword {
 
-    private String word = "";
-    private int popularity = 0;
+    private String word;
+    private int popularity;
 
     public Buzzword(String word, int popularity) {
-        super();
         this.word = word;
         this.popularity = popularity;
     }
@@ -43,6 +42,5 @@ public class Buzzword {
     public void setWord(String word) {
         this.word = word;
     }
-
 
 }
