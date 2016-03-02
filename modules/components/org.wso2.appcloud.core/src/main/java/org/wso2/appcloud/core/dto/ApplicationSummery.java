@@ -25,6 +25,7 @@ public class ApplicationSummery {
     private String applicationName;
     private String runtimeName;
     private String status;
+    private String appType;
     private Blob icon;
 
     public int getApplicationId() {
@@ -57,6 +58,14 @@ public class ApplicationSummery {
 
     public void setRuntimeName(String runtimeName) {
         this.runtimeName = runtimeName;
+    }
+
+    public String getAppType() {
+        return appType;
+    }
+
+    public void setAppType(String appType) {
+        this.appType = appType;
     }
 
     public Blob getIcon() {
