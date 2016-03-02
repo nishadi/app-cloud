@@ -16,7 +16,6 @@
 
 package org.wso2.appcloud.core.dto;
 
-import java.util.Iterator;
 import java.util.Set;
 
 public class Deployment {

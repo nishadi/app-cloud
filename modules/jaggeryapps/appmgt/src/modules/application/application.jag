@@ -208,7 +208,7 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
 
     log.info("Deploying application: " + applicationName);
     try{
-        kubService.deployApplication(deploymentConfig);       
+        kubService.deployApplication(deploymentConfig);
         if(!isRedeploy) {          
             persistDeploymentConfig(deploymentConfig, applicationName, applicationRevision);
         }
@@ -312,24 +312,31 @@ var redeployApplication = function(applicationName, applicationRevision){
 var persistDeploymentConfig = function(deploymentConfig, applicationName, applicationRevision){
 
     var containerList = deploymentConfig.getContainers();
-    var container = containerList.get(0);
-    var serviceProxies = container.getServiceProxies();
-    var serviceProxy = serviceProxies.get(0);
+    var ctr = containerList.get(0);
+    var serviceProxies = ctr.getServiceProxies();
+    var svc = serviceProxies.get(0);
 
     var deployment = new Deployment();
     deployment.setDeploymentName(deploymentConfig.getDeploymentName());
+    log.info("Deployment name:" + deploymentConfig.getDeploymentName());
     deployment.setReplicas(parseInt(deploymentConfig.getReplicas()));
-
+    log.info("Replicas:" + deploymentConfig.getReplicas());
 
     var serviceProxy = new ServiceProxy();
-    serviceProxy.setServiceName(serviceProxy.getServiceName());
-    serviceProxy.setServiceProtocol(serviceProxy.getServiceProtocol());
-    serviceProxy.setServicePort(serviceProxy.getServicePort());
-    serviceProxy.setServiceBackendPort(serviceProxy.getServiceBackendPort());
+    serviceProxy.setServiceName(svc.getServiceName());
+    log.info("Service name:" + svc.getServiceName());
+    serviceProxy.setServiceProtocol(svc.getServiceProtocol());
+    log.info("Service protocol:" + svc.getServiceProtocol());
+    serviceProxy.setServicePort(svc.getServicePort());
+    log.info("Service port:" + svc.getServicePort());
+    serviceProxy.setServiceBackendPort(svc.getServiceBackendPort());
+    log.info("Service Backend Port:" + svc.getServiceBackendPort());
 
     var container = new Container();
-    container.setImageName(container.getImageName());
-    container.setImageVersion(container.getImageVersion());
+    container.setImageName(ctr.getBaseImageName());
+    log.info("Image name:" + ctr.getBaseImageName());
+    container.setImageVersion(ctr.getBaseImageVersion());
+    log.info("Image version:" + ctr.getBaseImageVersion());
 
     var proxies = new java.util.HashSet();
     proxies.add(serviceProxy);
