@@ -288,7 +288,7 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
 var constructAppLaunchURL = function(applicationName, applicationRevision){
     var urlPrefix = modManager.getTenantDomain()
             + "-" + applicationName + "-" + applicationRevision;
-    var appLaunchURL = urlPrefix.replace('.', '-')
+    var appLaunchURL = urlPrefix.replace(/\./g, '-')
             +  "." + modManager.getPropertyValue("ApplicationLaunchBaseURL");
 
     log.info("Application Launch URL: " + appLaunchURL);
