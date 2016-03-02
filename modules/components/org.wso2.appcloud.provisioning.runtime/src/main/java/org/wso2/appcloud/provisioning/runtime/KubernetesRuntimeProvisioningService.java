@@ -192,8 +192,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                             .build();
                     //Deployment Unique service name is built using deployment name and the service name.
                     String srvBackendPort = Integer.toString(serviceProxy.getServiceBackendPort());
-                    String serviceName = config.getDeploymentName() + "-" + serviceProxy.getServiceName() + "-" +
-                            srvBackendPort;
+                    String serviceName = serviceProxy.getServiceName() + "-" + srvBackendPort;
                     Service service = new ServiceBuilder()
                             .withKind(KubernetesPovisioningConstants.KIND_SERVICE)
                             .withSpec(serviceSpec)
