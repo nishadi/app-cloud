@@ -263,6 +263,7 @@ public class ApplicationDAO {
                 applicationSummery.setApplicationId(resultSet.getInt(SQLQueryConstants.ID));
                 applicationSummery.setApplicationName(resultSet.getString(SQLQueryConstants.APPLICATION_NAME));
                 applicationSummery.setStatus(resultSet.getString(SQLQueryConstants.APPLICATION_STATUS));
+                applicationSummery.setAppType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
                 applicationSummery.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
                 applicationSummery.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
 

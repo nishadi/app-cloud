@@ -134,7 +134,7 @@ public class BuzzwordDAO {
 
     private Buzzword[] formatDataToBuzzWords(String values) {
         if (values != null) {
-            values = values.replaceAll("{", "").replaceAll("}", "");
+            values = values.replaceAll("\\{", "").replaceAll("}", "");
         } else {
             return new Buzzword[0];
         }

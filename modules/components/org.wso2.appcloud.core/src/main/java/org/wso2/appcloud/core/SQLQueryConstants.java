@@ -82,13 +82,11 @@ public class SQLQueryConstants {
 
     public static final String GET_ALL_APPLICATIONS_LIST =
             "SELECT MAX(Application.id) as id, Application.application_name as application_name, ApplicationRuntime.runtime_name" +
-            " as runtime_name, Application.status as status, ApplicationIcon.icon as icon " +
-            "FROM Application JOIN ApplicationRuntime ON " +
-            "Application.application_runtime_id = ApplicationRuntime.id " +
+            " as runtime_name, Application.status as status, ApplicationType.app_type_name as app_type_name," +
+            " ApplicationIcon.icon as icon FROM Application JOIN ApplicationRuntime ON Application.application_runtime_id" +
+            " = ApplicationRuntime.id JOIN ApplicationType ON Application.application_type_id = ApplicationType.id " +
             "LEFT OUTER JOIN ApplicationIcon ON (Application.application_name=ApplicationIcon.application_name AND " +
-            "Application.tenant_id=ApplicationIcon.tenant_id) "+
-            "WHERE Application.tenant_id=? GROUP BY " +
-            "Application.application_name";
+            "Application.tenant_id=ApplicationIcon.tenant_id) WHERE Application.tenant_id=? GROUP BY Application.application_name";
 
     public static final String GET_APPLICATION_By_NAME_REVISION =
             "SELECT Application.*, ApplicationType.app_type_name, " +
