@@ -186,7 +186,7 @@ var addApplication = function (applicationName, applicationRevision, application
 
     //==================================== Kubernetes deploy block ===============================================
     var runtimeProperties = application.getRuntimeProperties();
-    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, applicationName,applicationName, applicationRevision, runtimeProperties, runtimeId);
+    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, applicationName ,applicationName, applicationRevision, runtimeProperties, runtimeId);
     var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
     deployApplication(applicationName, applicationRevision, deploymentConfig, false);
 
@@ -281,7 +281,6 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
             deleteApplicationFromKubernetes(applicationName, applicationRevision);
         }
     }
-
 };
 
 var deleteDeployment = function(applicationName, applicationRevision){

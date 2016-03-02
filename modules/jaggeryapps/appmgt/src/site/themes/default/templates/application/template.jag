@@ -264,7 +264,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     required: true,
                     validateContent: true,
                     validateApplicationNameChar: true,
-                    maxlength: 11
+                    maxlength: 18
                 },
                 applicationRevision: {
                     required: true,
