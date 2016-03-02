@@ -97,7 +97,8 @@ jagg.template("home", function(inputs, outputs, jagg) {
         <div class="row">
           <div class="col-xs-12 col-md-12 col-lg-12 app-preview">
               <div class="app-thumb">
-                  <img id="app-icon"  src="" width="100px"/>
+                  <div id="app-icon" class="home-app-icon">
+                  </div>
                   <span><i class="fa fa-pencil" onclick="document.getElementById('change_app_icon').click();"></i></span>
                 <form id="changeAppIcon" action="/appmgt/site/blocks/application/application.jag" method="post" enctype="multipart/form-data">
                     <input id="change_app_icon" type="file" style="display:none" name="changeIcon" />
@@ -414,6 +415,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
 
 </script>
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('templates/home/js/home.js'))%>"></script>
+<script src="/appmgt/site/themes/default/js/app-listing-tile-icon.js"></script>
 
 <%
 }); %>
