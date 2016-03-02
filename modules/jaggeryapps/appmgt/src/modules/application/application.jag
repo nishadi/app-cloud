@@ -492,6 +492,7 @@ var getAllApplications = function(){
     var applicationArray = [];
     try {
         var applications = ApplicationManager.getApplicationList();
+        var appTypesProperties = require(APP_TYPES_PROPERTIES_CONFIG);
 
         for (var i = 0; i < applications.length; i++) {
             var application = applications[i];
@@ -502,6 +503,8 @@ var getAllApplications = function(){
             applicationObject.runtimeName = application.runtimeName;
             applicationObject.status = application.status;
             applicationObject.icon = getApplicationIconAsBase64String(application);
+            applicationObject.appTypeIcon = appTypesProperties[application.appType].icon;
+            applicationObject.appTypeTitle = appTypesProperties[application.appType].displayName;
             applicationArray.push(applicationObject);
         }
     } catch(e){

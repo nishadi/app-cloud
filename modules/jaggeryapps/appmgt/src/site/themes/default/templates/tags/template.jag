@@ -96,13 +96,13 @@ $(document).ready(function () {
                 '</div>' +
                 '<div class="form-group edit-key-values">' +
                 '<span class="fw-stack fw-lg">' +
-                '<i class="fw fw-ring fw-stack-2x fa-inverse"></i>' +
-                '<i id="editIcon" class="fw  fw-edit fw-stack-1x fa-inverse"></i>' +
-                '<i id="saveIcon" class="fw  fw-save fw-stack-1x fa-inverse" style="display: none"></i>' +
+                '<i class="fw fw-ring fw-stack-2x fw-inverse"></i>' +
+                '<i id="editIcon" class="fw  fw-edit fw-stack-1x fw-inverse"></i>' +
+                '<i id="saveIcon" class="fw  fw-save fw-stack-1x fw-inverse" style="display: none"></i>' +
                 '</span>' +
                 '<span class="fw-stack fw-lg">' +
-                '<i class="fw fw-ring fw-stack-2x fa-inverse"></i>' +
-                '<i class="fw fw-cancel fw-stack-1x fa-inverse"></i>' +
+                '<i class="fw fw-ring fw-stack-2x fw-inverse"></i>' +
+                '<i class="fw fw-cancel fw-stack-1x fw-inverse"></i>' +
                 '</span>' +
                 '</div>' +
                 '</div>');
@@ -121,13 +121,13 @@ $(document).ready(function () {
                 '</div>' +
                 '<div class="form-group edit-key-values">' +
                 '<span class="fw-stack fw-lg">' +
-                '<i class="fw fw-ring fw-stack-2x fa-inverse"></i>' +
-                '<i id="editIcon" class="fw  fw-edit fw-stack-1x fa-inverse" style="display: none"></i>' +
-                '<i id="saveIcon" class="fw  fw-save fw-stack-1x save-new-entry fa-inverse" disabled></i>' +
+                '<i class="fw fw-ring fw-stack-2x fw-inverse"></i>' +
+                '<i id="editIcon" class="fw  fw-edit fw-stack-1x fw-inverse" style="display: none"></i>' +
+                '<i id="saveIcon" class="fw  fw-save fw-stack-1x save-new-entry fw-inverse" disabled></i>' +
                 '</span>' +
                 '<span class="fw-stack fw-lg">' +
-                '<i class="fw fw-ring fw-stack-2x fa-inverse"></i>' +
-                '<i class="fw fw-cancel fw-stack-1x cancel-new-entry fa-inverse"></i>' +
+                '<i class="fw fw-ring fw-stack-2x fw-inverse"></i>' +
+                '<i class="fw fw-cancel fw-stack-1x cancel-new-entry fw-inverse"></i>' +
                 '</span>' +
                 '</div>' +
                 '</div>');
