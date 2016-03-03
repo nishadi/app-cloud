@@ -50,6 +50,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
     var urlUploadComplete = false;
     $(document).ready(function(){
 
+            $("#runtime").select2();
             //check if application name available
             if(applicationName != "null"){
                 $("#applicationName").val(applicationName);
@@ -77,6 +78,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             $.each(<%=runtimes%>,function(key,value){
                 $("#runtime").append($('<option></option>').val(value.id).html(value.runtimeName));
+                $("#runtime").trigger('change');
             });
 
             var max_fields      = 10; //maximum input boxes allowed
@@ -696,7 +698,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <label for="runtime">Runtime:
                     <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left" title="Select an appropriate runtime to run your application"></i>
                 </label>
-                <select name="runtime" id="runtime" class="form-control" ></select>
+                <select name="runtime" id="runtime" class="form-control"></select>
             </div>
 
             <div class="form-group">

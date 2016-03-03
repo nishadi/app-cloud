@@ -2694,3 +2694,8 @@ svg .outer {
     right: 0;
     bottom: 0;
 }
+
+ul#appVersionList {
+    max-height: 150px;
+    overflow-y: auto;
+}
