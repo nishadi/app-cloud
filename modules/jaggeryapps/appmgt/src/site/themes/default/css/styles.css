@@ -776,11 +776,11 @@ a.btn-action {
 
 .app-name-icon{
     color:#fff;
-    font-size: 8em;
+    font-size: 10em;
     font-weight:300;
     text-transform:capitalize;
     position:absolute;
-    left:32%;
+    left:10%;
     top:5%;
 }
 
