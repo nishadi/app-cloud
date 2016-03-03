@@ -58,8 +58,9 @@ isEdit = request.getParameter("isEdit");
                     
                     <div class="form-group col-md-6">
                         <label for="user-name-select">Default User Name: </label>
-                        <select id="user-name-select" name="user-name-select" class="form-control select2">
-                        </select>
+                        <!--select id="user-name-select" name="user-name-select" class="form-control select2">
+                        </select-->
+                        <input type="text" class="form-control" id="user-name-select" name="user-name-select" placeholder="Enter user name">
                     </div>
 
                     <div class="clearfix"></div>
