@@ -171,7 +171,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-12 col-lg-3">
-                         <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=selectedApplicationRevision.applicationType%>&applicationName=<%=applicationName%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>">
+                         <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=selectedApplicationRevision.applicationType%>&applicationName=<%=applicationName%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>&newVersion=true">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
                                     <i class="fw fw-ring fw-stack-2x"></i>
