@@ -25,6 +25,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var appType = outputs.appType;
         var appTypeName = appType.type;
         var applicationName = outputs.applicationName;
+        var encodedLabels = request.getParameter("encodedLabels");
+        var encodedEnvs = request.getParameter("encodedEnvs");
+        var log = new Log();
+        var decodedLabels = parse(decodeURIComponent(encodedLabels, "UTF-8"));
+        var decodedEnvs = parse(decodeURIComponent(encodedEnvs, "UTF-8"));
+        var newVersion = request.getParameter("newVersion");
     %>
 
 <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
@@ -38,23 +44,42 @@ jagg.template("application", function (inputs, outputs, jagg) {
     var applicationName = "<%=applicationName%>";
     var retryCount = 0;
     var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
-    var artifactErrorMsg = "Invalid Artifact"
+    var artifactErrorMsg = "Invalid Artifact";
     var contentInvalidErrorMsg = "";
     var validationFailErrorMsg = "";
     var uploadMethod = "file";
     var urlUploadComplete = false;
     $(document).ready(function(){
 
+            $("#runtime").select2();
             //check if application name available
             if(applicationName != "null"){
                 $("#applicationName").val(applicationName);
                 $("#applicationName").attr("disabled", true);
             }
+            // add existing envs
+            var prevEnvs =jQuery.parseJSON('<%=decodedEnvs%>');
+            if(prevEnvs){
+                // add existing env variables
+                for(x=0; x<prevEnvs.length; x++){
+                   var envVar = prevEnvs[x];
+                    drawEnvTagPane($("#env-pane"), envVar.propertyName, envVar.propertyValue);
+                }
+            }
 
+            // add existing labels
+            var prevLabels =jQuery.parseJSON('<%=decodedLabels%>');
+            if(prevLabels){
+                for(x=0; x<prevLabels.length; x++){
+                    var label = prevLabels[x];
+                    drawEnvTagPane($("#tags-pane"), label.labelName, label.labelValue);
+                }
+            }
             $("#url-upload-block").hide();
 
             $.each(<%=runtimes%>,function(key,value){
                 $("#runtime").append($('<option></option>').val(value.id).html(value.runtimeName));
+                $("#runtime").trigger('change');
             });
 
             var max_fields      = 10; //maximum input boxes allowed
@@ -567,27 +592,46 @@ jagg.template("application", function (inputs, outputs, jagg) {
     function redirectAppListing() {
         window.location.replace("index.jag");
     }
+
     function retryAppCreation() {
-
-
         $('#add-application').loadingButton({action:'hide'});
+    }
+
+    function goBack() {
+        window.history.back();
     }
  </script>
 
     <!-- BOF App factory menu actionbar -->
         <div class="action-bar">
+
+        <%
+        if(newVersion){
+        %>
+            <a onclick="goBack();" class="btn-action">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-left-arrow fw-stack-1x"></i>
+                </span> Back to App Home
+            </a>
+        <%
+        } else {
+        %>
             <a href="<%=jagg.getAbsoluteUrl("/site/pages/select-apptype.jag")%>" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
                     <i class="fw fw-ring fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
                 </span> Back to app type selection
-        </a>
-        <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action">
+            </a>
+            <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
                     <i class="fw fw-ring fw-stack-2x"></i>
                     <i class="fa fa-mail-reply-all fa-stack-1x"></i>
                 </span> Cancel
-        </a>
+            </a>
+        <%
+        }
+        %>
     </div>
 <!-- EOF App factory menu actionbar-->
 
@@ -674,7 +718,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <label for="runtime">Runtime:
                     <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left" title="Select an appropriate runtime to run your application"></i>
                 </label>
-                <select name="runtime" id="runtime" class="form-control" ></select>
+                <select name="runtime" id="runtime" class="form-control"></select>
             </div>
 
             <div class="form-group">

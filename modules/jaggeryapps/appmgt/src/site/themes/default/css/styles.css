@@ -361,9 +361,7 @@ a.btn-action {
     .version-url{
         width:41.8%;
     }
-    .app-name-icon{
-        font-size: 6.5em;
-    }
+
 }
 /* use for landing page blocks*/
 
@@ -619,8 +617,9 @@ a.btn-action {
     font-size: 1em;
 }
 .app-preview .app-thumb {
-    width: 140px;
+    width: 110px;
     padding-top: 5px;
+    margin-right: 20px;
     float: left;
     max-height: 100px;
     overflow: hidden;
@@ -718,6 +717,27 @@ a.btn-action {
 .app-thumb span i {
     padding-left: 4px;
 }
+
+.home-app-icon{
+    width: 110px;
+    padding-top: 5px;
+    margin-right: 20px;
+    float: left;
+    max-height: 100px;
+    overflow: hidden;
+}
+
+.home-app-icon i{
+    position: absolute;
+    z-index: 98;
+    right: 16px;
+    padding: 16px;
+    padding-top: 16px;
+    background-color: transparent;
+    top: 0;
+    color:#fff;
+}
+
 .app-icon {
     border: none;
     margin: 0;
@@ -756,11 +776,12 @@ a.btn-action {
 
 .app-name-icon{
     color:#fff;
-    width:100%;
-    font-size: 8em;
-    text-align:center;
+    font-size: 10em;
     font-weight:300;
     text-transform:capitalize;
+    position:absolute;
+    left:10%;
+    top:5%;
 }
 
 .app-name {
@@ -1737,9 +1758,7 @@ a.btn-action {
     .modal-md{
         width: 80%;
     }
-    .app-name-icon{
-        font-size: 10em;
-    }
+
 }
 @media (max-width: 992px) {
  .version-url{
@@ -1769,9 +1788,7 @@ a.btn-action {
     .btn-create-version + .popover .popover-title{
         font-size:14px;
     }
-    .app-name-icon{
-        font-size: 10em;
-    }
+
 }
 @media (max-width: 768px) {
     .version-url{
@@ -1799,9 +1816,7 @@ a.btn-action {
     .modal-md{
         width: auto;
     }
-    .app-name-icon{
-        font-size: 10em;
-    }
+
 }
 @media (max-width: 480px) {
     .version-url{
@@ -1825,9 +1840,7 @@ a.btn-action {
     .app-desc h2{
         margin-top:20px;
     }
-    .app-name-icon{
-        font-size: 6.5em;
-    }
+
 }
 .btn-launch-app,.btn-edit-code{
     border:none;
@@ -2680,4 +2693,9 @@ svg .outer {
     left: 0;
     right: 0;
     bottom: 0;
+}
+
+ul#appVersionList {
+    max-height: 150px;
+    overflow-y: auto;
 }

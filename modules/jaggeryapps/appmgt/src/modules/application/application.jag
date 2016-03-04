@@ -187,7 +187,7 @@ var addApplication = function (applicationName, applicationRevision, application
     //==================================== Kubernetes deploy block ===============================================
     var runtimeProperties = application.getRuntimeProperties();
     var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, applicationName ,applicationName, applicationRevision, runtimeProperties, runtimeId);
-    var deploymentConfig = getDeploymentConfig(containers, applicationName, replicas);
+    var deploymentConfig = getDeploymentConfig(containers, applicationName, applicationRevision, replicas);
     deployApplication(applicationName, applicationRevision, deploymentConfig, false);
 
     //=============================================================================================================
@@ -409,7 +409,7 @@ function getContainers(tenantDockerRegistryUrl, baseImageName, tag, applicationN
     for(var i = 0; i < services.length; i++){
         var serviceProxy = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
         var service = services[i];
-        serviceProxy.setServiceName(appServiceName);
+        serviceProxy.setServiceName(appServiceName + "-" + applicationRevision.replace(/\./g, "-"));
         serviceProxy.setServiceProtocol(service.getServiceProtocol());
         serviceProxy.setServicePort(getIngressPort(service.getServiceName()));
         serviceProxy.setServiceBackendPort(service.getServicePort());
@@ -434,10 +434,10 @@ function getRuntimeProperties(runtimeProperties){
     return envs;
 }
 
-function getDeploymentConfig(containersList, applicationName, replicas){
+function getDeploymentConfig(containersList, applicationName, applicationRevision, replicas){
 
     var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
-    deploymentConfig.setDeploymentName(applicationName);
+    deploymentConfig.setDeploymentName(applicationName + "-" + applicationRevision.replace(/\./g, '-'));
     deploymentConfig.setReplicas(parseInt(replicas));
     deploymentConfig.setContainers(containersList);
 
@@ -522,7 +522,7 @@ var getAllApplications = function(){
             applicationObject.applicationName = application.applicationName;
             applicationObject.runtimeName = application.runtimeName;
             applicationObject.status = application.status;
-            applicationObject.appType = application.appType;
+            applicationObject.applicationType = application.appType;
             applicationObject.icon = getApplicationIconAsBase64String(application);
             applicationObject.appTypeIcon = appTypesProperties[application.appType].icon;
             applicationObject.appTypeTitle = appTypesProperties[application.appType].displayName;

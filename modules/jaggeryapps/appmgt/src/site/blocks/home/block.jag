@@ -17,6 +17,8 @@
  *   under the License.
  */
 
+include('/jagg/constants.jag');
+
 jagg.block("home", {
     initialize:function (data) {
 
@@ -29,12 +31,14 @@ jagg.block("home", {
     getOutputs:function (inputs) {
         var log = new Log();
         var applicationModule = jagg.module("application");
+        var appTypesProperties = require(APP_TYPES_PROPERTIES_CONFIG);
         var revision = applicationModule.getAllRevisionsOfApplication(inputs.applicationName);
         var applicationRevisions={};
         for (var x = 0; x < revision.length; x++) {
             var application = applicationModule.getApplicationByNameRevision(inputs.applicationName,revision[x]);
             var deploymentURL = applicationModule.getDeploymentURL(inputs.applicationName, revision[x], application.applicationType);
             application["deploymentURL"] = deploymentURL;
+            application["appTypeIcon"] = appTypesProperties[application.applicationType].icon;
             applicationRevisions[revision[x]] = application;
         }
         var selectedRevision = applicationModule.getSelectedRevisionFromSession(inputs.applicationName);

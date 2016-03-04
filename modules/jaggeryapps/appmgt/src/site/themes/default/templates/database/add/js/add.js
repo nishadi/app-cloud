@@ -21,14 +21,14 @@
 $(document).ready(function () {
 //select 2
     //$('select').select2(); //select2 init for stages dropdown
-    var $select = $('#user-name-select.select2')
+    /*var $select = $('#user-name-select.select2')
             .select2({
                          placeholder: "Enter username or select existing",
                          multiple: true,
                          maximumInputLength: 5,
                          tags: true,
                          selectOnBlur: true,
-                         createSearchChoice: function (term, data) {
+                         *//*createSearchChoice: function (term, data) {
                              if ($(data).filter(function () {
                                          return this.text.localeCompare(term) === 0;
                                      }).length === 0) {
@@ -37,16 +37,10 @@ $(document).ready(function () {
                                      text: term
                                  };
                              }
-                         },
-                         createTag: function (tag) {
-                             return {
-                                 id: tag.term,
-                                 text: tag.term,
-                                 isNew: true
-                             };
-                         }
-                     });
-    $select.on("select2:select", function (e) {
+                         },*//*
+
+                     });*/
+    /*$select.on("select2:select", function (e) {
         var l = $select.select2('data');
         if (e.params.data.isNew != undefined && e.params.data.isNew) {
             if (l.length > 1) {
@@ -59,21 +53,25 @@ $(document).ready(function () {
                 $select.trigger('change');
             }
         }
-    });
+    });*/
+/*
     $select.on("select2:close", function (e) {
         var values = $select.select2('data');
     });
+*/
 
-    getExistingUsersForSelectedStage();
+    //getExistingUsersForSelectedStage();
 
+/*
     $('#stage').on("select2:select", function (e) {
         getExistingUsersForSelectedStage();
     });
+*/
 
     /**
      * According to the selected stage, users available will be set and listed in users dropdown
      */
-    function getExistingUsersForSelectedStage() {
+    /*function getExistingUsersForSelectedStage() {
         var dbUsersJsonArray = JSON.parse(dbUsers);
         var dbUsersInStage = [];
         for (var i in dbUsersJsonArray) {
@@ -89,13 +87,13 @@ $(document).ready(function () {
             }
         }
         setExistingUsers(dbUsersInStage);
-    }
+    }*/
 
     /**
      * Filling data to user-name-select dropdown
      * @param data = [{id:0, text: "Admin"}, {id:1, text: "Root"}, {id:2, text: "User"}];
      */
-    function setExistingUsers(data) {
+    /*function setExistingUsers(data) {
         $select.empty();
         $select.trigger('change');
         $select = $('#user-name-select.select2')
@@ -124,7 +122,7 @@ $(document).ready(function () {
                                  };
                              }
                          });
-    }
+    }*/
 
 //add show /hide option on user passsword field
     $('input[type=password]').after('<span class="hide-pass" title="Show/Hide Password"><i class="fa fa-eye"></i> </span>');
@@ -254,7 +252,8 @@ function getValidationOptions(){
                 maxlength: 5
             },
             "user-name-select": {
-                required: true
+                required: true,
+                maxlength: 7
             },
             "password": {
                 required: true
@@ -299,17 +298,17 @@ function addNewDatabase() {
     var formValidated = validator.form();
     if (formValidated) {  
         $("#add-database").loadingButton('show');
-        var isBasic = false; // isBasic variable defines whether the attaching an existing user or a new user.
+/*        var isBasic = false; // isBasic variable defines whether the attaching an existing user or a new user.
         if ($('#user-name-select').select2('data')[0].isNew) {
             isBasic = true; // attaching a new user
-        }
+        }*/
         jagg.post("../blocks/database/add/ajax/add.jag", {
             action: "createDatabaseAndAttachUser",
             databaseName: $("#database-name").val().trim(),
             databaseServerInstanceName: $("#stage option:selected").val(),
-            isBasic: isBasic,
+            isBasic: true,
             customPassword: $('#password').val().trim(),
-            userName: $('#user-name-select').select2('data')[0].text,
+            userName: $('#user-name-select').val().trim(),
             templateName: null,
             copyToAll: false
         }, function (result) {

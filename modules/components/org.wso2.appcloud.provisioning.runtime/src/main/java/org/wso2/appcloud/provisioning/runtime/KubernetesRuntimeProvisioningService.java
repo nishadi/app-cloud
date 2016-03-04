@@ -179,7 +179,6 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             for (Container container : containers) {
                 List<ServiceProxy> serviceProxies = container.getServiceProxies();
                 for (ServiceProxy serviceProxy : serviceProxies) {
-
                     ServicePort servicePorts = new ServicePortBuilder()
                             .withName(serviceProxy.getServiceName())
                             .withProtocol(serviceProxy.getServiceProtocol())
