@@ -798,13 +798,13 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             if (log.isDebugEnabled()){
                 log.debug("Ingress creating for service: " + service.getMetadata().getName());
             }
-
+            String ingressName = environmentUrl + "-" + service.getMetadata().getName();
             Ingress ing = new IngressBuilder()
                     .withApiVersion(Ingress.ApiVersion.EXTENSIONS_V_1_BETA_1)
                     .withKind(KubernetesPovisioningConstants.KIND_INGRESS)
                     .withNewMetadata()
                     .withName(
-                            KubernetesProvisioningUtils.createIngressMetaName(environmentUrl))
+                            KubernetesProvisioningUtils.createIngressMetaName(ingressName))
                     .withNamespace(namespace.getMetadata().getName()).withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
                     .endMetadata()
                     .withNewSpec()
@@ -830,7 +830,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     .create(ing);
 
             if (createdIng != null && KubernetesProvisioningUtils
-                    .createIngressMetaName(environmentUrl)
+                    .createIngressMetaName(ingressName)
                     .equals(createdIng.getMetadata().getName())) {
                 created = true;
                 if (log.isDebugEnabled()){
