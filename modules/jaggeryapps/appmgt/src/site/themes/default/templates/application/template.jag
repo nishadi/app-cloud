@@ -30,6 +30,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var log = new Log();
         var decodedLabels = parse(decodeURIComponent(encodedLabels, "UTF-8"));
         var decodedEnvs = parse(decodeURIComponent(encodedEnvs, "UTF-8"));
+        var newVersion = request.getParameter("newVersion");
     %>
 
 <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
@@ -591,27 +592,46 @@ jagg.template("application", function (inputs, outputs, jagg) {
     function redirectAppListing() {
         window.location.replace("index.jag");
     }
+
     function retryAppCreation() {
-
-
         $('#add-application').loadingButton({action:'hide'});
+    }
+
+    function goBack() {
+        window.history.back();
     }
  </script>
 
     <!-- BOF App factory menu actionbar -->
         <div class="action-bar">
+
+        <%
+        if(newVersion){
+        %>
+            <a onclick="goBack();" class="btn-action">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-left-arrow fw-stack-1x"></i>
+                </span> Back to App Home
+            </a>
+        <%
+        } else {
+        %>
             <a href="<%=jagg.getAbsoluteUrl("/site/pages/select-apptype.jag")%>" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
                     <i class="fw fw-ring fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
                 </span> Back to app type selection
-        </a>
-        <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action">
+            </a>
+            <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
                     <i class="fw fw-ring fw-stack-2x"></i>
                     <i class="fa fa-mail-reply-all fa-stack-1x"></i>
                 </span> Cancel
-        </a>
+            </a>
+        <%
+        }
+        %>
     </div>
 <!-- EOF App factory menu actionbar-->
 
