@@ -143,6 +143,7 @@ $(document).ready(function () {
         });
 
         $(document).on('click', '.fw-cancel', function () {
+
             var isNewRow = $(this).hasClass('cancel-new-entry');
             if (isNewRow) {
                 $(this).parent().parent().parent().remove();
@@ -150,8 +151,12 @@ $(document).ready(function () {
             }
             var key = $(this).parent().parent().parent().find('#key')[0].value;
             var value = $(this).parent().parent().parent().find('#value')[0].value;
-            deleteTag(key, value);
-            $(this).parent().parent().parent().remove();
+            var tr = $(this).parent().parent().parent();
+            jagg.popMessage({type:'confirm', modalStatus: true, title:'Delete Tag',content:'Are you sure you want to delete this Tag ' + key + ' ?',
+                okCallback:function(){
+                   deleteTag(key, value, tr);
+                }, cancelCallback:function(){}
+            });
         });
 
         $(document).on('click', '.fw-save', function () {
@@ -206,7 +211,7 @@ $(document).ready(function () {
         });
     }
 
-    function deleteTag(key, value) {
+    function deleteTag(key, value, tr) {
         jagg.post("../blocks/application/application.jag", {
             action: "deleteTag",
             applicationName: '<%=applicationName%>',
@@ -215,7 +220,7 @@ $(document).ready(function () {
             value: value
 
         }, function (result) {
-
+            tr.remove();
         });
     }
 
