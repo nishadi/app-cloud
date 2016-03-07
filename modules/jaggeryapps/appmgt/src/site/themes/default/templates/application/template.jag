@@ -327,8 +327,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 // Disable app creation button if the form is not valid
                 if (this.numberOfInvalids() > 0) {
                     $("#add-application").prop("disabled", true);
+                    $("#btn-artifact-upload").attr("disabled", true);
+                    $("#url-upload").attr("disabled", true);
                 } else {
                     $("#add-application").prop("disabled", false);
+                    $("#btn-artifact-upload").attr("disabled", false);
+                    $("#url-upload").attr("disabled", false);
                 }
                 this.defaultShowErrors();
             },
@@ -472,6 +476,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var createNewAppForm = $("#application-details");
         createNewAppForm.on('focusout keyup blur click', function () { // fires on every keyup & blur
             activateCreateApplication();
+            activateUploadButton();
         });
     });
 
@@ -493,6 +498,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
             }
         } else {
             $("#add-application").prop("disabled", true);      // enables button
+        }
+    }
+
+    function activateUploadButton() {
+        if ($('#applicationName').val() && $('#applicationRevision').val()) {
+            $("#btn-artifact-upload").attr("disabled", false);
+            $("#url-upload").attr("disabled", false);
         }
     }
 
@@ -704,7 +716,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <div class="input-group">
                     <input id="uploadedFileName" type="text" class="form-control" readonly>
                     <span class="input-group-btn">
-                       <span class="btn btn-primary btn-file">
+                       <span class="btn btn-primary btn-file" id="btn-artifact-upload" disabled>
                            Upload&hellip; <input id="fileupload" type="file" name="fileupload" multiple>
                        </span>
                     </span>
@@ -718,7 +730,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <div class="input-group">
                     <input id="artifactUrl" name="artifactUrl" type="text" class="form-control" placeholder="Enter artifact URL" />
                     <span class="input-group-btn">
-                        <a class="btn btn-primary" id="url-upload" type="button">Upload from URL
+                        <a class="btn btn-primary" id="url-upload" type="button" disabled>Upload from URL
                         <span id="url-upload-progress"><span></a>
                     </span>
                 </div>
