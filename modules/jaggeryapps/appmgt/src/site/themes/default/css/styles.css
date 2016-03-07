@@ -2632,8 +2632,12 @@ svg .outer {
     border: 1px solid #FEE62D;
     padding: 5px;
     top: 8px;
-    left: 21%;
+    left: 23.5%;
+    text-align: center;
+    width: 900px;
     border-top: none;
+
+
 }
 
 .edit-key-values{
