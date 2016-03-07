@@ -5,6 +5,11 @@ $(document).ready(function() {
         submitChangeAppIcon(this);
     });
     initPageView();
+    var nextVersion = generateNextPossibleVersion(applicationRevisions);
+    var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+selectedApplicationRevision.applicationType +
+                        "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
+                        + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;
+    $('#upload-revision').attr("href", uploadRevisionUrl);
 });
 
 // wrapping functions
@@ -101,8 +106,9 @@ function changeSelectedRevision(newRevision){
     $("#tableStatus").html(selectedApplicationRevision.status);
 
     // Set upload revision btn
-    var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+selectedApplicationRevision.applicationType +
-                        "&applicationName="+applicationName;
+    var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+selectedApplicationRevision.applicationType + //"&applicationName="+applicationName;
+                        "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
+                        + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;
     $('#upload-revision').attr("href", uploadRevisionUrl);
 
     changeRuntimeProps(selectedApplicationRevision);

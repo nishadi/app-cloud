@@ -44,6 +44,9 @@ jagg.template("home", function(inputs, outputs, jagg) {
     var appCreationPageBaseUrl = "<%=appCreationPageBaseUrl%>";
     var selectedApplicationRevision =  jQuery.parseJSON('<%=selectedApplicationRevision%>');
     var dashboardBaseUrl = "<%=dashboardBaseUrl%>";
+    var encodedLabels = "<%=encodedLabels%>";
+    var encodedEnvs = "<%=encodedEnvs%>";
+
 
 
 </script>
@@ -286,6 +289,20 @@ jagg.template("home", function(inputs, outputs, jagg) {
        </div><!-- /.modal-content -->
      </div><!-- /.modal -->
 <script>
+
+    function generateNextPossibleVersion(revisionsSet){
+        var revArry = [];
+        for (var x in revisionsSet){
+            var rev = x.split(".")[0];
+            console.log(rev);
+            revArry.push(rev);
+        }
+        revArry.sort(function(a, b){return a-b});
+        var x = parseInt(revArry.pop()) + 1;
+        var nextVersion = x + '.0.0';
+
+        return nextVersion;
+    }
 
     $('.side-pane-trigger').click(function(){
         var rightPane = $('.right-pane');
