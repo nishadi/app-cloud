@@ -36,7 +36,7 @@ jagg.template("header/default", function(inputs, outputs, jagg) { %>
                class="hidden-md hidden-sm hidden-lg cloud-menu-popover">
                 <i class="fw fw-tiles"></i>
             </a>
-            <a class="navbar-brand" href="<%=jagg.getCloudMgtAbsoluteUrl("/site/pages/index.jag")%>">
+            <a class="navbar-brand" href="/appmgt/site/pages/index.jag">
             <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo.png"))%>" alt="wso2-logo" > Cloud</a>
         </div>
         <div class="collapse navbar-collapse">
