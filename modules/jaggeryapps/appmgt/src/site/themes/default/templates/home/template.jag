@@ -351,7 +351,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
             applicationRevision: revision
 
         }, function (result) {
-             jagg.message({content: "Application start request is submitted successfully.", type: 'info'});
+             //jagg.message({content: "Application start request is submitted successfully.", type: 'info'});
         });
     }
 
@@ -379,18 +379,40 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 var statusStyle;
                 var event = result[i];
 
-                if (event.name === "Status" && event.status === "success" ){
+                if(event.status == "success"){
                     statusStyle = "success";
-                    table = table + "<tr class='" + statusStyle + "'><td>Restart Status</td>" +
-                                    "<td><i class=\"fa fa-check\"></i></td></tr>";
-                } else if (event.status == "failed"){
+                    if (event.name === "Status") {
+                            table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                            "<td>"+event.description+"</td>" +
+                                            "<td><i class=\"fa fa-check\"></i></td></tr>";
+                    } else {
+                            table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                            "<td></td>" +
+                                            "<td><i class=\"fa fa-check\"></i></td></tr>";
+                    }
+                } else if (event.status == "failed") {
                     statusStyle = "danger";
-                    table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                    "<td><i class=\"fa fa-times\"></i></td></tr>";
-                } else if (event.name === "Status" && event.status === "pending" ){
-                    statusStyle = "active";
-                    table = table + "<tr class='" + statusStyle + "'><td>Starting up containers</td>" +
-                                    "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                    if (event.name === "Status") {
+                            table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                            "<td>"+event.description+"</td>" +
+                                            "<td><i class=\"fa fa-times\"></i></td></tr>";
+                    } else {
+                            table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                            "<td></td>" +
+                                            "<td><i class=\"fa fa-times\"></i></td></tr>";
+                    }
+                } else if (event.status == "pending"){
+                    if (event.name === "Status") {
+                        statusStyle = "active";
+                            table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                            "<td>"+event.description+"</td>" +
+                                            "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                    } else {
+                        statusStyle = "active";
+                            table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                            "<td></td>" +
+                                            "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                    }
                 }
             }
 
