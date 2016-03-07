@@ -104,13 +104,14 @@ var addApplication = function (applicationName, applicationRevision, application
 
          var dockerTemplateFilePath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + "DockerFiles";
 
-            var uploadArtifactTmpName;
-            var splitArtifactExt = uploadedFileName.split(".");
-            if(splitArtifactExt[1] == "zip"){
-                    uploadArtifactTmpName = splitArtifactExt[0] + ".upload";
-                }else{
-                    uploadArtifactTmpName = uploadedFileName;
-                }
+        var uploadArtifactTmpName;
+        var checkFileExtZIP = isFileExtZIP(uploadedFileName);
+        if (checkFileExtZIP) {
+            var fileName = uploadedFileName.substring(0, uploadedFileName.lastIndexOf("."));
+            uploadArtifactTmpName = fileName + ".upload";
+        } else {
+            uploadArtifactTmpName = uploadedFileName;
+        }
         dockerOpClient.createDockerFile(runtimeId, appTypeName, uploadArtifactTmpName, dockerFilePath,dockerTemplateFilePath);
 
     } catch(e){
@@ -882,10 +883,13 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
     uploadedFileName = uploadedArtifact.getName();
     var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
             + modManager.getTenantDomain() + "/" + applicationName + "/" + revision + "/";
+
     var uploadApplicationTmpPath;
-    var splitFileExt = uploadedFileName.split(".");
-    if(splitFileExt[1] == "zip"){
-        uploadApplicationTmpPath = fileUploadPath + splitFileExt[0] + ".upload";
+    var checkFileExtZIP = isFileExtZIP(uploadedFileName);
+
+    if(checkFileExtZIP){
+        var fileName = uploadedFileName.substring(0, uploadedFileName.lastIndexOf("."));
+        uploadApplicationTmpPath = fileUploadPath + fileName + ".upload";
         log.info(uploadApplicationTmpPath);
     }else{
         uploadApplicationTmpPath = fileUploadPath + uploadedFileName;
@@ -894,6 +898,14 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
 
     uploadedArtifact.move(uploadApplicationTmpPath);
 }
+
+var isFileExtZIP = function(uploadedFileName){
+    var fileExt = uploadedFileName.substr(uploadedFileName.lastIndexOf(".") + 1, uploadedFileName.length);
+    if(fileExt == "zip"){
+        return true;
+    }
+    return false;
+};
 
 var createDestinationDirsForUploadedApps = function (applicationName, revision) {
 
