@@ -77,6 +77,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     drawEnvTagPane($("#tags-pane"), label.labelName, label.labelValue);
                 }
             }
+            activateUploadButton();
             $("#url-upload-block").hide();
 
             $.each(<%=runtimes%>,function(key,value){
@@ -213,28 +214,34 @@ jagg.template("application", function (inputs, outputs, jagg) {
                         statusStyle = "success";
                         if (event.name === "Status") {
                                 table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                                "<td>"+event.description+"</td>" +
                                                 "<td><i class=\"fa fa-check\"></i></td></tr>";
                         } else {
                                 table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                                "<td></td>" +
                                                 "<td><i class=\"fa fa-check\"></i></td></tr>";
                         }
                     } else if (event.status == "failed") {
                         statusStyle = "danger";
                         if (event.name === "Status") {
                                 table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                                "<td>"+event.description+"</td>" +
                                                 "<td><i class=\"fa fa-times\"></i></td></tr>";
                         } else {
                                 table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                                "<td></td>" +
                                                 "<td><i class=\"fa fa-times\"></i></td></tr>";
                         }
                     } else if (event.status == "pending"){
                         if (event.name === "Status") {
                             statusStyle = "active";
                                 table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                                "<td>"+event.description+"</td>" +
                                                 "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
                         } else {
                             statusStyle = "active";
                                 table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                                "<td></td>" +
                                                 "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
                         }
                     }
@@ -253,8 +260,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
                         }
                     } else if(event.status == "failed"){
                         var alert = "<p>Application creation failed. </p><p>Reason: " + event.description + "</p>";
-                        var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">Back</button>" +
-                                           "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"retryAppCreation();\">Retry</button>";
+                        var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">cancel</button>" +
+                                           "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"retryAppCreation();\">Back to Application Creation</button>";
                         setTimeout(showErrorPopup, 2000);
                         function showErrorPopup(){
                             $("#app-creation-model-body").html(alert);
@@ -264,8 +271,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 }
             },function (jqXHR, textStatus, errorThrown) {
                  var alert = "<p>Application creation failed. " + errorThrown + "</p>";
-                 var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">Back</button>" +
-                                    "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"retryAppCreation();\">Retry</button>";
+                 var retry_button = "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"redirectAppListing();\">Cancel</button>" +
+                                    "<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick=\"retryAppCreation();\">Back to Application Creation</button>";
                  setTimeout(showErrorPopup, 1000);
                  function showErrorPopup(){
                      $("#app-creation-model-body").html(alert);
@@ -291,7 +298,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     required: true,
                     validateContent: true,
                     validateApplicationNameChar: true,
-                    maxlength: 18
+                    maxlength: 10
                 },
                 applicationRevision: {
                     required: true,
@@ -408,7 +415,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
         function validationApplicationRevisionChar(value){
             var regexPattern = [];
-            var patternNonAlphaNum = /^(?:(\d{1,3})\.)?(?:(\d{1,3})\.)?(\*|\d{1,5})$/g;
+            var patternNonAlphaNum = /^(?:(\d{1,2})\.)?(?:(\d{1,2})\.)?(\*|\d{1,2})$/g;
             var isPattern = !patternNonAlphaNum.test(value);
             regexPattern.push(isPattern);
             var message = "Invalid version number - Provide version number in format major.minor.patch";

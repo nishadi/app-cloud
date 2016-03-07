@@ -256,24 +256,27 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
     }
     //======================================= checking pod status =================================================
     //Adding pod status pending event
-    var msg = "Application pods created, still pending";
-    addEvent(POD_STATUS, EVENT_PENDING, msg, applicationName, applicationRevision);
+    var msg = "Application pods Scheduled";
+    var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
+    var prevPodStatus = "";
+    addEvent(POD_STATUS, EVENT_PENDING, podStatus, applicationName, applicationRevision);
 
     var counter = 0;
     while(counter < 180){ // Waiting 3 minutes to gets pods up and running
         java.lang.Thread.sleep(1000);
         var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
         counter = counter + 1;
-        if (podStatus) {
+        if (podStatus == "Running") {
             //Adding pod status pending event
             var msg = "Application started successfully";
-            addEvent(POD_STATUS, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
+            addEvent(POD_STATUS, EVENT_SUCCEEDED, podStatus, applicationName, applicationRevision);
             ApplicationManager.updateApplicationStatus(APPLICATION_RUNNING, applicationName, applicationRevision);
             break;
         }else if(counter == 180){ // if pods doesn't starts withing 3 minutes user redirected to user home
             //Adding pod status error event
             var msg = "Application starting failed";
-            addEvent(POD_STATUS, EVENT_FAILED, msg, applicationName, applicationRevision);
+            var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
+            addEvent(POD_STATUS, EVENT_FAILED, podStatus, applicationName, applicationRevision);
             ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
             log.info("Application rollback started for application:"+applicationName + " with revision:"+
                     applicationRevision +" because pods are not running even after 3 minutes.");
@@ -281,6 +284,12 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
             deleteDeployment(applicationName, applicationRevision);
             deleteApplicationFromDatabase(applicationName, applicationRevision);
             deleteApplicationFromKubernetes(applicationName, applicationRevision);
+        } else {
+            var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
+            if (podStatus !== prevPodStatus) {
+                addEvent(POD_STATUS, EVENT_PENDING, podStatus, applicationName, applicationRevision);
+                prevPodStatus = podStatus;
+            }
         }
     }
 };
