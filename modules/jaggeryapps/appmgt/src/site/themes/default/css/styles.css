@@ -621,7 +621,7 @@ a.btn-action {
     padding-top: 5px;
     margin-right: 20px;
     float: left;
-    max-height: 100px;
+    max-height: 110px;
     overflow: hidden;
 }
 .app-preview .app-desc {
@@ -634,6 +634,12 @@ a.btn-action {
 .app-preview-action-bar div.sec {
     float: left;
 }
+
+.app-thumb-edit:hover{
+    cursor:pointer;
+    background-color: #757575;
+}
+
 .prod-url {
     padding: 10px 15px 11px 20px;
     font-size: 1.1em;
@@ -712,7 +718,7 @@ a.btn-action {
     z-index: 99;
     position: absolute;
     left: 130px;
-    top: 135px;
+    top: 130px;
 }
 .app-thumb span i {
     padding-left: 4px;
