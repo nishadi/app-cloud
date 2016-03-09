@@ -5,14 +5,14 @@
 
 <html>
 <head>
-    <title>TagCanvas example</title>
+    <title>App Cloud Demo</title>
     <!--[if lt IE 9]><script type="text/javascript" src="excanvas.js"></script><![endif]-->
     <script src="tagcanvas.min.js" type="text/javascript"></script>
     <script type="text/javascript">
         window.onload = function() {
             try {
                 TagCanvas.Start('myCanvas','tags',{
-                    textColour: '#ff0000',
+                    textColour: 'white',
                     outlineColour: '#ff00ff',
                     reverse: true,
                     weight: true,
@@ -25,12 +25,31 @@
             }
         };
     </script>
+    <style>
+        body{
+            margin: 0px;
+            background-color: rgb(77, 181, 236);
+        }
+        h1{
+            -webkit-margin-before: 0;
+            -webkit-margin-after: 0;
+            padding:10px;
+            background-color: #3D3333;
+            border-bottom: 3px solid rgb(86, 83, 83);
+            color:#fff;
+        }
+
+        #myCanvasContainer{
+            background-size: 107%;
+            min-height: 45em;
+        }
+    </style>
 </head>
 <body>
 <% Logger logger = Logger.getLogger(this.getClass().getName());%>
-<h1>Buzzword Cloud</h1>
-<div id="myCanvasContainer">
-    <canvas width="2000" height="800" id="myCanvas">
+<h1 style="text-align: center">Buzzword Cloud</h1>
+<div id="myCanvasContainer"  style="background-image: url(AppCloudBanner.png); background-repeat: no-repeat;">
+    <canvas width="1400" height="800" id="myCanvas">
         <p>Anything in here will be replaced on browsers that support the canvas element</p>
     </canvas>
 </div>
@@ -38,15 +57,31 @@
     <ul>
         <%
             BuzzwordDAO dao = new BuzzwordDAO();
-            Buzzword[] buzzwords = dao.getBuzzWordList();
-            if(buzzwords != null){
-                for (Buzzword buzzword : buzzwords) { %>
-
+            Buzzword[] buzzwords = new Buzzword[0];
+            try {
+                buzzwords = dao.getBuzzWordList();
+                if (buzzwords != null) {
+                    for (Buzzword buzzword : buzzwords) { %>
+                    <li>
+                        <a style="font-size: <%=buzzword.getPopularity()%>" href="#"><%=buzzword.getWord()%>
+                        </a>
+                    </li>
+                <% } // end of for loop
+                } else {
+                %>
                 <li>
-                    <a style="font-size: <%=buzzword.getPopularity()%>" href="#"><%=buzzword.getWord()%></a>
+                    <a style="font-size: 14" href="#">No Buzzwords Found.</a>
                 </li>
-            <% } // end of for loop
-            }%>
+                <%
+                        }
+            } catch (Exception e) {
+                %>
+                <li>
+                    <a style="font-size: 14" href="#">Error Occurred:<%=e.getMessage()%></a>
+                </li>
+                <%
+            }
+        %>
     </ul>
 </div>
 </body>

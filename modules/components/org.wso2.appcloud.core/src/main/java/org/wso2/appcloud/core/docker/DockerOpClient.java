@@ -80,13 +80,16 @@ public class DockerOpClient {
         String dockerRegistryUrl = DockerUtil.getDockerRegistryUrl();
         String dockerBaseImageName = applicationRuntime.getImageName();
         String dockerBaseImageVersion = applicationRuntime.getTag();
+        String artifactNameWithoutExtension = artifactName.substring(0, artifactName.lastIndexOf("."));
         List<String> dockerFileConfigs = new ArrayList<String>();
         String dockerFileTemplatePath = dockerTemplateFilePath + "/" + "Dockerfile"+ "." + dockerBaseImageName + "." +
                 dockerBaseImageVersion;
         for(String line: FileUtils.readLines(new File(dockerFileTemplatePath))) {
             if(line.contains("ARTIFACT_NAME")) {
                 dockerFileConfigs.add(line.replace("ARTIFACT_NAME", artifactName));
-            }else {
+            } else if (line.contains("ARTIFACT_DIR")) {
+                dockerFileConfigs.add(line.replace("ARTIFACT_DIR", artifactNameWithoutExtension));
+            } else {
                 dockerFileConfigs.add(line);
             }
         }
