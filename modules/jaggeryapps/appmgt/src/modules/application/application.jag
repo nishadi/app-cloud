@@ -263,7 +263,7 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
     addEvent(POD_STATUS, EVENT_PENDING, podStatus, applicationName, applicationRevision);
 
     var counter = 0;
-    while(counter < 180){ // Waiting 3 minutes to gets pods up and running
+    while(counter < 300){ // Waiting 5 minutes to gets pods up and running
         java.lang.Thread.sleep(1000);
         var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
         counter = counter + 1;
@@ -273,7 +273,7 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
             addEvent(POD_STATUS, EVENT_SUCCEEDED, podStatus, applicationName, applicationRevision);
             ApplicationManager.updateApplicationStatus(APPLICATION_RUNNING, applicationName, applicationRevision);
             break;
-        }else if(counter == 180){ // if pods doesn't starts withing 3 minutes user redirected to user home
+        }else if(counter == 300){ // if pods doesn't starts withing 5 minutes user redirected to user home
             //Adding pod status error event
             var msg = "Application starting failed";
             var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
