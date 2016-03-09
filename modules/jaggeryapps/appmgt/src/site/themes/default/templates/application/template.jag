@@ -724,7 +724,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     <input id="uploadedFileName" type="text" class="form-control" readonly>
                     <span class="input-group-btn">
                        <span class="btn btn-primary btn-file" id="btn-artifact-upload" disabled>
-                           Upload&hellip; <input id="fileupload" type="file" name="fileupload" multiple>
+                           <input id="fileupload" type="file" name="fileupload">Browse
                        </span>
                     </span>
                 </div>
