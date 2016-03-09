@@ -42,11 +42,17 @@ jagg.template("runtimeLogs", function (inputs, outputs, jagg) {
 
         <!-- BOF App factory menu actionbar -->
         <div class="action-bar">
-            <a href="/appmgt/site/pages/home.jag?applicationName=<%=applicationName%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
+            <a href="/appmgt/site/pages/home.jag?applicationName=<%=applicationName%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Go back to application home page">
                     <span class="fw-stack fw-lg btn-action-ico">
                         <i class="fw fw-ring fw-stack-2x"></i>
                         <i class="fw fw-left-arrow fw-stack-1x"></i>
                     </span> <span class="hidden-xs">Back to Application</span>
+            </a>
+            <a class="btn-action" data-toggle="tooltip" data-placement="top" title="reload logs" id="log-reload">
+                    <span class="fw-stack fw-lg btn-action-ico">
+                        <i class="fw fw-ring fw-stack-2x"></i>
+                        <i class="fw fw-refresh fw-stack-1x"></i>
+                    </span> <span class="hidden-xs">Reload Logs</span>
             </a>
         </div><!-- EOF App factory menu actionbar-->
 
@@ -66,9 +72,9 @@ jagg.template("runtimeLogs", function (inputs, outputs, jagg) {
                             <select class="form-control" id="revision" disabled>
                                 <option><%=selectedRevision%></option>
                                 <% for(var i = 0; i < revisionsList.length; i++){
-                                        if(selectedRevision == revisionsList[i]){
-                                            continue;
-                                        }
+                                    if(selectedRevision == revisionsList[i]){
+                                        continue;
+                                    }
                                 %>
                                 <option><%=revisionsList[i]%></option>
                                 <% }%>

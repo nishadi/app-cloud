@@ -2459,7 +2459,7 @@ th.hide-column-data, td.hide-column-data {
 }
 
 .div-search {
-    padding: 19px 0px 5px;
+    padding: 31px 0px 5px;
     background-color: #5F5F5F;
     margin: -15px;
 }
@@ -2625,19 +2625,17 @@ svg .outer {
     }
 }
 .top-notification {
-    position: absolute;
+    position: relative;
     background: rgba(254, 223, 45, 0.74);
     height: 32px;
     z-index: 1039;
     border: 1px solid #FEE62D;
     padding: 5px;
-    top: 8px;
-    left: 23.5%;
     text-align: center;
     width: 900px;
     border-top: none;
-
-
+    margin: 0px auto;
+    top: -40px;
 }
 
 .edit-key-values{

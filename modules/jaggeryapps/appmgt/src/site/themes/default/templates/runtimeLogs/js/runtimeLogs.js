@@ -105,4 +105,10 @@ function initelements(){
         selectedReplica = this.value;
         setLogArea(selectedRevisionLogMap[selectedReplica]);
     });
+
+    $('#log-reload').on('click', function (e) {
+        selectedReplica = $('#replicas').val();
+        setLogArea("Loading...");
+        setTimeout(function(){setLogArea(selectedRevisionLogMap[selectedReplica]);}, 1000);
+    });
 }
