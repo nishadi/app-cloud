@@ -34,7 +34,8 @@ ENGINE = InnoDB;
 INSERT INTO `ApplicationType` (`id`, `app_type_name`, `description`) VALUES
 (1, 'war', 'Allows you to create dynamic websites using Servlets and JSPs, instead of the static HTML webpages and JAX-RS/JAX-WS services.'),
 (2, 'mss', 'WSO2 Microservices Framework for Java (WSO2 MSF4J) offers the best option to create microservices in Java using annotation-based programming model.'),
-(3, 'php', 'Allows you to create dynamic web page content using PHP web applications.');
+(3, 'php', 'Allows you to create dynamic web page content using PHP web applications.'),
+(4, 'carbon', 'Allows you to deploy any carbon server where required deployable artifacts are already deployed into carbon zip file.');
 
 
 -- -----------------------------------------------------
@@ -58,7 +59,8 @@ INSERT INTO `ApplicationRuntime` (`id`, `runtime_name`, `repo_url`, `image_name`
 (1, 'Apache Tomcat 8.0.30', 'registry.docker.appfactory.private.wso2.com:5000', 'tomcat', '8.0'),
 (2, 'OpenJDK 8', 'registry.docker.appfactory.private.wso2.com:5000', 'msf4j', '1.0'),
 (3, 'Apache 2.4.10', 'registry.docker.appfactory.private.wso2.com:5000','php','5.6'),
-(4, 'Apache 2.4.18', 'registry.docker.appfactory.private.wso2.com:5000','php','5.7');
+(4, 'Apache 2.4.18', 'registry.docker.appfactory.private.wso2.com:5000','php','5.7'),
+(5, 'Carbon 4.2.0', 'registry.docker.appfactory.private.wso2.com:5000','carbon','4.2.0');
 
 -- -----------------------------------------------------
 -- Table `AppCloudDB`.`ApplicationDeployment`
@@ -212,7 +214,8 @@ INSERT INTO `ApplicationTypeRuntime` (`application_type_id`, `application_runtim
 (1, 1),
 (2, 2),
 (3, 3),
-(3, 4);
+(3, 4),
+(4, 5);
 
 
 -- -----------------------------------------------------
@@ -321,7 +324,9 @@ INSERT INTO `Service` (`id`, `service_name`, `service_port`, `service_protocol`,
 (1, 'http', 80, 'TCP', 'HTTP Protocol'),
 (2, 'https', 443, 'TCP', 'HTTPS Protocol'),
 (3, 'http-alt', 8080, 'TCP', 'HTTP Alternate Protocol'),
-(4, 'https-alt', 8443, 'TCP', 'HTTPS Alternate Protocol');
+(4, 'https-alt', 8443, 'TCP', 'HTTPS Alternate Protocol'),
+(5, 'http', 9763, 'TCP', 'HTTP servlet transport for carbon products'),
+(6, 'https', 9443, 'TCP', 'HTTPS servlet transport for carbon products');
 
 -- -----------------------------------------------------
 -- Populate Data to `AppCloudDB`.`ApplicationRuntimeService`
@@ -330,7 +335,9 @@ INSERT INTO `ApplicationRuntimeService` (`service_id`, `application_runtime_id`)
 (3, 1),
 (3, 2),
 (1, 3),
-(1, 4);
+(1, 4),
+(5, 5),
+(6, 5);
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
