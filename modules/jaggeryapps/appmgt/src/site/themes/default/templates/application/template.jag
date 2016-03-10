@@ -281,6 +281,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
             });
         }
 
+
+
         /*** application form validation ***/
 
          // Classes to be added to parent div of the validated element
@@ -480,10 +482,15 @@ jagg.template("application", function (inputs, outputs, jagg) {
             });
         });
 
-        var createNewAppForm = $("#application-details");
-        createNewAppForm.on('focusout keyup blur click', function () { // fires on every keyup & blur
-            activateCreateApplication();
-            activateUploadButton();
+        var createNewAppForm = $("#applicationName");
+        createNewAppForm.on('focusout click', function () {
+            checkApplicationExistence();
+        });
+
+        var appNameField = $("#application-details");
+                createNewAppForm.on('focusout keyup blur click', function () { // fires on every keyup & blur
+                    activateCreateApplication();
+                    activateUploadButton();
         });
     });
 
@@ -508,11 +515,34 @@ jagg.template("application", function (inputs, outputs, jagg) {
         }
     }
 
+
     function activateUploadButton() {
         if ($('#applicationName').val() && $('#applicationRevision').val()) {
             $("#btn-artifact-upload").attr("disabled", false);
             $("#url-upload").attr("disabled", false);
         }
+    }
+
+    function checkApplicationExistence(){
+        jagg.post("../blocks/application/application.jag", {
+            action:"getExistingRevisions",
+            applicationName:$("#applicationName").val()
+        },function (result) {
+        var result = jQuery.parseJSON(result);
+            if (result.length > 0) {
+                jagg.popMessage({type:'confirm', modalStatus: true, title:'Delete Tag',content:'Application with name: ' + $("#applicationName").val() + ' already exists. Do you want to go to the existing application?',
+                    okCallback:function(){
+                        window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
+                    }, cancelCallback:function(){
+                        location.reload();
+                    }
+                });
+            }
+        },function (jqXHR, textStatus, errorThrown) {
+            jagg.message({content: "Error occurred while checking application existence.", type: 'error', id:'view_log'});
+
+
+        });
     }
 
      function clearUploadIconField() {
