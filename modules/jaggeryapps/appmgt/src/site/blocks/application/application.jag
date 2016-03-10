@@ -34,6 +34,8 @@ var log = new Log();
         var appTypeName = request.getParameter("appTypeName");
         var applicationRevision = request.getParameter("applicationRevision");
         applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName, applicationRevision);
+        response.status = 200;
+        response.message = "Artifact is successfully uploaded!";
 
     }else if(action == "createApplication"){
         var applicationDescription = request.getParameter("applicationDescription");
@@ -50,7 +52,7 @@ var log = new Log();
         applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
                 runtimeId, appTypeName, runtimeProperties, tags, appIcon, uploadedFileName);
         response.status = 200;
-        response.message = "Artifact is successfully uploaded!";
+        response.message = "Application creation is successfully submitted";
 
     }else if(action == "stopApplication"){
         var applicationName = request.getParameter("applicationName");
@@ -189,8 +191,14 @@ var log = new Log();
         var mod = jagg.module("application");
         mod.changeApplicationIcon(applicationName, revision, appIcon);
         print("<html><script>window.location.replace('/appmgt/site/pages/home.jag?applicationName=" + applicationName + "');</script><body></body></html>");
+
+    } else if (action == "getExistingRevisions"){
+        var applicationName = request.getParameter("applicationName");
+        var mod = jagg.module("application");
+        var versions = mod.getAllRevisionsOfApplication(applicationName);
+        print(versions);
     } else {
-        throw new Error("No action specified");
+        throw new Error("No action specified for: " + action);
     }
 }());
 
