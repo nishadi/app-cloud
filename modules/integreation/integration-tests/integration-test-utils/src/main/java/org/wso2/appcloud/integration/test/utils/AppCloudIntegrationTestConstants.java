@@ -24,13 +24,31 @@ public class AppCloudIntegrationTestConstants {
     // Product groups
     public static final String APPCLOUD_PRODUCT_GROUP = "AppCloud";
 
+	// Automation Config Paths
     public static final String DEFAULT_TENANT_ADMIN = "//appCloudProperties/defaultTenant/admin";
     public static final String DEFAULT_TENANT_ADMIN_PASSWORD = "//appCloudProperties/defaultTenant/adminPassword";
     public static final String DEFAULT_TENANT_TENANT_DOMAIN = "//appCloudProperties/defaultTenant/tenantDomain";
     public static final String TIMEOUT_PERIOD = "//appCloudProperties/timeOutSetting/period";
     public static final String TIMEOUT_RETRY_COUNT = "//appCloudProperties/timeOutSetting/retryCount";
+    public static final String URLS_APPCLOUD = "//appCloudProperties/urls/appCloud";
 
-    public static final String DEFAULT_APP_APP_NAME = "//appCloudProperties/defaultApplication/applicationName";
+	// Default Application Details
+	public static final String DEFAULT_APP_APP_NAME = "//appCloudProperties/defaultApplication/applicationName";
+	public static final String DEFAULT_APP_APP_KEY = "//appCloudProperties/defaultApplication/applicationKey";
+	public static final String DEFAULT_APP_APP_TYPE = "//appCloudProperties/defaultApplication/applicationType";
+	public static final String DEFAULT_APP_APP_DESC = "//appCloudProperties/defaultApplication/applicationDescription";
+	public static final String DEFAULT_APP_APP_VERSION = "//appCloudProperties/defaultApplication/defaultVersion";
+	public static final String DEFAULT_APP_APP_RUNTIME_NAME = "//appCloudProperties/defaultApplication/runtimeName";
+	public static final String DEFAULT_APP_APP_FILE_NAME = "//appCloudProperties/defaultApplication/filename";
+	public static final String DEFAULT_APP_APP_PROPERTIES = "//appCloudProperties/defaultApplication/properties/property";
+	public static final String DEFAULT_APP_APP_TAGS = "//appCloudProperties/defaultApplication/tags/tag";
+	public static final String DEFAULT_APP_ARTIFACT_PATH = "//appCloudProperties/defaultApplication/resource_path";
 
-    public static final String URLS_APPFACTORY = "//appCloudProperties/urls/appCloud";
+	// Rest endpoints
+	public static final String REST_APPLICATION_ENDPOINT = "application/application.jag";
+	public static final String APPMGT_USER_LOGIN = "user/login/ajax/login.jag";
+	public static final String APPMGT_URL_SURFIX = "appmgt/site/blocks/";
+
+	public static final String RESPONSE_MESSAGE_NAME = "message";
+	public static final String ATTRIBUTE_KEY = "key";
 }

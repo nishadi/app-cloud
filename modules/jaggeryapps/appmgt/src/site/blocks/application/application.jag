@@ -48,6 +48,12 @@ var log = new Log();
         var appTypeName = request.getParameter("appTypeName");
         var uploadedFileName = request.getParameter("uploadedFileName");
         var appIcon = request.getFile("appIcon");
+        var uploadedArtifact = request.getFile("fileupload");
+        var isFileAttached = request.getParameter("isFileAttached");
+
+        if (isFileAttached) {
+            applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName, applicationRevision);
+        }
 
         applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
                 runtimeId, appTypeName, runtimeProperties, tags, appIcon, uploadedFileName);

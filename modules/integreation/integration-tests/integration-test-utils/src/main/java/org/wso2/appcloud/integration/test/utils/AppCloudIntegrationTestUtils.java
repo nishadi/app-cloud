@@ -21,6 +21,7 @@ package org.wso2.appcloud.integration.test.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.NodeList;
 import org.wso2.carbon.automation.engine.context.AutomationContext;
 import org.wso2.carbon.automation.engine.context.TestUserMode;
 
@@ -61,6 +62,14 @@ public class AppCloudIntegrationTestUtils {
             throw new IllegalArgumentException("Error reading " + xPath, e);
         }
     }
+
+	public static NodeList getPropertyNodes(String xPath) throws IllegalArgumentException{
+		try {
+			return context.getConfigurationNodeList(xPath);
+		} catch (XPathExpressionException e) {
+			throw new IllegalArgumentException("Error reading " + xPath, e);
+		}
+	}
 
     public static String getAdminUsername() {
         String tenantDomain = getDefaultTenantDomain();

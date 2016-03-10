@@ -286,85 +286,37 @@
 
     <appCloudProperties>
         <urls>
-            <appCloud>https://apps.appfactory.private.wso2.com:9443/</appCloud>
-            <prodStratosController>https://sc.appfactory.private.wso2.com:9463/</prodStratosController>
-            <devGreg>https://gregserver.dev.appfactory.private.wso2.com:9473/</devGreg>
-            <testGreg>https://gregserver.test.appfactory.private.wso2.com:9474/</testGreg>
-            <prodGreg>https://gregserver.prod.appfactory.private.wso2.com:9475/</prodGreg>
-            <bps>https://process.appfactory.private.wso2.com:9543/</bps>
-            <git>https://git.appfactory.private.wso2.com:8443/</git>
-            <s2git>https://s2git.appfactory.private.wso2.com:8444/</s2git>
-            <bam>https://bam.appfactory.private.wso2.com:9446/</bam>
-            <api>http://apimanager.appfactory.private.wso2.com:9769/</api>
-            <jenkins>https://jenkins.appfactory.private.wso2.com:9500/</jenkins>
+            <appCloud>https://localhost:9443/</appCloud>
         </urls>
 
-        <credentials>
-            <gituser>gitblitsystemadmin</gituser>
-            <gituserpass>admin</gituserpass>
-            <jenkinsuser>jenkinssystemadmin</jenkinsuser>
-            <jenkinsuserpass>password</jenkinsuserpass>
-            <s2gituser>admin</s2gituser>
-            <s2gituserpass>admin</s2gituserpass>
-        </credentials>
-
         <defaultTenant>
-            <firstName>firstName</firstName>
-            <lastName>lastName</lastName>
+            <firstName>Danushka</firstName>
+            <lastName>Fernando</lastName>
             <email>firstName@example.com</email>
-            <admin>admin</admin>
-            <adminPassword>admin</adminPassword>
-            <tenantDomain>carbon.super</tenantDomain>
-            <tenantID>-1234</tenantID>
+            <admin>dan</admin>
+            <adminPassword>111111</adminPassword>
+            <tenantDomain>dan001.com</tenantDomain>
             <usagePlan>Demo</usagePlan>
         </defaultTenant>
 
         <defaultApplication>
-            <applicationName>apptest</applicationName>
-            <applicationKey>apptest</applicationKey>
+            <applicationName>test002</applicationName>
+            <applicationKey>test</applicationKey>
             <applicationType>war</applicationType>
-            <applicationDescription>applicationDescription</applicationDescription>
-            <defaultVersion>trunk</defaultVersion>
-            <defaultArtifactVersion>default-SNAPSHOT</defaultArtifactVersion>
-            <runtimeAlias>as</runtimeAlias>
-            <defaultStage>Development</defaultStage>
-            <extension>war</extension>
-            <versions>
-                <version key="v1">
-                    <sourceVersion>trunk</sourceVersion>
-                    <targetVersion>1.0.0</targetVersion>
-                </version>
-                <version key="v2">
-                    <sourceVersion>trunk</sourceVersion>
-                    <targetVersion>2.0.0</targetVersion>
-                </version>
-                <version key="v3">
-                    <sourceVersion>trunk</sourceVersion>
-                    <targetVersion>3.0.0</targetVersion>
-                </version>
-            </versions>
+            <applicationDescription>This is the test application</applicationDescription>
+            <defaultVersion>1.0.0</defaultVersion>
+            <runtimeName>1</runtimeName>
+            <filename>sample.war</filename>
+            <resource_path>sample.war</resource_path>
+            <properties>
+                <property key="key1">value1</property>
+                <property key="key2">value2</property>
+            </properties>
+            <tags>
+                <tag key="tag1">tagValue1</tag>
+                <tag key="tag2">tagValue2</tag>
+            </tags>
         </defaultApplication>
-
-        <defaultAPI>
-            <useNAme>admin</useNAme>
-            <password>admin</password>
-            <addPayload>
-                action=addAPI&amp;name=PhoneVerification&amp;context=/phoneverify&amp;version=1.0.0&amp;visibility=public&amp;
-                thumbUrl=&amp;description=Verify a phone number&amp;tags=phone,mobile,multimedia&amp;endpointType=nonsecured&amp;
-                wsdl=&amp;wadl=&amp;tiersCollection=Gold,Bronze&amp;http_checked=http&amp;https_checked=https&amp;resourceCount=0&amp;
-                resourceMethod-0=GET&amp;resourceMethodAuthType-0=Application&amp;resourceMethodThrottlingTier-0=Unlimited&amp;
-                uriTemplate-0=/*&amp;default_version_checked=default_version&amp;bizOwner=xx&amp;bizOwnerMail=xx@ee.com&amp;
-                techOwner=xx&amp;techOwnerMail=ggg@ww.com"
-            </addPayload>
-            <publishPayload>
-                name=PhoneVerification&amp;version=1.0.0&amp;provider=admin&amp;status=PUBLISHED&amp;publishToGateway=true&amp;
-                action=updateStatus
-            </publishPayload>
-            <subscribePayload>
-                action=addAPISubscription&amp;name=PhoneVerification&amp;version=1.0.0&amp;provider=admin&amp;tier=Gold&amp;
-                applicationName=DefaultApplication
-            </subscribePayload>
-        </defaultAPI>
 
         <domainMapping>
             <domainName>example.com</domainName>
