@@ -772,7 +772,7 @@ var generateRuntimePropsArray=function(runtimeList){
         runtimePropsArray.push(runtimeProperty);
     }
     return runtimePropsArray;
-}
+};
 
 var generateLabelsArray=function(labelsList){
     var size = labelsList.size();
@@ -788,7 +788,7 @@ var generateLabelsArray=function(labelsList){
         labelsArray.push(label);
     }
     return labelsArray;
-}
+};
 
 var generateEndpointsArray=function(endpointsList){
     var size = endpointsList.size();
@@ -803,7 +803,7 @@ var generateEndpointsArray=function(endpointsList){
         endpointsArray.push(endpoint);
     }
     return endpointsArray;
-}
+};
 
 var getAllRevisionsOfApplication =function(appName){
     var revisionArray = [];
@@ -819,7 +819,7 @@ var getAllRevisionsOfApplication =function(appName){
         throw e;
     }
     return revisionArray;
-}
+};
 
 var getDeploymentURL = function (applicationName, applicationRevision, appTypeName){
     var urlScheme = CloudUtil.getPropertyValue("DeploymentUrlScheme");
@@ -828,7 +828,7 @@ var getDeploymentURL = function (applicationName, applicationRevision, appTypeNa
 
     log.debug("Deployment URL: " + applicationLaunchURL);
     return applicationLaunchURL;
-}
+};
 
 
 var putSelectedRevisionToSession = function(applicationName, currentRevision) {
@@ -838,7 +838,7 @@ var putSelectedRevisionToSession = function(applicationName, currentRevision) {
     }
     selectedVersions[applicationName] = currentRevision;
     session.put("SELECTED_REVISIONS", selectedVersions);
-}
+};
 
 var getSelectedRevisionFromSession = function(applicationName) {
     var selectedVersions = session.get("SELECTED_REVISIONS");
@@ -847,7 +847,7 @@ var getSelectedRevisionFromSession = function(applicationName) {
     } else {
         return null;
     }
-}
+};
 
 var getApplicationCreationEvents = function(applicationName, applicationRevision) {
 
@@ -875,8 +875,7 @@ var getApplicationCreationEvents = function(applicationName, applicationRevision
         return eventsArray;
 
     var events = eventsManager.getEventsOfApplication(applicationName, applicationRevision);
-
-}
+};
 
 var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationName, revision){
     createDestinationDirsForUploadedApps(applicationName, revision);
@@ -897,7 +896,7 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
     }
 
     uploadedArtifact.move(uploadApplicationTmpPath);
-}
+};
 
 var isFileExtZIP = function(uploadedFileName){
     var fileExt = uploadedFileName.substr(uploadedFileName.lastIndexOf(".") + 1, uploadedFileName.length);
@@ -929,7 +928,7 @@ var createDestinationDirsForUploadedApps = function (applicationName, revision) 
     if (!destinationDir.isExists()) {
         destinationDir.mkdir();
     }
-}
+};
 
 var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
     log.info("Inside modules downloadFromUrl");
@@ -946,7 +945,7 @@ var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
     }
     log.info("apptype: " + apptype);
     CloudUtil.downloadFromUrl(artifactUrl , filePath);
-}
+};
 
 var addEvent = function(name, status, description, applicationName, applicationRevision) {
     try {
@@ -988,7 +987,7 @@ var deleteApplicationFromDatabase = function(applicationName, revision) {
         log.error("Error while deleting application from the database");
         log.error(e);
     }
-}
+};
 
 var deleteApplicationFromKubernetes = function(applicationName, revision) {
     try{
@@ -1006,53 +1005,7 @@ var deleteApplicationFromKubernetes = function(applicationName, revision) {
         log.error("Error while cleaning up the Kubernetes deployment");
         log.error(e);
     }
-}
-var cleaApplicationUploadedPath = function(applicationName, revision){
-    var fileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-            + modManager.getTenantDomain() + "/" + applicationName;
-    var fileUtils = Packages.org.apache.commons.io.FileUtils;
-    var fileUploadPath = new Packages.java.io.File(fileUploadPath);
-    log.info(fileUploadPath.getAbsolutePath())
-    if(fileUploadPath.exists()){
-        //Commenting deleting upload path inorder to work retry app deployment correctly.
-        // Upload path clean up force to upload the artifact again in the retying.
-        //fileUtils.deleteDirectory(fileUploadPath);
-    }
-}
-
-var cleanUpApplicationDeployment = function(applicationName, revision){
-    try {
-        cleaApplicationUploadedPath(applicationName, revision);
-        log.info("Successfully clean up the application uploaded directory");
-    }catch(e){
-        log.error("Error while cleaning up the application uploaded path");
-        log.error(e);
-    }
-
-    try{
-        ApplicationManager.deleteApplication(applicationName, revision);
-        log.info("Successfully deleted the application form the database");
-    }catch(e){
-        log.error("Error while deleting application from the database");
-        log.error(e);
-    }
-
-    try{
-        var KubernetesRuntimeProvisioningService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
-
-        var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
-                applicationName, revision, null, modManager.getTenantId(), modManager.getTenantDomain());
-
-        var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
-
-        kubernetesRuntimeProvisioningService.deleteDeployment();
-        log.error("Successfully clean up the kubernetes deployments");
-
-    }catch(e){
-        log.error("Error while cleaning up the Kubernetes deployment");
-        log.error(e);
-    }
-}
+};
 
 var getIngressPort = function(serviceName){
 
@@ -1063,6 +1016,6 @@ var getIngressPort = function(serviceName){
     } else{
         return 80;
     }
-}
+};
 
 %>

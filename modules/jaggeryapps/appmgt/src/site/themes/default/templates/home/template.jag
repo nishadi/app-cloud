@@ -119,7 +119,9 @@ jagg.template("home", function(inputs, outputs, jagg) {
                     <a href="#"><i class="fw fw-settings"></i></a>
                     </div>
                 </div-->
+
               </div>
+
           </div>
         </div>
         <div class="row padding-bottom-xlg">
@@ -174,11 +176,19 @@ jagg.template("home", function(inputs, outputs, jagg) {
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-12 col-lg-3">
-                         <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=selectedApplicationRevision.applicationType%>&applicationName=<%=applicationName%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>&newVersion=true">
+                          <!--a id="delete-version">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
                                     <i class="fw fw-ring fw-stack-2x"></i>
-                                    <i class="fw fw-add fw-stack-1x"></i>
+                                    <i class="fw fw-delete fw-stack-1x"></i>
+                                  </span> Delete Version
+                              </div>
+                          </a-->
+                          <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=selectedApplicationRevision.applicationType%>&applicationName=<%=applicationName%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>&newVersion=true">
+                              <div class="btn-create-version">
+                                  <span class="fw-stack fw-lg btn-action-ico">
+                                     <i class="fw fw-ring fw-stack-2x"></i>
+                                     <i class="fw fw-add fw-stack-1x"></i>
                                   </span> Upload Version
                               </div>
                           </a>
