@@ -112,7 +112,6 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationIcon` (
   CONSTRAINT  `fk_ApplicationIcon_Application`
   FOREIGN KEY (`application_name`,`tenant_id`)
   REFERENCES `AppCloudDB`.`Application` (`application_name`,`tenant_id`)
-  ON DELETE CASCADE
   ON UPDATE NO ACTION)
 ENGINE=InnoDB;
 

@@ -190,3 +190,34 @@ function getFileExtension(filename) {
     var parts = filename.split('.');
     return parts[parts.length - 1];
 }
+
+// Delete Application
+function deleteApplication(){
+
+    $('#app_creation_progress_modal').modal({ backdrop: 'static', keyboard: false});
+    $("#app_creation_progress_modal").show();
+    $("#modal-title").text("Deleting...");
+
+    jagg.post("../blocks/application/application.jag", {
+        action:"deleteVersion",
+        applicationName:$("#applicationName").val(),
+        applicationVersion:selectedRevision
+    },function (result) {
+        jagg.message({content: "Selected version deleted successfully", type: 'success', id:'view_log'});
+        setTimeout(redirectAppListing, 2000);
+    },function (jqXHR, textStatus, errorThrown) {
+        jagg.message({content: "Error occurred while deleting the selected application version", type: 'error', id:'view_log'});
+    });
+}
+
+function deleteApplicationPopUp(){
+    jagg.popMessage({type:'confirm', modalStatus: true, title:'Delete Application Version',content:'Are you sure you want to delete this version:' + selectedRevision + ' ?',
+        okCallback:function(){
+           deleteApplication();
+        }, cancelCallback:function(){}
+    });
+}
+
+function redirectAppListing() {
+    window.location.replace("index.jag");
+}

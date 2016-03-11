@@ -530,7 +530,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
         },function (result) {
         var result = jQuery.parseJSON(result);
             if (result.length > 0) {
-                jagg.popMessage({type:'confirm', modalStatus: true, title:'Delete Tag',content:'Application with name: ' + $("#applicationName").val() + ' already exists. Do you want to go to the existing application?',
+                jagg.popMessage({type:'confirm', modalStatus: true, title:'Delete Tag',content:'Application with name: '
+                    + $("#applicationName").val() + ' already exists. Do you want to go to the existing application?',
                     okCallback:function(){
                         window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
                     }, cancelCallback:function(){

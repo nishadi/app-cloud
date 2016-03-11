@@ -213,6 +213,25 @@ var log = new Log();
         var mod = jagg.module("application");
         var versions = mod.getAllRevisionsOfApplication(applicationName);
         print(versions);
+
+    } else if (action == "deleteVersion"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationVersion = request.getParameter("applicationVersion");
+        var mod = jagg.module("application");
+
+        try {
+            mod.deleteApplicationUploadedPath(applicationName, applicationVersion);
+            mod.deleteApplicationFromDatabase(applicationName, applicationVersion);
+            mod.deleteApplicationFromKubernetes(applicationName, applicationVersion);
+            print(true);
+        } catch (e) {
+            var msg = "Error while deleting application: " + applicationName + ":" + applicationVersion;
+            log.error(msg);
+            log.error(e);
+            response.status = 500;
+            response.content = msg;
+        }
+
     } else {
         throw new Error("No action specified for: " + action);
     }

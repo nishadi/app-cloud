@@ -24,6 +24,12 @@ jagg.module("application", {
     deleteApplicationFromKubernetes:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteApplicationFromKubernetes.apply(this, arguments);
     },
+    deleteApplicationUploadedPath:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteApplicationUploadedPath.apply(this, arguments);
+    },
+    deleteApplicationFromDatabase:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteApplicationFromDatabase.apply(this, arguments);
+    },
     redeployApplication:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").redeployApplication.apply(this, arguments);
     },
