@@ -50,7 +50,7 @@ public class AppCloudIntegrationTests {
         defaultAdmin = AppCloudIntegrationTestUtils.getAdminUsername();
         defaultAdminPassword = AppCloudIntegrationTestUtils.getAdminPassword();
         defaultAppName = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_APP_APP_NAME);
-        serverUrl = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.URLS_APPFACTORY);
+        serverUrl = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.URLS_APPCLOUD);
         tenantDomain =  AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_TENANT_TENANT_DOMAIN);
     }
 
