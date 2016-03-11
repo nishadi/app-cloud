@@ -982,7 +982,7 @@ var deleteApplicationFromDatabase = function(applicationName, revision) {
     try{
         java.lang.Thread.sleep(3000); // database at last after the transaction completes.
         ApplicationManager.deleteApplication(applicationName, revision);
-        log.info("Successfully deleted the application form the database");
+        log.info("Successfully deleted the application: " + applicationName + ":" + revision + " form the database" );
     }catch(e){
         log.error("Error while deleting application from the database");
         log.error(e);
@@ -999,9 +999,9 @@ var deleteApplicationFromKubernetes = function(applicationName, revision) {
         var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
 
         kubernetesRuntimeProvisioningService.deleteDeployment();
-        log.info("Successfully clean up the kubernetes deployments");
+        log.info("Successfully deleted the application: " + applicationName + ":" + revision + " kubernetes deployments");
 
-    }catch(e){
+    } catch(e){
         log.error("Error while cleaning up the Kubernetes deployment");
         log.error(e);
     }

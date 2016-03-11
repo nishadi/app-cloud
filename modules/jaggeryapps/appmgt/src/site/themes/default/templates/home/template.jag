@@ -176,14 +176,14 @@ jagg.template("home", function(inputs, outputs, jagg) {
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-12 col-lg-3">
-                          <!--a id="delete-version">
+                          <a id="delete-version" onclick="deleteApplicationPopUp();">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
                                     <i class="fw fw-ring fw-stack-2x"></i>
                                     <i class="fw fw-delete fw-stack-1x"></i>
-                                  </span> Delete Version
+                                  </span> Delete
                               </div>
-                          </a-->
+                          </a>
                           <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=selectedApplicationRevision.applicationType%>&applicationName=<%=applicationName%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>&newVersion=true">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
@@ -368,6 +368,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
     function drawProgressWindow(){
         $('#app_creation_progress_modal').modal({ backdrop: 'static', keyboard: false});
         $("#app_creation_progress_modal").show();
+        $("#modal-title").text("Restarting...");
         setInterval(pollEvents, 5000);
     }
 
