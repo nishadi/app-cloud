@@ -20,45 +20,68 @@
 package org.wso2.appcloud.integration.test.utils.clients;
 
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.lang.CharEncoding;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
+import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestConstants;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestException;
-import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestUtils;
-import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.automation.engine.context.AutomationContext;
 import org.wso2.carbon.automation.test.utils.http.client.HttpRequestUtil;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
-import org.wso2.carbon.integration.common.admin.client.AuthenticatorClient;
-import org.wso2.carbon.integration.common.utils.LoginLogoutClient;
-import org.xml.sax.SAXException;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.xpath.XPathExpressionException;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BaseClient {
 
-    public static final String HEADER_SET_COOKIE = "Set-Cookie";
-    public static final String HEADER_COOKIE = "Cookie";
-    public static final String HEADER_CONTENT_TYPE = "Content-Type";
-    public static final String MEDIA_TYPE_X_WWW_FORM = "application/x-www-form-urlencoded";
+	private static final Log log = LogFactory.getLog(BaseClient.class);
 
-    private String backEndUrl;
+    protected static final String HEADER_SET_COOKIE = "Set-Cookie";
+	protected static final String HEADER_COOKIE = "Cookie";
+	protected static final String HEADER_CONTENT_TYPE = "Content-Type";
+	protected static final String MEDIA_TYPE_X_WWW_FORM = "application/x-www-form-urlencoded";
+	protected static final String PARAM_NAME_ACTION = "action";
+	protected static final String ACTION_NAME_LOGIN = "login";
+	protected static final String PARAM_EQUALIZER = "=";
+	protected static final String PARAM_SEPARATOR = "&";
+	protected static final String PARAM_NAME_USER_NAME = "userName";
+	protected static final String PARAM_NAME_PASSWORD = "password";
+
+	private String backEndUrl;
     private Map<String, String> requestHeaders = new HashMap<String, String>();
     private static AutomationContext context;
 
     protected String getBackEndUrl() {
         return backEndUrl;
     }
+
     protected void setBackEndUrl(String backEndUrl) {
         this.backEndUrl = backEndUrl;
     }
+
     protected Map<String, String> getRequestHeaders() {
         return requestHeaders;
     }
+
+
+	protected void setHTTPHeader(String headerName, String value) {
+		requestHeaders.put(headerName, value);
+	}
+
+	protected String getHTTPHeader(String headerName) {
+		return requestHeaders.get(headerName);
+	}
+
+	protected void removeHTTPHeader(String headerName) {
+		requestHeaders.remove(headerName);
+	}
 
     /**
      * Get session
@@ -94,20 +117,76 @@ public class BaseClient {
             getRequestHeaders().put(HEADER_CONTENT_TYPE, MEDIA_TYPE_X_WWW_FORM);
         }
 
-        login(context = AppCloudIntegrationTestUtils.getAutomationContext());
-    }
-
-    private String login(AutomationContext context)
-            throws IOException, XPathExpressionException, URISyntaxException, SAXException, XMLStreamException,
-            LoginAuthenticationExceptionException {
-        LoginLogoutClient loginLogoutClient = new LoginLogoutClient(context);
-        return loginLogoutClient.login();
+        login(username, password);
     }
 
     protected void checkErrors(HttpResponse response) throws AppCloudIntegrationTestException {
         JSONObject jsonObject = new JSONObject(response.getData());
         if (jsonObject.keySet().contains("error")) {
-            throw new AppCloudIntegrationTestException("Operation not successful: " + jsonObject.get("message").toString());
+            throw new AppCloudIntegrationTestException("Operation not successful: "
+                                                       + jsonObject.get(AppCloudIntegrationTestConstants.RESPONSE_MESSAGE_NAME).toString());
         }
     }
+
+	/**
+	 * login to app mgt
+	 *
+	 * @param userName username
+	 * @param password password
+	 * @throws Exception
+	 */
+	protected void login(String userName, String password) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(getBackEndUrl() + AppCloudIntegrationTestConstants.APPMGT_URL_SURFIX
+				+ AppCloudIntegrationTestConstants.APPMGT_USER_LOGIN),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + ACTION_NAME_LOGIN + PARAM_SEPARATOR + PARAM_NAME_USER_NAME
+				+ PARAM_EQUALIZER + userName + PARAM_SEPARATOR + PARAM_NAME_PASSWORD + PARAM_EQUALIZER
+				+ password, getRequestHeaders());
+
+		if (response.getResponseCode() == HttpStatus.SC_OK && response.getData().equals("true")) {
+			String session = getSession(response.getHeaders());
+			if (session == null) {
+				throw new AppCloudIntegrationTestException("No session cookie found with response");
+			}
+			setSession(session);
+		} else {
+			throw new AppCloudIntegrationTestException("Login failed " + response.getData());
+		}
+	}
+
+	/**
+	 * Do post request to appfactory.
+	 *
+	 * @param urlSuffix url suffix from the block layer
+	 * @param keyVal  post body
+	 * @return httpResponse
+	 */
+	public HttpResponse doPostRequest(String urlSuffix, Map<String, String> keyVal) throws AppCloudIntegrationTestException {
+		String postBody = generateMsgBody(keyVal);
+		try {
+			return HttpRequestUtil.doPost(new URL(getBackEndUrl() + AppCloudIntegrationTestConstants.APPMGT_URL_SURFIX
+			                                      + urlSuffix), postBody,
+			                              getRequestHeaders());
+		} catch (Exception e) {
+			final String msg = "Error occurred while doing a post :";
+			log.error(msg, e);
+			throw new AppCloudIntegrationTestException(msg, e);
+		}
+
+	}
+
+	/**
+	 * Returns a String that is suitable for use as an application/x-www-form-urlencoded list of parameters in an
+	 * HTTP PUT or HTTP POST.
+	 *
+	 * @param keyVal parameter map
+	 * @return message body
+	 */
+	public String generateMsgBody(Map<String, String> keyVal) {
+		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+		for (Map.Entry<String, String> keyValEntry : keyVal.entrySet()) {
+			qparams.add(new BasicNameValuePair(keyValEntry.getKey(), keyValEntry.getValue()));
+		}
+		return URLEncodedUtils.format(qparams, CharEncoding.UTF_8);
+	}
 }
