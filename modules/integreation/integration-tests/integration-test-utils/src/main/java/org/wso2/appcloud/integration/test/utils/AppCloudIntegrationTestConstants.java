@@ -37,8 +37,8 @@ public class AppCloudIntegrationTestConstants {
 	public static final String DEFAULT_APP_APP_KEY = "//appCloudProperties/defaultApplication/applicationKey";
 	public static final String DEFAULT_APP_APP_TYPE = "//appCloudProperties/defaultApplication/applicationType";
 	public static final String DEFAULT_APP_APP_DESC = "//appCloudProperties/defaultApplication/applicationDescription";
-	public static final String DEFAULT_APP_APP_VERSION = "//appCloudProperties/defaultApplication/defaultVersion";
-	public static final String DEFAULT_APP_APP_RUNTIME_NAME = "//appCloudProperties/defaultApplication/runtimeName";
+	public static final String DEFAULT_APP_APP_REVISION = "//appCloudProperties/defaultApplication/defaultRevision";
+	public static final String DEFAULT_APP_APP_RUNTIME_ID = "//appCloudProperties/defaultApplication/runtimeID";
 	public static final String DEFAULT_APP_APP_FILE_NAME = "//appCloudProperties/defaultApplication/filename";
 	public static final String DEFAULT_APP_APP_PROPERTIES = "//appCloudProperties/defaultApplication/properties/property";
 	public static final String DEFAULT_APP_APP_TAGS = "//appCloudProperties/defaultApplication/tags/tag";

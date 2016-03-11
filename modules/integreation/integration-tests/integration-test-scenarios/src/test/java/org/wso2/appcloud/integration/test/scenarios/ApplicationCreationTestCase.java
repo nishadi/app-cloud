@@ -18,6 +18,8 @@ package org.wso2.appcloud.integration.test.scenarios;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.junit.Assert;
 import org.testng.annotations.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -34,19 +36,21 @@ import java.io.File;
 public class ApplicationCreationTestCase extends AppCloudIntegrationTests {
 
 	private static final Log log = LogFactory.getLog(ApplicationCreationTestCase.class);
+	public static final String STATUS_RUNNING = "running";
+	public static final String PROPERTY_STATUS_NAME = "status";
 
-    @SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
     @Test(description = "Create application using rest api")
     public void testCreateApplication() throws Exception {
 
 	    String applicationName = AppCloudIntegrationTestUtils.getPropertyValue(
 			    AppCloudIntegrationTestConstants.DEFAULT_APP_APP_NAME);
 	    String runtimeID = AppCloudIntegrationTestUtils.getPropertyValue(
-			    AppCloudIntegrationTestConstants.DEFAULT_APP_APP_RUNTIME_NAME);
+			    AppCloudIntegrationTestConstants.DEFAULT_APP_APP_RUNTIME_ID);
 	    String applicationType = AppCloudIntegrationTestUtils.getPropertyValue(
 			    AppCloudIntegrationTestConstants.DEFAULT_APP_APP_TYPE);
-	    String version = AppCloudIntegrationTestUtils.getPropertyValue(
-			    AppCloudIntegrationTestConstants.DEFAULT_APP_APP_VERSION);
+	    String applicationRevision = AppCloudIntegrationTestUtils.getPropertyValue(
+			    AppCloudIntegrationTestConstants.DEFAULT_APP_APP_REVISION);
 	    String applicationDescription = AppCloudIntegrationTestUtils.getPropertyValue(
 			    AppCloudIntegrationTestConstants.DEFAULT_APP_APP_DESC);
 	    String fileName = AppCloudIntegrationTestUtils.getPropertyValue(
@@ -60,9 +64,20 @@ public class ApplicationCreationTestCase extends AppCloudIntegrationTests {
 
 	    File uploadArtifact = new File(TestConfigurationProvider.getResourceLocation() + resourcePath);
         ApplicationClient applicationClient = new ApplicationClient(serverUrl, defaultAdmin, defaultAdminPassword);
-        applicationClient.createNewApplication(applicationName, runtimeID, applicationType, version,
+        applicationClient.createNewApplication(applicationName, runtimeID, applicationType, applicationRevision,
                                                applicationDescription, fileName, properties, tags, uploadArtifact);
-        //log.info("###########################33");
+	    long timeOutPeriod = AppCloudIntegrationTestUtils.getTimeOutPeriod();
+	    int retryCount = AppCloudIntegrationTestUtils.getTimeOutRetryCount();
+	    int round = 1;
+	    while(round <= retryCount) {
+		    try {
+			    JSONObject result = applicationClient.getApplicationEvents(applicationName, applicationRevision);
+			    Assert.assertEquals("Application creation failed", STATUS_RUNNING, result.getString(PROPERTY_STATUS_NAME));
+		    } catch (Exception e) {
+			    Thread.sleep(timeOutPeriod);
+			    round++;
+		    }
+	    }
     }
 
 	/**

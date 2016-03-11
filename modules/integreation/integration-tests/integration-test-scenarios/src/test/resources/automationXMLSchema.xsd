@@ -576,9 +576,9 @@
                                                     maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element type="xs:string" name="applicationDescription"
                                                     maxOccurs="unbounded" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="defaultVersion"
+                                        <xs:element type="xs:string" name="defaultRevision"
                                                     maxOccurs="unbounded" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="runtimeName"
+                                        <xs:element type="xs:string" name="runtimeID"
                                                     maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element type="xs:string" name="filename"
                                                     maxOccurs="unbounded" minOccurs="0"/>

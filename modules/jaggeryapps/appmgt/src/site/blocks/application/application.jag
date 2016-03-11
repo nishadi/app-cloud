@@ -92,6 +92,16 @@ var log = new Log();
         var events = mod.getApplicationCreationEvents(applicationName, applicationRevision);
         print(events);
 
+    }else if (action == "getApplicationRevision"){
+
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+
+        var mod = jagg.module("application");
+
+        var events = mod.getApplicationByNameRevision(applicationName, applicationRevision);
+        print(events);
+
     }else if (action == "getEnvVariablesByNameRevision"){
 
         var applicationName = request.getParameter("applicationName");

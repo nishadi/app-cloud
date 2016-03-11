@@ -300,12 +300,12 @@
         </defaultTenant>
 
         <defaultApplication>
-            <applicationName>test002</applicationName>
+            <applicationName>te001</applicationName>
             <applicationKey>test</applicationKey>
             <applicationType>war</applicationType>
             <applicationDescription>This is the test application</applicationDescription>
-            <defaultVersion>1.0.0</defaultVersion>
-            <runtimeName>1</runtimeName>
+            <defaultRevision>1.0.0</defaultRevision>
+            <runtimeID>1</runtimeID>
             <filename>sample.war</filename>
             <resource_path>sample.war</resource_path>
             <properties>
