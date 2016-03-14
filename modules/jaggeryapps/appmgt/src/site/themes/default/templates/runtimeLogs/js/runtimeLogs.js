@@ -49,6 +49,8 @@ function regerateReplicasList(selectedRevisionReplicaList) {
 function setLogArea(logVal){
     $('#build-logs').val(logVal);
     editor.setValue(logVal);
+    var scroller = editor.getScrollInfo();
+    editor.scrollTo(0, scroller.height);
     $('.log-search').focus();
 }
 
