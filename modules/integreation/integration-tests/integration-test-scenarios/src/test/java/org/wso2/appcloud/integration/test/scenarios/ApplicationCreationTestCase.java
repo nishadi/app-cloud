@@ -73,6 +73,7 @@ public class ApplicationCreationTestCase extends AppCloudIntegrationTests {
 		    try {
 			    JSONObject result = applicationClient.getApplicationEvents(applicationName, applicationRevision);
 			    Assert.assertEquals("Application creation failed", STATUS_RUNNING, result.getString(PROPERTY_STATUS_NAME));
+			    break;
 		    } catch (Exception e) {
 			    Thread.sleep(timeOutPeriod);
 			    round++;
