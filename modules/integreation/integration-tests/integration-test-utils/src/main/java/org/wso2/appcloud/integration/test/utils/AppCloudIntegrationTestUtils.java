@@ -21,11 +21,17 @@ package org.wso2.appcloud.integration.test.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.junit.Assert;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.wso2.appcloud.integration.test.utils.clients.ApplicationClient;
 import org.wso2.carbon.automation.engine.context.AutomationContext;
 import org.wso2.carbon.automation.engine.context.TestUserMode;
+import org.wso2.carbon.automation.test.utils.common.TestConfigurationProvider;
 
 import javax.xml.xpath.XPathExpressionException;
+import java.io.File;
 
 public class AppCloudIntegrationTestUtils {
 
@@ -106,4 +112,68 @@ public class AppCloudIntegrationTestUtils {
         }
         return result;
     }
+
+	/**
+	 * [{key="key1",value=value1},...]
+	 * @param propertyNodes
+	 * @return
+	 */
+	public static String getKeyValuePairAsJson(NodeList propertyNodes) {
+		StringBuilder result = new StringBuilder("[");
+		for (int i = 0 ; i < propertyNodes.getLength() ; i++) {
+			if(i != 0){
+				result.append(",");
+			}
+			Element element = (Element)propertyNodes.item(i);
+			String key = element.getAttribute(AppCloudIntegrationTestConstants.ATTRIBUTE_KEY);
+			String value = element.getTextContent();
+			result.append("{\"key\":\"");
+			result.append(key);
+			result.append("\",\"value\":\"");
+			result.append(value);
+			result.append("\"}");
+		}
+		result.append("]");
+		return result.toString();
+	}
+
+	public static void createDefaultApplication(String serverUrl, String defaultAdmin, String defaultAdminPassword) throws Exception {
+		String applicationName = getPropertyValue(
+				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_NAME);
+		String runtimeID = getPropertyValue(
+				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_RUNTIME_ID);
+		String applicationType = getPropertyValue(
+				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_TYPE);
+		String applicationRevision = getPropertyValue(
+				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_REVISION);
+		String applicationDescription = getPropertyValue(
+				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_DESC);
+		String fileName = getPropertyValue(
+				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_FILE_NAME);
+		String properties = getKeyValuePairAsJson(getPropertyNodes(
+						AppCloudIntegrationTestConstants.DEFAULT_APP_APP_PROPERTIES));
+		String tags = getKeyValuePairAsJson(getPropertyNodes(
+				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_TAGS));
+		String resourcePath = getPropertyValue(
+				AppCloudIntegrationTestConstants.DEFAULT_APP_ARTIFACT_PATH);
+
+		File uploadArtifact = new File(TestConfigurationProvider.getResourceLocation() + resourcePath);
+		ApplicationClient applicationClient = new ApplicationClient(serverUrl, defaultAdmin, defaultAdminPassword);
+		applicationClient.createNewApplication(applicationName, runtimeID, applicationType, applicationRevision,
+		                                       applicationDescription, fileName, properties, tags, uploadArtifact);
+		long timeOutPeriod = getTimeOutPeriod();
+		int retryCount = getTimeOutRetryCount();
+		int round = 1;
+		while(round <= retryCount) {
+			try {
+				JSONObject result = applicationClient.getApplicationEvents(applicationName, applicationRevision);
+				Assert.assertEquals("Application creation failed", AppCloudIntegrationTestConstants.STATUS_RUNNING,
+				                    result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
+				break;
+			} catch (Exception e) {
+				Thread.sleep(timeOutPeriod);
+				round++;
+			}
+		}
+	}
 }
