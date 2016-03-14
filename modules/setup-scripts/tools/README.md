@@ -6,7 +6,7 @@ This is consists of two shell scripts
   
     This shell script is for configuring the client to connect with the Docker remote Registry. When the script is running, it asks for the domain name and the port of the remote registry. Then script would automatically adds the certificates and updates the client machine. Then client can docker pull, push with that remote registry. Followings are the main steps of the script.
 
-This shell script is for configuring the client to connect with the Docker remote Registry. When the script is running, it asks for the domain name and the port of the remote registry. Then script would automatically adds the certificates and updates the client machine.Then client can docker pull, push with that remote registry
+This shell script is for configuring the client to connect with the Docker remote Registry. When the script is running, it asks for the domain name and the port of the remote registry. Then script would automatically adds the certificates and updates the client machine.Then client can docker pull, push with that remote registry. Followings are the main steps of the script.
 I.   Copy the domain certificate from remote host to local host
 
 II.  Update the ca-certificates
