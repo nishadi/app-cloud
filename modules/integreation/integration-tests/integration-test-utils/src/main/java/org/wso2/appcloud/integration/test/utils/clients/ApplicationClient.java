@@ -44,6 +44,7 @@ import java.net.URL;
 public class ApplicationClient extends BaseClient{
 	private static final Log log = LogFactory.getLog(ApplicationClient.class);
 	protected static final String CREATE_APPLICATION_ACTION = "createApplication";
+	protected static final String DELETE_APPLICATION_ACTION = "deleteApplication";
 	protected static final String GET_APPLICATION_REVISION_ACTION = "getApplicationRevision";
 	protected static final String PARAM_NAME_APPLICATION_NAME = "applicationName";
 	protected static final String PARAM_NAME_APPLICATION_DESCRIPTION = "applicationDescription";
@@ -111,6 +112,19 @@ public class ApplicationClient extends BaseClient{
         }
     }
 
+	public void deleteApplication(String applicationName) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + DELETE_APPLICATION_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName
+				, getRequestHeaders());
+		if (response.getResponseCode() == HttpStatus.SC_OK && response.getData().equals("true")) {
+			checkErrors(response);
+		} else {
+			throw new AppCloudIntegrationTestException("Application deletion failed " + response.getData());
+		}
+	}
+
 	public JSONObject getApplicationEvents(String applicationName, String applicationRevision) throws Exception {
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
@@ -125,7 +139,6 @@ public class ApplicationClient extends BaseClient{
 		} else {
 			throw new AppCloudIntegrationTestException("Get Application Events failed " + response.getData());
 		}
-
 	}
 
 }

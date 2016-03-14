@@ -137,25 +137,17 @@ public class AppCloudIntegrationTestUtils {
 		return result.toString();
 	}
 
-	public static void createDefaultApplication(String serverUrl, String defaultAdmin, String defaultAdminPassword) throws Exception {
-		String applicationName = getPropertyValue(
-				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_NAME);
-		String runtimeID = getPropertyValue(
-				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_RUNTIME_ID);
-		String applicationType = getPropertyValue(
-				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_TYPE);
-		String applicationRevision = getPropertyValue(
-				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_REVISION);
-		String applicationDescription = getPropertyValue(
-				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_DESC);
-		String fileName = getPropertyValue(
-				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_FILE_NAME);
-		String properties = getKeyValuePairAsJson(getPropertyNodes(
-						AppCloudIntegrationTestConstants.DEFAULT_APP_APP_PROPERTIES));
-		String tags = getKeyValuePairAsJson(getPropertyNodes(
-				AppCloudIntegrationTestConstants.DEFAULT_APP_APP_TAGS));
-		String resourcePath = getPropertyValue(
-				AppCloudIntegrationTestConstants.DEFAULT_APP_ARTIFACT_PATH);
+	public static void createDefaultApplication(String serverUrl, String defaultAdmin, String defaultAdminPassword)
+			throws Exception {
+		String applicationName = getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_APP_APP_NAME);
+		String runtimeID = getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_APP_APP_RUNTIME_ID);
+		String applicationType = getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_APP_APP_TYPE);
+		String applicationRevision = getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_APP_APP_REVISION);
+		String applicationDescription = getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_APP_APP_DESC);
+		String fileName = getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_APP_APP_FILE_NAME);
+		String properties = getKeyValuePairAsJson(getPropertyNodes(AppCloudIntegrationTestConstants.DEFAULT_APP_APP_PROPERTIES));
+		String tags = getKeyValuePairAsJson(getPropertyNodes(AppCloudIntegrationTestConstants.DEFAULT_APP_APP_TAGS));
+		String resourcePath = getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_APP_ARTIFACT_PATH);
 
 		File uploadArtifact = new File(TestConfigurationProvider.getResourceLocation() + resourcePath);
 		ApplicationClient applicationClient = new ApplicationClient(serverUrl, defaultAdmin, defaultAdminPassword);
@@ -175,5 +167,12 @@ public class AppCloudIntegrationTestUtils {
 				round++;
 			}
 		}
+	}
+
+	public static void deleteDefaultApplication(String serverUrl, String defaultAdmin, String defaultAdminPassword)
+			throws Exception {
+		String applicationName = getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_APP_APP_NAME);
+		ApplicationClient applicationClient = new ApplicationClient(serverUrl, defaultAdmin, defaultAdminPassword);
+		applicationClient.deleteApplication(applicationName);
 	}
 }

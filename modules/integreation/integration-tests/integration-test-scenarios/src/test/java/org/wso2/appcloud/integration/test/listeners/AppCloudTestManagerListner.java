@@ -42,7 +42,7 @@ public class AppCloudTestManagerListner extends TestManagerListener {
 	        String serverUrl = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.URLS_APPCLOUD);
 	        AppCloudIntegrationTestUtils.createDefaultApplication(serverUrl, defaultAdmin, defaultAdminPassword);
         } catch (Exception e) {
-            final String msg = "Error occurred while populating initial data ";
+            final String msg = "Error occurred while creating default app ";
             log.error(msg, e);
             throw new IllegalStateException(msg, e);
         }
@@ -52,7 +52,10 @@ public class AppCloudTestManagerListner extends TestManagerListener {
     public void onFinish(ITestContext iTestContext) {
         super.onFinish(iTestContext);
         try {
-
+	        String defaultAdmin = AppCloudIntegrationTestUtils.getAdminUsername();
+	        String defaultAdminPassword = AppCloudIntegrationTestUtils.getAdminPassword();
+	        String serverUrl = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.URLS_APPCLOUD);
+	        AppCloudIntegrationTestUtils.deleteDefaultApplication(serverUrl, defaultAdmin, defaultAdminPassword);
         } catch (Exception e) {
             final String msg = "Error occurred while deleting default app ";
             log.error(msg, e);
