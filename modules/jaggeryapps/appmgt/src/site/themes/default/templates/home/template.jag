@@ -285,7 +285,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
         <div class="modal-dialog modal-dialog-margin-top-md ">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="modal-title">Application Restarting</h4>
+                    <h4 class="modal-title" id="modal-title"></h4>
                 </div>
                 <div class="modal-body">
                     <div class="container-fluid">
