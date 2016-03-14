@@ -234,18 +234,12 @@ var log = new Log();
 
     } else if (action == "deleteApplication"){
              var applicationName = request.getParameter("applicationName");
-             var versions = parse(request.getParameter("applicationVersions"));
              var mod = jagg.module("application");
              try {
-                 for (i = 0; i < versions.length; i++) {
-                      log.info("Deleting application: " + applicationName + ":" + versions[i]);
-                      mod.deleteApplicationUploadedPath(applicationName, versions[i]);
-                      mod.deleteApplicationFromDatabase(applicationName, versions[i]);
-                      mod.deleteApplicationFromKubernetes(applicationName, versions[i]);
-                 }
-                 print(true);
+                mod.deleteApplication(applicationName);
+                print(true);
              } catch (e) {
-                 var msg = "Error while deleting application: " + applicationName + ":" + applicationVersion;
+                 var msg = "Error while deleting application: " + applicationName;
                  log.error(msg);
                  log.error(e);
                  response.status = 500;

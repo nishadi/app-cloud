@@ -805,7 +805,7 @@ var generateEndpointsArray=function(endpointsList){
     return endpointsArray;
 };
 
-var getAllRevisionsOfApplication =function(appName){
+var getAllRevisionsOfApplication = function(appName){
     var revisionArray = [];
     try {
         var revisions = ApplicationManager.getAllRevisionsOfApplication(appName);
@@ -1004,6 +1004,21 @@ var deleteApplicationFromKubernetes = function(applicationName, revision) {
     } catch(e){
         log.error("Error while cleaning up the Kubernetes deployment");
         log.error(e);
+    }
+};
+
+var deleteApplication = function(applicationName) {
+    var versions = getAllRevisionsOfApplication(applicationName);
+    try{
+        for (i = 0; i < versions.length; i++) {
+            log.info("Deleting application: " + applicationName + ":" + versions[i]);
+            deleteApplicationUploadedPath(applicationName, versions[i]);
+            deleteApplicationFromDatabase(applicationName, versions[i]);
+            deleteApplicationFromKubernetes(applicationName, versions[i]);
+        }
+    } catch(e){
+             log.error("Error while cleaning up the Kubernetes deployment");
+             log.error(e);
     }
 };
 
