@@ -33,16 +33,18 @@ public class AppCloudIntegrationTestConstants {
     public static final String URLS_APPCLOUD = "//appCloudProperties/urls/appCloud";
 
 	// Default Application Details
-	public static final String DEFAULT_APP_APP_NAME = "//appCloudProperties/defaultApplication/applicationName";
-	public static final String DEFAULT_APP_APP_KEY = "//appCloudProperties/defaultApplication/applicationKey";
-	public static final String DEFAULT_APP_APP_TYPE = "//appCloudProperties/defaultApplication/applicationType";
-	public static final String DEFAULT_APP_APP_DESC = "//appCloudProperties/defaultApplication/applicationDescription";
-	public static final String DEFAULT_APP_APP_REVISION = "//appCloudProperties/defaultApplication/defaultRevision";
-	public static final String DEFAULT_APP_APP_RUNTIME_ID = "//appCloudProperties/defaultApplication/runtimeID";
-	public static final String DEFAULT_APP_APP_FILE_NAME = "//appCloudProperties/defaultApplication/filename";
-	public static final String DEFAULT_APP_APP_PROPERTIES = "//appCloudProperties/defaultApplication/properties/property";
-	public static final String DEFAULT_APP_APP_TAGS = "//appCloudProperties/defaultApplication/tags/tag";
-	public static final String DEFAULT_APP_ARTIFACT_PATH = "//appCloudProperties/defaultApplication/resource_path";
+	public static final String APP_NAME_KEY = "//appCloudProperties/application/applicationName";
+	public static final String APP_TYPE_KEY = "//appCloudProperties/application/applicationType";
+	public static final String APP_DESC_KEY = "//appCloudProperties/application/applicationDescription";
+	public static final String APP_REVISION_KEY = "//appCloudProperties/application/defaultRevision";
+	public static final String TOMCAT_APP_RUNTIME_ID_KEY = "//appCloudProperties/application/runtimeIDs/runtimeID[@key='tomcat']";
+	public static final String MSS_APP_RUNTIME_ID_KEY = "//appCloudProperties/application/runtimeIDs/runtimeID[@key='msf4j']";
+	public static final String PHP_APP_RUNTIME_ID_KEY = "//appCloudProperties/application/runtimeIDs/runtimeID[@key='php']";
+	public static final String TOMCAT_APP_FILE_NAME_KEY = "//appCloudProperties/application/files/file[@type='war']";
+	public static final String MSS_APP_FILE_NAME_KEY = "//appCloudProperties/application/files/file[@type='msf4j']";
+	public static final String PHP_APP_FILE_NAME_KEY = "//appCloudProperties/application/files/file[@type='php']";
+	public static final String APP_PROPERTIES_KEY = "//appCloudProperties/application/properties/property";
+	public static final String APP_TAGS_KEY = "//appCloudProperties/application/tags/tag";
 
 	// Rest endpoints
 	public static final String REST_APPLICATION_ENDPOINT = "application/application.jag";

@@ -25,15 +25,15 @@ import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestConstants
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestUtils;
 import org.wso2.appcloud.integration.test.utils.clients.ApplicationClient;
 
-public class MSF4JApplicationTestCase extends ApplicationTestCase {
+public class PHPApplicationTestCase extends ApplicationTestCase {
 
-	private static final Log log = LogFactory.getLog(MSF4JApplicationTestCase.class);
+	private static final Log log = LogFactory.getLog(PHPApplicationTestCase.class);
 
 	@BeforeClass(alwaysRun = true)
 	public void createApplication() throws Exception {
 		applicationClient = new ApplicationClient(serverUrl, defaultAdmin, defaultAdminPassword);
-		String runtimeID = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.MSS_APP_RUNTIME_ID_KEY);
-		String fileName = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.MSS_APP_FILE_NAME_KEY);
+		String runtimeID = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.PHP_APP_RUNTIME_ID_KEY);
+		String fileName = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.PHP_APP_FILE_NAME_KEY);
 		createApplication(runtimeID, fileName);
 	}
 
@@ -42,12 +42,12 @@ public class MSF4JApplicationTestCase extends ApplicationTestCase {
 //    public void testTomcatWARApplication() throws Exception {
 //		//Application details
 //		String applicationName = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_NAME_KEY);
-//		String runtimeID = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.MSS_APP_RUNTIME_ID_KEY);
+//		String runtimeID = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.PHP_APP_RUNTIME_ID_KEY);
 //		String applicationType = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_TYPE_KEY);
 //		String applicationRevision = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_REVISION_KEY);
 //		String applicationDescription = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_DESC_KEY);
 //		String fileName = AppCloudIntegrationTestUtils.getPropertyValue(
-//				AppCloudIntegrationTestConstants.MSS_APP_FILE_NAME_KEY);
+//				AppCloudIntegrationTestConstants.PHP_APP_FILE_NAME_KEY);
 //		String properties = AppCloudIntegrationTestUtils.getKeyValuePairAsJson(
 //				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_PROPERTIES_KEY));
 //		String tags = AppCloudIntegrationTestUtils.getKeyValuePairAsJson(

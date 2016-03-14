@@ -112,14 +112,14 @@ public class ApplicationClient extends BaseClient{
         }
     }
 
-	public void deleteApplication(String applicationName) throws Exception {
+	public boolean deleteApplication(String applicationName) throws Exception {
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + DELETE_APPLICATION_ACTION + PARAM_SEPARATOR
 				+ PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName
 				, getRequestHeaders());
 		if (response.getResponseCode() == HttpStatus.SC_OK && response.getData().equals("true")) {
-			checkErrors(response);
+			return true;
 		} else {
 			throw new AppCloudIntegrationTestException("Application deletion failed " + response.getData());
 		}
