@@ -198,25 +198,14 @@ jagg.template("index", function(inputs, outputs, jagg) {
         $("#modal-title").text("Deleting...");
 
         jagg.post("../blocks/application/application.jag", {
-            action:"getExistingRevisions",
+            action:"deleteApplication",
             applicationName:appName
         },function (result) {
-        var versionArr = jQuery.parseJSON(result);
-            jagg.post("../blocks/application/application.jag", {
-                    action:"deleteApplication",
-                    applicationName:appName,
-                    applicationVersions:JSON.stringify(versionArr)
-                },function (result) {
-                    jagg.message({content: "Application : " + appName + " deleted successfully", type: 'success', id:'view_log'});
-                    setTimeout(redirectAppListing, 2000);
-                },function (jqXHR, textStatus, errorThrown) {
-                    jagg.message({content: "Error occurred while deleting application : " + appName, type: 'error', id:'view_log'});
-                });
-
+            jagg.message({content: "Application : " + appName + " deleted successfully", type: 'success', id:'view_log'});
+            setTimeout(redirectAppListing, 2000);
         },function (jqXHR, textStatus, errorThrown) {
-            jagg.message({content: "Error occurred while retrieving respective application versions for delete", type: 'error', id:'view_log'});
+            jagg.message({content: "Error occurred while deleting application : " + appName, type: 'error', id:'view_log'});
         });
-
     }
 
     function deleteApplicationPopUp(appName){
