@@ -1,4 +1,4 @@
-# Docker Registry Setup
+# Docker Setup
 
 This is consists of two shell scripts
 
