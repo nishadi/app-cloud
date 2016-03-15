@@ -18,20 +18,20 @@ CREATE SCHEMA IF NOT EXISTS `AppCloudDB` DEFAULT CHARACTER SET utf8 COLLATE utf8
 USE `AppCloudDB` ;
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`ApplicationType`
+-- Table `AppCloudDB`.`AC_APP_TYPE`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationType` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_APP_TYPE` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `app_type_name` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
   `description` VARCHAR(1000) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Populate Data to `AppCloudDB`.`ApplicationType`
+-- Populate Data to `AppCloudDB`.`AC_APP_TYPE`
 -- -----------------------------------------------------
-INSERT INTO `ApplicationType` (`id`, `app_type_name`, `description`) VALUES
+INSERT INTO `AC_APP_TYPE` (`id`, `name`, `description`) VALUES
 (1, 'war', 'Allows you to create dynamic websites using Servlets and JSPs, instead of the static HTML webpages and JAX-RS/JAX-WS services.'),
 (2, 'mss', 'WSO2 Microservices Framework for Java (WSO2 MSF4J) offers the best option to create microservices in Java using annotation-based programming model.'),
 (3, 'php', 'Allows you to create dynamic web page content using PHP web applications.'),
@@ -39,15 +39,16 @@ INSERT INTO `ApplicationType` (`id`, `app_type_name`, `description`) VALUES
 
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`ApplicationRuntime`
+-- Table `AppCloudDB`.`AC_RUNTIME`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationRuntime` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_RUNTIME` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `runtime_name` VARCHAR(100) NOT NULL,
-  `repo_url` VARCHAR(100) NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `repo_url` VARCHAR(250) NULL,
   `image_name` VARCHAR(100) NULL,
   `tag` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id`))
+  `description` VARCHAR(1000) NULL,
+  PRIMARY KEY (`id`, `name`))
 ENGINE = InnoDB;
 
 
@@ -55,152 +56,153 @@ ENGINE = InnoDB;
 -- Populate Data to `AppCloudDB`.`ApplicationRuntime`
 -- -----------------------------------------------------
 
-INSERT INTO `ApplicationRuntime` (`id`, `runtime_name`, `repo_url`, `image_name`, `tag`) VALUES
+INSERT INTO `AC_RUNTIME` (`id`, `name`, `repo_url`, `image_name`, `tag`) VALUES
 (1, 'Apache Tomcat 8.0.30', 'registry.docker.appfactory.private.wso2.com:5000', 'tomcat', '8.0'),
 (2, 'OpenJDK 8', 'registry.docker.appfactory.private.wso2.com:5000', 'msf4j', '1.0'),
 (3, 'Apache 2.4.10', 'registry.docker.appfactory.private.wso2.com:5000','php','5.6'),
 (4, 'Apache 2.4.18', 'registry.docker.appfactory.private.wso2.com:5000','php','5.7'),
 (5, 'Carbon 4.2.0', 'registry.docker.appfactory.private.wso2.com:5000','carbon','4.2.0');
 
+
+
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`ApplicationDeployment`
+-- Table `AppCloudDB`.`AC_APPLICATION`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationDeployment` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_APPLICATION` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `deployment_name` VARCHAR(100) NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `hash_id` VARCHAR(24) NULL,
+  `description` VARCHAR(1000) NULL,
+  `tenant_id` INT NOT NULL,
+  `default_version` INT NULL,
+  `app_type_id` INT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT uk_Application_NAME_TID_REV UNIQUE(`name`, `tenant_id`),
+  CONSTRAINT `fk_Application_ApplicationType1`
+    FOREIGN KEY (`app_type_id`)
+    REFERENCES `AppCloudDB`.`AC_APP_TYPE` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `AppCloudDB`.`AC_DEPLOYMENT`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_DEPLOYMENT` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NULL,
   `replicas` INT NULL,
+  `tenant_id` INT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`Application`
+-- Table `AppCloudDB`.`AC_VERSION`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`Application` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_VERSION` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `application_name` VARCHAR(100) NOT NULL,
-  `description` VARCHAR(1000) NULL,
-  `tenant_id` INT NOT NULL,
-  `revision` VARCHAR(45) NOT NULL,
-  `application_runtime_id` INT NULL,
-  `application_type_id` INT NULL,
-  `endpoint_url` VARCHAR(1000) NULL,
+  `name` VARCHAR(13) NULL,
+  `hash_id` VARCHAR(24) NULL,
+  `application_id` INT NOT NULL,
+  `runtime_id` INT NOT NULL,
   `status` VARCHAR(45) NULL,
-  `number_of_replica` INT NULL,
-  `ApplicationDeployment_id` INT,
+  `deployment_id` INT NULL,
+  `tenant_id` INT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT uk_Application_NAME_TID_REV UNIQUE(`application_name`, `tenant_id`, `revision`),
-  CONSTRAINT `fk_Application_ApplicationRuntime`
-    FOREIGN KEY (`application_runtime_id`)
-    REFERENCES `AppCloudDB`.`ApplicationRuntime` (`id`)
+  CONSTRAINT `fk_AC_VERSION_AC_APPLICATION1`
+    FOREIGN KEY (`application_id`)
+    REFERENCES `AppCloudDB`.`AC_APPLICATION` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Application_ApplicationType1`
-    FOREIGN KEY (`application_type_id`)
-    REFERENCES `AppCloudDB`.`ApplicationType` (`id`)
+  CONSTRAINT `fk_AC_VERSION_ApplicationRuntime1`
+    FOREIGN KEY (`runtime_id`)
+    REFERENCES `AppCloudDB`.`AC_RUNTIME` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_AC_VERSION_ApplicationDeployment1`
+    FOREIGN KEY (`deployment_id`)
+    REFERENCES `AppCloudDB`.`AC_DEPLOYMENT` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationIcon` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `application_name` varchar(45) NOT NULL,
-  `icon` MEDIUMBLOB DEFAULT NULL,
-  `tenant_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT uk_AppIcon UNIQUE( `application_name` ,  `tenant_id`),
-  CONSTRAINT  `fk_ApplicationIcon_Application`
-  FOREIGN KEY (`application_name`,`tenant_id`)
-  REFERENCES `AppCloudDB`.`Application` (`application_name`,`tenant_id`)
-  ON UPDATE NO ACTION)
-ENGINE=InnoDB;
+
+
 
 
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`Label`
+-- Table `AppCloudDB`.`AC_TAG`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`Label` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_TAG` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `label_name` VARCHAR(100) NOT NULL,
-  `label_value` VARCHAR(100) NULL,
-  `application_id` INT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `value` VARCHAR(100) NULL,
+  `version_id` INT NOT NULL,
   `description` VARCHAR(1000) NULL,
   `tenant_id` INT NOT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_Label_Application1`
-    FOREIGN KEY (`application_id`)
-    REFERENCES `AppCloudDB`.`Application` (`id`)
+  CONSTRAINT `fk_AC_TAG_AC_VERSION1`
+    FOREIGN KEY (`version_id`)
+    REFERENCES `AppCloudDB`.`AC_VERSION` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`RuntimeProperties`
+-- Table `AppCloudDB`.`AC_RUNTIME_PROPERTY`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`RuntimeProperties` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_RUNTIME_PROPERTY` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `property_name` VARCHAR(100) NOT NULL,
-  `property_value` VARCHAR(100) NULL,
-  `application_id` INT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `value` VARCHAR(100) NULL,
+  `version_id` INT NOT NULL,
   `description` VARCHAR(1000) NULL,
   `tenant_id` INT NOT NULL,
+  `is_secured` BIT(1) NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_RuntimeProperties_Application1`
-    FOREIGN KEY (`application_id`)
-    REFERENCES `AppCloudDB`.`Application` (`id`)
+  CONSTRAINT `fk_AC_RUNTIME_PROPERTY_AC_VERSION1`
+    FOREIGN KEY (`version_id`)
+    REFERENCES `AppCloudDB`.`AC_VERSION` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
--- -----------------------------------------------------
--- Table `AppCloudDB`.`EndpointURL`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`EndpointURL` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `url_value` VARCHAR(1000) NULL,
-  `Application_id` INT NOT NULL,
-  `description` VARCHAR(1000) NULL,
-  `tenant_id` INT NOT NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `fk_EndpointURL_Application1`
-    FOREIGN KEY (`Application_id`)
-    REFERENCES `AppCloudDB`.`Application` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+
 
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`TenantAppType`
+-- Table `AppCloudDB`.`AC_TENANT_APP_TYPE`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`TenantAppType` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_TENANT_APP_TYPE` (
   `tenant_id` INT NOT NULL,
-  `application_type_id` INT NOT NULL,
+  `app_type_id` INT NOT NULL,
   CONSTRAINT `fk_TenantAppType_ApplicationType1`
-    FOREIGN KEY (`application_type_id`)
-    REFERENCES `AppCloudDB`.`ApplicationType` (`id`)
+    FOREIGN KEY (`app_type_id`)
+    REFERENCES `AppCloudDB`.`AC_APP_TYPE` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`ApplicationTypeRuntime`
+-- Table `AppCloudDB`.`AC_APP_TYPE_RUNTIME`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationTypeRuntime` (
-  `application_type_id` INT NOT NULL,
-  `application_runtime_id` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_APP_TYPE_RUNTIME` (
+  `app_type_id` INT NOT NULL,
+  `runtime_id` INT NOT NULL,
   CONSTRAINT `fk_ApplicationType_has_ApplicationRuntime_ApplicationType1`
-    FOREIGN KEY (`application_type_id`)
-    REFERENCES `AppCloudDB`.`ApplicationType` (`id`)
+    FOREIGN KEY (`app_type_id`)
+    REFERENCES `AppCloudDB`.`AC_APP_TYPE` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ApplicationType_has_ApplicationRuntime_ApplicationRuntime1`
-    FOREIGN KEY (`application_runtime_id`)
-    REFERENCES `AppCloudDB`.`ApplicationRuntime` (`id`)
+    FOREIGN KEY (`runtime_id`)
+    REFERENCES `AppCloudDB`.`AC_RUNTIME` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -209,7 +211,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Populate Data to `AppCloudDB`.`ApplicationTypeRuntime`
 -- -----------------------------------------------------
-INSERT INTO `ApplicationTypeRuntime` (`application_type_id`, `application_runtime_id`) VALUES
+INSERT INTO `AC_APP_TYPE_RUNTIME` (`app_type_id`, `runtime_id`) VALUES
 (1, 1),
 (2, 2),
 (3, 3),
@@ -218,99 +220,121 @@ INSERT INTO `ApplicationTypeRuntime` (`application_type_id`, `application_runtim
 
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`TenanntRuntime`
+-- Table `AppCloudDB`.`AC_TENANT_RUNTIME`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`TenanntRuntime` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_TENANT_RUNTIME` (
   `tenant_id` INT NOT NULL,
-  `application_runtime_id` INT NOT NULL,
+  `runtime_id` INT NOT NULL,
   CONSTRAINT `fk_TenanntRuntime_ApplicationRuntime1`
-    FOREIGN KEY (`application_runtime_id`)
-    REFERENCES `AppCloudDB`.`ApplicationRuntime` (`id`)
+    FOREIGN KEY (`runtime_id`)
+    REFERENCES `AppCloudDB`.`AC_RUNTIME` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`ApplicationEvents`
+-- Table `AppCloudDB`.`AC_EVENT`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationEvents` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_EVENT` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `application_id` INT NOT NULL,
-  `event_name` VARCHAR(100) NOT NULL,
-  `event_status` VARCHAR(45) NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `status` VARCHAR(45) NULL,
+  `version_id` INT NOT NULL,
   `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `event_desc` VARCHAR(1000) NULL,
+  `description` VARCHAR(1000) NULL,
+  `tenant_id` INT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_ApplicationEvents_Application1`
-    FOREIGN KEY (`application_id`)
-    REFERENCES `AppCloudDB`.`Application` (`id`)
-    ON DELETE CASCADE 
+  CONSTRAINT `fk_AC_EVENT_AC_VERSION1`
+    FOREIGN KEY (`version_id`)
+    REFERENCES `AppCloudDB`.`AC_VERSION` (`id`)
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`ApplicationContainer`
+-- Table `AppCloudDB`.`AC_CONTAINER`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationContainer` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_CONTAINER` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `image_name` VARCHAR(100) NULL,
-  `image_version` VARCHAR(45) NULL,
-  `ApplicationDeployment_id` INT NOT NULL,
+  `name` VARCHAR(100) NULL,
+  `version` VARCHAR(45) NULL,
+  `deployment_id` INT NOT NULL,
+  `tenant_id` INT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_ApplicationContainer_ApplicationDeployment1`
-    FOREIGN KEY (`ApplicationDeployment_id`)
-    REFERENCES `AppCloudDB`.`ApplicationDeployment` (`id`)
+    FOREIGN KEY (`deployment_id`)
+    REFERENCES `AppCloudDB`.`AC_DEPLOYMENT` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`ApplicationServiceProxy`
+-- Table `AppCloudDB`.`AC_CONTAINER_SERVICE_PROXY`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationServiceProxy` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_CONTAINER_SERVICE_PROXY` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `service_name` VARCHAR(100) NULL,
-  `service_protocol` VARCHAR(100) NULL,
-  `service_port` INT NULL,
-  `service_backend_port` VARCHAR(45) NULL,
-  `ApplicationContainer_id` INT NOT NULL,
+  `name` VARCHAR(100) NULL,
+  `protocol` VARCHAR(20) NULL,
+  `port` INT NULL,
+  `backend_port` VARCHAR(45) NULL,
+  `container_id` INT NOT NULL,
+  `tenant_id` INT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_ApplicationServiceProxy_ApplicationContainer1`
-    FOREIGN KEY (`ApplicationContainer_id`)
-    REFERENCES `AppCloudDB`.`ApplicationContainer` (`id`)
+    FOREIGN KEY (`container_id`)
+    REFERENCES `AppCloudDB`.`AC_CONTAINER` (`id`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`Service`
+-- Table `AppCloudDB`.`AC_APP_ICON`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`Service` (
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_APP_ICON` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `icon` MEDIUMBLOB DEFAULT NULL,
+  `application_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `application_id_UNIQUE` (`application_id` ASC),
+  CONSTRAINT `fk_AC_APPLICATION_ICON_AC_APPLICATION1`
+    FOREIGN KEY (`application_id`)
+    REFERENCES `AppCloudDB`.`AC_APPLICATION` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `AppCloudDB`.`AC_TRANSPORT`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_TRANSPORT` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `service_name` VARCHAR(20) NOT NULL,
-  `service_port` INT NOT NULL,
-  `service_protocol` VARCHAR(4) NOT NULL,
-  `description` VARCHAR(1000) NULL,
+  `name` VARCHAR(20) NOT NULL,
+  `port` INT NOT NULL,
+  `protocol` VARCHAR(4) NOT NULL,
+  `description` VARCHAR(1000) NULL DEFAULT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
+
 -- -----------------------------------------------------
--- Table `AppCloudDB`.`ApplicationRuntimeServices`
+-- Table `AppCloudDB`.`AC_RUNTIME_TRANSPORT`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `AppCloudDB`.`ApplicationRuntimeService` (
-  `service_id` INT NOT NULL,
-  `application_runtime_id` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_RUNTIME_TRANSPORT` (
+  `transport_id` INT NOT NULL,
+  `runtime_id` INT NOT NULL,
   CONSTRAINT `fk_Service_id`
-    FOREIGN KEY (`service_id`)
-    REFERENCES `AppCloudDB`.`Service` (`id`)
+    FOREIGN KEY (`transport_id`)
+    REFERENCES `AppCloudDB`.`AC_TRANSPORT` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ApplicationRuntime_id`
-    FOREIGN KEY (`application_runtime_id`)
-    REFERENCES `AppCloudDB`.`ApplicationRuntime` (`id`)
+    FOREIGN KEY (`runtime_id`)
+    REFERENCES `AppCloudDB`.`AC_RUNTIME` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -319,7 +343,7 @@ ENGINE = InnoDB;
 -- Populate Data to `AppCloudDB`.`ApplicationRuntime`
 -- -----------------------------------------------------
 
-INSERT INTO `Service` (`id`, `service_name`, `service_port`, `service_protocol`, `description`) VALUES
+INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `description`) VALUES
 (1, 'http', 80, 'TCP', 'HTTP Protocol'),
 (2, 'https', 443, 'TCP', 'HTTPS Protocol'),
 (3, 'http-alt', 8080, 'TCP', 'HTTP Alternate Protocol'),
@@ -330,7 +354,7 @@ INSERT INTO `Service` (`id`, `service_name`, `service_port`, `service_protocol`,
 -- -----------------------------------------------------
 -- Populate Data to `AppCloudDB`.`ApplicationRuntimeService`
 -- -----------------------------------------------------
-INSERT INTO `ApplicationRuntimeService` (`service_id`, `application_runtime_id`) VALUES
+INSERT INTO `AC_RUNTIME_TRANSPORT` (`transport_id`, `runtime_id`) VALUES
 (3, 1),
 (3, 2),
 (1, 3),

@@ -28,7 +28,7 @@
          return;
      }
 
-     var applicationName = request.getParameter('applicationName');
+     var applicationKey = request.getParameter('applicationKey');
      var applicationRevision = request.getParameter('applicationRevision');
      jagg.render({
          "name":"page/master",
@@ -47,7 +47,7 @@
                              {
                              	"name":"runtimeLogs",
                              "inputs":{
-                                 "applicationName":applicationName,
+                                 "applicationKey":applicationKey,
                                  "applicationRevision":applicationRevision,
                                  "pageName":"logs"
                              }

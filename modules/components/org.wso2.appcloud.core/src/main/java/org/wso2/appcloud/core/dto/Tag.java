@@ -17,35 +17,26 @@
 
 package org.wso2.appcloud.core.dto;
 
-public class Label {
+public class Tag {
 
-    private int labelId;
-    private String labelName;
-    private String labelValue;
+    private String tagName;
+    private String tagValue;
     private String description;
 
-    public int getLabelId() {
-        return labelId;
+    public String getTagName() {
+        return tagName;
     }
 
-    public void setLabelId(int labelId) {
-        this.labelId = labelId;
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
     }
 
-    public String getLabelName() {
-        return labelName;
+    public String getTagValue() {
+        return tagValue;
     }
 
-    public void setLabelName(String labelName) {
-        this.labelName = labelName;
-    }
-
-    public String getLabelValue() {
-        return labelValue;
-    }
-
-    public void setLabelValue(String labelValue) {
-        this.labelValue = labelValue;
+    public void setTagValue(String tagValue) {
+        this.tagValue = tagValue;
     }
 
     public String getDescription() {
@@ -55,5 +46,4 @@ public class Label {
     public void setDescription(String description) {
         this.description = description;
     }
-
 }
