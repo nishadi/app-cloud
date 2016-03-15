@@ -106,8 +106,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 <form id="changeAppIcon" action="/appmgt/site/blocks/application/application.jag" method="post" enctype="multipart/form-data">
                     <input id="change_app_icon" type="file" style="display:none" name="changeIcon" />
                     <input id="action" type="hidden" name="action" value="changeAppIcon" />
-                    <input id="applicationName" type="hidden" name="applicationName" value="<%=applicationName%>"/>
-                    <input id="selectedRevision" type="hidden" name="selectedRevision" value="<%=selectedRevision%>"/>
+                    <input id="applicationKey" type="hidden" name="applicationKey" value="<%=applicationKey%>"/>
                 </form>
               </div>
               <div class="app-desc">
@@ -437,7 +436,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 if(event.name === "Status" && event.status === "success"){
                     setTimeout(redirectAppHome, 2000);
                     function redirectAppHome(){
-                        window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
+                        window.location.replace("home.jag?applicationKey=" + applicationKey);
                     }
                 } else if(event.status == "failed"){
                     jagg.message({content: "Error occurred while creating application.", type: 'error'});
