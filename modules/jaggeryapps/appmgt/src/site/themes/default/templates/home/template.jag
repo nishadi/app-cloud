@@ -132,9 +132,11 @@ jagg.template("home", function(inputs, outputs, jagg) {
                               </button>
                               <ul id="appVersionList" class="dropdown-menu" >
                               <%
-                                for (var x = 0; x < application.versions.length; x++) {
+                                var versions = application.versions;
+                                var keyArray = Object.keys(versions);
+                                for (var x = 0; x < keyArray.length; x++) {
                               %>
-                                  <li ><a href="#"><%=application.versions[x]%></a></li>
+                                  <li ><a href="#"><%=versions[keyArray[x]].versionName%></a></li>
                               <%
                               }
                               %>
