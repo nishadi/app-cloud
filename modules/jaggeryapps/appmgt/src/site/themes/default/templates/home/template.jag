@@ -152,7 +152,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                 if(selectedApplicationRevision.status=='running'){
                                 %>
                                     <div class="btn-group ctrl-edit-button btn-edit-code">
-                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication(document.getElementById('applicationName').value, document.getElementById('selectedRevision').value);">Stop
+                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication();">Stop
                                         <span id="stop-in-progress"><span>
                                       </a>
                                     </div>
@@ -160,7 +160,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                 }else if(selectedApplicationRevision.status=='stopped'){
                                 %>
                                     <div class="btn-group ctrl-edit-button btn-edit-code">
-                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-blue" onclick="startApplication(document.getElementById('applicationName').value, document.getElementById('selectedRevision').value);">Start</a>
+                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-blue" onclick="startApplication();">Start</a>
                                     </div>
                                 <%
 
@@ -248,7 +248,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                    <span id="runtimePropCount"><%=selectedApplicationRevision.runtimeProperties.length.toString()%></span>
                   </div>
                   <div class="clearfix"></div>
-                  <a href="/appmgt/site/pages/envs.jag?applicationKey=<%=applicationKey%>&revision=<%=selectedRevision%>">
+                  <a href="/appmgt/site/pages/envs.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">
                       <div class="block-action-button">
                             <span class="fw-stack fw-lg btn-action-ico">
                                 <i class="fw fw-ring fw-stack-2x"></i>
@@ -328,13 +328,14 @@ jagg.template("home", function(inputs, outputs, jagg) {
     });
 
     // stop application
-    function stopApplication(applicationName, revision){
+    function stopApplication(){
         $("#stop-in-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
         executeAsync(waitAndReloadAfterStop());
         jagg.post("../blocks/application/application.jag", {
             action: "stopApplication",
             applicationName: applicationName,
-            applicationRevision: revision
+            applicationRevision: selectedRevision,
+            versionKey: selectedApplicationRevision.hashId
 
         }, function (result) {
             jagg.message({content: "Application stop request is submitted successfully.", type: 'info'});
@@ -350,14 +351,14 @@ jagg.template("home", function(inputs, outputs, jagg) {
     }
 
     // redeploy application
-    function startApplication(applicationName, revision){
+    function startApplication(){
 
         executeAsync(drawProgressWindow());
 
         jagg.post("../blocks/application/application.jag", {
             action: "startApplication",
             applicationName: applicationName,
-            applicationRevision: revision,
+            applicationRevision: selectedRevision,
             versionKey: selectedApplicationRevision.hashId
 
         }, function (result) {
@@ -436,7 +437,8 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 if(event.name === "Status" && event.status === "success"){
                     setTimeout(redirectAppHome, 2000);
                     function redirectAppHome(){
-                        window.location.replace("home.jag?applicationKey=" + applicationKey);
+                        window.location.replace("home.jag?applicationKey=<%=applicationKey%>");
+
                     }
                 } else if(event.status == "failed"){
                     jagg.message({content: "Error occurred while creating application.", type: 'error'});
