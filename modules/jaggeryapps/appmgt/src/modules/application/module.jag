@@ -21,6 +21,9 @@ jagg.module("application", {
     addApplication:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").addApplication.apply(this, arguments);
     },
+    addApplicationViaGitHub:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").addApplicationViaGitHub.apply(this, arguments);
+    },
     deleteApplicationFromKubernetes:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteApplicationFromKubernetes.apply(this, arguments);
     },

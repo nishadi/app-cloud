@@ -70,20 +70,13 @@ public class DockerOpClient {
         dockerClient = new DefaultDockerClient(config);
     }
 
-    public void createDockerFile(String runtimeId, String appType, String artifactName, String dockerFilePath,
+    public void createDockerFile(String runtimeId, String artifactName, String dockerFilePath,
                                  String dockerTemplateFilePath)
             throws IOException, AppCloudException {
 
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-        ApplicationRuntime applicationRuntime = applicationDAO.getRuntimeById(Integer.parseInt(runtimeId));
-
-        String dockerRegistryUrl = DockerUtil.getDockerRegistryUrl();
-        String dockerBaseImageName = applicationRuntime.getImageName();
-        String dockerBaseImageVersion = applicationRuntime.getTag();
+        String dockerFileTemplatePath = DockerUtil.getDockerFileTemplatePath(runtimeId, dockerTemplateFilePath);
         String artifactNameWithoutExtension = artifactName.substring(0, artifactName.lastIndexOf("."));
         List<String> dockerFileConfigs = new ArrayList<String>();
-        String dockerFileTemplatePath = dockerTemplateFilePath + "/" + "Dockerfile"+ "." + dockerBaseImageName + "." +
-                dockerBaseImageVersion;
         for(String line: FileUtils.readLines(new File(dockerFileTemplatePath))) {
             if(line.contains("ARTIFACT_NAME")) {
                 dockerFileConfigs.add(line.replace("ARTIFACT_NAME", artifactName));
@@ -92,6 +85,24 @@ public class DockerOpClient {
             } else {
                 dockerFileConfigs.add(line);
             }
+        }
+        FileUtils.writeLines(new File(dockerFilePath), dockerFileConfigs);
+    }
+
+    public void createDockerFileForGitHub(String runtimeId, String gitRepoUrl, String gitRepoBranch,
+                                          String dockerFilePath, String dockerGitHubTemplateFilePath)
+            throws IOException, AppCloudException {
+
+        String dockerFileTemplatePath = DockerUtil.getDockerFileTemplatePath(runtimeId, dockerGitHubTemplateFilePath);
+        List<String> dockerFileConfigs = new ArrayList<String>();
+        for (String line : FileUtils.readLines(new File(dockerFileTemplatePath))) {
+            if (line.contains("GIT_REPO_URL")) {
+                line = line.replace("GIT_REPO_URL", gitRepoUrl);
+            }
+            if (line.contains("GIT_REPO_BRANCH")) {
+                line = line.replace("GIT_REPO_BRANCH", gitRepoBranch);
+            }
+            dockerFileConfigs.add(line);
         }
         FileUtils.writeLines(new File(dockerFilePath), dockerFileConfigs);
     }

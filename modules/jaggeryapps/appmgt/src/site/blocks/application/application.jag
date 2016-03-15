@@ -54,9 +54,17 @@ var log = new Log();
         if (isFileAttached) {
             applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName, applicationRevision);
         }
-
-        applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
-                runtimeId, appTypeName, runtimeProperties, tags, appIcon, uploadedFileName);
+        if(uploadedFileName) {
+            applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
+                                             runtimeId, appTypeName, runtimeProperties, tags, appIcon,
+                                             uploadedFileName);
+        }else{
+            var gitRepoUrl = request.getParameter("gitRepoUrl");
+            var gitRepoBranch = request.getParameter("gitRepoBranch");
+            applicationModule.addApplicationViaGitHub(applicationName, applicationRevision, applicationDescription, replicas,
+                                             runtimeId, appTypeName, runtimeProperties, tags, appIcon, gitRepoUrl,
+                                             gitRepoBranch);
+        }
         response.status = 200;
         response.message = "Application creation is successfully submitted";
 
