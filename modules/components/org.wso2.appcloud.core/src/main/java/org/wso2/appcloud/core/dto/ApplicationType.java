@@ -19,17 +19,8 @@ package org.wso2.appcloud.core.dto;
 
 public class ApplicationType {
 
-    private int id;
     private String appTypeName;
     private String description;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getAppTypeName() {
         return appTypeName;

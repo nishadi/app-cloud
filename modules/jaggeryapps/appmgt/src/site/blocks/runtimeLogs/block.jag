@@ -33,18 +33,18 @@ jagg.block("runtimeLogs", {
     getOutputs: function (inputs) {
         var viewRuntimeLogPermission = true;
         var applicationMod = jagg.module("application");
-        var applicationName = inputs.applicationName;
-        var revisionsList = applicationMod.getAllRevisionsOfApplication(applicationName);
+        var applicationKey = inputs.applicationKey;
         var selectedRevision = inputs.applicationRevision;
+        var revisionsList = applicationMod.getVersionListOfApplication(applicationKey);
         if(!selectedRevision) {
-            selectedRevision = applicationMod.getSelectedRevisionFromSession(inputs.applicationName);
+            selectedRevision = applicationMod.getSelectedRevisionFromSession(applicationKey);
             if(!selectedRevision && revisionsList.length > 0){
                 selectedRevision = revisionsList[0];
             }
         }
         return {
             "viewRuntimeLogPermission": viewRuntimeLogPermission,
-            "applicationName": applicationName,
+            "applicationKey": applicationKey,
             "selectedRevision": selectedRevision,
             "revisionsList":revisionsList
         };

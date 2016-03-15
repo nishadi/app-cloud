@@ -23,20 +23,21 @@ import org.wso2.appcloud.core.DBUtil;
 import org.wso2.appcloud.core.SQLQueryConstants;
 import org.wso2.appcloud.core.dto.Application;
 import org.wso2.appcloud.core.dto.ApplicationRuntime;
-import org.wso2.appcloud.core.dto.ApplicationSummery;
 import org.wso2.appcloud.core.dto.ApplicationType;
-import org.wso2.appcloud.core.dto.Endpoint;
-import org.wso2.appcloud.core.dto.Label;
+import org.wso2.appcloud.core.dto.Container;
+import org.wso2.appcloud.core.dto.ContainerServiceProxy;
+import org.wso2.appcloud.core.dto.Deployment;
 import org.wso2.appcloud.core.dto.RuntimeProperty;
+import org.wso2.appcloud.core.dto.Tag;
+import org.wso2.appcloud.core.dto.Transport;
+import org.wso2.appcloud.core.dto.Version;
 
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.wso2.appcloud.core.dto.*;
-
-import java.sql.*;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,207 +51,445 @@ public class ApplicationDAO {
     private static final Log log = LogFactory.getLog(ApplicationDAO.class);
 
     /**
-     * Method for adding application to database
+     * Method for adding application details to database
      *
+     * @param dbConnection database connection
      * @param application application object
-     * @param tenantId    tenant id
-     * @return true if application adding completed
+     * @param tenantId tenant id
+     * @return
      * @throws AppCloudException
      */
-    public boolean addApplication(Application application, int tenantId) throws AppCloudException {
+    public void addApplication(Connection dbConnection, Application application, int tenantId) throws AppCloudException {
+
         PreparedStatement preparedStatement = null;
-        Connection dbConnection = DBUtil.getDBConnection();
+        int applicationId = 0;
+        ResultSet resultSet = null;
 
         try {
 
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_APPLICATION);
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_APPLICATION, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, application.getApplicationName());
-            preparedStatement.setString(2, application.getDescription());
-            preparedStatement.setInt(3, tenantId);
-            preparedStatement.setString(4, application.getRevision());
-            preparedStatement.setInt(5, application.getRuntimeId());
+            preparedStatement.setString(2, application.getHashId());
+            preparedStatement.setString(3, application.getDescription());
+            preparedStatement.setInt(4, tenantId);
+            preparedStatement.setString(5, application.getDefaultVersion());
             preparedStatement.setString(6, application.getApplicationType());
-            preparedStatement.setString(7, application.getEndpointURL());
-            preparedStatement.setString(8, application.getStatus());
-            preparedStatement.setInt(9, application.getNumberOfReplicas());
 
             preparedStatement.execute();
-            dbConnection.commit();
+
+            resultSet = preparedStatement.getGeneratedKeys();
+            while (resultSet.next()){
+                applicationId = resultSet.getInt(1);
+            }
+
+            List<Version> versions = application.getVersions();
+
+            if (versions != null) {
+                for (Version version : versions) {
+                    addVersion(dbConnection, version, application.getApplicationName(), applicationId, tenantId);
+                }
+            }
 
         } catch (SQLException e) {
 
             String msg =
                     "Error occurred while adding application : " + application.getApplicationName() + " to database " +
                             "in tenant : " + tenantId;
-            throw new AppCloudException(msg, e);
-
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-
-        return true;
-    }
-
-    /**
-     * Method for adding label, which associated with an application, to database
-     *
-     * @param applicationName     name of the application
-     * @param applicationRevision revision of the application
-     * @param tenantId            tenant id
-     * @param labels              labels of the application
-     * @return true if label adding completed
-     * @throws AppCloudException
-     */
-    public boolean addLabel(String applicationName, String applicationRevision, int tenantId, List<Label> labels)
-            throws AppCloudException {
-        int applicationId = getIdOfApplication(applicationName, applicationRevision, tenantId);
-
-        PreparedStatement preparedStatement = null;
-        Connection dbConnection = DBUtil.getDBConnection();
-
-        try {
-            for (Label label : labels) {
-                preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_LABEL);
-                preparedStatement.setString(1, label.getLabelName());
-                preparedStatement.setString(2, label.getLabelValue());
-                preparedStatement.setInt(3, applicationId);
-                preparedStatement.setInt(4, tenantId);
-                preparedStatement.setString(5, label.getDescription());
-
-                preparedStatement.execute();
-            }
-            dbConnection.commit();
-        } catch (SQLException e) {
-
-            String msg = "Error occurred while adding the label for application : " + applicationName
-                    + " to the database in tenant" +
-                    " : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-
-        return true;
-    }
-
-    /**
-     * Method for adding runtime property, which belongs to an application, to the database
-     *
-     * @param applicationName     name of the application
-     * @param applicationRevision revision of the application
-     * @param tenantId            tenant id
-     * @param runtimeProperties   runtime properties
-     * @return true if runtime properties adding completed
-     * @throws AppCloudException
-     */
-    public boolean addRunTimeProperty(String applicationName, String applicationRevision, int tenantId,
-            List<RuntimeProperty> runtimeProperties) throws AppCloudException {
-        int applicationId = getIdOfApplication(applicationName, applicationRevision, tenantId);
-
-        PreparedStatement preparedStatement = null;
-        Connection dbConnection = DBUtil.getDBConnection();
-
-        try {
-            for (RuntimeProperty runtimeProperty : runtimeProperties) {
-                preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_RUNTIME_PROPERTY);
-                preparedStatement.setString(1, runtimeProperty.getPropertyName());
-                preparedStatement.setString(2, runtimeProperty.getPropertyValue());
-                preparedStatement.setInt(3, applicationId);
-                preparedStatement.setInt(4, tenantId);
-                preparedStatement.setString(5, runtimeProperty.getDescription());
-
-                preparedStatement.execute();
-            }
-            dbConnection.commit();
-        } catch (SQLException e) {
-
-            String msg = "Error occurred while adding the property for application : " + applicationName +
-                    " to the database in tenant" +
-                    " : " + tenantId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
 
         } finally {
+            DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
         }
-
-        return true;
 
     }
 
 
     /**
-     * Method for adding endpoint, which is associated with an application, to database
+     * Method for adding version details to database
      *
-     * @param endpoint Endpoint object
+     * @param dbConnection database connection
+     * @param version version object
+     * @param applicationId application id
+     * @param tenantId tenant id
      * @return
      * @throws AppCloudException
      */
-    public boolean addEndpoint(Endpoint endpoint, String applicationName, String revision, int tenantId)
+    public void addVersion(Connection dbConnection, Version version, String applicationName, int applicationId, int tenantId)
             throws AppCloudException {
 
-        int applicationId = getIdOfApplication(applicationName, revision, tenantId);
 
         PreparedStatement preparedStatement = null;
-        Connection dbConnection = DBUtil.getDBConnection();
+        int versionId = 0;
+        ResultSet resultSet = null;
 
         try {
 
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_ENDPOINT_URL);
-            preparedStatement.setString(1, endpoint.getUrlValue());
-            preparedStatement.setInt(2, applicationId);
-            preparedStatement.setInt(3, tenantId);
-            preparedStatement.setString(4, endpoint.getDescription());
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_VERSION, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, version.getVersionName());
+            preparedStatement.setString(2, version.getHashId());
+            preparedStatement.setInt(3, applicationId);
+            preparedStatement.setInt(4, version.getRuntimeId());
+            preparedStatement.setInt(5, tenantId);
 
             preparedStatement.execute();
-            dbConnection.commit();
 
-        } catch (SQLException e) {
-
-            if (dbConnection != null) {
-                log.error("Error while adding Endpoint : " + endpoint.getUrlValue() + " to database for " +
-                          "tenant : " + tenantId + ". Transaction is being rolled back");
-                try {
-                    dbConnection.rollback();
-                } catch (SQLException e1) {
-                    log.error("Error while rolling back the failed transaction", e1);
-                }
+            resultSet = preparedStatement.getGeneratedKeys();
+            while (resultSet.next()){
+                versionId = resultSet.getInt(1);
             }
 
-            String msg = "Error occurred while adding the endpoint : " + endpoint.getUrlValue() +
-                         " to the database in tenant" +
-                         " : " + tenantId;
+            List<Tag> tags = version.getTags();
+            if (tags != null) {
+                addTags(dbConnection, tags, version.getHashId(), tenantId);
+            }
+
+            List<RuntimeProperty> runtimeProperties = version.getRuntimeProperties();
+            if (runtimeProperties != null) {
+                addRunTimeProperties(dbConnection, runtimeProperties, version.getHashId(), tenantId);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while adding application version to database for application id : " + applicationId +
+                         " version : " + version.getVersionName() + " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+
+    }
+
+
+
+    /**
+     * Method for adding label, which associated with a version of an application, to database
+     *
+     * @param dbConnection database Connection
+     * @param tags list of tags
+     * @param versionHashId version hash id
+     * @param tenantId tenant id
+     * @throws AppCloudException
+     */
+    public void addTags(Connection dbConnection, List<Tag> tags, String versionHashId, int tenantId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_TAG);;
+
+            for (Tag tag : tags) {
+
+                preparedStatement.setString(1, tag.getTagName());
+                preparedStatement.setString(2, tag.getTagValue());
+                preparedStatement.setString(3, versionHashId);
+                preparedStatement.setString(4, tag.getDescription());
+                preparedStatement.setInt(5, tenantId);
+
+                preparedStatement.addBatch();
+            }
+
+            preparedStatement.executeBatch();
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while adding tags to database for version with hash id : " + versionHashId + " in tenant : "
+                         + tenantId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
 
         } finally {
             DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    /**
+     * Method for adding runtime property, which belongs to a version of an application, to the database
+     *
+     * @param dbConnection database connecton
+     * @param runtimeProperties list of runtime properties
+     * @param versionHashId version hash id
+     * @param tenantId tenant id
+     * @return
+     * @throws AppCloudException
+     */
+    public boolean addRunTimeProperties (Connection dbConnection, List<RuntimeProperty> runtimeProperties, String versionHashId,
+                                         int tenantId) throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_RUNTIME_PROPERTY);
+
+            for (RuntimeProperty runtimeProperty : runtimeProperties) {
+
+                preparedStatement.setString(1, runtimeProperty.getPropertyName());
+                preparedStatement.setString(2, runtimeProperty.getPropertyValue());
+                preparedStatement.setString(3, versionHashId);
+                preparedStatement.setString(4, runtimeProperty.getDescription());
+                preparedStatement.setInt(5, tenantId);
+                preparedStatement.setBoolean(6, runtimeProperty.isSecured());
+
+                preparedStatement.addBatch();
+            }
+
+            preparedStatement.executeBatch();
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while adding property to the database for version id : " + versionHashId + " in " +
+                         "tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
         }
 
         return true;
+
+    }
+
+
+    public void addDeployment(Connection dbConnection, String versionHashId, Deployment deployment) throws AppCloudException{
+
+        int deploymentId = addDeployment(dbConnection, deployment);
+        PreparedStatement preparedStatement = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_VERSION_WITH_DEPLOYMENT);
+            preparedStatement.setInt(1, deploymentId);
+            preparedStatement.setString(2, versionHashId);
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            String msg = "Error while updating deployment detail for version with hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+    }
+
+
+    private int addDeployment(Connection dbConnection, Deployment deployment) throws AppCloudException{
+
+        PreparedStatement preparedStatement = null;
+        int deploymentId =-1;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_DEPLOYMENT, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, deployment.getDeploymentName());
+            preparedStatement.setInt(2, deployment.getReplicas());
+            preparedStatement.execute();
+
+            ResultSet rs = preparedStatement.getGeneratedKeys();
+
+            if(rs.next()) {
+                deploymentId = rs.getInt(1);
+            }
+
+            for(Container container: deployment.getContainers()){
+                addContainer(dbConnection, container, deploymentId);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while inserting deployment record.";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        if(deploymentId==-1){
+            throw new AppCloudException("Failed to insert deployment record.");
+        }
+        return deploymentId;
+    }
+
+
+    public void addContainer(Connection dbConnection, Container container, int deploymentId) throws AppCloudException{
+
+        PreparedStatement preparedStatement = null;
+        int containerId = -1;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_CONTAINER, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, container.getImageName());
+            preparedStatement.setString(2, container.getImageVersion());
+            preparedStatement.setInt(3, deploymentId);
+
+            preparedStatement.execute();
+
+            ResultSet rs = preparedStatement.getGeneratedKeys();
+            if(rs.next()) {
+                containerId = rs.getInt(1);
+            }
+            for(ContainerServiceProxy containerServiceProxy : container.getServiceProxies()){
+                addContainerServiceProxy(dbConnection, containerServiceProxy, containerId);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while inserting deployment container record.";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+    }
+
+    public void addContainerServiceProxy(Connection dbConnection, ContainerServiceProxy containerServiceProxy,
+                                         int containerId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_CONTAINER_SERVICE_PROXY, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, containerServiceProxy.getServiceName());
+            preparedStatement.setString(2, containerServiceProxy.getServiceProtocol());
+            preparedStatement.setInt(3, containerServiceProxy.getServicePort());
+            preparedStatement.setString(4, containerServiceProxy.getServiceBackendPort());
+            preparedStatement.setInt(5, containerId);
+            preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg = "Error while inserting container service proxy record.";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+    }
+
+
+    public void updateApplicationIcon(Connection dbConnection, InputStream inputStream, String applicationHashId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_APPLICATION_ICON);
+            preparedStatement.setBlob(1, inputStream);
+            preparedStatement.setString(2, applicationHashId);
+            preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg =
+                    "Error occurred while updating application icon for application with hash id : " + applicationHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+    }
+
+
+    /**
+     * Method for updating the status of the given version
+     *
+     * @param status status of the version
+     * @param versionHashId version hash id
+     * @return
+     * @throws AppCloudException
+     */
+    public boolean updateVersionStatus(Connection dbConnection, String status, String versionHashId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_APPLICATION_STATUS);
+            preparedStatement.setString(1, status);
+            preparedStatement.setString(2, versionHashId);
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            String msg = "Error while updating application status : " + status + " for version with the hash id : " +
+                         versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        return true;
+    }
+
+    public void updateRuntimeProperty(Connection dbConnection, String versionHashId, String oldKey, String newKey,
+                                      String newValue) throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_RUNTIME_PROPERTIES);
+            preparedStatement.setString(1, newKey);
+            preparedStatement.setString(2, newValue);
+            preparedStatement.setString(3, versionHashId);
+            preparedStatement.setString(4, oldKey);
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            String msg = "Error while updating runtime property Key : " + oldKey + " for version with hash id : " +
+                         versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+    }
+
+    public void updateTag(Connection dbConnection, String versionHashId, String oldKey, String newKey, String newValue)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_TAG);
+            preparedStatement.setString(1, newKey);
+            preparedStatement.setString(2, newValue);
+            preparedStatement.setString(3, versionHashId);
+            preparedStatement.setString(4, oldKey);
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            String msg = "Error while updating tag Key : " + oldKey + " for version with hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
     }
 
 
     /**
      * Method for getting the list of applications of a tenant from database with minimal information
      *
+     * @param dbConnection database connection
      * @param tenantId tenant id
      * @return
      * @throws AppCloudException
      */
-    public List<ApplicationSummery> getAllApplicationsList(int tenantId) throws AppCloudException {
+    public List<Application> getAllApplicationsList(Connection dbConnection, int tenantId) throws AppCloudException {
 
-        Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
 
-        List<ApplicationSummery> applicationSummeryList = new ArrayList<ApplicationSummery>();
-        ApplicationSummery applicationSummery;
+        List<Application> applications = new ArrayList<>();
+        Application application;
         ResultSet resultSet = null;
+
         try {
 
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_APPLICATIONS_LIST);
@@ -259,15 +498,14 @@ public class ApplicationDAO {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                applicationSummery = new ApplicationSummery();
-                applicationSummery.setApplicationId(resultSet.getInt(SQLQueryConstants.ID));
-                applicationSummery.setApplicationName(resultSet.getString(SQLQueryConstants.APPLICATION_NAME));
-                applicationSummery.setStatus(resultSet.getString(SQLQueryConstants.APPLICATION_STATUS));
-                applicationSummery.setAppType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
-                applicationSummery.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
-                applicationSummery.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
 
-                applicationSummeryList.add(applicationSummery);
+                application = new Application();
+                application.setApplicationName(resultSet.getString(SQLQueryConstants.APPLICATION_NAME));
+                application.setApplicationType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
+                application.setHashId(resultSet.getString(SQLQueryConstants.HASH_ID));
+                application.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
+
+                applications.add(application);
             }
 
         } catch (SQLException e) {
@@ -277,77 +515,253 @@ public class ApplicationDAO {
         } finally {
             DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
         }
-        return applicationSummeryList;
+        return applications;
+    }
+
+
+    public List<String> getAllVersionListOfApplication(Connection dbConnection, String applicationHashId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+        ArrayList<String> versionList = new ArrayList<>();
+        ResultSet resultSet = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_VERSION_LIST_OF_APPLICATION);
+            preparedStatement.setString(1, applicationHashId);
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                versionList.add(resultSet.getString(SQLQueryConstants.NAME));
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while getting the list of versions for the application with hash id : " + applicationHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        return versionList;
+    }
+
+    public String getApplicationNameByHashId(Connection dbConnection, String applicationHashId)
+            throws AppCloudException {
+        PreparedStatement preparedStatement;
+        ResultSet resultSet;
+        String applicationName = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_APPLICATION_NAME_BY_HASH_ID);
+            preparedStatement.setString(1, applicationHashId);
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                applicationName = resultSet.getString(SQLQueryConstants.NAME);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while getting the application name of application with hash id : " + applicationHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        }
+
+        return applicationName;
     }
 
 
     /**
-     * Method for getting application from database using application id
+     * Method for getting application from database using application hash id
      *
-     * @param applicationName name of the application
-     * @param revision        revision of the application
+     * @param dbConnection database connection
+     * @param applicationHashId application hash id
      * @return
      * @throws AppCloudException
      */
-    public Application getApplicationByNameRevision(String applicationName, String revision, int tenantId)
-            throws AppCloudException {
+    public Application getApplicationByHashId(Connection dbConnection, String applicationHashId) throws AppCloudException {
 
-        Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-
         Application application = new Application();
+        ResultSet resultSet = null;
 
         try {
 
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_APPLICATION_By_NAME_REVISION);
-            preparedStatement.setString(1, applicationName);
-            preparedStatement.setString(2, revision);
-            preparedStatement.setInt(3, tenantId);
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_APPLICATION_BY_HASH_ID);
+            preparedStatement.setString(1, applicationHashId);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                application.setApplicationId(resultSet.getInt(SQLQueryConstants.ID));
-                application.setApplicationName(resultSet.getString(SQLQueryConstants.APPLICATION_NAME));
+
+                application.setApplicationName(resultSet.getString(SQLQueryConstants.NAME));
+                application.setHashId(applicationHashId);
                 application.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
-                application.setStatus(resultSet.getString(SQLQueryConstants.APPLICATION_STATUS));
-                application.setRuntimeId(resultSet.getInt(SQLQueryConstants.APPLICATION_RUNTIME_ID));
-                application.setEndpointURL(resultSet.getString(SQLQueryConstants.APPLICATION_ENDPOINT_URL));
-                application.setRevision(resultSet.getString(SQLQueryConstants.REVISION));
-                application.setNumberOfReplicas(resultSet.getInt(SQLQueryConstants.NUMBER_OF_REPLICA));
+                application.setDefaultVersion(resultSet.getString(SQLQueryConstants.DEFAULT_VERSION));
                 application.setApplicationType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
-                application.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
                 application.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
+
+                application.setVersions(getAllVersionsOfApplication(dbConnection, applicationHashId));
             }
 
         } catch (SQLException e) {
             String msg =
-                    "Error while retrieving application detail for application : " + applicationName + " revision :" +
-                    " " + revision + " in tenant : " + tenantId;
+                    "Error while retrieving application detail for application with hash id : " + applicationHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
+            DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
         }
         return application;
     }
 
-
     /**
-     * Method for getting the id of an application with the given revision
+     * Method for retrieving all the versions of a specific application
      *
-     * @param applicationName application name
-     * @param revision        application revision
-     * @param tenantId        tenant id
+     * @param dbConnection
+     * @param applicationHashId
      * @return
      * @throws AppCloudException
      */
-    public int getIdOfApplication(String applicationName, String revision, int tenantId) throws AppCloudException {
+    public List<Version> getAllVersionsOfApplication(Connection dbConnection, String applicationHashId)
+            throws AppCloudException {
 
-        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement;
+        ResultSet resultSet;
+        List<Version> versions = new ArrayList<>();
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_VERSIONS_OF_APPLICATION);
+            preparedStatement.setString(1, applicationHashId);
+
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+
+                Version version = new Version();
+                version.setVersionName(resultSet.getString(SQLQueryConstants.NAME));
+                version.setHashId(resultSet.getString(SQLQueryConstants.HASH_ID));
+                version.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
+                version.setRuntimeId(resultSet.getInt(SQLQueryConstants.RUNTIME_ID));
+                version.setStatus(resultSet.getString(SQLQueryConstants.STATUS));
+                version.setTags(getAllTagsOfVersion(dbConnection, version.getHashId()));
+                version.setRuntimeProperties(getAllRuntimePropertiesOfVersion(dbConnection, version.getHashId()));
+
+                versions.add(version);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return versions;
+    }
+
+
+    /**
+     * Method for retrieving list of labels belongs to a given version of an application
+     *
+     * @param dbConnection database connection
+     * @param versionHashId version hash id
+     * @return
+     * @throws AppCloudException
+     */
+    public List<Tag> getAllTagsOfVersion(Connection dbConnection, String versionHashId) throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<Tag> tags = new ArrayList<>();
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_TAGS_OF_VERSION);
+            preparedStatement.setString(1, versionHashId);
+
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+
+                Tag tag = new Tag();
+                tag.setTagName(resultSet.getString(SQLQueryConstants.NAME));
+                tag.setTagValue(resultSet.getString(SQLQueryConstants.VALUE));
+                tag.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
+
+                tags.add(tag);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving tags from database for version with hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+
+        return tags;
+    }
+
+
+    /**
+     * Method for retrieving all the runtime properties of a given version of an application
+     *
+     * @param dbConnection database connection
+     * @param versionHashId version hash id
+     * @return
+     * @throws AppCloudException
+     */
+    public List<RuntimeProperty> getAllRuntimePropertiesOfVersion(Connection dbConnection, String versionHashId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<RuntimeProperty> runtimeProperties = new ArrayList<>();
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(
+                    SQLQueryConstants.GET_ALL_RUNTIME_PROPERTIES_OF_VERSION);
+            preparedStatement.setString(1, versionHashId);
+
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+
+                RuntimeProperty runtimeProperty = new RuntimeProperty();
+                runtimeProperty.setPropertyName(resultSet.getString(SQLQueryConstants.NAME));
+                runtimeProperty.setPropertyValue(resultSet.getString(SQLQueryConstants.VALUE));
+                runtimeProperty.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
+                runtimeProperty.setSecured(resultSet.getBoolean(SQLQueryConstants.IS_SECURED));
+
+                runtimeProperties.add(runtimeProperty);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving the runtime properties from the database for version with hash id : " +
+                         versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+
+        return runtimeProperties;
+    }
+
+
+    /**
+     * Method for getting the id of an application with the given hash id
+     *
+     * @param dbConnection database connection
+     * @param applicationHashId application hash id
+     * @return
+     * @throws AppCloudException
+     */
+    public int getApplicationId(Connection dbConnection, String applicationHashId) throws AppCloudException {
+
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         int applicationId = 0;
@@ -355,9 +769,7 @@ public class ApplicationDAO {
         try {
 
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_APPLICATION_ID);
-            preparedStatement.setString(1, applicationName);
-            preparedStatement.setString(2, revision);
-            preparedStatement.setInt(3, tenantId);
+            preparedStatement.setString(1, applicationHashId);
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
@@ -365,14 +777,12 @@ public class ApplicationDAO {
             }
 
         } catch (SQLException e) {
-            String msg =
-                    "Error while retrieving the id of application : " + applicationName + " in tenant : " + tenantId;
+            String msg = "Error while retrieving the id of application with hash value : " + applicationHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
             DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
         }
 
         return applicationId;
@@ -380,306 +790,34 @@ public class ApplicationDAO {
 
 
     /**
-     * Method for retrieving all the revisions of a given application
+     * Method for getting the version id with the given hash id
      *
-     * @param applicationName name of the application
-     * @param tenantId        tenant id
+     * @param dbConnection
+     * @param hashId
      * @return
      * @throws AppCloudException
      */
-    public List<String> getAllRevisionsOfApplication(String applicationName, int tenantId) throws AppCloudException {
+    public int getVersionId(Connection dbConnection, String hashId) throws AppCloudException {
 
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        List<String> revisionList = new ArrayList<String>();
+        PreparedStatement preparedStatement;
+        int versionId = 0;
 
         try {
 
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_REVISIONS_OF_APPLICATION);
-            preparedStatement.setString(1, applicationName);
-            preparedStatement.setInt(2, tenantId);
-            resultSet = preparedStatement.executeQuery();
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_VERSION_ID);
+            preparedStatement.setString(1, hashId);
 
-            while (resultSet.next()) {
-                revisionList.add(resultSet.getString(SQLQueryConstants.REVISION));
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                versionId = resultSet.getInt(SQLQueryConstants.ID);
             }
 
         } catch (SQLException e) {
-            String msg = "Error while retrieving revisions from database for application : " + applicationName +
-                         " in tenant : " + tenantId;
+            String msg = "Error while retreiving id of version with hash value : " + hashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closeResultSet(resultSet);
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
         }
-        return revisionList;
-    }
-
-
-    /**
-     * Method for retrieving all the endpoints of a given application
-     *
-     * @param applicationName id of the application
-     * @param revision        revision of the application
-     * @param tenantId        tenant id
-     * @return
-     * @throws AppCloudException
-     */
-    public List<Endpoint> getAllEndpointsOfApplication(String applicationName, String revision, int tenantId)
-            throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_ENDPOINT_URL_OF_APPLICATION);
-            preparedStatement.setString(1, applicationName);
-            preparedStatement.setString(2, revision);
-            preparedStatement.setInt(3, tenantId);
-            resultSet = preparedStatement.executeQuery();
-            return generateEndpoints(resultSet);
-        } catch (SQLException e) {
-            String msg = "Error while retrieving Application endpoints from database for application : " +
-                         applicationName + " revision : " + revision + " in tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closeResultSet(resultSet);
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-
-    /**
-     * Method for retrieving all the endpoints of a given application.
-     *
-     * @param applicationId application id
-     * @return Endpoints list
-     * @throws AppCloudException
-     */
-    public List<Endpoint> getAllEndpointsOfApplication(int applicationId) throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-            preparedStatement = dbConnection.prepareStatement(
-                    SQLQueryConstants.GET_ALL_ENDPOINT_URL_OF_APPLICATION_BY_ID);
-            preparedStatement.setInt(1, applicationId);
-            resultSet = preparedStatement.executeQuery();
-            return generateEndpoints(resultSet);
-        } catch (SQLException e) {
-            String msg = "Error while retrieving Application endpoints from database for application :" + applicationId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closeResultSet(resultSet);
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-
-    private List<Endpoint> generateEndpoints(ResultSet resultSet) throws SQLException {
-        List<Endpoint> endpointList = new ArrayList<Endpoint>();
-        while (resultSet.next()) {
-            Endpoint endpoint = new Endpoint();
-            endpoint.setId(resultSet.getInt(SQLQueryConstants.ID));
-            endpoint.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
-            endpoint.setUrlValue(resultSet.getString(SQLQueryConstants.ENDPOINT_URL_VALUE));
-            endpointList.add(endpoint);
-        }
-        return endpointList;
-    }
-
-
-    /**
-     * Method for retrieving list of labels belongs to a given application
-     *
-     * @param applicationName name of the application
-     * @param revision        revision of the application
-     * @param tenantId        tenant id
-     * @return
-     * @throws AppCloudException
-     */
-    public List<Label> getAllLabelsOfApplication(String applicationName, String revision, int tenantId)
-            throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_LABELS_OF_APPLICATION);
-            preparedStatement.setString(1, applicationName);
-            preparedStatement.setString(2, revision);
-            preparedStatement.setInt(3, tenantId);
-            resultSet = preparedStatement.executeQuery();
-            return generateLabels(resultSet);
-        } catch (SQLException e) {
-            String msg =
-                    "Error while retrieving labels from database for application : " + applicationName + " revision :" +
-                    " " + revision + " in tenant : " + tenantId;
-            ;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closeResultSet(resultSet);
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-
-    /**
-     * Method for retrieving list of labels belongs to a given application
-     *
-     * @param applicationId applicationId
-     * @return Labels list
-     * @throws AppCloudException
-     */
-    public List<Label> getAllLabelsOfApplication(int applicationId) throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_LABELS_OF_APPLICATION_BY_ID);
-            preparedStatement.setInt(1, applicationId);
-            resultSet = preparedStatement.executeQuery();
-            return generateLabels(resultSet);
-        } catch (SQLException e) {
-            String msg = "Error while retrieving labels from database for application : " + applicationId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closeResultSet(resultSet);
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-
-
-    public void updateApplicationIcon(InputStream inputStream, String applicationName, int tenantId)
-            throws AppCloudException {
-
-        PreparedStatement preparedStatement = null;
-        Connection dbConnection = DBUtil.getDBConnection();
-        try {
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_APPLICATION_ICON);
-            preparedStatement.setBlob(1, inputStream);
-            preparedStatement.setString(2, applicationName);
-            preparedStatement.setInt(3, tenantId);
-            preparedStatement.execute();
-            dbConnection.commit();
-
-        } catch (SQLException e) {
-            String msg = "Error occurred while adding application icon for application : " + applicationName
-                         + " tenant id " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-
-    private List<Label> generateLabels(ResultSet resultSet) throws SQLException {
-        List<Label> labelList = new ArrayList<Label>();
-        while (resultSet.next()) {
-            Label label = new Label();
-            label.setLabelId(resultSet.getInt(SQLQueryConstants.ID));
-            label.setLabelName(resultSet.getString(SQLQueryConstants.LABEL_NAME));
-            label.setLabelValue(resultSet.getString(SQLQueryConstants.LABEL_VALUE));
-            label.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
-            labelList.add(label);
-        }
-        return labelList;
-    }
-
-
-    /**
-     * Method for retrieving all the runtime properties of a given application
-     *
-     * @param applicationName name of the application
-     * @param revision        revision of the application
-     * @param tenantId        tenant id
-     * @return
-     * @throws AppCloudException
-     */
-    public List<RuntimeProperty> getAllRuntimePropertiesOfApplication(String applicationName, String revision,
-                                                                      int tenantId) throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-
-            preparedStatement = dbConnection.prepareStatement(
-                    SQLQueryConstants.GET_ALL_RUNTIME_PROPERTIES_OF_APPLICATION);
-            preparedStatement.setString(1, applicationName);
-            preparedStatement.setString(2, revision);
-            preparedStatement.setInt(3, tenantId);
-            resultSet = preparedStatement.executeQuery();
-            return generateRuntimeProperties(resultSet);
-        } catch (SQLException e) {
-            String msg = "Error while retrieving the runtime properties from the database for application : " +
-                         applicationName + " revision : " + revision + " in tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closeResultSet(resultSet);
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-
-    /**
-     * Method for retrieving all the runtime properties of a given application
-     *
-     * @param applicationId applicationId
-     * @return RuntimeProperty List
-     * @throws AppCloudException
-     */
-    public List<RuntimeProperty> getAllRuntimePropertiesOfApplication(int applicationId) throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-            preparedStatement = dbConnection.prepareStatement(
-                    SQLQueryConstants.GET_ALL_RUNTIME_PROPERTIES_OF_APPLICATION_BY_ID);
-            preparedStatement.setInt(1, applicationId);
-            resultSet = preparedStatement.executeQuery();
-            return generateRuntimeProperties(resultSet);
-
-        } catch (SQLException e) {
-            String msg = "Error while retrieving the runtime properties from the database " +
-                         "for application : "+applicationId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closeResultSet(resultSet);
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-
-    private List<RuntimeProperty> generateRuntimeProperties(ResultSet resultSet)
-            throws SQLException {
-        List<RuntimeProperty> runtimePropertyList = new ArrayList<RuntimeProperty>();
-        while (resultSet.next()) {
-            RuntimeProperty runtimeProperty = new RuntimeProperty();
-            runtimeProperty.setId(resultSet.getInt(SQLQueryConstants.ID));
-            runtimeProperty.setPropertyName(resultSet.getString(SQLQueryConstants.PROPERTY_NAME));
-            runtimeProperty.setPropertyValue(resultSet.getString(SQLQueryConstants.PROPERTY_VALUE));
-            runtimeProperty.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
-            runtimePropertyList.add(runtimeProperty);
-        }
-        return runtimePropertyList;
+        return versionId;
     }
 
 
@@ -695,7 +833,7 @@ public class ApplicationDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
 
-        List<ApplicationType> applicationTypeList = new ArrayList<ApplicationType>();
+        List<ApplicationType> applicationTypeList = new ArrayList<>();
         ApplicationType applicationType;
 
         try {
@@ -704,9 +842,9 @@ public class ApplicationDAO {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
+
                 applicationType = new ApplicationType();
-                applicationType.setId(resultSet.getInt(SQLQueryConstants.ID));
-                applicationType.setAppTypeName(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
+                applicationType.setAppTypeName(resultSet.getString(SQLQueryConstants.NAME));
                 applicationType.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
 
                 applicationTypeList.add(applicationType);
@@ -748,9 +886,10 @@ public class ApplicationDAO {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
+
                 applicationRuntime = new ApplicationRuntime();
                 applicationRuntime.setId(resultSet.getInt(SQLQueryConstants.ID));
-                applicationRuntime.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
+                applicationRuntime.setRuntimeName(resultSet.getString(SQLQueryConstants.NAME));
                 applicationRuntime.setImageName(resultSet.getString(SQLQueryConstants.RUNTIME_IMAGE_NAME));
                 applicationRuntime.setRepoURL(resultSet.getString(SQLQueryConstants.RUNTIME_REPO_URL));
                 applicationRuntime.setTag(resultSet.getString(SQLQueryConstants.RUNTIME_TAG));
@@ -771,195 +910,7 @@ public class ApplicationDAO {
     }
 
 
-    /**
-     * Method for updating the status of the application
-     *
-     * @param status          status of the application
-     * @param applicationName name of the application
-     * @param revision        revison of the application
-     * @param tenantId        tenant id
-     * @return
-     * @throws AppCloudException
-     */
-    public boolean updateApplicationStatus(String status, String applicationName, String revision, int tenantId)
-            throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-
-        try {
-
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_APPLICATION_STATUS);
-            preparedStatement.setString(1, status);
-            preparedStatement.setString(2, applicationName);
-            preparedStatement.setString(3, revision);
-            preparedStatement.setInt(4, tenantId);
-
-            preparedStatement.executeUpdate();
-            dbConnection.commit();
-
-        } catch (SQLException e) {
-            String msg = "Error while updating application status : " + status + " for application : " + applicationName
-                         + " revision : " + revision + " in tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-        return true;
-    }
-
-    public void updateApplicationRuntimeProperty(int applicationId, String oldKey, String newKey, String oldValue, String newValue, int tenantId)
-            throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-
-        try {
-
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_RUNTIME_PROPERTIES);
-            preparedStatement.setString(1, newKey);
-            preparedStatement.setString(2, newValue);
-            preparedStatement.setInt(3, applicationId);
-            preparedStatement.setInt(4, tenantId);
-            preparedStatement.setString(5, oldKey);
-            preparedStatement.setString(6, oldValue);
-
-            preparedStatement.executeUpdate();
-            dbConnection.commit();
-        } catch (SQLException e) {
-            String msg = "Error while updating runtime property Key : " + oldKey + " for application : " + applicationId
-                          + " in tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-    public void updateTag(int applicationId, String oldKey, String newKey, String oldValue, String newValue, int tenantId)
-            throws AppCloudException {
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-
-        try {
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_TAG);
-            preparedStatement.setString(1, newKey);
-            preparedStatement.setString(2, newValue);
-            preparedStatement.setInt(3, applicationId);
-            preparedStatement.setInt(4, tenantId);
-            preparedStatement.setString(5, oldKey);
-            preparedStatement.setString(6, oldValue);
-
-            preparedStatement.executeUpdate();
-            dbConnection.commit();
-        } catch (SQLException e) {
-            String msg = "Error while updating tag Key : " + oldKey + " for application : " + applicationId
-                          + " in tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-
-    public boolean deleteApplicationRuntimeProperty(int applicationId, String key, String value, int tenantId)
-            throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        boolean deleted=false;
-        try {
-
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_RUNTIME_PROPERTIES);
-            preparedStatement.setInt(1, applicationId);
-            preparedStatement.setInt(2, tenantId);
-            preparedStatement.setString(3, key);
-            preparedStatement.setString(4, value);
-
-            deleted = preparedStatement.execute();
-            dbConnection.commit();
-        } catch (SQLException e) {
-            String msg = "Error while deleting runtime property Key : " + key + " for application : " + applicationId
-                          + " in tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-        return deleted;
-    }
-    public boolean deleteTag(int applicationId, String key, String value, int tenantId)
-            throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        boolean deleted=false;
-        try {
-
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_TAG);
-            preparedStatement.setInt(1, applicationId);
-            preparedStatement.setInt(2, tenantId);
-            preparedStatement.setString(3, key);
-            preparedStatement.setString(4, value);
-
-            deleted = preparedStatement.execute();
-            dbConnection.commit();
-        } catch (SQLException e) {
-            String msg = "Error while deleting tag with Key : " + key + " for application : " + applicationId
-                          + " in tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-        return deleted;
-    }
-
-
-    /**
-     * Method for updating number of replicas for an application
-     *
-     * @param numberOfReplicas number of replicas of application
-     * @param applicationName  name of the application
-     * @param revision         revision of the application
-     * @param tenantId         tenant id
-     * @return
-     * @throws AppCloudException
-     */
-    public boolean updateNumberOfReplicas(int numberOfReplicas, String applicationName, String revision, int tenantId)
-            throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-
-        try {
-
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_NUMBER_OF_REPLICA);
-            preparedStatement.setInt(1, numberOfReplicas);
-            preparedStatement.setString(2, applicationName);
-            preparedStatement.setString(3, revision);
-            preparedStatement.setInt(4, tenantId);
-
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            String msg = "Error while updating number of replicas for application : " + applicationName + " revision : "
-                         + revision + " in tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-        return true;
-    }
-
-    public ApplicationRuntime getRuntime(int runtimeId) throws AppCloudException {
+    public ApplicationRuntime getRuntimeById (int runtimeId) throws AppCloudException {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
@@ -968,7 +919,7 @@ public class ApplicationDAO {
 
         try {
 
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_RUNTIME_FOR_APP_TYPE);
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_RUNTIME_BY_ID);
             preparedStatement.setInt(1, runtimeId);
             resultSet = preparedStatement.executeQuery();
 
@@ -976,7 +927,7 @@ public class ApplicationDAO {
                 applicationRuntime.setId(resultSet.getInt(SQLQueryConstants.ID));
                 applicationRuntime.setImageName(resultSet.getString(SQLQueryConstants.RUNTIME_IMAGE_NAME));
                 applicationRuntime.setRepoURL(resultSet.getString(SQLQueryConstants.RUNTIME_REPO_URL));
-                applicationRuntime.setRuntimeName(resultSet.getString(SQLQueryConstants.RUNTIME_NAME));
+                applicationRuntime.setRuntimeName(resultSet.getString(SQLQueryConstants.NAME));
                 applicationRuntime.setTag(resultSet.getString(SQLQueryConstants.RUNTIME_TAG));
             }
 
@@ -992,170 +943,26 @@ public class ApplicationDAO {
         return applicationRuntime;
     }
 
+    public Deployment getDeployment(String versionHashId) throws AppCloudException{
 
-    /**
-     * Delete a application
-     *
-     * @param applicationName
-     * @param applicationRevision
-     * @param tenantId
-     * @return if delete a application
-     * @throws AppCloudException
-     */
-    public boolean deleteApplication(String applicationName, String applicationRevision, int tenantId)
-            throws AppCloudException {
-
-        int applicationId = getIdOfApplication(applicationName, applicationRevision, tenantId);
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        boolean deleted = false;
-        try {
-
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_APPLICATION);
-            preparedStatement.setInt(1, applicationId);
-
-            deleted = preparedStatement.execute();
-            dbConnection.commit();
-        } catch (SQLException e) {
-            String msg =
-                    "Error while deleting the application : " + applicationName + " revision : " + applicationRevision
-                            + " in tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-        return deleted;
-    }
-
-	/**
-     * Delete all aplication's revisions
-     *
-     * @param applicationName
-     * @param applicationRevision
-     * @param tenantId
-     * @return if delete a application
-     * @throws AppCloudException
-     */
-    public boolean deleteApplicationRevisions(String applicationName, int tenantId) throws AppCloudException {
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        boolean deleted = false;
-        try {
-
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_APPLICATION_REVISION);
-            preparedStatement.setString(1, applicationName);
-            preparedStatement.setInt(2, tenantId);
-
-            deleted = preparedStatement.execute();
-            dbConnection.commit();
-        } catch (SQLException e) {
-            String msg = "Error while deleting the application : " + applicationName + " in tenant : " + tenantId;
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-        return deleted;
-    }
-
-    public void addDeployment(String applicationName, String revision, int tenantId,  Deployment deployment) throws AppCloudException{
-        int deploymentId = addDeployment(deployment);
-
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        try {
-            String UPDATE_APPLICATION = "UPDATE Application SET ApplicationDeployment_id=? WHERE application_name=? AND revision=? AND tenant_id=?";
-            preparedStatement = dbConnection.prepareStatement(UPDATE_APPLICATION);
-            preparedStatement.setInt(1, deploymentId);
-            preparedStatement.setString(2, applicationName);
-            preparedStatement.setString(3, revision);
-            preparedStatement.setInt(4, tenantId);
-            preparedStatement.executeUpdate();
-            dbConnection.commit();
-        } catch (SQLException e) {
-            String msg = "Error while updating application with deploymentId.";
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-    public int addDeployment(Deployment deployment) throws AppCloudException{
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        int deploymentId =-1;
-        try {
-            String INSERT_DEPLOYMENT = "INSERT INTO ApplicationDeployment (deployment_name, replicas) values (?, ?)";
-            preparedStatement = dbConnection.prepareStatement(INSERT_DEPLOYMENT, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, deployment.getDeploymentName());
-            preparedStatement.setInt(2, deployment.getReplicas());
-            preparedStatement.execute();
-            dbConnection.commit();
-            ResultSet rs = preparedStatement.getGeneratedKeys();
-            if(rs.next()) {
-                deploymentId = rs.getInt(1);
-            }
-            for(Container container: deployment.getContainers()){
-                addContainer(container, deploymentId);
-            }
-        } catch (SQLException e) {
-            String msg = "Error while inserting deployment record.";
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-        if(deploymentId==-1){
-            throw new AppCloudException("Failed to insert deployment record.");
-        }
-        return deploymentId;
-    }
-
-    public void deleteDeployment(String applicationName, String revision, int tenantId) throws AppCloudException{
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        try {
-            String DELETE_DEPLOYMENT = "DELETE FROM ApplicationDeployment WHERE id=(SELECT ApplicationDeployment_id FROM Application WHERE application_name=? AND revision=? AND tenant_id=?)";
-            preparedStatement = dbConnection.prepareStatement(DELETE_DEPLOYMENT);
-            preparedStatement.setString(1, applicationName);
-            preparedStatement.setString(2, revision);
-            preparedStatement.setInt(3, tenantId);
-            preparedStatement.execute();
-            dbConnection.commit();
-
-        } catch (SQLException e) {
-            String msg = "Error while deleting deployment record.";
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-    public Deployment getDeployment(int applicationId) throws AppCloudException{
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
         Deployment deployment = new Deployment();
+
         try {
-            String SELECT_DEPLOYMENT = "SELECT * from ApplicationDeployment where id=(SELECT ApplicationDeployment_id from Application WHERE id=?)";
-            preparedStatement = dbConnection.prepareStatement(SELECT_DEPLOYMENT);
-            preparedStatement.setInt(1, applicationId);
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_DEPLOYMENT);
+            preparedStatement.setString(1, versionHashId);
 
             ResultSet rs =  preparedStatement.executeQuery();
             if(rs.next()) {
-               deployment.setDeploymentName(rs.getString("deployment_name"));
-               deployment.setReplicas(rs.getInt("replicas"));
-               deployment.setContainers(getContainers(rs.getInt("id"), applicationId));
+                deployment.setDeploymentName(rs.getString(SQLQueryConstants.NAME));
+                deployment.setReplicas(rs.getInt(SQLQueryConstants.REPLICAS));
+                deployment.setContainers(getContainers(rs.getInt(SQLQueryConstants.ID), versionHashId));
             }
 
             dbConnection.commit();
+
         } catch (SQLException e) {
             String msg = "Error while inserting deployment record.";
             log.error(msg, e);
@@ -1167,56 +974,34 @@ public class ApplicationDAO {
 
         return deployment;
     }
-    public void addContainer(Container container, int deploymentId) throws AppCloudException{
+
+
+    public Set<Container> getContainers(int deploymentId, String versionHashId) throws AppCloudException{
+
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-        int containerId = -1;
-        try {
-            String INSERT_CONTAINER = "INSERT INTO ApplicationContainer (image_name, image_version, ApplicationDeployment_id) values (?, ?, ?)";
-            preparedStatement = dbConnection.prepareStatement(INSERT_CONTAINER, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, container.getImageName());
-            preparedStatement.setString(2, container.getImageVersion());
-            preparedStatement.setInt(3, deploymentId);
-            preparedStatement.execute();
-            dbConnection.commit();
+        Set<Container> containers = new HashSet<>();
 
-            ResultSet rs = preparedStatement.getGeneratedKeys();
-            if(rs.next()) {
-               containerId = rs.getInt(1);
-            }
-            for(ServiceProxy serviceProxy: container.getServiceProxies()){
-                addServiceProxy(serviceProxy, containerId);
-            }
-
-        } catch (SQLException e) {
-            String msg = "Error while inserting deployment container record.";
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-    public Set<Container> getContainers(int deploymentId, int applicationId) throws AppCloudException{
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        Set<Container> containers = new HashSet<Container>();
         try {
-            String SELECT_CONTAINER = "SELECT * FROM ApplicationContainer WHERE ApplicationDeployment_id=?";
-            preparedStatement = dbConnection.prepareStatement(SELECT_CONTAINER);
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_CONTAINER);
             preparedStatement.setInt(1, deploymentId);
 
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()) {
+
                 Container container = new Container();
-                container.setImageName(rs.getString("image_name"));
-                container.setImageVersion(rs.getString("image_version"));
-                container.setServiceProxies(getServiceProxies(rs.getInt("id")));
-                List<RuntimeProperty> runtimeProperties = getRuntimeProperties(applicationId);
+                container.setImageName(rs.getString(SQLQueryConstants.NAME));
+                container.setImageVersion(rs.getString(SQLQueryConstants.VERSION));
+                container.setServiceProxies(getContainerServiceProxies(rs.getInt(SQLQueryConstants.ID)));
+
+                List<RuntimeProperty> runtimeProperties = getAllRuntimePropertiesOfVersion(dbConnection, versionHashId);
                 container.setRuntimeProperties(runtimeProperties);
                 containers.add(container);
+
             }
             dbConnection.commit();
+
         } catch (SQLException e) {
             String msg = "Error while inserting deployment container record.";
             log.error(msg, e);
@@ -1227,50 +1012,31 @@ public class ApplicationDAO {
         }
         return containers;
     }
-    public void addServiceProxy(ServiceProxy serviceProxy, int containerId) throws AppCloudException{
+
+
+    private Set<ContainerServiceProxy> getContainerServiceProxies(int containerId) throws AppCloudException{
+
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
+        Set<ContainerServiceProxy> containerServiceProxies= new HashSet<>();
 
         try {
-            String INSERT_SERVICE_PROXY = "INSERT INTO ApplicationServiceProxy (service_name, service_protocol, service_port, service_backend_port, ApplicationContainer_id) values (?,?,?,?,?)";
-            preparedStatement = dbConnection.prepareStatement(INSERT_SERVICE_PROXY, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, serviceProxy.getServiceName());
-            preparedStatement.setString(2, serviceProxy.getServiceProtocol());
-            preparedStatement.setInt(3, serviceProxy.getServicePort());
-            preparedStatement.setString(4, serviceProxy.getServiceBackendPort());
-            preparedStatement.setInt(5, containerId);
-            preparedStatement.execute();
-            dbConnection.commit();
 
-        } catch (SQLException e) {
-            String msg = "Error while inserting deployment service proxy record.";
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-    }
-    public Set<ServiceProxy> getServiceProxies(int containerId) throws AppCloudException{
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        Set<ServiceProxy> serviceProxies = new HashSet<ServiceProxy>();
-        try {
-            String SELECT_SERVICE_PROXY = "SELECT * FROM ApplicationServiceProxy WHERE ApplicationContainer_id=?";
-            preparedStatement = dbConnection.prepareStatement(SELECT_SERVICE_PROXY);
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_CONTAINER_SERVICE_PROXIES);
             preparedStatement.setInt(1, containerId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){
-                ServiceProxy serviceProxy = new ServiceProxy();
-                serviceProxy.setServiceName(resultSet.getString("service_name"));
-                serviceProxy.setServiceProtocol(resultSet.getString("service_protocol"));
-                serviceProxy.setServicePort(resultSet.getInt("service_port"));
-                serviceProxy.setServiceBackendPort(resultSet.getString("service_backend_port"));
-                serviceProxies.add(serviceProxy);
+                ContainerServiceProxy containerServiceProxy = new ContainerServiceProxy();
+                containerServiceProxy.setServiceName(resultSet.getString(SQLQueryConstants.NAME));
+                containerServiceProxy.setServiceProtocol(resultSet.getString(SQLQueryConstants.PROTOCOL));
+                containerServiceProxy.setServicePort(resultSet.getInt(SQLQueryConstants.PORT));
+                containerServiceProxy.setServiceBackendPort(resultSet.getString(SQLQueryConstants.BACKEND_PORT));
+                containerServiceProxies.add(containerServiceProxy);
             }
 
             dbConnection.commit();
+
         } catch (SQLException e) {
             String msg = "Error while inserting deployment service proxy record.";
             log.error(msg, e);
@@ -1279,73 +1045,186 @@ public class ApplicationDAO {
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
-        return serviceProxies;
+        return containerServiceProxies;
     }
 
-    /**
-     * Getting runtime properties from database
-     *
-     * @param applicationId id of the application
-     * @return list of runtime properties
-     * @throws AppCloudException
-     */
-    public List<RuntimeProperty> getRuntimeProperties(int applicationId) throws AppCloudException {
+
+    public List<Transport> getTransportsForRuntime(int runtimeId) throws AppCloudException{
+
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-        List<RuntimeProperty> runtimeProperties = new ArrayList<>();
+        List<Transport> transports = new ArrayList<>();
+
         try {
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_RUNTIME_PROPERTIES);
-            preparedStatement.setInt(1, applicationId);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                RuntimeProperty runtimeProperty = new RuntimeProperty();
-                runtimeProperty.setPropertyName(resultSet.getString(SQLQueryConstants.PROPERTY_NAME));
-                runtimeProperty.setPropertyValue(resultSet.getString(SQLQueryConstants.PROPERTY_VALUE));
-                runtimeProperties.add(runtimeProperty);
-            }
-
-            dbConnection.commit();
-        } catch (SQLException e) {
-            String msg = "Error while getting runtime properties";
-            log.error(msg, e);
-            throw new AppCloudException(msg, e);
-        } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
-            DBUtil.closeConnection(dbConnection);
-        }
-        return runtimeProperties;
-    }
-
-    public List<Service> getServices(int runtimeId) throws AppCloudException{
-        Connection dbConnection = DBUtil.getDBConnection();
-        PreparedStatement preparedStatement = null;
-        List<Service> services = new ArrayList<Service>();
-        try {
-            String SELECT_SERVICE_PROXY = "select service_name, service_port,service_protocol from Service where id in " +
-                    "(select service_id from ApplicationRuntimeService where application_runtime_id=?)";
-            preparedStatement = dbConnection.prepareStatement(SELECT_SERVICE_PROXY);
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_TRANSPORTS_FOR_RUNTIME);
             preparedStatement.setInt(1, runtimeId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){
-                Service service = new Service();
-                service.setServiceName(resultSet.getString("service_name"));
-                service.setServiceProtocol(resultSet.getString("service_protocol"));
-                service.setServicePort(resultSet.getInt("service_port"));
-                services.add(service);
+                Transport transport = new Transport();
+                transport.setServiceName(resultSet.getString(SQLQueryConstants.NAME));
+                transport.setServiceProtocol(resultSet.getString(SQLQueryConstants.PROTOCOL));
+                transport.setServicePort(resultSet.getInt(SQLQueryConstants.PORT));
+                transports.add(transport);
             }
-
             dbConnection.commit();
+
         } catch (SQLException e) {
-            String msg = "Error while retrieving runtime service records.";
+            String msg = "Error while retrieving runtime transport detail for runtime : " + runtimeId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
-        return services;
+        return transports;
+    }
+
+
+    public boolean deleteRuntimeProperty(Connection dbConnection, String versionHashId, String key) throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+        boolean deleted=false;
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_RUNTIME_PROPERTY);
+            preparedStatement.setString(1, versionHashId);
+            preparedStatement.setString(2, key);
+
+            deleted = preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg = "Error while deleting runtime property Key : " + key + " for version with hash id : " +
+                         versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        return deleted;
+    }
+
+
+    public boolean deleteTag(Connection dbConnection, String versionHashId, String key) throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+        boolean deleted=false;
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_TAG);
+            preparedStatement.setString(1, versionHashId);
+            preparedStatement.setString(2, key);
+
+            deleted = preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg = "Error while deleting tag with Key : " + key + " for version with hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        return deleted;
+    }
+
+
+    /**
+     * Delete an application
+     *
+     * @param applicationHashId application hash id
+     * @return
+     * @throws AppCloudException
+     */
+    public boolean deleteApplication(Connection dbConnection, String applicationHashId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+        boolean deleted = false;
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_APPLICATION);
+            preparedStatement.setString(1, applicationHashId);
+
+            deleted = preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg = "Error while deleting the application with hash id : " + applicationHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        return deleted;
+    }
+
+    public boolean deleteVersion(Connection dbConnection, String versionHashId) throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_VERSION);
+            preparedStatement.setString(1, versionHashId);
+
+            return preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg = "Error while deleting the version with hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+    }
+
+
+    /**
+     * Delete all the versions of an application
+     *
+     * @param applicationHashId application hash id
+     * @return
+     * @throws AppCloudException
+     */
+    public boolean deleteAllVersionsOfApplication(Connection dbConnection, String applicationHashId) throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+        boolean deleted = false;
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_VERSIONS_OF_APPLICATION);
+            preparedStatement.setString(1, applicationHashId);
+
+            deleted = preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg = "Error while deleting the versions of the application with hash id : " + applicationHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        return deleted;
+    }
+
+
+    public void deleteDeployment(Connection dbConnection, String versionHashId) throws AppCloudException{
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_DEPLOYMENT);
+            preparedStatement.setString(1, versionHashId);
+
+            preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg = "Error while deleting deployment record for version with the hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
     }
 
 

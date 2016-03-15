@@ -16,7 +16,7 @@
 
 package org.wso2.appcloud.core.dto;
 
-public class ServiceProxy {
+public class ContainerServiceProxy {
     private int id;
     private String serviceName;
     private String serviceProtocol;

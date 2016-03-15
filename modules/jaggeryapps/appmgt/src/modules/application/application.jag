@@ -24,81 +24,107 @@ var log = new Log("module/application/application.jag");
 var modManager = jagg.module("manager");
 var ApplicationManager = Packages.org.wso2.appcloud.core.ApplicationManager;
 var Application = Packages.org.wso2.appcloud.core.dto.Application;
+var Version = Packages.org.wso2.appcloud.core.dto.Version;
 var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
 var EventsManager = Packages.org.wso2.appcloud.core.EventsManager;
 var Event = Packages.org.wso2.appcloud.core.dto.Event;
 var Deployment = Packages.org.wso2.appcloud.core.dto.Deployment;
 var Container = Packages.org.wso2.appcloud.core.dto.Container;
-var ServiceProxy = Packages.org.wso2.appcloud.core.dto.ServiceProxy;
+var ServiceProxy = Packages.org.wso2.appcloud.core.dto.ContainerServiceProxy;
 var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
 var RuntimeProperty = Packages.org.wso2.appcloud.core.dto.RuntimeProperty;
 var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
+var Util = Packages.org.wso2.appcloud.core.Util;
 /**
  * Add a application object
  *
  * @param applicationName name of the application
- * @param applicationRevision revision number of the application
+ * @param versionName revision number of the application
  * @param applicationDescription description of the application
  * @param replicas no of replicas
  * @param uploadedArtifact the uploaded artifact file
  * @param runtimeId runtime id of the application
  */
-var addApplication = function (applicationName, applicationRevision, applicationDescription, replicas,
+var addApplication = function (applicationName, versionName, applicationDescription, replicas,
                                runtimeId, appTypeName, runtimePropertiesArray, tagArray, appIcon, uploadedFileName) {
-    log.info("Started creating App => name: " + applicationName + " " +
-            "Revision: " + applicationRevision + " " + "Description: " + applicationDescription + " " +
-            "Replicas: " + replicas + " runtimeId: " + runtimeId + " apptype: " + appTypeName + " "
-    );
+
+    log.info("Started creating App => name : " + applicationName + " Version : " + versionName + " Description " +
+             ": " + applicationDescription + " runtimeId : " + runtimeId + " apptype : " + appTypeName );
 
     //================================= Adding application to Database =========================================
     var application = new Application();
+    var version = new Version();
+    var tenantId = modManager.getTenantId();
+    var versionHashId = Util.getVersionHashId(applicationName, versionName, tenantId);
+    var applicationHashId = Util.getApplicationHashId(applicationName, tenantId);
+
     try {
         application.setApplicationName(applicationName);
-        application.setRevision(applicationRevision);
+        application.setHashId(applicationHashId);
         application.setDescription(applicationDescription);
-        application.setNumberOfReplicas(replicas);
-        application.setRuntimeId(runtimeId);
         application.setApplicationType(appTypeName);
-        application.setStatus(APPLICATION_CREATED);
+
+        version.setVersionName(versionName);
+        version.setRuntimeId(runtimeId);
+        version.setStatus(APPLICATION_CREATED);
+        version.setHashId(versionHashId);
 
         if(runtimePropertiesArray.length > 0) {
             var runtimePropertyList = generateRuntimePropsList(runtimePropertiesArray);
-            application.setRuntimeProperties(runtimePropertyList);
+            version.setRuntimeProperties(runtimePropertyList);
         }
 
         if(tagArray.length > 0){
             var tagList = generateTagsList(tagArray);
-            application.setLabels(tagList);
+            version.setTags(tagList);
         }
+
+        var versionList = new java.util.ArrayList();
+        versionList.add(version);
+        application.setVersions(versionList);
 
         ApplicationManager.addApplication(application);
 
         if(appIcon){
-            changeApplicationIcon(applicationName, applicationRevision, appIcon);
+            changeApplicationIcon(applicationHashId, appIcon);
         }
     } catch (e){
+
         var msg = "Error while adding application to database";
-        addEvent(DATABASE_ADD, EVENT_FAILED, msg, applicationName, applicationRevision);
-        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        addEvent(DATABASE_ADD, EVENT_FAILED, msg, versionHashId);
+
+        try {
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        } catch (e1){
+            log.error("Error while updating Application Creation Failed event for application : " + applicationName
+                      + " version : " + versionName);
+            log.error(e1);
+            // not throwing the error, because it will hide the actual exception
+        }
+
         log.error(msg);
         log.error(e);
         log.info("Application creation failed because initial application metadata persistence failed and roll back process" +
-                " is started for application:"+applicationName+" with revision:"+applicationRevision);
-        deleteApplicationUploadedPath(applicationName, applicationRevision);
+                " is started for application : "+applicationName+" with revision : "+ versionName);
+        deleteApplicationUploadedPath(applicationName, versionName);
         throw e;
     }
+
+
     //============================================================================================================
 
     //==================================== Create docker file block ==============================================
+
     //Adding docker file create pending event
     var msg = "Docker file create successfully triggered in appcloud";
-    addEvent(DOCKER_FILE_CREATE, EVENT_PENDING, msg, applicationName, applicationRevision);
+    addEvent(DOCKER_FILE_CREATE, EVENT_PENDING, msg, versionHashId);
 
     try {
+
         var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
         var dockerOpClient = new DockerOpClient(modManager.getPropertyValue("DockerClientURL"));
         var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                + modManager.getTenantDomain() + "/" + applicationName + "/" + applicationRevision + "/";
+                + modManager.getTenantDomain() + "/" + applicationName + "/" + versionName + "/";
         var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
         var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
 
@@ -116,141 +142,184 @@ var addApplication = function (applicationName, applicationRevision, application
 
     } catch(e){
         var msg = "Error while creating docker file";
-        addEvent(DOCKER_FILE_CREATE, EVENT_FAILED, msg, applicationName, applicationRevision);
-        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        addEvent(DOCKER_FILE_CREATE, EVENT_FAILED, msg, versionHashId);
+
+        try {
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        } catch(e1){
+            log.error("Error while updating Application Creation Failed event for application : " + applicationName
+                      + " version : " + versionName);
+            log.error(e1);
+            // not throwing the error, because it will hide the actual exception
+        }
+
         log.error(msg);
         log.error(e);
         log.info("Application creation failed because docker file creation failed and roll back process" +
-                " is started for application:"+applicationName+" with revision:"+applicationRevision);
-        deleteApplicationUploadedPath(applicationName, applicationRevision);
-        deleteApplicationFromDatabase(applicationName, applicationRevision);
+                " is started for application : "+applicationName+" with revision : "+versionName);
+        deleteApplicationUploadedPath(applicationName, versionName);
+        deleteApplicationFromDatabase(versionHashId);
         throw e;
     }
 
     //Adding docker file create success event
     var msg = "Docker file successfully created for application";
-    addEvent(DOCKER_FILE_CREATE, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
+    addEvent(DOCKER_FILE_CREATE, EVENT_SUCCEEDED, msg, versionHashId);
+
+
     //============================================================================================================
 
     //==================================== Build docker image block ==============================================
+
     //Adding docker build pending event
     var msg = "Docker image build successfully triggered in appcloud";
-    addEvent(DOCKER_IMAGE_BUILD, EVENT_PENDING, msg, applicationName, applicationRevision);
+    addEvent(DOCKER_IMAGE_BUILD, EVENT_PENDING, msg, versionHashId);
 
-    var applicationRuntime = ApplicationManager.getApplicationRuntime(runtimeId);
+    var applicationRuntime = ApplicationManager.getRuntimeById(runtimeId);
     var tenantDockerRegistryUrl = modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) + "/" + dockerRegTenantSpace;
-    var tagName = applicationRuntime.getTag() +"-"+ modManager.getTenantDomain() +"-"+applicationName+"-"+applicationRevision;
-    
+    var tagName = applicationRuntime.getTag() +"-"+ versionHashId;
 
     try {
+
         var dockerRegTenantSpace = modManager.getTenantDomain().replace(".","-");
         dockerOpClient.buildDockerImage(applicationRuntime.getRepoURL() ,applicationRuntime.getImageName(), tagName, absFileUploadedPath);
+
     } catch (e){
+
         var msg = "Error while building docker file";
-        addEvent(DOCKER_IMAGE_BUILD, EVENT_FAILED, msg, applicationName, applicationRevision);
-        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        addEvent(DOCKER_IMAGE_BUILD, EVENT_FAILED, msg, versionHashId);
+
+        try {
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        } catch(e1){
+            log.error("Error while updating Application Creation Failed event for application : " + applicationName
+                      + " version : " + versionName);
+            log.error(e1);
+            // not throwing the error, because it will hide the actual exception
+        }
+
         log.error(msg);
         log.error(e);
         log.info("Application creation failed because dokcer image build failed and roll back process" +
-                " is started for application:"+applicationName+" with revision:"+applicationRevision);
-        deleteApplicationUploadedPath(applicationName, applicationRevision);
-        deleteApplicationFromDatabase(applicationName, applicationRevision);
+                " is started for application : "+applicationName+" with revision : "+versionName);
+        deleteApplicationUploadedPath(applicationName, versionName);
+        deleteApplicationFromDatabase(versionHashId);
         throw e;
+
     }
+
     //Adding docker build success event
     var msg = "Docker image build successfully built";
-    addEvent(DOCKER_IMAGE_BUILD, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
+    addEvent(DOCKER_IMAGE_BUILD, EVENT_SUCCEEDED, msg, versionHashId);
+
+
     //============================================================================================================
 
     //==================================== Push docker image block ===============================================
+
     //Adding docker image push pending event
     var msg = "Docker image push successfully triggered in triggered";
-    addEvent(DOCKER_REGISTRY_PUSH, EVENT_PENDING, msg, applicationName, applicationRevision);
+    addEvent(DOCKER_REGISTRY_PUSH, EVENT_PENDING, msg, versionHashId);
+
     try {
+
         dockerOpClient.pushDockerImage(applicationRuntime.getRepoURL(),applicationRuntime.getImageName(), tagName);
+
     } catch (e) {
+
         var msg = "Error uploading docker image to remote registry";
-        addEvent(DOCKER_REGISTRY_PUSH, EVENT_FAILED, msg, applicationName, applicationRevision);
-        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        addEvent(DOCKER_REGISTRY_PUSH, EVENT_FAILED, msg, versionHashId);
+
+        try {
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        } catch(e1){
+            log.error("Error while updating Application Creation Failed event for application : " + applicationName
+                      + " version : " + versionName);
+            log.error(e1);
+            // not throwing the error, because it will hide the actual exception
+        }
+
         log.error(msg);
         log.error(e);
         log.info("Application creation failed because docker image push failed and roll back process" +
-                " is started for application:"+applicationName+" with revision:"+applicationRevision);
-        deleteApplicationUploadedPath(applicationName, applicationRevision);
-        deleteApplicationFromDatabase(applicationName, applicationRevision);
+                " is started for application : "+applicationName+" with revision : "+versionName);
+        deleteApplicationUploadedPath(applicationName, versionName);
+        deleteApplicationFromDatabase(versionHashId);
         throw e;
     }
+
     //Adding docker push success event
     var msg = "Docker image push successfully completed";
-    addEvent(DOCKER_REGISTRY_PUSH, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
+    addEvent(DOCKER_REGISTRY_PUSH, EVENT_SUCCEEDED, msg, versionHashId);
+
     //============================================================================================================
 
     //==================================== Kubernetes deploy block ===============================================
-    var runtimeProperties = application.getRuntimeProperties();
-    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, applicationName ,applicationName, applicationRevision, runtimeProperties, runtimeId);
-    var deploymentConfig = getDeploymentConfig(containers, applicationName, applicationRevision, replicas);
-    deployApplication(applicationName, applicationRevision, deploymentConfig, false);
-
-    //=============================================================================================================
-
+    var runtimeProperties = version.getRuntimeProperties();
+    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, versionHashId ,versionHashId, runtimeProperties, runtimeId);
+    var deploymentConfig = getDeploymentConfig(containers, versionHashId, replicas);
+    deployApplication(applicationName, versionName, deploymentConfig, false, versionHashId);
 };
 
-var deployApplication = function(applicationName, applicationRevision, deploymentConfig, isRedeploy){
+
+var deployApplication = function(applicationName, versionName, deploymentConfig, isRedeploy, versionHashId){
   
     //Adding deployment pending event
     var msg = "Application deployment successfully triggered in Kubernetes";
-    addEvent(KUBE_DEPLOY, EVENT_PENDING, msg, applicationName, applicationRevision);
+    addEvent(KUBE_DEPLOY, EVENT_PENDING, msg, versionHashId);
 
+    applicationName = Util.getRuntimeValidAppName(applicationName);
     //Creating basic deployment
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
+
     var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
-             applicationName, applicationRevision, null , modManager.getTenantId(), modManager.getTenantDomain());
+            applicationName, versionName, null , modManager.getTenantId(), modManager.getTenantDomain());
     var kubService = new KubernetesRuntime(applicationCtx);
 
     log.info("Deploying application: " + applicationName);
     try{
         kubService.deployApplication(deploymentConfig);
         if(!isRedeploy) {          
-            persistDeploymentConfig(deploymentConfig, applicationName, applicationRevision);
+            persistDeploymentConfig(deploymentConfig, versionHashId);
         }
 
     } catch(e){
         var msg = "Error while submitting application deployment to Kubernetes";
-        addEvent(KUBE_DEPLOY, EVENT_FAILED, msg, applicationName, applicationRevision);
-        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        addEvent(KUBE_DEPLOY, EVENT_FAILED, msg, versionHashId);
+        ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
         log.error(msg);
         log.error(e);
         log.info("Application deployment failed because kubernetes deployment was failed and roll back process" +
-                " is started for application:"+applicationName+" with revision:"+applicationRevision);
-        deleteApplicationUploadedPath(applicationName, applicationRevision);
-        deleteApplicationFromDatabase(applicationName, applicationRevision);
+                " is started for application:"+applicationName+" with revision:"+versionName);
+        deleteApplicationUploadedPath(applicationName, versionName);
+        deleteApplicationFromDatabase(versionHashId);
         throw e;
     }
     //Adding deployment success event
     var msg = "Application deployment successfull";
-    addEvent(KUBE_DEPLOY, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
+    addEvent(KUBE_DEPLOY, EVENT_SUCCEEDED, msg, versionHashId);
     //============================================================================================================
 
     //======================================= Creating Ingress ===================================================
     //Adding deployment pending event
     var msg = "Application ingress creation successfully triggered in Kubernetes";
-    addEvent(INGRESS, EVENT_PENDING, msg, applicationName, applicationRevision);
+    addEvent(INGRESS, EVENT_PENDING, msg, versionHashId);
     try{
-        var appLaunchURL = constructAppLaunchURL(applicationName, applicationRevision);
+        var appLaunchURL = constructAppLaunchURL(applicationName, versionName);
 
         var ingressCreated = kubService.createDeploymentUrl(appLaunchURL);
         log.info("Deployment URL status: " + ingressCreated);
         var msg = "Application ingress creation successful";
-        addEvent(INGRESS, EVENT_SUCCEEDED, msg, applicationName, applicationRevision);
+        addEvent(INGRESS, EVENT_SUCCEEDED, msg, versionHashId);
     } catch(e){
         var msg = "Application ingress creation failed in Kubernetes";
-        addEvent(INGRESS, EVENT_FAILED, msg, applicationName, applicationRevision);
-        ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+        addEvent(INGRESS, EVENT_FAILED, msg, versionHashId);
+        ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
         log.info("Application deployment failed because ingress is not created successfully and roll back process" +
-                " is started for application:"+applicationName+" with revision:"+applicationRevision);
-        deleteApplicationUploadedPath(applicationName, applicationRevision);
-        deleteApplicationFromDatabase(applicationName, applicationRevision);
-        deleteApplicationFromKubernetes(applicationName, applicationRevision);
+                " is started for application:"+applicationName+" with revision:"+versionName);
+        deleteApplicationUploadedPath(applicationName, versionName);
+        deleteApplicationFromDatabase(versionHashId);
+        deleteApplicationFromKubernetes(applicationName, versionName);
         log.error(msg);
         log.error(e);
         throw e;
@@ -260,7 +329,7 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
     var msg = "Application pods Scheduled";
     var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
     var prevPodStatus = "";
-    addEvent(POD_STATUS, EVENT_PENDING, podStatus, applicationName, applicationRevision);
+    addEvent(POD_STATUS, EVENT_PENDING, podStatus, versionHashId);
 
     var counter = 0;
     while(counter < 300){ // Waiting 5 minutes to gets pods up and running
@@ -270,21 +339,21 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
         if (podStatus == "Running") {
             //Adding pod status pending event
             var msg = "Application started successfully";
-            addEvent(POD_STATUS, EVENT_SUCCEEDED, podStatus, applicationName, applicationRevision);
-            ApplicationManager.updateApplicationStatus(APPLICATION_RUNNING, applicationName, applicationRevision);
+            addEvent(POD_STATUS, EVENT_SUCCEEDED, podStatus, versionHashId);
+            ApplicationManager.updateVersionStatus(versionHashId,APPLICATION_RUNNING);
             break;
         }else if(counter == 300){ // if pods doesn't starts withing 5 minutes user redirected to user home
             //Adding pod status error event
             var msg = "Application starting failed";
             var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
-            addEvent(POD_STATUS, EVENT_FAILED, podStatus, applicationName, applicationRevision);
+            addEvent(POD_STATUS, EVENT_FAILED, podStatus, versionHashId);
             ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
             log.info("Application rollback started for application:"+applicationName + " with revision:"+
-                    applicationRevision +" because pods are not running even after 3 minutes.");
-            deleteApplicationUploadedPath(applicationName, applicationRevision);
-            deleteDeployment(applicationName, applicationRevision);
-            deleteApplicationFromDatabase(applicationName, applicationRevision);
-            deleteApplicationFromKubernetes(applicationName, applicationRevision);
+                    versionName +" because pods are not running even after 3 minutes.");
+            deleteApplicationUploadedPath(applicationName, versionName);
+            deleteDeployment(applicationName, versionName);
+            deleteApplicationFromDatabase(versionHashId);
+            deleteApplicationFromKubernetes(applicationName, versionName);
         } else {
             var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
             if (podStatus !== prevPodStatus) {
@@ -295,9 +364,13 @@ var deployApplication = function(applicationName, applicationRevision, deploymen
     }
 };
 
-var constructAppLaunchURL = function(applicationName, applicationRevision){
+var constructAppLaunchURL = function(applicationName, versionName){
+
+    applicationName = Util.getRuntimeValidAppName(applicationName);
+    applicationName = applicationName.toLowerCase();
+
     var urlPrefix = modManager.getTenantDomain()
-            + "-" + applicationName + "-" + applicationRevision;
+            + "-" + applicationName + "-" + versionName;
     var appLaunchURL = urlPrefix.replace(/\./g, '-')
             +  "." + modManager.getPropertyValue("ApplicationLaunchBaseURL");
 
@@ -306,20 +379,19 @@ var constructAppLaunchURL = function(applicationName, applicationRevision){
     return appLaunchURL;
 };
 
-var deleteDeployment = function(applicationName, applicationRevision){
-    ApplicationManager.deleteDeployment(applicationName, applicationRevision);
+var deleteDeployment = function(versionHashId){
+    ApplicationManager.deleteDeployment(versionHashId);
 };
 
-var updateApplicationStatus = function(applicationName, applicationRevision, status){
-    log.info(applicationName +' '+applicationRevision+' '+status);
-    ApplicationManager.updateApplicationStatus(status, applicationName, applicationRevision);
+var updateApplicationStatus = function(versionHashId, status){
+    ApplicationManager.updateVersionStatus(versionHashId, status);
 };
 
-var redeployApplication = function(applicationName, applicationRevision){
-    var deploymentConfig = buildDeploymentConfigFromDB(applicationName, applicationRevision);
-    deployApplication(applicationName, applicationRevision, deploymentConfig, true);
+var redeployApplication = function(applicationName, versionName, versionHashId){
+    var deploymentConfig = buildDeploymentConfigFromDB(versionHashId);
+    deployApplication(applicationName, versionName, deploymentConfig, true, versionHashId);
 };
-var persistDeploymentConfig = function(deploymentConfig, applicationName, applicationRevision){
+var persistDeploymentConfig = function(deploymentConfig, versionHashId){
 
     var containerList = deploymentConfig.getContainers();
     var ctr = containerList.get(0);
@@ -355,11 +427,11 @@ var persistDeploymentConfig = function(deploymentConfig, applicationName, applic
     var containerSet = new java.util.HashSet();
     containerSet.add(container);
     deployment.setContainers(containerSet);
-    ApplicationManager.addDeployment(applicationName,applicationRevision, deployment );
+    ApplicationManager.addDeployment(versionHashId, deployment );
 };
 
-var buildDeploymentConfigFromDB = function(applicationName, applicationRevision){
-    var deployment = ApplicationManager.getDeployment(applicationName,applicationRevision);
+var buildDeploymentConfigFromDB = function(versionHashId){
+    var deployment = ApplicationManager.getDeployment(versionHashId);
 
     var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
     deploymentConfig.setDeploymentName(deployment.getDeploymentName());
@@ -371,7 +443,7 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
     while(containerIterator.hasNext()){
         var deploymentContainer = containerIterator.next();
         var provisioningContainer = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
-        provisioningContainer.setContainerName(applicationName);
+        provisioningContainer.setContainerName(versionHashId);
         provisioningContainer.setBaseImageName(deploymentContainer.getImageName());
         provisioningContainer.setBaseImageVersion(deploymentContainer.getImageVersion());
 
@@ -404,22 +476,22 @@ var buildDeploymentConfigFromDB = function(applicationName, applicationRevision)
 /**
  * Method for getting all the available application types. e.g : war, mss, car
  */
-function getContainers(tenantDockerRegistryUrl, baseImageName, tag, applicationName, appServiceName, applicationRevision, runtimeProperties, runtimeId){
+function getContainers(tenantDockerRegistryUrl, baseImageName, tag, versionHashId, appServiceName, runtimeProperties, runtimeId){
     var containerList = new java.util.ArrayList();
     var container = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
     var appBaseImageName = tenantDockerRegistryUrl + "/" + baseImageName;
-    container.setContainerName(applicationName);
+    container.setContainerName(versionHashId);
     container.setBaseImageName(appBaseImageName);
     container.setBaseImageVersion(tag);
     var envs = getRuntimeProperties(runtimeProperties);
     container.setEnvVariables(envs);
     var serviceProxyList = new java.util.ArrayList();
-    var services = ApplicationManager.getServices(runtimeId);
+    var services = ApplicationManager.getTransportsForRuntime(runtimeId);
 
     for(var i = 0; i < services.length; i++){
         var serviceProxy = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
         var service = services[i];
-        serviceProxy.setServiceName(appServiceName + "-" + applicationRevision.replace(/\./g, "-"));
+        serviceProxy.setServiceName('srv-' + appServiceName);
         serviceProxy.setServiceProtocol(service.getServiceProtocol());
         serviceProxy.setServicePort(getIngressPort(service.getServiceName()));
         serviceProxy.setServiceBackendPort(service.getServicePort());
@@ -444,10 +516,10 @@ function getRuntimeProperties(runtimeProperties){
     return envs;
 }
 
-function getDeploymentConfig(containersList, applicationName, applicationRevision, replicas){
+function getDeploymentConfig(containersList, versionHashId, replicas){
 
     var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
-    deploymentConfig.setDeploymentName(applicationName + "-" + applicationRevision.replace(/\./g, '-'));
+    deploymentConfig.setDeploymentName(versionHashId);
     deploymentConfig.setReplicas(parseInt(replicas));
     deploymentConfig.setContainers(containersList);
 
@@ -468,7 +540,6 @@ var getAllAppTypes = function(){
             var appType = appTypes[i];
             var appTypeObject = {};
 
-            appTypeObject.id = appType.id;
             appTypeObject.name = appType.appTypeName;
             appTypeObject.description = appType.description;
 
@@ -528,14 +599,12 @@ var getAllApplications = function(){
             var application = applications[i];
             var applicationObject = {};
 
-            applicationObject.id = application.applicationId;
             applicationObject.applicationName = application.applicationName;
-            applicationObject.runtimeName = application.runtimeName;
-            applicationObject.status = application.status;
-            applicationObject.applicationType = application.appType;
+            applicationObject.hashId = application.hashId;
+            applicationObject.applicationType = application.applicationType;
             applicationObject.icon = getApplicationIconAsBase64String(application);
-            applicationObject.appTypeIcon = appTypesProperties[application.appType].icon;
-            applicationObject.appTypeTitle = appTypesProperties[application.appType].displayName;
+            applicationObject.appTypeIcon = appTypesProperties[application.applicationType].icon;
+            applicationObject.appTypeTitle = appTypesProperties[application.applicationType].displayName;
             applicationArray.push(applicationObject);
         }
     } catch(e){
@@ -547,6 +616,10 @@ var getAllApplications = function(){
     return applicationArray;
 }
 
+var getApplicationHashId = function(applicationName){
+    var tenantId = modManager.getTenantId();
+    return Util.getApplicationHashId(applicationName, tenantId);
+}
 /**
  * Method for getting the application e.g. :- Application {
  *                                              id=1,
@@ -558,22 +631,18 @@ var getAllApplications = function(){
  *                                              description="this is fooApp java application"
  *                                              }
  */
-var getApplicationByNameRevision = function(appName,appRevision){
+var getApplication = function(applicationHashId){
        try {
-        var application = ApplicationManager.getApplicationByNameRevision(appName,appRevision);
-            var applicationObject = {};
-            applicationObject.id = application.applicationId;
-            applicationObject.applicationName = application.applicationName;
-            applicationObject.runtimeName = application.runtimeName;
-            applicationObject.revision = application.revision;
-            applicationObject.status = application.status;
-            applicationObject.numberOfReplicas = application.numberOfReplicas;
-            applicationObject.description = application.description;
-            applicationObject.applicationType = application.applicationType;
-            applicationObject.icon = getApplicationIconAsBase64String(application);
-            applicationObject.runtimeProperties = generateRuntimePropsArray(application.runtimeProperties);
-            applicationObject.labels = generateLabelsArray(application.labels);
-            applicationObject.endpoints = generateEndpointsArray(application.endpoints);
+       var application = ApplicationManager.getApplicationByHashId(applicationHashId);
+    var applicationObject = {};
+
+    applicationObject.applicationName = application.applicationName;
+    applicationObject.hashId = application.hashId;
+    applicationObject.description = application.description;
+    applicationObject.defaultVersion = application.versions.get(0).versionName;
+    applicationObject.applicationType = application.applicationType;
+    applicationObject.icon = application.icon;
+    applicationObject.versions = generateVersionList(application.versions, application.applicationName);
     } catch(e){
         log.error("Error while getting the application");
         log.error(e);
@@ -582,6 +651,34 @@ var getApplicationByNameRevision = function(appName,appRevision){
 
     return applicationObject;
 }
+
+var generateVersionList = function (versions, applicationName){
+    var versionList = {};
+    try {
+        for (var i = 0; i < versions.size(); i++) {
+            var versionObject = {};
+            var version = versions.get(i);
+            var deploymentUrl = getDeploymentURL(applicationName, version.versionName);
+
+            versionObject.versionName = version.versionName;
+            versionObject.hashId = version.hashId;
+            versionObject.runtimeId = version.runtimeId;
+            versionObject.runtimeName = version.runtimeName;
+            versionObject.status = version.status;
+            versionObject.runtimeProperties = generateRuntimePropsArray(version.runtimeProperties);
+            versionObject.tags = generateTagsArray(version.tags);
+            versionObject.deploymentURL = deploymentUrl;
+
+            versionList[version.versionName] = versionObject;
+        }
+    } catch(e){
+        log.error("Error while getting the application list");
+        log.error(e);
+        throw e;
+    }
+    return versionList;
+}
+
 
 /**
  * Get application icon as a base64 encoded string.
@@ -603,11 +700,11 @@ function getApplicationIconAsBase64String(application) {
  * @param applicationKey application key
  * @param appIcon file object of the appIcon
  */
-function changeApplicationIcon(applicationName, revision, appIcon){
+function changeApplicationIcon(applicationHashId, appIcon){
     if(appIcon){
         var streamHostObject = appIcon.getStream();
         var inputStream = streamHostObject.getStream();
-        ApplicationManager.updateApplicationIcon(applicationName, inputStream);
+        ApplicationManager.updateApplicationIcon(applicationHashId, inputStream);
     } else {
         log.error("Provided app icon is Empty for application : "+applicationName);
         throw "Provided app icon is Empty"
@@ -615,14 +712,15 @@ function changeApplicationIcon(applicationName, revision, appIcon){
 
 }
 
-var getEnvVariablesByNameRevision = function(appName,appRevision){
+var getEnvVariablesOfVersion = function(versionHashId){
+
     var evnVariables = [];
        try {
-        var envVars = ApplicationManager.getApplicationRuntimePropertiesByNameRevision(appName,appRevision);
-           for (var i = 0; i < envVars.length; i++) {
+        var envVars = ApplicationManager.getAllRuntimePropertiesOfVersion(versionHashId);
+           for (var i = 0; i < envVars.size(); i++) {
                var envObj = {};
-               envObj.key = envVars[i].propertyName;
-               envObj.value = envVars[i].propertyValue;
+               envObj.key = envVars.get(i).propertyName;
+               envObj.value = envVars.get(i).propertyValue;
                evnVariables.push(envObj);
            }
     } catch(e){
@@ -633,14 +731,14 @@ var getEnvVariablesByNameRevision = function(appName,appRevision){
     return evnVariables;
 };
 
-var getTags = function(appName,appRevision){
+var getTags = function(versionHashId){
     var tags = [];
        try {
-        var tagArr = ApplicationManager.getTags(appName,appRevision);
-           for (var i = 0; i < tagArr.length; i++) {
+        var tagArr = ApplicationManager.getAllTagsOfVersion(versionHashId);
+           for (var i = 0; i < tagArr.size(); i++) {
                var tagObj = {};
-               tagObj.key = tagArr[i].labelName;
-               tagObj.value = tagArr[i].labelValue;
+               tagObj.key = tagArr.get(i).tagName;
+               tagObj.value = tagArr.get(i).tagValue;
                tags.push(tagObj);
            }
     } catch(e){
@@ -651,18 +749,18 @@ var getTags = function(appName,appRevision){
     return tags;
 };
 
-var updateTag = function (applicationName, applicationRevision, prevKey, newKey, prevValue, newValue) {
+var updateTag = function (versionHashId, prevKey, newKey, newValue) {
     try {
-        ApplicationManager.updateTag(applicationName, applicationRevision, prevKey, newKey, prevValue, newValue);
+        ApplicationManager.updateTag(versionHashId, prevKey, newKey, newValue);
     } catch (e) {
         log.error("Error while getting the application");
         log.error(e);
         throw e;
     }
 };
-var updateApplicationRuntimeProperty = function (applicationName, applicationRevision, prevKey, newKey, prevValue, newValue) {
+var updateRuntimeProperty = function (versionHashId, prevKey, newKey, newValue) {
     try {
-        ApplicationManager.updateApplicationRuntimeProperty(applicationName, applicationRevision, prevKey, newKey, prevValue, newValue);
+        ApplicationManager.updateRuntimeProperty(versionHashId, prevKey, newKey, newValue);
     } catch (e) {
         log.error("Error while getting the application");
         log.error(e);
@@ -670,32 +768,32 @@ var updateApplicationRuntimeProperty = function (applicationName, applicationRev
     }
 };
 
-var deleteApplicationRuntimeProperty = function (applicationName, applicationRevision, key, value) {
+var deleteRuntimeProperty = function (versionHashId, key) {
     try {
-        ApplicationManager.deleteApplicationRuntimeProperty(applicationName, applicationRevision, key, value);
+        ApplicationManager.deleteRuntimeProperty(versionHashId, key);
     } catch (e) {
         log.error("Error while getting the application");
         log.error(e);
         throw e;
     }
 };
-var deleteTag = function (applicationName, applicationRevision, key, value) {
+var deleteTag = function (versionHashId, key) {
     try {
-        ApplicationManager.deleteTag(applicationName, applicationRevision, key, value);
+        ApplicationManager.deleteTag(versionHashId, key);
     } catch (e) {
         log.error("Error while getting the application");
         log.error(e);
         throw e;
     }
 };
-var addApplicationRuntimeProperty = function (applicationName, applicationRevision, key, value) {
+var addRuntimeProperty = function (versionHashId, key, value) {
     try {
         var runtimePropertyList = new java.util.ArrayList();
         var runtimeProperty = new Packages.org.wso2.appcloud.core.dto.RuntimeProperty();
         runtimeProperty.setPropertyName(key);
         runtimeProperty.setPropertyValue(value);
         runtimePropertyList.add(runtimeProperty);
-        ApplicationManager.addRuntimeProperties(applicationName, applicationRevision, runtimePropertyList);
+        ApplicationManager.addRuntimeProperties(runtimePropertyList, versionHashId);
     } catch (e) {
         log.error("Error while adding runtime property with Key:" + key);
         log.error(e);
@@ -703,14 +801,14 @@ var addApplicationRuntimeProperty = function (applicationName, applicationRevisi
     }
 };
 
-var addTag = function (applicationName, applicationRevision, key, value) {
+var addTag = function (versionHashId, key, value) {
     try {
         var tagList = new java.util.ArrayList();
-        var tag = new Packages.org.wso2.appcloud.core.dto.Label();
-        tag.setLabelName(key);
-        tag.setLabelValue(value);
+        var tag = new Packages.org.wso2.appcloud.core.dto.Tag();
+        tag.setTagName(key);
+        tag.setTagValue(value);
         tagList.add(tag);
-        ApplicationManager.addTags(applicationName, applicationRevision, tagList);
+        ApplicationManager.addTags(tagList, versionHashId);
     } catch (e) {
         log.error("Error while adding runtime property with Key:" + key);
         log.error(e);
@@ -724,9 +822,9 @@ var generateTagsList = function (tagListArray) {
         var tagList = new java.util.ArrayList();
         for (var i = 0; i < size; i++) {
             var tagJsonObj = tagListArray[i];
-            var tag = new Packages.org.wso2.appcloud.core.dto.Label();
-            tag.setLabelName(tagJsonObj.key);
-            tag.setLabelValue(tagJsonObj.value);
+            var tag = new Packages.org.wso2.appcloud.core.dto.Tag();
+            tag.setTagName(tagJsonObj.key);
+            tag.setTagValue(tagJsonObj.value);
             tagList.add(tag);
         }
         return tagList;
@@ -774,15 +872,14 @@ var generateRuntimePropsArray=function(runtimeList){
     return runtimePropsArray;
 };
 
-var generateLabelsArray=function(labelsList){
+var generateTagsArray=function(labelsList){
     var size = labelsList.size();
     var labelsArray = [];
     for (var i = 0; i < size; i++) {
         var labelObject = labelsList.get(i);
         var label = {
-            labelId: labelObject.labelId,
-            labelName: labelObject.labelName,
-            labelValue: labelObject.labelValue,
+            labelName: labelObject.tagName,
+            labelValue: labelObject.tagValue,
             description: labelObject.description
         };
         labelsArray.push(label);
@@ -790,28 +887,13 @@ var generateLabelsArray=function(labelsList){
     return labelsArray;
 };
 
-var generateEndpointsArray=function(endpointsList){
-    var size = endpointsList.size();
-    var endpointsArray = [];
-    for (var i = 0; i < size; i++) {
-        var epObject = endpointsList.get(i);
-        var endpoint = {
-            id: epObject.id,
-            urlValue: epObject.urlValue,
-            description: epObject.description
-        };
-        endpointsArray.push(endpoint);
-    }
-    return endpointsArray;
-};
 
-var getAllRevisionsOfApplication = function(appName){
+var getVersionListOfApplication = function(applicationHashId){
     var revisionArray = [];
     try {
-        var revisions = ApplicationManager.getAllRevisionsOfApplication(appName);
-        for (var i = 0; i < revisions.length; i++) {
-            var revision = revisions[i];
-            revisionArray.push(revisions[i]);
+        var revisions = ApplicationManager.getVersionListOfApplication(applicationHashId);
+        for (var i = 0; i < revisions.size(); i++) {
+            revisionArray.push(revisions.get(i));
         }
     } catch(e){
         log.error("Error while getting the application list");
@@ -821,9 +903,10 @@ var getAllRevisionsOfApplication = function(appName){
     return revisionArray;
 };
 
-var getDeploymentURL = function (applicationName, applicationRevision, appTypeName){
+var getDeploymentURL = function (applicationName, versionName){
+
     var urlScheme = CloudUtil.getPropertyValue("DeploymentUrlScheme");
-    var baseURL = constructAppLaunchURL(applicationName, applicationRevision);
+    var baseURL = constructAppLaunchURL(applicationName, versionName);
     var applicationLaunchURL = urlScheme + "://" + baseURL;
 
     log.debug("Deployment URL: " + applicationLaunchURL);
@@ -831,50 +914,53 @@ var getDeploymentURL = function (applicationName, applicationRevision, appTypeNa
 };
 
 
-var putSelectedRevisionToSession = function(applicationName, currentRevision) {
+var putSelectedRevisionToSession = function(applicationKey, currentRevision) {
     var selectedVersions = session.get("SELECTED_REVISIONS");
     if (!selectedVersions) {
         selectedVersions = {};
     }
-    selectedVersions[applicationName] = currentRevision;
+    selectedVersions[applicationKey] = currentRevision;
     session.put("SELECTED_REVISIONS", selectedVersions);
 };
 
-var getSelectedRevisionFromSession = function(applicationName) {
+var getSelectedRevisionFromSession = function(applicationKey) {
     var selectedVersions = session.get("SELECTED_REVISIONS");
-    if (selectedVersions && selectedVersions[applicationName]) {
-        return selectedVersions[applicationName];
+    if (selectedVersions && selectedVersions[applicationKey]) {
+        return selectedVersions[applicationKey];
     } else {
         return null;
     }
 };
 
-var getApplicationCreationEvents = function(applicationName, applicationRevision) {
+var getApplicationCreationEvents = function(applicationName, versionName) {
+
+    var tenantId = modManager.getTenantId();
+    var versionHashId = Util.getVersionHashId(applicationName, versionName, tenantId);
 
     var eventsManager = new EventsManager();
     var eventsArray = [];
 
     try {
-            var events = eventsManager.getEventsOfApplication(applicationName, applicationRevision);
-            for (var i = 0; i < events.length; i++) {
-                var event = events[i];
-                var eventObject = {};
+        var events = eventsManager.getEventsOfApplication(versionHashId);
+        for (var i = 0; i < events.length; i++) {
+            var event = events[i];
+            var eventObject = {};
 
-                eventObject.name = event.eventName;
-                eventObject.status = event.eventStatus;
-                eventObject.timestamp = event.timestamp;
-                eventObject.description = event.eventDescription;
+            eventObject.name = event.eventName;
+            eventObject.status = event.eventStatus;
+            eventObject.timestamp = event.timestamp;
+            eventObject.description = event.eventDescription;
 
-                eventsArray.push(eventObject);
-            }
-        } catch(e){
-            log.error("Error while getting the application creation event list");
-            log.error(e);
-            throw e;
+            eventsArray.push(eventObject);
         }
-        return eventsArray;
+    } catch(e){
+        log.error("Error while getting the application creation event list");
+        log.error(e);
+        throw e;
+    }
+    return eventsArray;
 
-    var events = eventsManager.getEventsOfApplication(applicationName, applicationRevision);
+    var events = eventsManager.getEventsOfApplication(versionHashId);
 };
 
 var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationName, revision){
@@ -947,7 +1033,7 @@ var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
     CloudUtil.downloadFromUrl(artifactUrl , filePath);
 };
 
-var addEvent = function(name, status, description, applicationName, applicationRevision) {
+var addEvent = function(name, status, description, versionHashId) {
     try {
         var eventsManager = new EventsManager();
         var event = new Event();
@@ -956,12 +1042,12 @@ var addEvent = function(name, status, description, applicationName, applicationR
         event.setEventStatus(status);
         event.setTimestamp(new Packages.java.sql.Timestamp(new Date().getTime()));
         event.setEventDescription(description);
-        eventsManager.addAppCreationEvent(applicationName, applicationRevision, event);
+        eventsManager.addAppCreationEvent(versionHashId, event);
     } catch (e) {
-        log.error("Error while adding app creation event for application:"+applicationName + " with revision:"+
-                applicationRevision+" event name:"+name+" ,event status:"+status+" ,event description:"+description);
+        log.error("Error while adding app creation event for application with version hash id : "+versionHashId + " with version hash Id :"
+                  + versionHashId+" event name:"+name+" ,event status:"+status+" ,event description:"+description);
         log.error(e);
-        throw e;
+        // not throwing error, because it will affect the application creation process
     }
 };
 
@@ -978,11 +1064,11 @@ var deleteApplicationUploadedPath = function(applicationName, revision) {
     }
 };
 
-var deleteApplicationFromDatabase = function(applicationName, revision) {
+var deleteApplicationFromDatabase = function(versionHashId) {
     try{
         java.lang.Thread.sleep(3000); // database at last after the transaction completes.
-        ApplicationManager.deleteApplication(applicationName, revision);
-        log.info("Successfully deleted the application: " + applicationName + ":" + revision + " form the database" );
+        ApplicationManager.deleteVersion(versionHashId);
+        log.info("Successfully deleted the application form the database");
     }catch(e){
         log.error("Error while deleting application from the database");
         log.error(e);
