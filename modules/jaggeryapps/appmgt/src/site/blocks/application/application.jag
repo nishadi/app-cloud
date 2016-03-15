@@ -187,11 +187,10 @@ var log = new Log();
 
     } else if (action == "changeAppIcon"){
         var appIcon = request.getFile("changeIcon");
-        var applicationName = request.getParameter("applicationName");
-        var revision = request.getParameter("selectedRevision");
+        var applicationKey = request.getParameter("applicationKey");
         var mod = jagg.module("application");
-        mod.changeApplicationIcon(applicationName, revision, appIcon);
-        print("<html><script>window.location.replace('/appmgt/site/pages/home.jag?applicationName=" + applicationName + "');</script><body></body></html>");
+        mod.changeApplicationIcon(applicationKey, appIcon);
+        print("<html><script>window.location.replace('/appmgt/site/pages/home.jag?applicationKey=" + applicationKey + "');</script><body></body></html>");
 
     } else if (action == "getApplicationHashId"){
         var applicationName = request.getParameter("applicationName");
