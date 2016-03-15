@@ -16,6 +16,7 @@
 
 package org.wso2.appcloud.core.dao;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
@@ -32,6 +33,7 @@ import org.wso2.appcloud.core.dto.Tag;
 import org.wso2.appcloud.core.dto.Transport;
 import org.wso2.appcloud.core.dto.Version;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -90,6 +92,9 @@ public class ApplicationDAO {
                 }
             }
 
+            InputStream iconInputStream = IOUtils.toBufferedInputStream(application.getIcon().getBinaryStream());
+            updateApplicationIcon(dbConnection, iconInputStream, application.getHashId());
+
         } catch (SQLException e) {
 
             String msg =
@@ -98,6 +103,12 @@ public class ApplicationDAO {
             log.error(msg, e);
             throw new AppCloudException(msg, e);
 
+        } catch (IOException e) {
+            String msg =
+                    "Error while generating stream of the icon for application : " + application.getApplicationName() +
+                    " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
         } finally {
             DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
