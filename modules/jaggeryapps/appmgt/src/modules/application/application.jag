@@ -87,7 +87,7 @@ var addApplication = function (applicationName, versionName, applicationDescript
     var application = createAppInDataBase(applicationName, versionName, applicationDescription, replicas, runtimeId, appTypeName,
                                           runtimePropertiesArray, tagArray, appIcon, applicationHashId, versionHashId);
     var applicationRuntime = ApplicationManager.getRuntimeById(runtimeId);
-    var tagName = applicationRuntime.getTag() +"-"+ modManager.getTenantDomain() +"-"+applicationName+"-"+versionName;
+    var tagName = applicationRuntime.getTag() +"-"+ versionHashId;
     var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
     var dockerOpClient = new DockerOpClient(modManager.getPropertyValue("DockerClientURL"));
     var version = application.getVersions().get(0);
@@ -205,6 +205,10 @@ var createAppInDataBase = function(applicationName, versionName, applicationDesc
         application.setDescription(applicationDescription);
         application.setApplicationType(appTypeName);
 
+        var icon = Packages.org.apache.commons.io.IOUtils.toByteArray(appIcon.getStream().getStream());
+        var blob = new Packages.javax.sql.rowset.serial.SerialBlob(icon);
+        application.setIcon(blob);
+
         version.setVersionName(versionName);
         version.setRuntimeId(runtimeId);
         version.setStatus(APPLICATION_CREATED);
@@ -226,9 +230,6 @@ var createAppInDataBase = function(applicationName, versionName, applicationDesc
 
         ApplicationManager.addApplication(application);
 
-        if(appIcon){
-            changeApplicationIcon(applicationHashId, appIcon);
-        }
     } catch (e){
 
         var msg = "Error while adding application to database";
@@ -737,7 +738,7 @@ var getApplication = function(applicationHashId){
         applicationObject.description = application.description;
         applicationObject.defaultVersion = application.versions.get(0).versionName;
         applicationObject.applicationType = application.applicationType;
-        applicationObject.icon = application.icon;
+        applicationObject.icon = getApplicationIconAsBase64String(application);
         applicationObject.versions = generateVersionList(application.versions, application.applicationName);
     } catch(e){
         log.error("Error while getting the application");
