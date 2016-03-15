@@ -45,16 +45,25 @@ public class Util {
     }
 
     public static String getVersionHashId (String applicationName, String versionName, int tenantId){
+        if(applicationName == null || versionName == null || applicationName.isEmpty() || versionName.isEmpty()){
+            return null;
+        }
         String idString = tenantId + applicationName + versionName;
         return Long.toString(Util.hash(idString));
     }
 
     public static String getApplicationHashId (String applicationName, int tenantId){
+        if(applicationName == null || applicationName.isEmpty()){
+            return null;
+        }
         String idString = tenantId + applicationName;
         return Long.toString(Util.hash(idString));
     }
 
     public static String getRuntimeValidAppName(String applicationName){
+        if(applicationName == null || applicationName.isEmpty()){
+            return null;
+        }
         applicationName = applicationName.replaceAll("[^a-zA-Z0-9]+", "-");
         return applicationName;
     }

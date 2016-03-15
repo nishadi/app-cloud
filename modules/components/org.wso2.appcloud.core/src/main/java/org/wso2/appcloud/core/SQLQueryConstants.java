@@ -107,6 +107,9 @@ public class SQLQueryConstants {
     public static final String GET_APPLICATION_NAME_BY_HASH_ID =
             "SELECT name FROM AC_APPLICATION WHERE hash_id = ?";
 
+    public static final String GET_APPLICATION_HASH_ID_BY_NAME =
+            "SELECT hash_id FROM AC_APPLICATION WHERE name=? AND tenant_id=?";
+
     public static final String GET_APPLICATION_ID =
             "SELECT id FROM AC_APPLICATION WHERE hash_id=?";
 

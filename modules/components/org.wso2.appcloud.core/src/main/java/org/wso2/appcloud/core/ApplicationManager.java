@@ -187,6 +187,21 @@ public class ApplicationManager {
         }
     }
 
+    public static String getApplicationHashIdByName(String applicationName) throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        try {
+            return applicationDAO.getApplicationHashIdByName(dbConnection, applicationName, tenantId);
+        } catch (AppCloudException e) {
+            String msg = "Error while getting application hash id for application name : " + applicationName;
+            throw new AppCloudException(msg, e);
+        }
+    }
+
     /**
      * Method for getting application by id
      *
