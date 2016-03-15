@@ -710,6 +710,12 @@ var getApplicationHashId = function(applicationName){
     var tenantId = modManager.getTenantId();
     return Util.getApplicationHashId(applicationName, tenantId);
 }
+
+
+var getApplicationHashIdByName = function(applicationName){
+    return ApplicationManager.getApplicationHashIdByName(applicationName);
+}
+
 /**
  * Method for getting the application e.g. :- Application {
  *                                              id=1,

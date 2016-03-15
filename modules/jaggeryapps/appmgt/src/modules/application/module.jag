@@ -108,6 +108,9 @@ jagg.module("application", {
     },
     getApplicationHashId:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationHashId.apply(this, arguments);
+    },
+    getApplicationHashIdByName:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationHashIdByName.apply(this, arguments);
     }
 });
 %>

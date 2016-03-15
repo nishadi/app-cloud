@@ -576,6 +576,34 @@ public class ApplicationDAO {
     }
 
 
+    public String getApplicationHashIdByName(Connection dbConnection, String applicationName, int tenantId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement;
+        ResultSet resultSet;
+        String applicationHashId = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_APPLICATION_HASH_ID_BY_NAME);
+            preparedStatement.setString(1, applicationName);
+            preparedStatement.setInt(2, tenantId);
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                applicationHashId = resultSet.getString(SQLQueryConstants.HASH_ID);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving application hash id using application name : " + applicationName +
+                         " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        }
+
+        return applicationHashId;
+    }
+
     /**
      * Method for getting application from database using application hash id
      *
