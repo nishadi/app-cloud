@@ -39,6 +39,7 @@ public class SQLQueryConstants {
     public static final String RUNTIME_ID = "runtime_id";
     public static final String STATUS = "status";
     public static final String APPLICATION_TYPE_NAME = "app_type_name";
+    public static final String BUILDABLE = "buildable" ;
     public static final String RUNTIME_NAME = "runtime_name";
     public static final String ICON = "icon";
     public static final String RUNTIME_REPO_URL = "repo_url";
@@ -185,4 +186,5 @@ public class SQLQueryConstants {
 
     public static final String DELETE_DEPLOYMENT =
             "DELETE FROM AC_DEPLOYMENT WHERE id=(SELECT deployment_id FROM AC_VERSION WHERE hash_id=?)";
+
 }

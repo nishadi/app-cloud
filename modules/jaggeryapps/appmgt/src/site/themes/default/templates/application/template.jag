@@ -24,6 +24,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var runtimes = outputs.runtimes;
         var appType = outputs.appType;
         var appTypeName = appType.type;
+        var isAppTypeBuildable = appType.buildable;
         var applicationName = outputs.applicationName;
         var encodedLabels = request.getParameter("encodedLabels");
         var encodedEnvs = request.getParameter("encodedEnvs");
@@ -80,6 +81,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             }
             activateUploadButton();
             $("#url-upload-block").hide();
+            $("#github-block").hide();
 
             $.each(<%=runtimes%>,function(key,value){
                 $("#runtime").append($('<option></option>').val(value.id).html(value.runtimeName));
@@ -152,6 +154,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     } else if (appTypeName == "mss") {
                         formData.append('uploadedFileName', $("#applicationName").val() + ".jar");
                     }
+                } else if (uploadMethod === "github" ) {
+                    formData.append('gitRepoUrl', $("#gitRepoUrl").val());
+                    formData.append('gitRepoBranch', $("#gitRepoBranch").val());
                 }
                 $.ajax({
                         url: $(this).attr("action"),
@@ -404,11 +409,18 @@ jagg.template("application", function (inputs, outputs, jagg) {
             if(selection.val() == 'upload-from-file'){
                 $('#file-upload-block').fadeIn();
                 $('#url-upload-block').hide();
+                $('#github-block').hide();
                 uploadMethod = "file";
             }else if(selection.val() == 'upload-from-url'){
                 $('#file-upload-block').hide();
+                $('#github-block').hide();
                 $('#url-upload-block').fadeIn();
                 uploadMethod = "url";
+            }else if(selection.val() == 'github-repo-url'){
+                $('#file-upload-block').hide();
+                $('#url-upload-block').hide();
+                $('#github-block').fadeIn();
+                uploadMethod = "github";
             }
         });
 
@@ -756,6 +768,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="upload-from-url"
                            class="custom-radio"> Upload from URL
                 </label>
+                <%  if(isAppTypeBuildable == 'false'){ %>
+                    <label class="radio-inline">
+                        <input type="radio" name="inlineRadioOptions" id="inlineRadio3" value="github-repo-url"
+                               class="custom-radio"> Connect to GitHub repo
+                    </label>
+                <% } %>
             </div>
 
             <div class="form-group" id="file-upload-block">
@@ -779,6 +797,17 @@ jagg.template("application", function (inputs, outputs, jagg) {
                         <a class="btn btn-primary" id="url-upload" type="button" disabled>Upload from URL
                         <span id="url-upload-progress"><span></a>
                     </span>
+                </div>
+            </div>
+
+            <div class="form-group" id="github-block">
+                <div class="input-group">
+                <label for="runtime">URL:
+                    <input id="gitRepoUrl" name="gitRepoUrl" type="text" class="form-control" placeholder="Enter GitHub Repository URL" />
+                </label>
+                <label for="runtime">Branch:
+                    <input id="gitRepoBranch" name="gitRepoBranch" type="text" class="form-control" placeholder="Enter GitHub Repository branch" />
+                </label>
                 </div>
             </div>
 

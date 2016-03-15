@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_APP_TYPE` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NOT NULL,
   `description` VARCHAR(1000) NULL,
+  `buildable` int(1) DEFAULT '1',
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 

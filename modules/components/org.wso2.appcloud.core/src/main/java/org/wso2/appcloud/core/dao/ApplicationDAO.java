@@ -605,8 +605,8 @@ public class ApplicationDAO {
                 application.setDefaultVersion(resultSet.getString(SQLQueryConstants.DEFAULT_VERSION));
                 application.setApplicationType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
                 application.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
-
                 application.setVersions(getAllVersionsOfApplication(dbConnection, applicationHashId));
+
             }
 
         } catch (SQLException e) {
@@ -846,7 +846,7 @@ public class ApplicationDAO {
                 applicationType = new ApplicationType();
                 applicationType.setAppTypeName(resultSet.getString(SQLQueryConstants.NAME));
                 applicationType.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
-
+                applicationType.setBuildable(resultSet.getInt(SQLQueryConstants.BUILDABLE) == 1 ? true : false);
                 applicationTypeList.add(applicationType);
             }
 
