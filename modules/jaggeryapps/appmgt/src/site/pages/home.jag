@@ -27,7 +27,7 @@ include("/jagg/jagg.jag");
         return;
     }
 
-    var applicationName = request.getParameter('applicationName');
+    var applicationKey = request.getParameter('applicationKey');
     jagg.render({
         "name":"page/master",
         "inputs":{
@@ -45,7 +45,7 @@ include("/jagg/jagg.jag");
                             {
                                 "name":"home",
                                 "inputs":{
-                                    "applicationName":applicationName,
+                                    "applicationKey":applicationKey,
                                     "pageName":"home"
                                 }
                             }

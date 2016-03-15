@@ -59,7 +59,7 @@ function initData(selectedRevision){
     setLogArea("Loading...");
     jagg.post("../blocks/runtimeLogs/ajax/runtimeLogs.jag", {
         action:"getSnapshotLogs",
-        applicationKey:applicationName,
+        applicationKey:applicationKey,
         selectedRevision:selectedRevision
     },function (result) {
         initelements();

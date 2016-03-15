@@ -34,16 +34,16 @@ include("/jagg/constants.jag");
 
     if (action == "getSnapshotLogs") {
 
-        var applicationName = request.getParameter("applicationKey");
+        var applicationKey = request.getParameter("applicationKey");
         var selectedRevision = request.getParameter("selectedRevision");
         var mod = jagg.module("runtimeLogs");
         try {
-            var logMap = mod.getFormattedRuntimeLogs(applicationName, selectedRevision, "");
+            var logMap = mod.getFormattedRuntimeLogs(applicationKey, selectedRevision, "");
             print(logMap);
         } catch(e) {
             var msg = "Error while getting deployment logs";
             log.error(e);
-            log.error(msg+" for application: "+applicationName+ " revision: "+applicationName);
+            log.error(msg+" for application: "+applicationKey+ " revision: "+applicationKey);
             response.status = 400;
             response.content = msg;
         }

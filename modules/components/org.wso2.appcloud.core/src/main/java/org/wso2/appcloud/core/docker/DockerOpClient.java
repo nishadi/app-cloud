@@ -75,7 +75,7 @@ public class DockerOpClient {
             throws IOException, AppCloudException {
 
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        ApplicationRuntime applicationRuntime = applicationDAO.getRuntime(Integer.parseInt(runtimeId));
+        ApplicationRuntime applicationRuntime = applicationDAO.getRuntimeById(Integer.parseInt(runtimeId));
 
         String dockerRegistryUrl = DockerUtil.getDockerRegistryUrl();
         String dockerBaseImageName = applicationRuntime.getImageName();

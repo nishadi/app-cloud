@@ -6,7 +6,7 @@ $(document).ready(function() {
     });
     initPageView();
     var nextVersion = generateNextPossibleVersion(applicationRevisions);
-    var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+selectedApplicationRevision.applicationType +
+    var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+application.applicationType +
                         "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
                         + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;
     $('#upload-revision').attr("href", uploadRevisionUrl);
@@ -14,7 +14,7 @@ $(document).ready(function() {
 
 // wrapping functions
 function initPageView() {
-    loadAppIcon(selectedApplicationRevision);
+    loadAppIcon();
     var deploymentURL = selectedApplicationRevision.deploymentURL;
     var repoUrlHtml = generateLunchUrl(deploymentURL);
     $("#version-url-link").html(repoUrlHtml);
@@ -39,7 +39,7 @@ function initPageView() {
 }
 
 function listTags(){
-    var tags = selectedApplicationRevision.labels;
+    var tags = selectedApplicationRevision.tags;
     var tagListLength;
     if(tags) {
         tagListLength = tags.length;
@@ -52,24 +52,24 @@ function listTags(){
         tagString += tags[i].labelName + " : " + tags[i].labelValue + "</br>";
     }
     if(tagListLength > 3) {
-        tagString += "</br><a class='view-tag' href='/appmgt/site/pages/tags.jag?applicationName=" + applicationName + "&revision=" +
-                     selectedRevision + "'>View All Tags</a>";
+        tagString += "</br><a class='view-tag' href='/appmgt/site/pages/tags.jag?applicationKey=" + applicationKey
+        + "&versionKey=" + selectedApplicationRevision.hashId + "'>View All Tags</a>";
     }
 
     $('#tag-list').html(tagString);
 }
 
 // Icon initialization
-function loadAppIcon(selectedApplicationRevision) {
+function loadAppIcon() {
 
-    selectedApplicationRevision = getIconDetail(selectedApplicationRevision);
+    application = getIconDetail(application);
 
     var iconDiv;
-    if(selectedApplicationRevision.icon){
-        iconDiv = '<img id="app-icon"  src="data:image/bmp;base64,' + selectedApplicationRevision.icon + '" width="100px"/>'
+    if(application.icon){
+        iconDiv = '<img id="app-icon"  src="data:image/bmp;base64,' + application.icon + '" width="100px"/>'
     } else {
-        iconDiv = '<div class="app-icon" style="background:' + selectedApplicationRevision.uniqueColor + '">' +
-                      '<i class="fw ' + selectedApplicationRevision.appTypeIcon + ' fw-4x" data-toggle="tooltip" ></i>' +
+        iconDiv = '<div class="app-icon" style="background:' + application.uniqueColor + '">' +
+                      '<i class="fw ' + application.appTypeIcon + ' fw-4x" data-toggle="tooltip" ></i>' +
                       '</div>';
     }
 
@@ -80,10 +80,10 @@ function changeSelectedRevision(newRevision){
     // change app description
 
     //Changing revision dropdown
-    putSelectedRevisionToSession(applicationName, newRevision);
+    putSelectedRevisionToSession(applicationKey, newRevision);
     $('#selected-version').html(newRevision+" ");
     $("#selectedRevision").val(newRevision);
-    selectedApplicationRevision = applicationRevisions[newRevision];
+    selectedApplicationRevision = application.versions[newRevision];
     //Changing deploymentURL
     var deploymentURL = selectedApplicationRevision.deploymentURL;
     var repoUrlHtml = generateLunchUrl(deploymentURL);
@@ -94,19 +94,19 @@ function changeSelectedRevision(newRevision){
     $('#btn-dashboard').attr({url:dashboardUrl});
 
     //changing app description
-    $("#app-description").text(selectedApplicationRevision.description?selectedApplicationRevision.description:'');
+    $("#app-description").text(application.description?application.description:'');
 
     //changing runtime
     $("#runtime").html(selectedApplicationRevision.runtimeName);
 
     //change icon
-    loadAppIcon(selectedApplicationRevision);
+    loadAppIcon();
 
     // Change replica status
     $("#tableStatus").html(selectedApplicationRevision.status);
 
     // Set upload revision btn
-    var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+selectedApplicationRevision.applicationType + //"&applicationName="+applicationName;
+    var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+application.applicationType + //"&applicationName="+applicationName;
                         "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
                         + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;
     $('#upload-revision').attr("href", uploadRevisionUrl);
@@ -130,10 +130,10 @@ function generateLunchUrl(appURL) {
     return message;
 }
 
-function putSelectedRevisionToSession(applicationName, selectedRevision){
+function putSelectedRevisionToSession(applicationKey, selectedRevision){
     jagg.syncPost("../blocks/home/ajax/get.jag", {
         action: "putSelectedRevisionToSession",
-        applicationName: applicationName,
+        applicationKey: applicationKey,
         selectedRevision: selectedRevision
     });
 }
@@ -143,7 +143,7 @@ function changeRuntimeProps(selectedApplicationRevision){
 }
 
 function changeLabels(selectedApplicationRevision){
-    $('#labelCount').html(selectedApplicationRevision.labels.length);
+    $('#labelCount').html(selectedApplicationRevision.tags.length);
 }
 
 // Uploading application icon

@@ -23,7 +23,7 @@ public class Container {
     private int id;
     private String imageName;
     private String imageVersion;
-    private Set<ServiceProxy> serviceProxies;
+    private Set<ContainerServiceProxy> serviceProxies;
     private List<RuntimeProperty> runtimeProperties;
 
     public int getId() {
@@ -50,11 +50,11 @@ public class Container {
         this.imageVersion = imageVersion;
     }
 
-    public Set<ServiceProxy> getServiceProxies() {
+    public Set<ContainerServiceProxy> getServiceProxies() {
         return serviceProxies;
     }
 
-    public void setServiceProxies(Set<ServiceProxy> serviceProxies) {
+    public void setServiceProxies(Set<ContainerServiceProxy> serviceProxies) {
         this.serviceProxies = serviceProxies;
     }
 

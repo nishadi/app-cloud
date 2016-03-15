@@ -16,7 +16,7 @@
 
 package org.wso2.appcloud.core.dto;
 
-public class Service {
+public class Transport {
     private int id;
     private String serviceName;
     private String serviceProtocol;
