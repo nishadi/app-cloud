@@ -265,15 +265,16 @@ public class ApplicationDAO {
     }
 
 
-    public void addDeployment(Connection dbConnection, String versionHashId, Deployment deployment) throws AppCloudException{
+    public void addDeployment(Connection dbConnection, String versionHashId, Deployment deployment, int tenantId) throws AppCloudException{
 
-        int deploymentId = addDeployment(dbConnection, deployment);
+        int deploymentId = addDeployment(dbConnection, deployment, tenantId);
         PreparedStatement preparedStatement = null;
 
         try {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_VERSION_WITH_DEPLOYMENT);
             preparedStatement.setInt(1, deploymentId);
             preparedStatement.setString(2, versionHashId);
+            preparedStatement.setInt(3, tenantId);
 
             preparedStatement.executeUpdate();
 
@@ -287,7 +288,7 @@ public class ApplicationDAO {
     }
 
 
-    private int addDeployment(Connection dbConnection, Deployment deployment) throws AppCloudException{
+    private int addDeployment(Connection dbConnection, Deployment deployment, int tenantId) throws AppCloudException{
 
         PreparedStatement preparedStatement = null;
         int deploymentId =-1;
@@ -297,6 +298,7 @@ public class ApplicationDAO {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_DEPLOYMENT, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, deployment.getDeploymentName());
             preparedStatement.setInt(2, deployment.getReplicas());
+            preparedStatement.setInt(3, tenantId);
             preparedStatement.execute();
 
             ResultSet rs = preparedStatement.getGeneratedKeys();
@@ -306,7 +308,7 @@ public class ApplicationDAO {
             }
 
             for(Container container: deployment.getContainers()){
-                addContainer(dbConnection, container, deploymentId);
+                addContainer(dbConnection, container, deploymentId, tenantId);
             }
 
         } catch (SQLException e) {
@@ -323,7 +325,7 @@ public class ApplicationDAO {
     }
 
 
-    public void addContainer(Connection dbConnection, Container container, int deploymentId) throws AppCloudException{
+    public void addContainer(Connection dbConnection, Container container, int deploymentId, int tenantId) throws AppCloudException{
 
         PreparedStatement preparedStatement = null;
         int containerId = -1;
@@ -334,6 +336,7 @@ public class ApplicationDAO {
             preparedStatement.setString(1, container.getImageName());
             preparedStatement.setString(2, container.getImageVersion());
             preparedStatement.setInt(3, deploymentId);
+            preparedStatement.setInt(4, tenantId);
 
             preparedStatement.execute();
 
@@ -342,7 +345,7 @@ public class ApplicationDAO {
                 containerId = rs.getInt(1);
             }
             for(ContainerServiceProxy containerServiceProxy : container.getServiceProxies()){
-                addContainerServiceProxy(dbConnection, containerServiceProxy, containerId);
+                addContainerServiceProxy(dbConnection, containerServiceProxy, containerId, tenantId);
             }
 
         } catch (SQLException e) {
@@ -355,8 +358,7 @@ public class ApplicationDAO {
     }
 
     public void addContainerServiceProxy(Connection dbConnection, ContainerServiceProxy containerServiceProxy,
-                                         int containerId)
-            throws AppCloudException {
+                                         int containerId, int tenantId) throws AppCloudException {
 
         PreparedStatement preparedStatement = null;
 
@@ -368,6 +370,7 @@ public class ApplicationDAO {
             preparedStatement.setInt(3, containerServiceProxy.getServicePort());
             preparedStatement.setString(4, containerServiceProxy.getServiceBackendPort());
             preparedStatement.setInt(5, containerId);
+            preparedStatement.setInt(6, tenantId);
             preparedStatement.execute();
 
         } catch (SQLException e) {
