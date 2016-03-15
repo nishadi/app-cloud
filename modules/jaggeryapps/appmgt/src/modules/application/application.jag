@@ -101,7 +101,8 @@ var addApplication = function (applicationName, versionName, applicationDescript
 };
 
 var triggerKubernetesDeployment = function(runtimeProperties, applicationRuntime, tagName, applicationName, versionName, runtimeId, replicas, versionHashId){
-    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, versionHashId ,versionHashId, runtimeProperties, runtimeId);
+    var appHostURL = constructAppLaunchURL(applicationName, versionName);
+    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, versionHashId ,versionHashId, runtimeProperties, runtimeId, appHostURL);
     var deploymentConfig = getDeploymentConfig(containers, versionHashId, replicas);
     deployApplication(applicationName, versionName, deploymentConfig, false, versionHashId);
 
@@ -566,7 +567,7 @@ var buildDeploymentConfigFromDB = function(versionHashId){
 /**
  * Method for getting all the available application types. e.g : war, mss, car
  */
-function getContainers(tenantDockerRegistryUrl, baseImageName, tag, versionHashId, appServiceName, runtimeProperties, runtimeId){
+function getContainers(tenantDockerRegistryUrl, baseImageName, tag, versionHashId, appServiceName, runtimeProperties, runtimeId, appHostURL){
     var containerList = new java.util.ArrayList();
     var container = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
     var appBaseImageName = tenantDockerRegistryUrl + "/" + baseImageName;

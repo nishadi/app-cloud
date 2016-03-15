@@ -25,6 +25,7 @@ public class ServiceProxy {
     private String serviceProtocol;
     private Integer servicePort;
     private Integer serviceBackendPort;
+    private String appHostURL;
 
     public Integer getServiceBackendPort() {
         return serviceBackendPort;
@@ -56,6 +57,14 @@ public class ServiceProxy {
 
     public void setServiceProtocol(String serviceProtocol) {
         this.serviceProtocol = serviceProtocol;
+    }
+
+    public String getAppHostURL() {
+        return appHostURL;
+    }
+
+    public void setAppHostURL(String appHostURL) {
+        this.appHostURL = appHostURL;
     }
 
 }
