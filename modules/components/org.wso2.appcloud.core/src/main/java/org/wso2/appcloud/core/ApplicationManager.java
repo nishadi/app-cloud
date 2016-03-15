@@ -445,7 +445,6 @@ public class ApplicationManager {
      * @throws AppCloudException
      */
     public static void deleteApplication(String applicationHashId) throws AppCloudException {
-
         ApplicationDAO applicationDAO = new ApplicationDAO();
         Connection dbConnection = DBUtil.getDBConnection();
 
@@ -462,7 +461,6 @@ public class ApplicationManager {
 
 
     public static void deleteVersion(String versionHashId) throws AppCloudException {
-
         ApplicationDAO applicationDAO = new ApplicationDAO();
         Connection dbConnection = DBUtil.getDBConnection();
 

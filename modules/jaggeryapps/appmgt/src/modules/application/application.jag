@@ -351,27 +351,11 @@ var createDockerFile =  function(applicationName, versionName, runtimeId, upload
         throw e;
     }
 
-<<<<<<< HEAD
     //Adding docker file create success event
     var msg = "Docker file successfully created for application";
     addEvent(DOCKER_FILE_CREATE, EVENT_SUCCEEDED, msg, versionHashId);
     return absFileUploadedPath;
 }
-=======
-    //Adding docker push success event
-    var msg = "Docker image push successfully completed";
-    addEvent(DOCKER_REGISTRY_PUSH, EVENT_SUCCEEDED, msg, versionHashId);
-
-    //============================================================================================================
-
-    //==================================== Kubernetes deploy block ===============================================
-    var runtimeProperties = version.getRuntimeProperties();
-    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, versionHashId, versionHashId, runtimeProperties, runtimeId);
-    var deploymentConfig = getDeploymentConfig(containers, versionHashId, replicas);
-    deployApplication(applicationName, versionName, deploymentConfig, false, versionHashId);
-};
-
->>>>>>> 05be875... Fixing code formatting - pull request 73
 
 var deployApplication = function(applicationName, versionName, deploymentConfig, isRedeploy, versionHashId){
 
@@ -1082,9 +1066,10 @@ var getApplicationCreationEvents = function(applicationName, versionName) {
 
 var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationName, revision){
     createDestinationDirsForUploadedApps(applicationName, revision);
+    var file = Packages.java.io.File;
     uploadedFileName = uploadedArtifact.getName();
-    var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                 + modManager.getTenantDomain() + "/" + applicationName + "/" + revision + "/";
+    var fileUploadPath = file.separator + TMP_UPLOADED_APPLICATIONS_PATH + file.separator
+                                 + modManager.getTenantDomain() + file.separator + applicationName + file.separator + revision + file.separator;
 
     var uploadApplicationTmpPath;
     var checkFileExtZIP = isFileExtZIP(uploadedFileName);
@@ -1169,8 +1154,9 @@ var addEvent = function(name, status, description, versionHashId) {
 };
 
 var deleteApplicationUploadedPath = function(applicationName, revision) {
-    var fileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                 + modManager.getTenantDomain() + "/" + applicationName;
+    var file = Packages.java.io.File;
+    var fileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + file.separator
+            + TMP_UPLOADED_APPLICATIONS_PATH + file.separator + modManager.getTenantDomain() + file.separator + applicationName;
     var fileUtils = Packages.org.apache.commons.io.FileUtils;
     var file = new Packages.java.io.File(fileUploadPath);
 

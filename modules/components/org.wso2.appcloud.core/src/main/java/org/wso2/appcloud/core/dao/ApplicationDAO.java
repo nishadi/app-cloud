@@ -1184,18 +1184,16 @@ public class ApplicationDAO {
      */
     public boolean deleteApplication(Connection dbConnection, String applicationHashId)
             throws AppCloudException {
-
         PreparedStatement preparedStatement = null;
         boolean deleted = false;
-        try {
 
+        try {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_APPLICATION);
             preparedStatement.setString(1, applicationHashId);
 
             deleted = preparedStatement.execute();
-
         } catch (SQLException e) {
-            String msg = "Error while deleting the application with hash id : " + applicationHashId;
+            String msg = "Error while executing the application deletion sql query with hash id : " + applicationHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
@@ -1205,7 +1203,6 @@ public class ApplicationDAO {
     }
 
     public boolean deleteVersion(Connection dbConnection, String versionHashId) throws AppCloudException {
-
         PreparedStatement preparedStatement = null;
 
         try {
@@ -1213,9 +1210,8 @@ public class ApplicationDAO {
             preparedStatement.setString(1, versionHashId);
 
             return preparedStatement.execute();
-
         } catch (SQLException e) {
-            String msg = "Error while deleting the version with hash id : " + versionHashId;
+            String msg = "Error while executing the version deletion sql query with hash id : " + versionHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
