@@ -351,11 +351,27 @@ var createDockerFile =  function(applicationName, versionName, runtimeId, upload
         throw e;
     }
 
+<<<<<<< HEAD
     //Adding docker file create success event
     var msg = "Docker file successfully created for application";
     addEvent(DOCKER_FILE_CREATE, EVENT_SUCCEEDED, msg, versionHashId);
     return absFileUploadedPath;
 }
+=======
+    //Adding docker push success event
+    var msg = "Docker image push successfully completed";
+    addEvent(DOCKER_REGISTRY_PUSH, EVENT_SUCCEEDED, msg, versionHashId);
+
+    //============================================================================================================
+
+    //==================================== Kubernetes deploy block ===============================================
+    var runtimeProperties = version.getRuntimeProperties();
+    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, versionHashId, versionHashId, runtimeProperties, runtimeId);
+    var deploymentConfig = getDeploymentConfig(containers, versionHashId, replicas);
+    deployApplication(applicationName, versionName, deploymentConfig, false, versionHashId);
+};
+
+>>>>>>> 05be875... Fixing code formatting - pull request 73
 
 var deployApplication = function(applicationName, versionName, deploymentConfig, isRedeploy, versionHashId){
 
