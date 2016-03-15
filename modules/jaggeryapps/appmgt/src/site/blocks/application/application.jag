@@ -92,7 +92,12 @@ var log = new Log();
 
         var events = mod.getApplicationCreationEvents(applicationName, applicationRevision);
         print(events);
-
+    }else if (action == "getApplication"){
+        var applicationName = request.getParameter("applicationName");
+        var mod = jagg.module("application");
+        var applicationHashId = mod.getApplicationHashId(applicationName);
+        var application = mod.getApplication(applicationHashId);
+        print(application);
     }else if (action == "getEnvVariablesOfVersion"){
 
         var versionKey = request.getParameter("versionKey");
@@ -100,7 +105,6 @@ var log = new Log();
 
         var events = mod.getEnvVariablesOfVersion(versionKey);
         print(events);
-
     }else if (action == "updateRuntimeProperty"){
         var versionKey = request.getParameter("versionKey");
         var prevKey = request.getParameter("prevKey");

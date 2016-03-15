@@ -48,6 +48,10 @@ public class ApplicationClient extends BaseClient{
 	protected static final String STOP_APPLICATION_ACTION = "stopApplication";
 	protected static final String START_APPLICATION_ACTION = "startApplication";
 	protected static final String GET_APPLICATION_REVISION_ACTION = "getApplicationRevision";
+	protected static final String GET_ENV_VAR_ACTION = "getEnvVariablesOfVersion";
+	protected static final String ADD_ENV_VAR_ACTION = "addRuntimeProperty";
+	protected static final String UPDATE_ENV_VAR_ACTION = "updateRuntimeProperty";
+	protected static final String DELETE_ENV_VAR_ACTION = "deleteRuntimeProperty";
 	protected static final String PARAM_NAME_APPLICATION_NAME = "applicationName";
 	protected static final String PARAM_NAME_APPLICATION_DESCRIPTION = "applicationDescription";
 	protected static final String PARAM_NAME_RUNTIME = "runtime";
