@@ -347,7 +347,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
             var msg = "Application starting failed";
             var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
             addEvent(POD_STATUS, EVENT_FAILED, podStatus, versionHashId);
-            ApplicationManager.updateApplicationStatus(APPLICATION_ERROR, applicationName, applicationRevision);
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
             log.info("Application rollback started for application:"+applicationName + " with revision:"+
                     versionName +" because pods are not running even after 3 minutes.");
             deleteApplicationUploadedPath(applicationName, versionName);
@@ -357,7 +357,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
         } else {
             var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
             if (podStatus !== prevPodStatus) {
-                addEvent(POD_STATUS, EVENT_PENDING, podStatus, applicationName, applicationRevision);
+                addEvent(POD_STATUS, EVENT_PENDING, podStatus, versionHashId);
                 prevPodStatus = podStatus;
             }
         }
