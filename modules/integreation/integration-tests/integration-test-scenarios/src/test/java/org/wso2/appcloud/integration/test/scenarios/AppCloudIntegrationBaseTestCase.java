@@ -30,10 +30,25 @@ public abstract class AppCloudIntegrationBaseTestCase {
 	private String fileName;
 	private String runtimeID;
 	private ApplicationClient applicationClient;
+	protected String applicationName;
+	protected String applicationType;
+	protected String applicationRevision;
+	protected String applicationDescription;
+	protected String properties;
+	protected String tags;
 	
 	public AppCloudIntegrationBaseTestCase(String runtimeID, String fileName){
 		this.runtimeID = runtimeID;
 		this.fileName = fileName;
+		//Application details
+		this.applicationName = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_NAME_KEY);
+		this.applicationType = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_TYPE_KEY);
+		this.applicationRevision  = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_REVISION_KEY);
+		this.applicationDescription = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_DESC_KEY);
+		this.properties = AppCloudIntegrationTestUtils.getKeyValuePairAsJson(
+				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_PROPERTIES_KEY));
+		this.tags = AppCloudIntegrationTestUtils.getKeyValuePairAsJson(
+				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_TAGS_KEY));
 	}
 
 	@BeforeClass(alwaysRun = true)
@@ -49,21 +64,8 @@ public abstract class AppCloudIntegrationBaseTestCase {
 	}
 	
 	public void createApplication() throws Exception {
-		//Application details
-		String applicationName = 
-				AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_NAME_KEY);
-		String applicationType = 
-				AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_TYPE_KEY);
-		String applicationRevision = 
-				AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_REVISION_KEY);
-		String applicationDescription = 
-				AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_DESC_KEY);
-		String properties = AppCloudIntegrationTestUtils.getKeyValuePairAsJson(
-				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_PROPERTIES_KEY));
-		String tags = AppCloudIntegrationTestUtils.getKeyValuePairAsJson(
-				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_TAGS_KEY));
+		//Load the file in resources
 		File uploadArtifact = new File(TestConfigurationProvider.getResourceLocation() + fileName);
-
 		//Application creation
 		ApplicationClient applicationClient = new ApplicationClient(serverUrl, defaultAdmin, defaultAdminPassword);
 		applicationClient.createNewApplication(applicationName, this.runtimeID, applicationType, applicationRevision,
@@ -75,7 +77,7 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		int round = 1;
 		while(round <= retryCount) {
 			try {
-				JSONObject result = applicationClient.getApplicationEvents(applicationName, applicationRevision);
+				JSONObject result = applicationClient.getApplicationBean(applicationName, applicationRevision);
 				log.info("Application current status is : " + result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
 				Assert.assertEquals("Application creation failed", AppCloudIntegrationTestConstants.STATUS_RUNNING,
 				                    result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
@@ -88,9 +90,49 @@ public abstract class AppCloudIntegrationBaseTestCase {
 	}
 
 	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
-	@Test(description = "log test")
-	public void testApplication() throws Exception {
-		log.info("dddddddddddddddddddd");
+	@Test(description = "Testing stop application action")
+	public void stopApplication() throws Exception {
+		applicationClient.stopApplicationRevision(applicationName, applicationRevision);
+
+		//Wait until stop application finished
+		long timeOutPeriod = AppCloudIntegrationTestUtils.getTimeOutPeriod();
+		int retryCount = AppCloudIntegrationTestUtils.getTimeOutRetryCount();
+		int round = 1;
+		while(round <= retryCount) {
+			try {
+				JSONObject result = applicationClient.getApplicationBean(applicationName, applicationRevision);
+				log.info("Application current status is : " + result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
+				Assert.assertEquals("Application stop action failed", AppCloudIntegrationTestConstants.STATUS_STOPPED,
+				                    result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
+				break;
+			} catch (Exception e) {
+				Thread.sleep(timeOutPeriod);
+				round++;
+			}
+		}
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing stop application action")
+	public void startApplication() throws Exception {
+		applicationClient.startApplicationRevision(applicationName, applicationRevision);
+
+		//Wait until start application finished
+		long timeOutPeriod = AppCloudIntegrationTestUtils.getTimeOutPeriod();
+		int retryCount = AppCloudIntegrationTestUtils.getTimeOutRetryCount();
+		int round = 1;
+		while(round <= retryCount) {
+			try {
+				JSONObject result = applicationClient.getApplicationBean(applicationName, applicationRevision);
+				log.info("Application current status is : " + result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
+				Assert.assertEquals("Application start action failed", AppCloudIntegrationTestConstants.STATUS_RUNNING,
+				                    result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
+				break;
+			} catch (Exception e) {
+				Thread.sleep(timeOutPeriod);
+				round++;
+			}
+		}
 	}
 
 

@@ -45,6 +45,8 @@ public class ApplicationClient extends BaseClient{
 	private static final Log log = LogFactory.getLog(ApplicationClient.class);
 	protected static final String CREATE_APPLICATION_ACTION = "createApplication";
 	protected static final String DELETE_APPLICATION_ACTION = "deleteApplication";
+	protected static final String STOP_APPLICATION_ACTION = "stopApplication";
+	protected static final String START_APPLICATION_ACTION = "startApplication";
 	protected static final String GET_APPLICATION_REVISION_ACTION = "getApplicationRevision";
 	protected static final String PARAM_NAME_APPLICATION_NAME = "applicationName";
 	protected static final String PARAM_NAME_APPLICATION_DESCRIPTION = "applicationDescription";
@@ -112,6 +114,30 @@ public class ApplicationClient extends BaseClient{
         }
     }
 
+	public void stopApplicationRevision(String applicationName, String applicationRevision) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + STOP_APPLICATION_ACTION
+				+ PARAM_SEPARATOR + PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName
+				+ PARAM_SEPARATOR + PARAM_NAME_APPLICATION_REVISION + PARAM_EQUALIZER + applicationRevision
+				, getRequestHeaders());
+		if (response.getResponseCode() != HttpStatus.SC_OK) {
+			throw new AppCloudIntegrationTestException("Application stop failed " + response.getData());
+		}
+	}
+
+	public void startApplicationRevision(String applicationName, String applicationRevision) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + START_APPLICATION_ACTION
+				+ PARAM_SEPARATOR + PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName
+				+ PARAM_SEPARATOR + PARAM_NAME_APPLICATION_REVISION + PARAM_EQUALIZER + applicationRevision
+				, getRequestHeaders());
+		if (response.getResponseCode() != HttpStatus.SC_OK) {
+			throw new AppCloudIntegrationTestException("Application start failed " + response.getData());
+		}
+	}
+
 	public boolean deleteApplication(String applicationName) throws Exception {
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
@@ -125,7 +151,7 @@ public class ApplicationClient extends BaseClient{
 		}
 	}
 
-	public JSONObject getApplicationEvents(String applicationName, String applicationRevision) throws Exception {
+	public JSONObject getApplicationBean(String applicationName, String applicationRevision) throws Exception {
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + GET_APPLICATION_REVISION_ACTION + PARAM_SEPARATOR

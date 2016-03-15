@@ -54,5 +54,6 @@ public class AppCloudIntegrationTestConstants {
 	public static final String RESPONSE_MESSAGE_NAME = "message";
 	public static final String ATTRIBUTE_KEY = "key";
 	public static final String STATUS_RUNNING = "running";
+	public static final String STATUS_STOPPED = "stopped";
 	public static final String PROPERTY_STATUS_NAME = "status";
 }

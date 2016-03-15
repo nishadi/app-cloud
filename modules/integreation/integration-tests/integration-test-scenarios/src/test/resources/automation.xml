@@ -329,8 +329,8 @@
         </domainMapping>
 
         <timeOutSetting>
-              <period>10000L</period>
-              <retryCount>8</retryCount>
+              <period>10000</period>
+              <retryCount>15</retryCount>
         </timeOutSetting>
 
         <!--bamResources>
