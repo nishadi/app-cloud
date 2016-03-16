@@ -1156,8 +1156,8 @@ var deleteApplicationUploadedPath = function(applicationName, revision) {
     var fileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
                                  + modManager.getTenantDomain() + "/" + applicationName;
     var fileUtils = Packages.org.apache.commons.io.FileUtils;
-    var fileUploadPath = new Packages.java.io.File(fileUploadPath);
-    log.info("Deleting the uploaded file at:"+fileUploadPath.getAbsolutePath());
+    var file = new Packages.java.io.File(fileUploadPath);
+
     if(fileUploadPath.exists()){
         //Commenting deleting upload path inorder to work retry app deployment correctly.
         // Upload path clean up force to upload the artifact again in the retying.
@@ -1165,32 +1165,36 @@ var deleteApplicationUploadedPath = function(applicationName, revision) {
     }
 };
 
-var deleteApplicationFromDatabase = function(versionHashId) {
-    try{
+var deleteApplicationFromDatabase = function (versionHashId) {
+    try {
         java.lang.Thread.sleep(3000); // database at last after the transaction completes.
         ApplicationManager.deleteVersion(versionHashId);
-        log.info("Successfully deleted the application form the database");
-    }catch(e){
-        log.error("Error while deleting application from the database");
-        log.error(e);
+    } catch (e) {
+        log.error("Error while deleting application from the database versionHashId : " + versionHashId);
+        throw e;
     }
 };
 
-var deleteApplicationFromKubernetes = function(applicationName, revision) {
-    try{
-        var KubernetesRuntimeProvisioningService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
+var deleteApplicationFromKubernetes = function (applicationName, revision) {
+    try {
+        var KubernetesRuntimeProvisioningService =
+                Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
 
-        var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
-                applicationName, revision, null, modManager.getTenantId(), modManager.getTenantDomain());
+        var applicationCtx = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ApplicationContext();
+        applicationCtx.setId(applicationName);
+        applicationCtx.setVersion(revision);
+        var tenantInfo = new Packages.org.wso2.appcloud.provisioning.runtime.beans.TenantInfo();
+        tenantInfo.setTenantId(modManager.getTenantId());
+        tenantInfo.setTenantDomain(modManager.getTenantDomain());
+        applicationCtx.setTenantInfo(tenantInfo);
 
         var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
 
         kubernetesRuntimeProvisioningService.deleteDeployment();
-        log.info("Successfully deleted the application: " + applicationName + ":" + revision + " kubernetes deployments");
-
-    } catch(e){
-        log.error("Error while cleaning up the Kubernetes deployment");
-        log.error(e);
+    } catch (e) {
+        log.error("Error while cleaning up the application : " + applicationName + " revision : " + revision
+                + "Kubernetes deployment");
+        throw e;
     }
 };
 

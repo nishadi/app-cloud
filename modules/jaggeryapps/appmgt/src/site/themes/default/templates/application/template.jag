@@ -375,18 +375,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
         //Initially the create button is disabled
         $("#add-application").prop("disabled", true);
 
-        $.validator.addMethod("validateContent",
-            validateContent, getContentInvalidErrorMsg);
-        $.validator.addMethod("validateAppIcon",
-            validateAppIcon, getIconErrorMessage);
-        $.validator.addMethod("validateApplicationNameChar",
-            validateApplicationNameChar, getValidationFailErrorMsg);
-        $.validator.addMethod("validationApplicationRevisionChar",
-            validationApplicationRevisionChar, getValidationFailErrorMsg);
-        $.validator.addMethod("validateRuntimeSelection",
-                    validateRuntimeSelection, "Please select a valid runtime");
-        $.validator.addMethod("validateArtifact",
-                            validateArtifact, getArtifactErrorMessage);
+        $.validator.addMethod("validateContent", validateContent, getContentInvalidErrorMsg);
+        $.validator.addMethod("validateAppIcon", validateAppIcon, getIconErrorMessage);
+        $.validator.addMethod("validateApplicationNameChar", validateApplicationNameChar, getValidationFailErrorMsg);
+        $.validator.addMethod("validationApplicationRevisionChar", validationApplicationRevisionChar, getValidationFailErrorMsg);
+        $.validator.addMethod("validateRuntimeSelection", validateRuntimeSelection, "Please select a valid runtime");
+        $.validator.addMethod("validateArtifact", validateArtifact, getArtifactErrorMessage);
 
         $("#appIcon").change(function() {
              $("#icon").val($("#appIcon").val());
@@ -429,7 +423,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             var isPattern = patternNonAlphaNumExceptHyphen.test(value);
             regexPattern.push(isPattern);
             var message = "Application Name has invalid characters. Valid characters are a-z A-Z 0-9 -";
-            var isValid = validateWithRegexPatters(regexPattern, message);
+            var isValid = validateWithRegexPatterns(regexPattern, message);
 
             return isValid;
         }
@@ -440,17 +434,17 @@ jagg.template("application", function (inputs, outputs, jagg) {
             var isPattern = !patternNonAlphaNum.test(value);
             regexPattern.push(isPattern);
             var message = "Invalid version number - Provide version number in format major.minor.patch";
-            return validateWithRegexPatters(regexPattern, message);
+            return validateWithRegexPatterns(regexPattern, message);
         }
 
         function validateRuntimeSelection(value){
             return (value > 0 ) ? true : false;
         }
 
-        function validateWithRegexPatters(regexPatters, message){
+        function validateWithRegexPatterns(regexPatterns, message){
             var isValueValid = true;
-            for(var i = 0; i < regexPatters.length; i++){
-                if(regexPatters[i]){
+            for(var i = 0; i < regexPatterns.length; i++){
+                if(regexPatterns[i]){
                    validationFailErrorMsg = message;
                    return isValueValid = false;
                 }
@@ -462,14 +456,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
              var isValueValid = true;
              var valueLength = (value).length;
              if (valueLength == 0) {
-                 // Here we are setting the error message as duplicated app name since we are not allowing to change
-                 // the app key
-                 contentInvalidErrorMsg = "Invalid value - Enter a value which is not empty";
+                 contentInvalidErrorMsg = "Empty values are not allowed for filed : " + $(element).attr("name");
                  isValueValid = false;
              } else if (!isNaN(value)){
-                 // Here we are setting the error message as duplicated app name since we are not allowing to change
-                 // the app key
-                 contentInvalidErrorMsg =  "Invalid value - Enter a value which has only alphanumeric characters";
+                 contentInvalidErrorMsg =  "Non-alphanumeric characters are not allowed for field : " + $(element).attr("name");
                  isValueValid = false;
              }
              return isValueValid;
