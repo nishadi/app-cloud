@@ -69,7 +69,8 @@ public class ApplicationDAO {
 
         try {
 
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_APPLICATION, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_APPLICATION,
+                                                              Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, application.getApplicationName());
             preparedStatement.setString(2, application.getHashId());
             preparedStatement.setString(3, application.getDescription());
@@ -80,7 +81,7 @@ public class ApplicationDAO {
             preparedStatement.execute();
 
             resultSet = preparedStatement.getGeneratedKeys();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 applicationId = resultSet.getInt(1);
             }
 
@@ -92,7 +93,10 @@ public class ApplicationDAO {
                 }
             }
 
-            InputStream iconInputStream = IOUtils.toBufferedInputStream(application.getIcon().getBinaryStream());
+            InputStream iconInputStream = null;
+            if (application.getIcon() != null) {
+                iconInputStream = IOUtils.toBufferedInputStream(application.getIcon().getBinaryStream());
+            }
             updateApplicationIcon(dbConnection, iconInputStream, application.getHashId());
 
         } catch (SQLException e) {
