@@ -299,15 +299,21 @@
             <usagePlan>Demo</usagePlan>
         </defaultTenant>
 
-        <defaultApplication>
-            <applicationName>te001</applicationName>
-            <applicationKey>test</applicationKey>
+        <application>
+            <applicationName>testapp017</applicationName>
             <applicationType>war</applicationType>
             <applicationDescription>This is the test application</applicationDescription>
             <defaultRevision>1.0.0</defaultRevision>
-            <runtimeID>1</runtimeID>
-            <filename>sample.war</filename>
-            <resource_path>sample.war</resource_path>
+            <runtimeIDs>
+                <runtimeID key="tomcat">1</runtimeID>
+                <runtimeID key="msf4j">2</runtimeID>
+                <runtimeID key="php">3</runtimeID>
+            </runtimeIDs>
+            <files>
+                <file type="war">sample.war</file>
+                <file type="msf4j">helloworld.jar</file>
+                <file type="php">sample.zip</file>
+            </files>
             <properties>
                 <property key="key1">value1</property>
                 <property key="key2">value2</property>
@@ -316,15 +322,15 @@
                 <tag key="tag1">tagValue1</tag>
                 <tag key="tag2">tagValue2</tag>
             </tags>
-        </defaultApplication>
+        </application>
 
         <domainMapping>
             <domainName>example.com</domainName>
         </domainMapping>
 
         <timeOutSetting>
-              <period>10000L</period>
-              <retryCount>8</retryCount>
+              <period>10000</period>
+              <retryCount>15</retryCount>
         </timeOutSetting>
 
         <!--bamResources>
