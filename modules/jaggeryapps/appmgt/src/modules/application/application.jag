@@ -205,9 +205,13 @@ var createAppInDataBase = function(applicationName, versionName, applicationDesc
         application.setDescription(applicationDescription);
         application.setApplicationType(appTypeName);
 
-        var icon = Packages.org.apache.commons.io.IOUtils.toByteArray(appIcon.getStream().getStream());
-        var blob = new Packages.javax.sql.rowset.serial.SerialBlob(icon);
-        application.setIcon(blob);
+        var iconStream = null;
+        var iconBlob = null;
+        if (appIcon) {
+            iconStream = Packages.org.apache.commons.io.IOUtils.toByteArray(appIcon.getStream().getStream());
+            iconBlob = new Packages.javax.sql.rowset.serial.SerialBlob(iconStream);
+            application.setIcon(iconBlob);
+        }
 
         version.setVersionName(versionName);
         version.setRuntimeId(runtimeId);
