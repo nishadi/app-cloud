@@ -477,11 +477,11 @@ public class ApplicationManager {
     }
 
     public static void addDeployment(String versionHashId, Deployment deployment)throws AppCloudException {
-
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         ApplicationDAO applicationDAO = new ApplicationDAO();
         Connection dbcConnection = DBUtil.getDBConnection();
         try {
-            applicationDAO.addDeployment(dbcConnection, versionHashId, deployment);
+            applicationDAO.addDeployment(dbcConnection, versionHashId, deployment, tenantId);
             dbcConnection.commit();
         } catch (SQLException e) {
             String msg = "Error while committing transaction when adding deployment for version with hash id : " +

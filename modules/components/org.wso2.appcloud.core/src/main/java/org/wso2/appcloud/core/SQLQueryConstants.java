@@ -75,13 +75,14 @@ public class SQLQueryConstants {
             " FROM AC_VERSION WHERE hash_id=?), ?, ?, ?)";
 
     public static final String ADD_DEPLOYMENT =
-            "INSERT INTO AC_DEPLOYMENT (name, replicas) values (?, ?)";
+            "INSERT INTO AC_DEPLOYMENT (name, replicas, tenant_id) values (?, ?, ?)";
 
     public static final String ADD_CONTAINER =
-            "INSERT INTO AC_CONTAINER (name, version, deployment_id) values (?, ?, ?)";
+            "INSERT INTO AC_CONTAINER (name, version, deployment_id, tenant_id) values (?, ?, ?, ?)";
 
     public static final String ADD_CONTAINER_SERVICE_PROXY =
-            "INSERT INTO AC_CONTAINER_SERVICE_PROXY (name, protocol, port, backend_port, container_id) values (?,?,?,?,?)";
+            "INSERT INTO AC_CONTAINER_SERVICE_PROXY (name, protocol, port, backend_port, container_id, tenant_id) "
+                    + "values (?, ?, ?, ?, ?, ?)";
 
 
 
@@ -161,7 +162,7 @@ public class SQLQueryConstants {
             " AND name=?";
 
     public static final String UPDATE_VERSION_WITH_DEPLOYMENT =
-            "UPDATE AC_VERSION SET deployment_id=? WHERE hash_id=?";
+            "UPDATE AC_VERSION SET deployment_id=? WHERE hash_id=? AND tenant_id=?";
 
     public static final String UPDATE_TAG =
             "UPDATE AC_TAG SET name=?, value=? WHERE version_id=(SELECT id FROM AC_VERSION WHERE hash_id=?) AND name=? ";
