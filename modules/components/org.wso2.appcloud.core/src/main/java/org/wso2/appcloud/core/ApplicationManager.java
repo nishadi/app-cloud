@@ -71,6 +71,37 @@ public class ApplicationManager {
     }
 
     /**
+     * Method for adding application version
+     *
+     * @param version version object
+     * @throws AppCloudException
+     */
+    public static void addApplicationVersion(Version version, String applicationHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        try {
+            int applicationId = applicationDAO.getApplicationId(dbConnection, applicationHashId);
+            applicationDAO.addVersion(dbConnection, version,"",applicationId, tenantId);
+            dbConnection.commit();
+        } catch (AppCloudException e){
+            String msg = "Error occurred while adding application version to the database for application id : " +
+                          applicationHashId + ", version:"+ version.getVersionName()+" in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error while committing the application version adding transaction for application id : " +
+                    applicationHashId + ", version:"+ version.getVersionName()+" in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+
+    }
+
+    /**
      * Method for adding runtime properties for a specific version
      *
      * @param runtimeProperties list of runtime properties

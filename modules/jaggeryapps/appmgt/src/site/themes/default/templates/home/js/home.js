@@ -5,7 +5,7 @@ $(document).ready(function() {
         submitChangeAppIcon(this);
     });
     initPageView();
-    var nextVersion = generateNextPossibleVersion(applicationRevisions);
+    var nextVersion = generateNextPossibleVersion(application.versions);
     var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+application.applicationType +
                         "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
                         + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;

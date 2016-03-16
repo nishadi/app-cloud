@@ -41,6 +41,10 @@ var log = new Log();
         var applicationDescription = request.getParameter("applicationDescription");
         var replicas = 1;
         var runtimeId = request.getParameter("runtime");
+        var isNewVersion = request.getParameter("isNewVersion");
+        if(isNewVersion == null) {
+            isNewVersion = false;
+        }        
         var runtimeProperties = parse(request.getParameter("runtimeProperties"));
         var tags = parse(request.getParameter("tags"));
         var applicationName = request.getParameter("applicationName");
@@ -57,7 +61,7 @@ var log = new Log();
         if(uploadedFileName) {
             applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
                                              runtimeId, appTypeName, runtimeProperties, tags, appIcon,
-                                             uploadedFileName);
+                                             uploadedFileName, isNewVersion);
         }else{
             var gitRepoUrl = request.getParameter("gitRepoUrl");
             var gitRepoBranch = request.getParameter("gitRepoBranch");
