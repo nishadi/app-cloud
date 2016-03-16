@@ -53,7 +53,7 @@ var addApplicationViaGitHub = function (applicationName, versionName, applicatio
     var application = createAppInDataBase(applicationName, versionName, applicationDescription, replicas, runtimeId, appTypeName,
                                           runtimePropertiesArray, tagArray, appIcon, applicationHashId, versionHashId);
     var applicationRuntime = ApplicationManager.getRuntimeById(runtimeId);
-    var tagName = applicationRuntime.getTag() +"-"+ modManager.getTenantDomain() +"-"+applicationName+"-"+versionName;
+    var tagName = applicationRuntime.getTag() +"-"+ versionHashId;
     var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
     var dockerOpClient = new DockerOpClient(modManager.getPropertyValue("DockerClientURL"));
     var version = application.getVersions().get(0);
