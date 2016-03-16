@@ -453,16 +453,16 @@ jagg.template("application", function (inputs, outputs, jagg) {
         }
 
         function validateContent(value, element) {
-             var isValueValid = true;
-             var valueLength = (value).length;
-             if (valueLength == 0) {
-                 contentInvalidErrorMsg = "Empty values are not allowed for filed : " + $(element).attr("name");
-                 isValueValid = false;
-             } else if (!isNaN(value)){
-                 contentInvalidErrorMsg =  "Non-alphanumeric characters are not allowed for field : " + $(element).attr("name");
-                 isValueValid = false;
-             }
-             return isValueValid;
+            var isValueValid = true;
+            var valueLength = (value).length;
+            if (valueLength == 0) {
+                contentInvalidErrorMsg = "Empty values are not allowed for filed : " + $(element).attr("name");
+                isValueValid = false;
+            } else if (!isNaN(value)) {
+                contentInvalidErrorMsg = "Non-alphanumeric characters are not allowed for field : " + $(element).attr("name");
+                isValueValid = false;
+            }
+            return isValueValid;
         }
 
         function getContentInvalidErrorMsg(){
@@ -901,7 +901,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.iframe-transport.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.validate.min.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/additional-methods.min.js'))%>"></script>
-
     <!-- --------------------------------------- Overlay ----------------------------------------- -->
     <div class="modal fade build-logs-modal" id="app_creation_progress_modal">
         <div class="modal-dialog modal-dialog-margin-top-md ">
