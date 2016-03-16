@@ -201,6 +201,13 @@ var log = new Log();
         var applicationName = request.getParameter("applicationName");
         var mod = jagg.module("application");
         print(mod.getApplicationHashId(applicationName));
+
+    } else if (action == "getVersionHashId"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var mod = jagg.module("application");
+        print(mod.getVersionHashId(applicationName, applicationRevision));
+
     } else if (action == "getExistingRevisions"){
         var applicationName = request.getParameter("applicationName");
         var mod = jagg.module("application");

@@ -48,6 +48,7 @@ public class ApplicationClient extends BaseClient{
 	protected static final String STOP_APPLICATION_ACTION = "stopApplication";
 	protected static final String START_APPLICATION_ACTION = "startApplication";
 	protected static final String GET_APPLICATION_ACTION = "getApplication";
+	protected static final String GET_VERSION_HASH_ACTION = "getVersionHashId";
 	protected static final String GET_ENV_VAR_ACTION = "getEnvVariablesOfVersion";
 	protected static final String ADD_ENV_VAR_ACTION = "addRuntimeProperty";
 	protected static final String UPDATE_ENV_VAR_ACTION = "updateRuntimeProperty";
@@ -60,6 +61,7 @@ public class ApplicationClient extends BaseClient{
 	protected static final String PARAM_NAME_UPLOADED_FILE_NAME = "uploadedFileName";
 	protected static final String PARAM_NAME_PROPERTIES = "runtimeProperties";
 	protected static final String PARAM_NAME_TAGS = "tags";
+	protected static final String PARAM_NAME_VERSION_KEY = "versionKey";
 	public static final String PARAM_NAME_IS_FILE_ATTACHED = "isFileAttached";
 	public static final String PARAM_NAME_FILE_UPLOAD = "fileupload";
 
@@ -118,24 +120,26 @@ public class ApplicationClient extends BaseClient{
         }
     }
 
-	public void stopApplicationRevision(String applicationName, String applicationRevision) throws Exception {
+	public void stopApplicationRevision(String applicationName, String applicationRevision, String versionHash) throws Exception {
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + STOP_APPLICATION_ACTION
 				+ PARAM_SEPARATOR + PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName
 				+ PARAM_SEPARATOR + PARAM_NAME_APPLICATION_REVISION + PARAM_EQUALIZER + applicationRevision
+				+ PARAM_SEPARATOR + PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionHash
 				, getRequestHeaders());
 		if (response.getResponseCode() != HttpStatus.SC_OK) {
 			throw new AppCloudIntegrationTestException("Application stop failed " + response.getData());
 		}
 	}
 
-	public void startApplicationRevision(String applicationName, String applicationRevision) throws Exception {
+	public void startApplicationRevision(String applicationName, String applicationRevision, String versionHash) throws Exception {
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + START_APPLICATION_ACTION
 				+ PARAM_SEPARATOR + PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName
 				+ PARAM_SEPARATOR + PARAM_NAME_APPLICATION_REVISION + PARAM_EQUALIZER + applicationRevision
+				+ PARAM_SEPARATOR + PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionHash
 				, getRequestHeaders());
 		if (response.getResponseCode() != HttpStatus.SC_OK) {
 			throw new AppCloudIntegrationTestException("Application start failed " + response.getData());
@@ -165,6 +169,20 @@ public class ApplicationClient extends BaseClient{
 			checkErrors(response);
 			JSONObject jsonObject = new JSONObject(response.getData());
 			return jsonObject;
+		} else {
+			throw new AppCloudIntegrationTestException("Get Application Events failed " + response.getData());
+		}
+	}
+
+	public String getVersionHash(String applicationName, String applicationRevision) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + GET_VERSION_HASH_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName + PARAM_SEPARATOR
+				+ PARAM_NAME_APPLICATION_REVISION + PARAM_EQUALIZER + applicationRevision
+				, getRequestHeaders());
+		if (response.getResponseCode() == HttpStatus.SC_OK) {
+			return response.getData();
 		} else {
 			throw new AppCloudIntegrationTestException("Get Application Events failed " + response.getData());
 		}

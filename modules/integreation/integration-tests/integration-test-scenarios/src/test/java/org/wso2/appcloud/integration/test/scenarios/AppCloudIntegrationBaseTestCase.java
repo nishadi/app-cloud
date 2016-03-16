@@ -72,68 +72,29 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		                                       applicationDescription, this.fileName, properties, tags, uploadArtifact);
 
 		//Wait until creation finished
-		long timeOutPeriod = AppCloudIntegrationTestUtils.getTimeOutPeriod();
-		int retryCount = AppCloudIntegrationTestUtils.getTimeOutRetryCount();
-		int round = 1;
-		while(round <= retryCount) {
-			try {
-				JSONObject result = applicationClient.getApplicationBean(applicationName);
-				log.info("Application current status is : " + result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
-//				Assert.assertEquals("Application creation failed", AppCloudIntegrationTestConstants.STATUS_RUNNING,
-//				                    result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
-				break;
-			} catch (Exception e) {
-				Thread.sleep(timeOutPeriod);
-				round++;
-			}
-		}
+		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING, "Application creation");
 	}
+
 
 	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
 	@Test(description = "Testing stop application action")
-	public void stopApplication() throws Exception {
-		applicationClient.stopApplicationRevision(applicationName, applicationRevision);
+	public void testStopApplication() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		applicationClient.stopApplicationRevision(applicationName, applicationRevision, versionHash);
 
 		//Wait until stop application finished
-		long timeOutPeriod = AppCloudIntegrationTestUtils.getTimeOutPeriod();
-		int retryCount = AppCloudIntegrationTestUtils.getTimeOutRetryCount();
-		int round = 1;
-		while(round <= retryCount) {
-			try {
-				JSONObject result = applicationClient.getApplicationBean(applicationName);
-				log.info("Application current status is : " + result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
-				Assert.assertEquals("Application stop action failed", AppCloudIntegrationTestConstants.STATUS_STOPPED,
-				                    result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
-				break;
-			} catch (Exception e) {
-				Thread.sleep(timeOutPeriod);
-				round++;
-			}
-		}
+		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_STOPPED, "Application stop action");
 	}
 
-//	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
-//	@Test(description = "Testing stop application action")
-//	public void startApplication() throws Exception {
-//		applicationClient.startApplicationRevision(applicationName, applicationRevision);
-//
-//		//Wait until start application finished
-//		long timeOutPeriod = AppCloudIntegrationTestUtils.getTimeOutPeriod();
-//		int retryCount = AppCloudIntegrationTestUtils.getTimeOutRetryCount();
-//		int round = 1;
-//		while(round <= retryCount) {
-//			try {
-//				JSONObject result = applicationClient.getApplicationBean(applicationName);
-//				log.info("Application current status is : " + result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
-//				Assert.assertEquals("Application start action failed", AppCloudIntegrationTestConstants.STATUS_RUNNING,
-//				                    result.getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME));
-//				break;
-//			} catch (Exception e) {
-//				Thread.sleep(timeOutPeriod);
-//				round++;
-//			}
-//		}
-//	}
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing start application action", dependsOnMethods = {"testStopApplication"})
+	public void testStartApplication() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		applicationClient.startApplicationRevision(applicationName, applicationRevision, versionHash);
+
+		//Wait until start application finished
+		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING, "Application start action");
+	}
 
 
 	@AfterClass(alwaysRun = true)
@@ -141,5 +102,34 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		String applicationName = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_NAME_KEY);
 		boolean isDeleted = applicationClient.deleteApplication(applicationName);
 		Assert.assertEquals("Application deletion failed", isDeleted, true);
+	}
+
+	/**
+	 * Retry for application status to be changed to expected value for configured no of retries
+	 * @param applicationRevision Revision of the application wanted to check status for
+	 * @param expectedStatus Expected Status of the application
+	 * @param action Action to log in error messages
+	 * @throws java.lang.Exception
+	 */
+	private void RetryApplicationActions(String applicationRevision, String expectedStatus, String action)
+			throws Exception {
+		long timeOutPeriod = AppCloudIntegrationTestUtils.getTimeOutPeriod();
+		int retryCount = AppCloudIntegrationTestUtils.getTimeOutRetryCount();
+		int round = 1;
+		String actualStatus = null;
+		while (round <= retryCount) {
+			JSONObject result = applicationClient.getApplicationBean(applicationName);
+			actualStatus = ((JSONObject) ((JSONObject) result
+					.get(AppCloudIntegrationTestConstants.PROPERTY_VERSIONS_NAME))
+					.get(applicationRevision)).getString(AppCloudIntegrationTestConstants.PROPERTY_STATUS_NAME);
+			log.info("Application current status is : " + actualStatus);
+			if(!expectedStatus.equals(actualStatus)){
+				Thread.sleep(timeOutPeriod);
+				round++;
+				continue;
+			}
+			break;
+		}
+		Assert.assertEquals(action + " failed", expectedStatus, actualStatus);
 	}
 }

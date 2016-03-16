@@ -1029,6 +1029,12 @@ var getSelectedRevisionFromSession = function(applicationKey) {
     }
 };
 
+var getVersionHashId = function(applicationName, versionName){
+    var tenantId = modManager.getTenantId();
+    var versionHashId = Util.getVersionHashId(applicationName, versionName, tenantId)
+    return versionHashId;
+}
+
 var getApplicationCreationEvents = function(applicationName, versionName) {
 
     var tenantId = modManager.getTenantId();

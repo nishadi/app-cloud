@@ -56,4 +56,5 @@ public class AppCloudIntegrationTestConstants {
 	public static final String STATUS_RUNNING = "running";
 	public static final String STATUS_STOPPED = "stopped";
 	public static final String PROPERTY_STATUS_NAME = "status";
+	public static final String PROPERTY_VERSIONS_NAME = "versions";
 }
