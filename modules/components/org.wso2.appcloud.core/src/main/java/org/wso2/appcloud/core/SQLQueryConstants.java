@@ -96,6 +96,15 @@ public class SQLQueryConstants {
     public static final String GET_VERSION_LIST_OF_APPLICATION =
             "SELECT name FROM AC_VERSION WHERE application_id = (SELECT id FROM AC_APPLICATION WHERE hash_id=?)";
 
+    public static final String GET_VERSION_HASH_IDS_OF_APPLICATION =
+            "SELECT hash_id FROM AC_VERSION WHERE application_id = (SELECT id FROM AC_APPLICATION WHERE hash_id=?)";
+
+    public static final String GET_VERSION_HASH_IDS_OF_APPLICATION_BY_VERSION_HASH_ID =
+            "SELECT hash_id FROM AC_VERSION WHERE application_id = (SELECT application_id FROM AC_VERSION WHERE hash_id=?)";
+
+    public static final String GET_APPLICATION_HASH_ID_BY_VERSION_HASH_ID =
+            "SELECT hash_id FROM AC_APPLICATION WHERE id = (SELECT application_id FROM AC_VERSION WHERE hash_id=?)";
+
     public static final String GET_APPLICATION_BY_HASH_ID =
             "SELECT app.*, type.name as app_type_name, icon.icon as icon FROM AC_APPLICATION app JOIN AC_APP_TYPE type " +
             "ON app.app_type_id = type.id JOIN AC_APP_ICON icon ON app.id = icon.application_id WHERE app.hash_id=?";
@@ -190,5 +199,9 @@ public class SQLQueryConstants {
 
     public static final String DELETE_DEPLOYMENT =
             "DELETE FROM AC_DEPLOYMENT WHERE id=(SELECT deployment_id FROM AC_VERSION WHERE hash_id=?)";
+
+    public static final String DELETE_ALL_DEPLOYMENT_OF_APPLICATION =
+            "DELETE FROM AC_DEPLOYMENT WHERE id in (SELECT deployment_id from AC_VERSION WHERE application_id = " +
+            "(SELECT id FROM AC_APPLICATION WHERE hash_id=?))";
 
 }

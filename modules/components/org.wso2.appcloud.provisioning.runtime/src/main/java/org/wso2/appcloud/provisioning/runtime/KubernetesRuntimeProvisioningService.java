@@ -855,7 +855,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
         //If it is not deleted one object successfully, continue deleting others.
         try {
             kubernetesClient.extensions().deployments().inNamespace(namespace).withLabels(
-                    KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+                    KubernetesProvisioningUtils.getDeleteLables(applicationContext)).delete();
         } catch (KubernetesClientException e) {
             String message = "Error while deleting kubernetes deployment : "
                     + " and continue deleting replication controller";
@@ -866,7 +866,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
         //Replication controller will be deleted with related pods
         try {
             kubernetesClient.replicationControllers().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+                    .withLabels(KubernetesProvisioningUtils.getDeleteLables(applicationContext)).delete();
         } catch (KubernetesClientException e) {
             String message = "Error while deleting kubernetes replication controller in deployment"
                     + " and continue deleting services";
@@ -878,7 +878,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
         //Service will be deleted from the K8
         try {
             kubernetesClient.services().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+                    .withLabels(KubernetesProvisioningUtils.getDeleteLables(applicationContext)).delete();
         } catch (KubernetesClientException e) {
             String message = "Error while deleting kubernetes services in deployment"
                     + " and continue deleting ingress";
@@ -889,7 +889,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
         //Ingress will be deleted from the K8
         try {
             kubernetesClient.extensions().ingress().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+                    .withLabels(KubernetesProvisioningUtils.getDeleteLables(applicationContext)).delete();
         } catch (KubernetesClientException e) {
             String message = "Error while deleting kubernetes ingress in deployment"
                     + " and continue deleting secrets";
@@ -900,7 +900,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
         //Secrete will be deleted from the K8
         try {
             kubernetesClient.secrets().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+                    .withLabels(KubernetesProvisioningUtils.getDeleteLables(applicationContext)).delete();
         } catch (KubernetesClientException e) {
             String message = "Error while deleting kubernetes secrets in deployment";
             log.warn(message, e);
@@ -909,7 +909,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
 
         try {
             kubernetesClient.pods().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+                    .withLabels(KubernetesProvisioningUtils.getDeleteLables(applicationContext)).delete();
         } catch (KubernetesClientException e) {
             String message = "Error while deleting kubernetes pods in deployment";
             log.warn(message, e);

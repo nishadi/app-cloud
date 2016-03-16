@@ -124,7 +124,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
 
                  jagg.post("../blocks/application/application.jag", {
-                    action:"getApplicationHashId",
+                    action:"generateApplicationHashId",
                     applicationName:$("#applicationName").val()
                 },function (result) {
                     applicationHashId = result;

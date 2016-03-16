@@ -106,14 +106,20 @@ jagg.module("application", {
     downloadFromUrl:function() {
             return jagg.require(jagg.getModulesDir() + "application/application.jag").downloadFromUrl.apply(this, arguments);
     },
-    getApplicationHashId:function() {
-        return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationHashId.apply(this, arguments);
+    generateApplicationHashId:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").generateApplicationHashId.apply(this, arguments);
     },
     getApplicationHashIdByName:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationHashIdByName.apply(this, arguments);
     },
     getVersionHashId:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getVersionHashId.apply(this, arguments);
+    },
+    getApplicationNameByHashId:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationNameByHashId.apply(this, arguments);
+    },
+    deleteVersionFromDatabase:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteVersionFromDatabase.apply(this, arguments);
     }
 });
 %>
