@@ -179,58 +179,20 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             for (Container container : containers) {
                 List<ServiceProxy> serviceProxies = container.getServiceProxies();
                 for (ServiceProxy serviceProxy : serviceProxies) {
-                    ServicePort servicePorts = new ServicePortBuilder()
-                            .withName(serviceProxy.getServiceName())
-                            .withProtocol(serviceProxy.getServiceProtocol())
-                            .withPort(serviceProxy.getServicePort())
-                            .withTargetPort(new IntOrString(serviceProxy.getServiceBackendPort()))
-                            .build();
-                    ServiceSpec serviceSpec = new ServiceSpecBuilder()
-                            .withSelector(KubernetesProvisioningUtils.getLableMap(applicationContext))
-                            .withPorts(servicePorts)
-                            .build();
-                    //Deployment Unique service name is built using deployment name and the service name.
-                    String srvBackendPort = Integer.toString(serviceProxy.getServiceBackendPort());
-                    String serviceName = serviceProxy.getServiceName();
-                    Service service = new ServiceBuilder()
-                            .withKind(KubernetesPovisioningConstants.KIND_SERVICE)
-                            .withSpec(serviceSpec)
-                            .withMetadata(new ObjectMetaBuilder()
-                                    .withName(serviceName.toLowerCase())
-                                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
-                                    .build())
-                            .build();
+                    Service service = getService(serviceProxy);
                     serviceList.add(service);
                 }
             }
 
             kubClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
-            DeploymentList deploymentList = kubClient.extensions().deployments().list();
 
-            Deployment currentDeployement = kubClient.inNamespace(namespace.getMetadata().getName()).extensions()
-                    .deployments().withName(config.getDeploymentName().toLowerCase()).get();
-            if (currentDeployement != null) {
-                //Redeployment
-                //Deployment recreation should happen after comparing the new Deployment config with
-                // running service configs.
-                kubClient.inNamespace(namespace.getMetadata().getName()).extensions()
-                        .deployments().withName(config.getDeploymentName().toLowerCase()).replace(deployment);
-
-                //todo need to change service replacement because need to check whether service object is available
-                //Service recreation should happen after comparing the new service config with running service configs.
-//                for (Service service : serviceList) {
-//                    kubClient.inNamespace(namespace.getMetadata().getName()).services().replace(service);
-//                    serviceNameList.add(service.getMetadata().getName());
-//                }
-            } else {
-                //New Deployment
-                kubClient.inNamespace(namespace.getMetadata().getName()).extensions()
-                        .deployments().create(deployment);
-                for (Service service : serviceList) {
-                    kubClient.inNamespace(namespace.getMetadata().getName()).services().create(service);
-                    serviceNameList.add(service.getMetadata().getName());
-                }
+            //create a new deployement with servies
+            kubClient.inNamespace(namespace.getMetadata().getName()).extensions().deployments().create(deployment);
+            for (Service service : serviceList) {
+                kubClient.inNamespace(namespace.getMetadata().getName()).services().create(service);
+                serviceNameList.add(service.getMetadata().getName());
             }
+
         } catch (KubernetesClientException e) {
             String msg = "Error while creating Deployment : " + config.getDeploymentName();
             log.error(msg, e);
@@ -241,6 +203,39 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             }
         }
         return serviceNameList;
+    }
+
+    /**
+     * Get service with service port and service specification
+     * @param serviceProxy service information
+     * @return K8s service
+     */
+    private Service getService(ServiceProxy serviceProxy) {
+        Map<String, String> annotationMap = new HashMap<String, String>();
+        annotationMap.put(KubernetesPovisioningConstants.ANNOTATION_KEY_HOST, serviceProxy.getAppHostURL());
+        //Check whether service is https and enable ssl term
+        if (serviceProxy.getServicePort() == KubernetesPovisioningConstants.HTTPS_SERVICE_PORT) {
+            annotationMap.put(KubernetesPovisioningConstants.ANNOTATION_KEY_SSL_TERM,
+                    KubernetesPovisioningConstants.ANNOTATION_VALUE_SSL_TERM);
+        }
+        ServicePort servicePorts = new ServicePortBuilder().withName(serviceProxy.getServiceName())
+                .withProtocol(serviceProxy.getServiceProtocol())
+                .withPort(serviceProxy.getServicePort())
+                .withTargetPort(new IntOrString(serviceProxy.getServiceBackendPort())).build();
+        ServiceSpec serviceSpec = new ServiceSpecBuilder()
+                .withSelector(KubernetesProvisioningUtils.getLableMap(applicationContext))
+                .withPorts(servicePorts)
+                .withSessionAffinity(KubernetesPovisioningConstants.SERVICE_SESSION_AFFINITY_MODE).build();
+
+        //Deployment Unique service name is built using deployment name and the service name.
+        String serviceName = serviceProxy.getServiceName();
+        return new ServiceBuilder()
+                .withKind(KubernetesPovisioningConstants.KIND_SERVICE)
+                .withSpec(serviceSpec)
+                .withMetadata(new ObjectMetaBuilder()
+                        .withName(serviceName.toLowerCase())
+                        .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
+                        .withAnnotations(annotationMap).build()).build();
     }
 
     @Override
