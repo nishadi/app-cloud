@@ -187,6 +187,21 @@ public class ApplicationManager {
         }
     }
 
+    public static String getApplicationHashIdByName(String applicationName) throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        try {
+            return applicationDAO.getApplicationHashIdByName(dbConnection, applicationName, tenantId);
+        } catch (AppCloudException e) {
+            String msg = "Error while getting application hash id for application name : " + applicationName;
+            throw new AppCloudException(msg, e);
+        }
+    }
+
     /**
      * Method for getting application by id
      *
@@ -462,11 +477,11 @@ public class ApplicationManager {
     }
 
     public static void addDeployment(String versionHashId, Deployment deployment)throws AppCloudException {
-
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         ApplicationDAO applicationDAO = new ApplicationDAO();
         Connection dbcConnection = DBUtil.getDBConnection();
         try {
-            applicationDAO.addDeployment(dbcConnection, versionHashId, deployment);
+            applicationDAO.addDeployment(dbcConnection, versionHashId, deployment, tenantId);
             dbcConnection.commit();
         } catch (SQLException e) {
             String msg = "Error while committing transaction when adding deployment for version with hash id : " +

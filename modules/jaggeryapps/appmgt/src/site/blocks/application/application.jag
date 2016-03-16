@@ -54,20 +54,29 @@ var log = new Log();
         if (isFileAttached) {
             applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName, applicationRevision);
         }
-
-        applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
-                runtimeId, appTypeName, runtimeProperties, tags, appIcon, uploadedFileName);
+        if(uploadedFileName) {
+            applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
+                                             runtimeId, appTypeName, runtimeProperties, tags, appIcon,
+                                             uploadedFileName);
+        }else{
+            var gitRepoUrl = request.getParameter("gitRepoUrl");
+            var gitRepoBranch = request.getParameter("gitRepoBranch");
+            applicationModule.addApplicationViaGitHub(applicationName, applicationRevision, applicationDescription, replicas,
+                                             runtimeId, appTypeName, runtimeProperties, tags, appIcon, gitRepoUrl,
+                                             gitRepoBranch);
+        }
         response.status = 200;
         response.message = "Application creation is successfully submitted";
 
     }else if(action == "stopApplication"){
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
+        var versionKey = request.getParameter("versionKey");
 
         // delete application from kubernetes
         applicationModule.deleteApplicationFromKubernetes(applicationName, applicationRevision);
         // update application status to stopped
-        applicationModule.updateApplicationStatus(applicationName, applicationRevision, APPLICATION_STOPPED);
+        applicationModule.updateApplicationStatus(versionKey, APPLICATION_STOPPED);
 
         response.status = 200;
         response.message = "Application is successfully stopped.";
@@ -183,11 +192,10 @@ var log = new Log();
 
     } else if (action == "changeAppIcon"){
         var appIcon = request.getFile("changeIcon");
-        var applicationName = request.getParameter("applicationName");
-        var revision = request.getParameter("selectedRevision");
+        var applicationKey = request.getParameter("applicationKey");
         var mod = jagg.module("application");
-        mod.changeApplicationIcon(applicationName, revision, appIcon);
-        print("<html><script>window.location.replace('/appmgt/site/pages/home.jag?applicationName=" + applicationName + "');</script><body></body></html>");
+        mod.changeApplicationIcon(applicationKey, appIcon);
+        print("<html><script>window.location.replace('/appmgt/site/pages/home.jag?applicationKey=" + applicationKey + "');</script><body></body></html>");
 
     } else if (action == "getApplicationHashId"){
         var applicationName = request.getParameter("applicationName");
@@ -199,6 +207,11 @@ var log = new Log();
         var versions = mod.getAllRevisionsOfApplication(applicationName);
         print(versions);
 
+    } else if (action == "getApplicationHashIdByName"){
+        var applicationName = request.getParameter("applicationName");
+        var mod = jagg.module("application");
+        var applicationHashId = mod.getApplicationHashIdByName(applicationName);
+        print(applicationHashId);
     } else if (action == "deleteVersion"){
         var applicationName = request.getParameter("applicationName");
         var applicationVersion = request.getParameter("applicationVersion");

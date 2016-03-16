@@ -16,7 +16,10 @@
 
 package org.wso2.appcloud.core.docker;
 
+import org.wso2.appcloud.common.AppCloudException;
 import org.wso2.appcloud.common.util.AppCloudUtil;
+import org.wso2.appcloud.core.dao.ApplicationDAO;
+import org.wso2.appcloud.core.dto.ApplicationRuntime;
 
 public class DockerUtil {
 
@@ -26,5 +29,16 @@ public class DockerUtil {
 
     public static String getDeploymentLocation(String appType) {
         return DockerOpClientConstants.DOCKER_WAR_LOCATION;
+    }
+
+    public static String getDockerFileTemplatePath(String runtimeId, String dockerTemplateFilePath) throws
+                                                                                              AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        ApplicationRuntime applicationRuntime = applicationDAO.getRuntimeById(Integer.parseInt(runtimeId));
+        String dockerBaseImageName = applicationRuntime.getImageName();
+        String dockerBaseImageVersion = applicationRuntime.getTag();
+
+        return dockerTemplateFilePath + "/" + "Dockerfile"+ "." + dockerBaseImageName + "." +
+               dockerBaseImageVersion;
     }
 }

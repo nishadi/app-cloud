@@ -39,6 +39,7 @@ public class SQLQueryConstants {
     public static final String RUNTIME_ID = "runtime_id";
     public static final String STATUS = "status";
     public static final String APPLICATION_TYPE_NAME = "app_type_name";
+    public static final String BUILDABLE = "buildable" ;
     public static final String RUNTIME_NAME = "runtime_name";
     public static final String ICON = "icon";
     public static final String RUNTIME_REPO_URL = "repo_url";
@@ -74,13 +75,14 @@ public class SQLQueryConstants {
             " FROM AC_VERSION WHERE hash_id=?), ?, ?, ?)";
 
     public static final String ADD_DEPLOYMENT =
-            "INSERT INTO AC_DEPLOYMENT (name, replicas) values (?, ?)";
+            "INSERT INTO AC_DEPLOYMENT (name, replicas, tenant_id) values (?, ?, ?)";
 
     public static final String ADD_CONTAINER =
-            "INSERT INTO AC_CONTAINER (name, version, deployment_id) values (?, ?, ?)";
+            "INSERT INTO AC_CONTAINER (name, version, deployment_id, tenant_id) values (?, ?, ?, ?)";
 
     public static final String ADD_CONTAINER_SERVICE_PROXY =
-            "INSERT INTO AC_CONTAINER_SERVICE_PROXY (name, protocol, port, backend_port, container_id) values (?,?,?,?,?)";
+            "INSERT INTO AC_CONTAINER_SERVICE_PROXY (name, protocol, port, backend_port, container_id, tenant_id) "
+                    + "values (?, ?, ?, ?, ?, ?)";
 
 
 
@@ -105,6 +107,9 @@ public class SQLQueryConstants {
 
     public static final String GET_APPLICATION_NAME_BY_HASH_ID =
             "SELECT name FROM AC_APPLICATION WHERE hash_id = ?";
+
+    public static final String GET_APPLICATION_HASH_ID_BY_NAME =
+            "SELECT hash_id FROM AC_APPLICATION WHERE name=? AND tenant_id=?";
 
     public static final String GET_APPLICATION_ID =
             "SELECT id FROM AC_APPLICATION WHERE hash_id=?";
@@ -157,7 +162,7 @@ public class SQLQueryConstants {
             " AND name=?";
 
     public static final String UPDATE_VERSION_WITH_DEPLOYMENT =
-            "UPDATE AC_VERSION SET deployment_id=? WHERE hash_id=?";
+            "UPDATE AC_VERSION SET deployment_id=? WHERE hash_id=? AND tenant_id=?";
 
     public static final String UPDATE_TAG =
             "UPDATE AC_TAG SET name=?, value=? WHERE version_id=(SELECT id FROM AC_VERSION WHERE hash_id=?) AND name=? ";
@@ -185,4 +190,5 @@ public class SQLQueryConstants {
 
     public static final String DELETE_DEPLOYMENT =
             "DELETE FROM AC_DEPLOYMENT WHERE id=(SELECT deployment_id FROM AC_VERSION WHERE hash_id=?)";
+
 }

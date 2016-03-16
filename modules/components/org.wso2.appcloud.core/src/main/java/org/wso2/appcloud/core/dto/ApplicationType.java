@@ -21,6 +21,7 @@ public class ApplicationType {
 
     private String appTypeName;
     private String description;
+    private boolean buildable;
 
     public String getAppTypeName() {
         return appTypeName;
@@ -36,5 +37,13 @@ public class ApplicationType {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isBuildable() {
+        return buildable;
+    }
+
+    public void setBuildable(boolean buildable) {
+        this.buildable = buildable;
     }
 }

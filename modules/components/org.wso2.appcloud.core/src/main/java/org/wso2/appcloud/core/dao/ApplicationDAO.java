@@ -16,6 +16,7 @@
 
 package org.wso2.appcloud.core.dao;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
@@ -32,6 +33,7 @@ import org.wso2.appcloud.core.dto.Tag;
 import org.wso2.appcloud.core.dto.Transport;
 import org.wso2.appcloud.core.dto.Version;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -90,6 +92,9 @@ public class ApplicationDAO {
                 }
             }
 
+            InputStream iconInputStream = IOUtils.toBufferedInputStream(application.getIcon().getBinaryStream());
+            updateApplicationIcon(dbConnection, iconInputStream, application.getHashId());
+
         } catch (SQLException e) {
 
             String msg =
@@ -98,6 +103,12 @@ public class ApplicationDAO {
             log.error(msg, e);
             throw new AppCloudException(msg, e);
 
+        } catch (IOException e) {
+            String msg =
+                    "Error while generating stream of the icon for application : " + application.getApplicationName() +
+                    " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
         } finally {
             DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
@@ -254,15 +265,16 @@ public class ApplicationDAO {
     }
 
 
-    public void addDeployment(Connection dbConnection, String versionHashId, Deployment deployment) throws AppCloudException{
+    public void addDeployment(Connection dbConnection, String versionHashId, Deployment deployment, int tenantId) throws AppCloudException{
 
-        int deploymentId = addDeployment(dbConnection, deployment);
+        int deploymentId = addDeployment(dbConnection, deployment, tenantId);
         PreparedStatement preparedStatement = null;
 
         try {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_VERSION_WITH_DEPLOYMENT);
             preparedStatement.setInt(1, deploymentId);
             preparedStatement.setString(2, versionHashId);
+            preparedStatement.setInt(3, tenantId);
 
             preparedStatement.executeUpdate();
 
@@ -276,7 +288,7 @@ public class ApplicationDAO {
     }
 
 
-    private int addDeployment(Connection dbConnection, Deployment deployment) throws AppCloudException{
+    private int addDeployment(Connection dbConnection, Deployment deployment, int tenantId) throws AppCloudException{
 
         PreparedStatement preparedStatement = null;
         int deploymentId =-1;
@@ -286,6 +298,7 @@ public class ApplicationDAO {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_DEPLOYMENT, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, deployment.getDeploymentName());
             preparedStatement.setInt(2, deployment.getReplicas());
+            preparedStatement.setInt(3, tenantId);
             preparedStatement.execute();
 
             ResultSet rs = preparedStatement.getGeneratedKeys();
@@ -295,7 +308,7 @@ public class ApplicationDAO {
             }
 
             for(Container container: deployment.getContainers()){
-                addContainer(dbConnection, container, deploymentId);
+                addContainer(dbConnection, container, deploymentId, tenantId);
             }
 
         } catch (SQLException e) {
@@ -312,7 +325,7 @@ public class ApplicationDAO {
     }
 
 
-    public void addContainer(Connection dbConnection, Container container, int deploymentId) throws AppCloudException{
+    public void addContainer(Connection dbConnection, Container container, int deploymentId, int tenantId) throws AppCloudException{
 
         PreparedStatement preparedStatement = null;
         int containerId = -1;
@@ -323,6 +336,7 @@ public class ApplicationDAO {
             preparedStatement.setString(1, container.getImageName());
             preparedStatement.setString(2, container.getImageVersion());
             preparedStatement.setInt(3, deploymentId);
+            preparedStatement.setInt(4, tenantId);
 
             preparedStatement.execute();
 
@@ -331,7 +345,7 @@ public class ApplicationDAO {
                 containerId = rs.getInt(1);
             }
             for(ContainerServiceProxy containerServiceProxy : container.getServiceProxies()){
-                addContainerServiceProxy(dbConnection, containerServiceProxy, containerId);
+                addContainerServiceProxy(dbConnection, containerServiceProxy, containerId, tenantId);
             }
 
         } catch (SQLException e) {
@@ -344,8 +358,7 @@ public class ApplicationDAO {
     }
 
     public void addContainerServiceProxy(Connection dbConnection, ContainerServiceProxy containerServiceProxy,
-                                         int containerId)
-            throws AppCloudException {
+                                         int containerId, int tenantId) throws AppCloudException {
 
         PreparedStatement preparedStatement = null;
 
@@ -357,6 +370,7 @@ public class ApplicationDAO {
             preparedStatement.setInt(3, containerServiceProxy.getServicePort());
             preparedStatement.setString(4, containerServiceProxy.getServiceBackendPort());
             preparedStatement.setInt(5, containerId);
+            preparedStatement.setInt(6, tenantId);
             preparedStatement.execute();
 
         } catch (SQLException e) {
@@ -576,6 +590,34 @@ public class ApplicationDAO {
     }
 
 
+    public String getApplicationHashIdByName(Connection dbConnection, String applicationName, int tenantId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement;
+        ResultSet resultSet;
+        String applicationHashId = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_APPLICATION_HASH_ID_BY_NAME);
+            preparedStatement.setString(1, applicationName);
+            preparedStatement.setInt(2, tenantId);
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                applicationHashId = resultSet.getString(SQLQueryConstants.HASH_ID);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving application hash id using application name : " + applicationName +
+                         " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        }
+
+        return applicationHashId;
+    }
+
     /**
      * Method for getting application from database using application hash id
      *
@@ -605,8 +647,8 @@ public class ApplicationDAO {
                 application.setDefaultVersion(resultSet.getString(SQLQueryConstants.DEFAULT_VERSION));
                 application.setApplicationType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
                 application.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
-
                 application.setVersions(getAllVersionsOfApplication(dbConnection, applicationHashId));
+
             }
 
         } catch (SQLException e) {
@@ -846,7 +888,7 @@ public class ApplicationDAO {
                 applicationType = new ApplicationType();
                 applicationType.setAppTypeName(resultSet.getString(SQLQueryConstants.NAME));
                 applicationType.setDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
-
+                applicationType.setBuildable(resultSet.getInt(SQLQueryConstants.BUILDABLE) == 1 ? true : false);
                 applicationTypeList.add(applicationType);
             }
 
