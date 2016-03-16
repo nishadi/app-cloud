@@ -249,7 +249,7 @@ function getValidationOptions(){
         rules: {
             "database-name": {
                 required: true,
-                maxlength: 5
+                maxlength: 30
             },
             "user-name-select": {
                 required: true,
