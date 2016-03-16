@@ -116,7 +116,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
                                         '<span class="sr-only">Toggle Dropdown</span>' +
                                     '</a>' +
                                     '<ul class="dropdown-menu app-extra-menu" role="menu">' +
-                                        '<li><a onclick="deleteApplicationPopUp(' +  "'" + displayName + "'"  + ')">Delete</a></li>' +
+                                        '<li><a onclick="deleteApplicationPopUp(' +  "'" + displayName + "'," +  "'" + application.hashId + "'"  + ')">Delete</a></li>' +
                                     '</ul>' +
 
                             '</div>' +
@@ -150,7 +150,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
         theLi.remove();
     }
 
-    function deleteApplicationAllVersions(appName){
+    function deleteApplicationAllVersions(appName, applicationHashId){
 
         $('#app_creation_progress_modal').modal({ backdrop: 'static', keyboard: false});
         $("#app_creation_progress_modal").show();
@@ -158,7 +158,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
 
         jagg.post("../blocks/application/application.jag", {
             action:"deleteApplication",
-            applicationName:appName
+            applicationKey:applicationHashId
         },function (result) {
             jagg.message({content: "Application : " + appName + " deleted successfully", type: 'success', id:'view_log'});
             setTimeout(redirectAppListing, 2000);
@@ -167,10 +167,10 @@ jagg.template("index", function(inputs, outputs, jagg) {
         });
     }
 
-    function deleteApplicationPopUp(appName){
+    function deleteApplicationPopUp(appName, applicationHashId){
         jagg.popMessage({type:'confirm', modalStatus: true, title:'Delete Application',content:'Are you sure you want to delete : ' + appName + ' ?',
             okCallback:function(){
-               deleteApplicationAllVersions(appName);
+               deleteApplicationAllVersions(appName, applicationHashId);
             }, cancelCallback:function(){}
         });
     }

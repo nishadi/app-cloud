@@ -119,7 +119,16 @@ public class KubernetesProvisioningUtils {
         Map<String, String> selector = new HashMap<>();
         selector.put("app", applicationContext.getId());
         selector.put("version", applicationContext.getVersion());
+        selector.put("versionHashId", applicationContext.getVersionHashId());
         return selector;
+    }
+
+    public static Map<String, String> getDeleteLables(ApplicationContext applicationContext){
+
+        Map<String, String> deleteLables = new HashMap<>();
+        deleteLables.put("versionHashId", applicationContext.getVersionHashId());
+
+        return deleteLables;
     }
 
     /**
@@ -133,7 +142,7 @@ public class KubernetesProvisioningUtils {
     }
 
     public static ApplicationContext getApplicationContext(String id, String version, String type, int tenantId,
-            String tenantDomain) {
+            String tenantDomain, String versionHashId) {
 
         ApplicationContext applicationContext = new ApplicationContext();
         applicationContext.setId(id);
@@ -143,6 +152,7 @@ public class KubernetesProvisioningUtils {
         tenantInfo.setTenantId(tenantId);
         tenantInfo.setTenantDomain(tenantDomain);
         applicationContext.setTenantInfo(tenantInfo);
+        applicationContext.setVersionHashId(versionHashId);
         return applicationContext;
     }
 

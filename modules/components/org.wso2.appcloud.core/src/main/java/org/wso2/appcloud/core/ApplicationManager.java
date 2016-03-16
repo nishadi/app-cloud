@@ -202,6 +202,40 @@ public class ApplicationManager {
         }
     }
 
+    public static List<String> getVersionHashIdsOfApplication(String applicationHashId) throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            return applicationDAO.getAllVersionHashIdsOfApplication(dbConnection, applicationHashId);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static boolean isSingleVersion(String versionHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            return applicationDAO.isSingleVersion(dbConnection, versionHashId);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static String getApplicationHashIdByVersionHashId(String versionHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            return applicationDAO.getApplicationHashIdByVersionHashId(dbConnection, versionHashId);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
     public static String getApplicationNameByHashId(String applicationHashId) throws AppCloudException {
 
         ApplicationDAO applicationDAO = new ApplicationDAO();
@@ -481,8 +515,8 @@ public class ApplicationManager {
         Connection dbConnection = DBUtil.getDBConnection();
 
         try {
+            applicationDAO.deleteAllDeploymentOfApplication(dbConnection, applicationHashId);
             applicationDAO.deleteApplication(dbConnection, applicationHashId);
-            applicationDAO.deleteAllVersionsOfApplication(dbConnection, applicationHashId);
             dbConnection.commit();
         } catch (SQLException e) {
             String msg = "Error while deleting application with hash id : " + applicationHashId;
@@ -498,6 +532,7 @@ public class ApplicationManager {
         Connection dbConnection = DBUtil.getDBConnection();
 
         try {
+            applicationDAO.deleteDeployment(dbConnection, versionHashId);
             applicationDAO.deleteVersion(dbConnection, versionHashId);
             dbConnection.commit();
         }  catch (SQLException e) {

@@ -140,8 +140,8 @@ var pushDockerImage = function (applicationName, versionName, applicationRuntime
         log.error(e);
         log.info("Application creation failed because docker image push failed and roll back process" +
                  " is started for application : "+applicationName+" with revision : "+versionName);
-        deleteApplicationUploadedPath(applicationName, versionName);
-        deleteApplicationFromDatabase(versionHashId);
+        deleteApplicationUploadedPath(versionHashId);
+        deleteVersionFromDatabase(versionHashId);
         throw e;
     }
 
@@ -183,8 +183,8 @@ var buildDockerImage = function (applicationName, versionName, runtimeId, absFil
         log.error(e);
         log.info("Application creation failed because dokcer image build failed and roll back process" +
                  " is started for application : "+applicationName+" with revision : "+versionName);
-        deleteApplicationUploadedPath(applicationName, versionName);
-        deleteApplicationFromDatabase(versionHashId);
+        deleteApplicationUploadedPath(versionHashId);
+        deleteVersionFromDatabase(versionHashId);
         throw e;
 
     }
@@ -257,7 +257,7 @@ var createAppInDataBase = function(applicationName, versionName, applicationDesc
         log.error(e);
         log.info("Application creation failed because initial application metadata persistence failed and roll back process" +
                  " is started for application : "+applicationName+" with version : "+ versionName);
-        deleteApplicationUploadedPath(applicationName, versionName);
+        deleteApplicationUploadedPath(versionHashId);
         throw e;
     }
     return application;
@@ -313,9 +313,7 @@ var createDockerFileForGitHub =  function(applicationName, versionName, runtimeI
 
     try {
 
-        var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                     + modManager.getTenantDomain() + "/" + applicationName + "/" + versionName + "/";
-        var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
+        var absFileUploadedPath = getVersionDirectoryPath(versionHashId);
         var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
 
         var dockerTemplateFilePath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + "DockerFiles/GitHub";
@@ -337,8 +335,8 @@ var createDockerFileForGitHub =  function(applicationName, versionName, runtimeI
         log.error(e);
         log.info("Application creation failed because docker file creation failed and roll back process" +
                  " is started for application : "+applicationName+" with revision : "+versionName);
-        deleteApplicationUploadedPath(applicationName, versionName);
-        deleteApplicationFromDatabase(versionHashId);
+        deleteApplicationUploadedPath(versionHashId);
+        deleteVersionFromDatabase(versionHashId);
         throw e;
     }
 
@@ -357,9 +355,7 @@ var createDockerFile =  function(applicationName, versionName, runtimeId, upload
 
     try {
 
-        var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                     + modManager.getTenantDomain() + "/" + applicationName + "/" + versionName + "/";
-        var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
+        var absFileUploadedPath = getVersionDirectoryPath(versionHashId);
         var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
 
         var dockerTemplateFilePath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + "DockerFiles";
@@ -391,8 +387,8 @@ var createDockerFile =  function(applicationName, versionName, runtimeId, upload
         log.error(e);
         log.info("Application creation failed because docker file creation failed and roll back process" +
                  " is started for application : "+applicationName+" with revision : "+versionName);
-        deleteApplicationUploadedPath(applicationName, versionName);
-        deleteApplicationFromDatabase(versionHashId);
+        deleteApplicationUploadedPath(versionHashId);
+        deleteVersionFromDatabase(versionHashId);
         throw e;
     }
 
@@ -413,7 +409,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
     var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
 
     var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
-            applicationName, versionName, null , modManager.getTenantId(), modManager.getTenantDomain());
+            applicationName, versionName, null , modManager.getTenantId(), modManager.getTenantDomain(), versionHashId);
     var kubService = new KubernetesRuntime(applicationCtx);
 
     log.info("Deploying application: " + applicationName);
@@ -431,8 +427,8 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
         log.error(e);
         log.info("Application deployment failed because kubernetes deployment was failed and roll back process" +
                  " is started for application:"+applicationName+" with revision:"+versionName);
-        deleteApplicationUploadedPath(applicationName, versionName);
-        deleteApplicationFromDatabase(versionHashId);
+        deleteApplicationUploadedPath(versionHashId);
+        deleteVersionFromDatabase(versionHashId);
         throw e;
     }
     //Adding deployment success event
@@ -457,9 +453,9 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
         ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
         log.info("Application deployment failed because ingress is not created successfully and roll back process" +
                  " is started for application:"+applicationName+" with revision:"+versionName);
-        deleteApplicationUploadedPath(applicationName, versionName);
-        deleteApplicationFromDatabase(versionHashId);
-        deleteApplicationFromKubernetes(applicationName, versionName);
+        deleteApplicationUploadedPath(versionHashId);
+        deleteVersionFromDatabase(versionHashId);
+        deleteApplicationFromKubernetes(versionHashId);
         log.error(msg);
         log.error(e);
         throw e;
@@ -490,10 +486,9 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
             ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
             log.info("Application rollback started for application:"+applicationName + " with revision:"+
                      versionName +" because pods are not running even after 3 minutes.");
-            deleteApplicationUploadedPath(applicationName, versionName);
-            deleteDeployment(applicationName, versionName);
-            deleteApplicationFromDatabase(versionHashId);
-            deleteApplicationFromKubernetes(applicationName, versionName);
+            deleteApplicationUploadedPath(versionHashId);
+            deleteVersionFromDatabase(versionHashId);
+            deleteApplicationFromKubernetes(versionHashId);
         } else {
             var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
             if (podStatus !== prevPodStatus) {
@@ -757,14 +752,40 @@ var getAllApplications = function(){
     return applicationArray;
 }
 
-var getApplicationHashId = function(applicationName){
+var generateApplicationHashId = function(applicationName){
     var tenantId = modManager.getTenantId();
-    return Util.getApplicationHashId(applicationName, tenantId);
+    try {
+        return Util.getApplicationHashId(applicationName, tenantId);
+    } catch (e){
+        var msg = "Error while generating application hash id for application : " + applicationName + " in tenant : "
+                + tenantId;
+        log.error(msg);
+        log.error(e);
+        throw e;
+    }
 }
 
 
 var getApplicationHashIdByName = function(applicationName){
-    return ApplicationManager.getApplicationHashIdByName(applicationName);
+    try {
+        return ApplicationManager.getApplicationHashIdByName(applicationName);
+    } catch (e){
+        var msg = "Error while getting application hash id for application : " + applicationName;
+        log.error(msg);
+        log.error(e);
+        throw e;
+    }
+}
+
+var getApplicationNameByHashId = function(applicationHashId){
+    try {
+        return ApplicationManager.getApplicationNameByHashId(applicationHashId);
+    } catch(e){
+        var msg = "Error while getting application name for application with hash id : " + applicationHashId;
+        log.error(msg);
+        log.error(e);
+        throw e;
+    }
 }
 
 /**
@@ -1116,11 +1137,14 @@ var getApplicationCreationEvents = function(applicationName, versionName) {
     var events = eventsManager.getEventsOfApplication(versionHashId);
 };
 
-var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationName, revision){
-    createDestinationDirsForUploadedApps(applicationName, revision);
+var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationName, versionName){
+
+    var versionHashId = Util.getVersionHashId(applicationName, versionName, modManager.getTenantId());
+    createDestinationDirsForUploadedApps(versionHashId);
     uploadedFileName = uploadedArtifact.getName();
+
     var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                 + modManager.getTenantDomain() + "/" + applicationName + "/" + revision + "/";
+                         + modManager.getTenantDomain() + "/" + versionHashId + "/";
 
     var uploadApplicationTmpPath;
     var checkFileExtZIP = isFileExtZIP(uploadedFileName);
@@ -1145,7 +1169,7 @@ var isFileExtZIP = function(uploadedFileName){
     return false;
 };
 
-var createDestinationDirsForUploadedApps = function (applicationName, revision) {
+var createDestinationDirsForUploadedApps = function (versionHashId) {
 
     var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH);
     if (!destinationDir.isExists()) {
@@ -1157,30 +1181,25 @@ var createDestinationDirsForUploadedApps = function (applicationName, revision) 
 
     }
     var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                          + modManager.getTenantDomain() + "/" + applicationName);
+                                          + modManager.getTenantDomain() + "/" + versionHashId);
     if (!destinationDir.isExists()) {
         destinationDir.mkdir();
 
-    }
-    var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                          + modManager.getTenantDomain() + "/" + applicationName + "/" + revision);
-    if (!destinationDir.isExists()) {
-        destinationDir.mkdir();
     }
 };
 
-var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
-    log.info("Inside modules downloadFromUrl");
-    createDestinationDirsForUploadedApps(applicationName, revision);
-    var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                 + modManager.getTenantDomain() + "/" + applicationName + "/" + revision + "/";
-    var CARBON_HOME = CarbonUtils.getCarbonHome();
-    var filePath = CARBON_HOME + "/repository/deployment/server/jaggeryapps/appmgt";
+var downloadFromUrl = function(artifactUrl, applicationName, versionName, apptype){
+
+    var versionHashId = Util.getVersionHashId(applicationName, versionName, modManager.getTenantId());
+    createDestinationDirsForUploadedApps(versionHashId);
+
+    var filePath = "";
+    var versionDirectoryPath = getVersionDirectoryPath();
 
     if (apptype == "war"){
-        filePath  = filePath + fileUploadPath + applicationName + ".war";
+        filePath  = versionDirectoryPath + versionHashId + ".war";
     } else if (apptype == "mss") {
-        filePath  = filePath + fileUploadPath + applicationName + ".jar";
+        filePath  = versionDirectoryPath + versionHashId + ".jar";
     }
     log.info("apptype: " + apptype);
     CloudUtil.downloadFromUrl(artifactUrl , filePath);
@@ -1204,9 +1223,8 @@ var addEvent = function(name, status, description, versionHashId) {
     }
 };
 
-var deleteApplicationUploadedPath = function(applicationName, revision) {
-    var fileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                 + modManager.getTenantDomain() + "/" + applicationName;
+var deleteApplicationUploadedPath = function(versionHashId) {
+    var fileUploadPath = getVersionDirectoryPath(versionHashId);
     var fileUtils = Packages.org.apache.commons.io.FileUtils;
     var fileUploadPath = new Packages.java.io.File(fileUploadPath);
     log.info("Deleting the uploaded file at:"+fileUploadPath.getAbsolutePath());
@@ -1217,49 +1235,67 @@ var deleteApplicationUploadedPath = function(applicationName, revision) {
     }
 };
 
-var deleteApplicationFromDatabase = function(versionHashId) {
+var deleteVersionFromDatabase = function(versionHashId) {
     try{
-        java.lang.Thread.sleep(3000); // database at last after the transaction completes.
-        ApplicationManager.deleteVersion(versionHashId);
-        log.info("Successfully deleted the application form the database");
+        if(ApplicationManager.isSingleVersion){
+            var applicationHashId = ApplicationManager.getApplicationHashIdByVersionHashId(versionHashId);
+            ApplicationManager.deleteApplication(applicationHashId);
+        } else {
+            //java.lang.Thread.sleep(3000); // database at last after the transaction completes.
+            ApplicationManager.deleteVersion(versionHashId);
+        }
     }catch(e){
-        log.error("Error while deleting application from the database");
+        log.error("Error while deleting application version from the database with version hash id : " + versionHashId);
         log.error(e);
     }
 };
 
-var deleteApplicationFromKubernetes = function(applicationName, revision) {
+var deleteApplicationFromDatabase = function (applicationHashId){
+    try {
+        ApplicationManager.deleteApplication(applicationHashId);
+    } catch(e){
+        log.error("Error while deleting application from the database with application hash id : " + applicationHashId);
+        log.error(e);
+    }
+};
+
+var deleteApplicationFromKubernetes = function(versionHashId) {
+
     try{
         var KubernetesRuntimeProvisioningService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
-
-        var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
-                applicationName, revision, null, modManager.getTenantId(), modManager.getTenantDomain());
-
+        var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(null, null, null, modManager.getTenantId(),
+                                                                               modManager.getTenantDomain(), versionHashId);
         var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
-
         kubernetesRuntimeProvisioningService.deleteDeployment();
-        log.info("Successfully deleted the application: " + applicationName + ":" + revision + " kubernetes deployments");
 
     } catch(e){
-        log.error("Error while cleaning up the Kubernetes deployment");
+        log.error("Error while cleaning up the Kubernetes deployment for the version with hash id : " + versionHashId);
         log.error(e);
     }
 };
 
-var deleteApplication = function(applicationName) {
-    var versions = getAllRevisionsOfApplication(applicationName);
+var deleteApplication = function(applicationHashId) {
+
     try{
-        for (i = 0; i < versions.length; i++) {
-            log.info("Deleting application: " + applicationName + ":" + versions[i]);
-            deleteApplicationUploadedPath(applicationName, versions[i]);
-            deleteApplicationFromDatabase(applicationName, versions[i]);
-            deleteApplicationFromKubernetes(applicationName, versions[i]);
+        deleteApplicationFromDatabase(applicationHashId);
+        var versions = ApplicationManager.getVersionHashIdsOfApplication(applicationHashId);
+
+        for (var i = 0; i < versions.length; i++) {
+            deleteApplicationUploadedPath(versions[i]);
+            deleteApplicationFromKubernetes(versions[i]);
         }
     } catch(e){
-        log.error("Error while cleaning up the Kubernetes deployment");
+        log.error("Error while deleting application with hash id : " + applicationHashId);
         log.error(e);
     }
 };
+
+
+var getVersionDirectoryPath = function(versionHashId){
+
+    return modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
+                                        + modManager.getTenantDomain() + "/" + versionHashId + "/";
+}
 
 var getIngressPort = function(serviceName){
 
