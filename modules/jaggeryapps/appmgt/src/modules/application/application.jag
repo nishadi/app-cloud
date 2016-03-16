@@ -76,7 +76,7 @@ var addApplicationViaGitHub = function (applicationName, versionName, applicatio
  * @param runtimeId runtime id of the application
  */
 var addApplication = function (applicationName, versionName, applicationDescription, replicas,
-                               runtimeId, appTypeName, runtimePropertiesArray, tagArray, appIcon, uploadedFileName) {
+                               runtimeId, appTypeName, runtimePropertiesArray, tagArray, appIcon, uploadedFileName, isNewVersion) {
 
     log.info("Started creating App => name : " + applicationName + " Version : " + versionName + " Description " +
              ": " + applicationDescription + " runtimeId : " + runtimeId + " apptype : " + appTypeName );
@@ -84,14 +84,18 @@ var addApplication = function (applicationName, versionName, applicationDescript
     var tenantId = modManager.getTenantId();
     var applicationHashId = Util.getApplicationHashId(applicationName, tenantId);
     var versionHashId = Util.getVersionHashId(applicationName, versionName, tenantId);
-    var application = createAppInDataBase(applicationName, versionName, applicationDescription, replicas, runtimeId, appTypeName,
-                                          runtimePropertiesArray, tagArray, appIcon, applicationHashId, versionHashId);
+   
+    if(isNewVersion == 'true'){        
+        createAppVersionInDataBase(versionName, runtimeId, runtimePropertiesArray, tagArray, applicationHashId, versionHashId);
+    }else{
+        createAppInDataBase(applicationName, versionName, applicationDescription, replicas, runtimeId, appTypeName,
+                runtimePropertiesArray, tagArray, appIcon, applicationHashId, versionHashId);
+    }
     var applicationRuntime = ApplicationManager.getRuntimeById(runtimeId);
     var tagName = applicationRuntime.getTag() +"-"+ versionHashId;
     var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
     var dockerOpClient = new DockerOpClient(modManager.getPropertyValue("DockerClientURL"));
-    var version = application.getVersions().get(0);
-    var runtimeProperties = version.getRuntimeProperties();
+     var runtimeProperties = generateRuntimePropsList(runtimePropertiesArray);
 
 
     var absFileUploadedPath =  createDockerFile(applicationName, versionName, runtimeId, uploadedFileName, versionHashId, dockerOpClient);
@@ -253,6 +257,46 @@ var createAppInDataBase = function(applicationName, versionName, applicationDesc
         log.info("Application creation failed because initial application metadata persistence failed and roll back process" +
                  " is started for application : "+applicationName+" with version : "+ versionName);
         deleteApplicationUploadedPath(applicationName, versionName);
+        throw e;
+    }
+    return application;
+}
+var createAppVersionInDataBase = function( versionName,   runtimeId, runtimePropertiesArray, tagArray, applicationHashId, versionHashId){
+	var version = new Version();
+    try {
+        version.setVersionName(versionName);
+        version.setRuntimeId(runtimeId);
+        version.setStatus(APPLICATION_CREATED);
+        version.setHashId(versionHashId);
+
+        if(runtimePropertiesArray.length > 0) {
+            var runtimePropertyList = generateRuntimePropsList(runtimePropertiesArray);
+            version.setRuntimeProperties(runtimePropertyList);
+        }
+
+        if(tagArray.length > 0){
+            var tagList = generateTagsList(tagArray);
+            version.setTags(tagList);
+        }
+        ApplicationManager.addApplicationVersion(version, applicationHashId);
+
+    } catch (e){
+        var msg = "Error while adding application version to database";
+        addEvent(DATABASE_ADD, EVENT_FAILED, msg, versionHashId);
+        try {
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        } catch (e1){
+            log.error("Error while updating Application version Creation Failed event for application hash id : " + applicationHashId
+                              + " version : " + versionName);
+            log.error(e1);
+            // not throwing the error, because it will hide the actual exception
+        }
+
+        log.error(msg);
+        log.error(e);
+        log.info("Application version creation failed because initial application metadata persistence failed and roll back process" +
+                 " is started for application hash id : "+applicationHashId+" with version : "+ versionName);
+       // deleteApplicationUploadedPath(applicationName, versionName);
         throw e;
     }
     return application;
