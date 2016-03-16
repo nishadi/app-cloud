@@ -120,7 +120,7 @@ var pushDockerImage = function (applicationName, versionName, applicationRuntime
 
     try {
 
-        dockerOpClient.pushDockerImage(applicationRuntime.getRepoURL(),applicationRuntime.getImageName(), tagName);
+        dockerOpClient.pushDockerImage(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL),applicationRuntime.getImageName(), tagName);
 
     } catch (e) {
 
@@ -163,7 +163,7 @@ var buildDockerImage = function (applicationName, versionName, runtimeId, absFil
     try {
 
         var dockerRegTenantSpace = modManager.getTenantDomain().replace(".","-");
-        dockerOpClient.buildDockerImage(applicationRuntime.getRepoURL() ,applicationRuntime.getImageName(), tagName, absFileUploadedPath);
+        dockerOpClient.buildDockerImage(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) ,applicationRuntime.getImageName(), tagName, absFileUploadedPath);
 
     } catch (e){
 
