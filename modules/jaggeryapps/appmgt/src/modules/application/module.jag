@@ -120,6 +120,9 @@ jagg.module("application", {
     },
     deleteVersionFromDatabase:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteVersionFromDatabase.apply(this, arguments);
+    },
+    deleteVersion:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteVersion.apply(this, arguments);
     }
 });
 %>

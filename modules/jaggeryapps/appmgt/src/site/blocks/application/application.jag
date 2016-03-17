@@ -228,9 +228,7 @@ var log = new Log();
         var mod = jagg.module("application");
 
         try {
-            mod.deleteApplicationUploadedPath(versionKey);
-            mod.deleteVersionFromDatabase(versionKey);
-            mod.deleteApplicationFromKubernetes(versionKey);
+            mod.deleteVersion(versionKey, false, true);
             print(true);
         } catch (e) {
             var msg = "Error while deleting application version with the hash id : " + versionKey;
