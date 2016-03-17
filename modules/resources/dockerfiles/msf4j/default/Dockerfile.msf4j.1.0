@@ -1,0 +1,6 @@
+FROM wso2-appcloud/msf4j:1.0.0-base 
+
+ENV MSF4J_JAR ARTIFACT_NAME
+COPY "$MSF4J_JAR" "$MSF4J_HOME/"
+
+CMD ["java", "-jar", "-Dtransports.netty.conf=/opt/conf/https/netty-transports.yml ", "ARTIFACT_NAME"]

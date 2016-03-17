@@ -1,0 +1,3 @@
+FROM wso2-appcloud/php:1.0.0-base 
+
+RUN git clone GIT_REPO_URL --branch GIT_REPO_BRANCH --single-branch "$WEB_ROOT/"

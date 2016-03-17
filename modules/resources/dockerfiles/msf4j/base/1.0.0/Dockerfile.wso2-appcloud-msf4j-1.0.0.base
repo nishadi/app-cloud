@@ -1,0 +1,14 @@
+FROM java:8-jre
+
+ENV MSF4J_HOME /srv/msf4j
+ENV PATH $MSF4J_HOME:$PATH
+ENV HTTPS_CONF /opt/conf/https/
+
+RUN mkdir -p "$MSF4J_HOME" \
+    && mkdir -p "HTTPS_CONF/"
+COPY wso2carbon.jks "$HTTPS_CONF"
+COPY netty-transports.yaml "$HTTPS_CONF" 
+
+WORKDIR $MSF4J_HOME
+
+EXPOSE 8080 8443
