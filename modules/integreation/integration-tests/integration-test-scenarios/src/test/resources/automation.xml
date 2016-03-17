@@ -300,7 +300,7 @@
         </defaultTenant>
 
         <application>
-            <applicationName>testapp017</applicationName>
+            <applicationName>intapp007</applicationName>
             <applicationType>war</applicationType>
             <applicationDescription>This is the test application</applicationDescription>
             <defaultRevision>1.0.0</defaultRevision>
@@ -322,6 +322,14 @@
                 <tag key="tag1">tagValue1</tag>
                 <tag key="tag2">tagValue2</tag>
             </tags>
+            <newProperties>
+                <property key="key3">value3</property>
+                <property key="key4">value4</property>
+            </newProperties>
+            <newTags>
+                <tag key="tag3">tagValue3</tag>
+                <tag key="tag4">tagValue4</tag>
+            </newTags>
         </application>
 
         <domainMapping>

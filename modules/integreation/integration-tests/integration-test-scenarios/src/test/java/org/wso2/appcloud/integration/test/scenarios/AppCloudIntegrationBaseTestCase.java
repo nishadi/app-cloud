@@ -1,7 +1,9 @@
 package org.wso2.appcloud.integration.test.scenarios;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.testng.annotations.AfterClass;
@@ -15,6 +17,7 @@ import org.wso2.carbon.automation.engine.annotations.SetEnvironment;
 import org.wso2.carbon.automation.test.utils.common.TestConfigurationProvider;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * Basic test case to implement things common to all app types.
@@ -22,6 +25,8 @@ import java.io.File;
 public abstract class AppCloudIntegrationBaseTestCase {
 
 	private static final Log log = LogFactory.getLog(AppCloudIntegrationBaseTestCase.class);
+	public static final String PARAM_NAME_KEY = "key";
+	public static final String PARAM_NAME_VALUE = "value";
 	protected String defaultAdmin;
 	protected String defaultAdminPassword;
 	protected String defaultAppName;
@@ -45,9 +50,9 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		this.applicationType = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_TYPE_KEY);
 		this.applicationRevision  = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_REVISION_KEY);
 		this.applicationDescription = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_DESC_KEY);
-		this.properties = AppCloudIntegrationTestUtils.getKeyValuePairAsJson(
+		this.properties = AppCloudIntegrationTestUtils.getKeyValuePairAsJsonFromConfig(
 				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_PROPERTIES_KEY));
-		this.tags = AppCloudIntegrationTestUtils.getKeyValuePairAsJson(
+		this.tags = AppCloudIntegrationTestUtils.getKeyValuePairAsJsonFromConfig(
 				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_TAGS_KEY));
 	}
 
@@ -93,14 +98,141 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		applicationClient.startApplicationRevision(applicationName, applicationRevision, versionHash);
 
 		//Wait until start application finished
-		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING, "Application start action");
+		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING,
+		                        "Application start action");
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing add runtime properties", dependsOnMethods = {"testStartApplication"})
+	public void testAddEnvironmentalVariables() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		Map<String, String> properties = AppCloudIntegrationTestUtils.getKeyValuePairsFromConfig(
+				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_NEW_PROPERTIES_KEY));
+		for (String key : properties.keySet()) {
+			applicationClient.addRuntimeProperty(versionHash, key, properties.get(key));
+		}
+		JSONArray jsonArray = applicationClient.getRuntimeProperties(versionHash);
+		int i = 0;
+		for (Object object : jsonArray) {
+			JSONObject jsonObject = (JSONObject)object;
+			if(properties.containsKey(jsonObject.getString(PARAM_NAME_KEY))){
+				i++;
+				Assert.assertEquals("Value of the property doesn't match.", properties.get(jsonObject.getString(PARAM_NAME_KEY)),
+				                    jsonObject.getString(PARAM_NAME_VALUE));
+			}
+		}
+		Assert.assertTrue("One or more Properties are not added.", i == properties.size());
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing update runtime properties", dependsOnMethods = {"testAddEnvironmentalVariables"})
+	public void testUpdateEnvironmentalVariables() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		JSONArray jsonArray = applicationClient.getRuntimeProperties(versionHash);
+		JSONObject jsonObject = (JSONObject)jsonArray.get(0);
+		String prevKey = jsonObject.getString(PARAM_NAME_KEY);
+		String newKey = RandomStringUtils.random(5, true, false);
+		String newValue = RandomStringUtils.random(6, true, false);
+		applicationClient.updateRuntimeProperty(versionHash, prevKey, newKey, newValue);
+		JSONArray updatedJSONArray = applicationClient.getRuntimeProperties(versionHash);
+		boolean containsNewKey = false;
+		for (Object object : updatedJSONArray) {
+			JSONObject jsonOBJ = (JSONObject)object;
+			if(newKey.equals(jsonOBJ.getString(PARAM_NAME_KEY))){
+				containsNewKey = true;
+				Assert.assertEquals("Value of the property doesn't match.", newValue, jsonOBJ.getString(PARAM_NAME_VALUE));
+			}
+		}
+		Assert.assertTrue("Property is not updated.", containsNewKey);
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing update runtime properties", dependsOnMethods = {"testUpdateEnvironmentalVariables"})
+	public void testDeleteEnvironmentalVariables() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		JSONArray jsonArray = applicationClient.getRuntimeProperties(versionHash);
+		JSONObject jsonObject = (JSONObject)jsonArray.get(0);
+		String key = jsonObject.getString(PARAM_NAME_KEY);
+		applicationClient.deleteRuntimeProperty(versionHash, key);
+		JSONArray updatedJSONArray = applicationClient.getRuntimeProperties(versionHash);
+		boolean containsKey = false;
+		for (Object object : updatedJSONArray) {
+			JSONObject jsonOBJ = (JSONObject)object;
+			if(key.equals(jsonOBJ.getString(PARAM_NAME_KEY))){
+				containsKey = true;
+			}
+		}
+		Assert.assertNotEquals("Property is not deleted.", containsKey);
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing add tags", dependsOnMethods = {"testDeleteEnvironmentalVariables"})
+	public void testAddTags() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		Map<String, String> properties = AppCloudIntegrationTestUtils.getKeyValuePairsFromConfig(
+				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_NEW_TAGS_KEY));
+		for (String key : properties.keySet()) {
+			applicationClient.addTag(versionHash, key, properties.get(key));
+		}
+		JSONArray jsonArray = applicationClient.getTags(versionHash);
+		int i = 0;
+		for (Object object : jsonArray) {
+			JSONObject jsonObject = (JSONObject)object;
+			if(properties.containsKey(jsonObject.getString(PARAM_NAME_KEY))){
+				i++;
+				Assert.assertEquals("Value of the property doesn't match.", properties.get(jsonObject.getString(PARAM_NAME_KEY)),
+				                    jsonObject.getString(PARAM_NAME_VALUE));
+			}
+		}
+		Assert.assertTrue("One or more Properties are not added.", i == properties.size());
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing update tags", dependsOnMethods = {"testAddTags"})
+	public void testUpdateTags() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		JSONArray jsonArray = applicationClient.getTags(versionHash);
+		JSONObject jsonObject = (JSONObject)jsonArray.get(0);
+		String prevKey = jsonObject.getString(PARAM_NAME_KEY);
+		String newKey = RandomStringUtils.random(5, true, false);
+		String newValue = RandomStringUtils.random(6, true, false);
+		applicationClient.updateTag(versionHash, prevKey, newKey, newValue);
+		JSONArray updatedJSONArray = applicationClient.getTags(versionHash);
+		boolean containsNewKey = false;
+		for (Object object : updatedJSONArray) {
+			JSONObject jsonOBJ = (JSONObject)object;
+			if(newKey.equals(jsonOBJ.getString(PARAM_NAME_KEY))){
+				containsNewKey = true;
+				Assert.assertEquals("Value of the property doesn't match.", newValue, jsonOBJ.getString(PARAM_NAME_VALUE));
+			}
+		}
+		Assert.assertTrue("Property is not updated.", containsNewKey);
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing update tags", dependsOnMethods = {"testUpdateTags"})
+	public void testDeleteTags() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		JSONArray jsonArray = applicationClient.getTags(versionHash);
+		JSONObject jsonObject = (JSONObject)jsonArray.get(0);
+		String key = jsonObject.getString(PARAM_NAME_KEY);
+		applicationClient.deleteTag(versionHash, key);
+		JSONArray updatedJSONArray = applicationClient.getTags(versionHash);
+		boolean containsKey = false;
+		for (Object object : updatedJSONArray) {
+			JSONObject jsonOBJ = (JSONObject)object;
+			if(key.equals(jsonOBJ.getString(PARAM_NAME_KEY))){
+				containsKey = true;
+			}
+		}
+		Assert.assertNotEquals("Property is not deleted.", containsKey);
 	}
 
 
 	@AfterClass(alwaysRun = true)
 	public void cleanEnvironment() throws Exception {
-		String applicationName = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_NAME_KEY);
-		boolean isDeleted = applicationClient.deleteApplication(applicationName);
+		String applicationHash = applicationClient.getApplicationHash(applicationName);
+		boolean isDeleted = applicationClient.deleteApplication(applicationHash);
 		Assert.assertEquals("Application deletion failed", isDeleted, true);
 	}
 
