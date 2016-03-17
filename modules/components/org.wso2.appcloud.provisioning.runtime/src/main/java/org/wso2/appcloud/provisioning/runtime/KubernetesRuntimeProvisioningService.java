@@ -847,80 +847,67 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
     }
 
     /**
-     * Delete deployment
+     * Delete deployment wich are associated with all k8s kinds
      *
-     * @return false if one of the objects deletion is fail
+     * @return true if deleted all kinds from K8s
      */
     @Override
     public boolean deleteDeployment() {
-        boolean deleted = true;
+        //If it is not deleted one object successfully, continue deleting others.
+        boolean deleteCompleted = true;
+        try {
+            deleteK8sKind(KubernetesPovisioningConstants.KIND_REPLICATION_CONTROLLER);
+            deleteK8sKind(KubernetesPovisioningConstants.KIND_DEPLOYMENT);
+            deleteK8sKind(KubernetesPovisioningConstants.KIND_POD);
+            deleteK8sKind(KubernetesPovisioningConstants.KIND_INGRESS);
+            deleteK8sKind(KubernetesPovisioningConstants.KIND_SECRETS);
+            deleteK8sKind(KubernetesPovisioningConstants.KIND_SERVICE);
+        } catch (RuntimeProvisioningException e) {
+            String message = "Error while deleting kubernetes kind and continue deleting others";
+            log.warn(message, e);
+            deleteCompleted = false;
+        }
+
+        return deleteCompleted;
+    }
+
+    /**
+     * Delete K8s object for given kind with labels
+     *
+     * @param k8sKind k8s object type
+     */
+    public void deleteK8sKind(String k8sKind) throws RuntimeProvisioningException {
         KubernetesClient kubernetesClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
         String namespace = this.namespace.getMetadata().getName();
-
-        //If it is not deleted one object successfully, continue deleting others.
-        try {
-            kubernetesClient.extensions().deployments().inNamespace(namespace).withLabels(
-                    KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
-        } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes deployment : "
-                    + " and continue deleting replication controller";
-            log.warn(message, e);
-            deleted = false;
-        }
-
-        //Replication controller will be deleted with related pods
-        try {
-            kubernetesClient.replicationControllers().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
-        } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes replication controller in deployment"
-                    + " and continue deleting services";
-            log.warn(message, e);
-            deleted = false;
-
-        }
-
-        //Service will be deleted from the K8
-        try {
-            kubernetesClient.services().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
-        } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes services in deployment"
-                    + " and continue deleting ingress";
-            log.warn(message, e);
-            deleted = false;
-        }
-
-        //Ingress will be deleted from the K8
-        try {
-            kubernetesClient.extensions().ingress().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
-        } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes ingress in deployment"
-                    + " and continue deleting secrets";
-            log.warn(message, e);
-            deleted = false;
-        }
-
-        //Secrete will be deleted from the K8
-        try {
-            kubernetesClient.secrets().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
-        } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes secrets in deployment";
-            log.warn(message, e);
-            deleted = false;
-        }
+        Map<String, String> labels = KubernetesProvisioningUtils.getLableMap(applicationContext);
 
         try {
-            kubernetesClient.pods().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+            switch (k8sKind) {
+            case KubernetesPovisioningConstants.KIND_REPLICATION_CONTROLLER:
+                kubernetesClient.replicationControllers().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            case KubernetesPovisioningConstants.KIND_DEPLOYMENT:
+                kubernetesClient.extensions().deployments().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            case KubernetesPovisioningConstants.KIND_POD:
+                kubernetesClient.pods().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            case KubernetesPovisioningConstants.KIND_INGRESS:
+                kubernetesClient.extensions().ingress().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            case KubernetesPovisioningConstants.KIND_SECRETS:
+                kubernetesClient.secrets().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            case KubernetesPovisioningConstants.KIND_SERVICE:
+                kubernetesClient.services().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            default:
+                String message = "The given kubernetes kind : " + k8sKind + " is not supported";
+                throw new IllegalArgumentException(message);
+            }
         } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes pods in deployment";
-            log.warn(message, e);
-            deleted = false;
+            String message = "Error while deleting kubernetes kind : " + k8sKind + " from deployment";
+            throw new RuntimeProvisioningException(message, e);
         }
-
-        return deleted;
     }
 }
