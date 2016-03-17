@@ -74,7 +74,7 @@ public class DockerOpClient {
                                  String dockerTemplateFilePath)
             throws IOException, AppCloudException {
 
-        String dockerFileTemplatePath = DockerUtil.getDockerFileTemplatePath(runtimeId, dockerTemplateFilePath);
+        String dockerFileTemplatePath = DockerUtil.getDockerFileTemplatePath(runtimeId, dockerTemplateFilePath, "default");
         String artifactNameWithoutExtension = artifactName.substring(0, artifactName.lastIndexOf("."));
         List<String> dockerFileConfigs = new ArrayList<String>();
         for(String line: FileUtils.readLines(new File(dockerFileTemplatePath))) {
@@ -93,7 +93,7 @@ public class DockerOpClient {
                                           String dockerFilePath, String dockerGitHubTemplateFilePath)
             throws IOException, AppCloudException {
 
-        String dockerFileTemplatePath = DockerUtil.getDockerFileTemplatePath(runtimeId, dockerGitHubTemplateFilePath);
+        String dockerFileTemplatePath = DockerUtil.getDockerFileTemplatePath(runtimeId, dockerGitHubTemplateFilePath, "github");
         List<String> dockerFileConfigs = new ArrayList<String>();
         for (String line : FileUtils.readLines(new File(dockerFileTemplatePath))) {
             if (line.contains("GIT_REPO_URL")) {
