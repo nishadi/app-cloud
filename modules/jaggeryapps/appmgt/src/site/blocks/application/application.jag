@@ -80,7 +80,7 @@ var log = new Log();
         var versionKey = request.getParameter("versionKey");
 
         // delete application from kubernetes
-        applicationModule.deleteApplicationFromKubernetes(applicationName, applicationRevision);
+        applicationModule.deleteApplicationFromKubernetes(versionKey);
         // update application status to stopped
         applicationModule.updateApplicationStatus(versionKey, APPLICATION_STOPPED);
 
@@ -110,7 +110,7 @@ var log = new Log();
     }else if (action == "getApplication"){
         var applicationName = request.getParameter("applicationName");
         var mod = jagg.module("application");
-        var applicationHashId = mod.getApplicationHashId(applicationName);
+        var applicationHashId = mod.getApplicationHashIdByName(applicationName);
         var application = mod.getApplication(applicationHashId);
         print(application);
     }else if (action == "getEnvVariablesOfVersion"){

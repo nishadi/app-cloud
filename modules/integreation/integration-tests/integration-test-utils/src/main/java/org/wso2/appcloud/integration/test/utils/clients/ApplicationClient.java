@@ -30,6 +30,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestConstants;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestException;
@@ -49,11 +50,17 @@ public class ApplicationClient extends BaseClient{
 	protected static final String START_APPLICATION_ACTION = "startApplication";
 	protected static final String GET_APPLICATION_ACTION = "getApplication";
 	protected static final String GET_VERSION_HASH_ACTION = "getVersionHashId";
+	protected static final String GET_APPLICATION_HASH_ACTION = "getApplicationHashIdByName";
 	protected static final String GET_ENV_VAR_ACTION = "getEnvVariablesOfVersion";
 	protected static final String ADD_ENV_VAR_ACTION = "addRuntimeProperty";
 	protected static final String UPDATE_ENV_VAR_ACTION = "updateRuntimeProperty";
 	protected static final String DELETE_ENV_VAR_ACTION = "deleteRuntimeProperty";
+	protected static final String GET_TAG_ACTION = "getTags";
+	protected static final String ADD_TAG_ACTION = "addTag";
+	protected static final String UPDATE_TAG_ACTION = "updateTag";
+	protected static final String DELETE_TAG_ACTION = "deleteTag";
 	protected static final String PARAM_NAME_APPLICATION_NAME = "applicationName";
+	protected static final String PARAM_NAME_APPLICATION_HASH_ID = "applicationKey";
 	protected static final String PARAM_NAME_APPLICATION_DESCRIPTION = "applicationDescription";
 	protected static final String PARAM_NAME_RUNTIME = "runtime";
 	protected static final String PARAM_NAME_APP_TYPE_NAME = "appTypeName";
@@ -62,6 +69,11 @@ public class ApplicationClient extends BaseClient{
 	protected static final String PARAM_NAME_PROPERTIES = "runtimeProperties";
 	protected static final String PARAM_NAME_TAGS = "tags";
 	protected static final String PARAM_NAME_VERSION_KEY = "versionKey";
+	protected static final String PARAM_NAME_KEY = "key";
+	protected static final String PARAM_NAME_PREVIOUS_KEY = "prevKey";
+	protected static final String PARAM_NAME_NEW_KEY = "newKey";
+	protected static final String PARAM_NAME_VALUE = "value";
+	protected static final String PARAM_NAME_NEW_VALUE = "newValue";
 	public static final String PARAM_NAME_IS_FILE_ATTACHED = "isFileAttached";
 	public static final String PARAM_NAME_FILE_UPLOAD = "fileupload";
 
@@ -146,11 +158,11 @@ public class ApplicationClient extends BaseClient{
 		}
 	}
 
-	public boolean deleteApplication(String applicationName) throws Exception {
+	public boolean deleteApplication(String applicationHashId) throws Exception {
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + DELETE_APPLICATION_ACTION + PARAM_SEPARATOR
-				+ PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName
+				+ PARAM_NAME_APPLICATION_HASH_ID + PARAM_EQUALIZER + applicationHashId
 				, getRequestHeaders());
 		if (response.getResponseCode() == HttpStatus.SC_OK && response.getData().equals("true")) {
 			return true;
@@ -170,7 +182,20 @@ public class ApplicationClient extends BaseClient{
 			JSONObject jsonObject = new JSONObject(response.getData());
 			return jsonObject;
 		} else {
-			throw new AppCloudIntegrationTestException("Get Application Events failed " + response.getData());
+			throw new AppCloudIntegrationTestException("Get Application Bean failed " + response.getData());
+		}
+	}
+
+	public String getApplicationHash(String applicationName) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + GET_APPLICATION_HASH_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName + PARAM_SEPARATOR
+				, getRequestHeaders());
+		if (response.getResponseCode() == HttpStatus.SC_OK) {
+			return response.getData();
+		} else {
+			throw new AppCloudIntegrationTestException("Get Application Hash value failed " + response.getData());
 		}
 	}
 
@@ -184,7 +209,117 @@ public class ApplicationClient extends BaseClient{
 		if (response.getResponseCode() == HttpStatus.SC_OK) {
 			return response.getData();
 		} else {
-			throw new AppCloudIntegrationTestException("Get Application Events failed " + response.getData());
+			throw new AppCloudIntegrationTestException("Get Application Version Hash value failed " + response.getData());
+		}
+	}
+
+	public String addRuntimeProperty(String versionKey, String key, String value) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + ADD_ENV_VAR_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				+ PARAM_NAME_KEY + PARAM_EQUALIZER + key + PARAM_SEPARATOR
+				+ PARAM_NAME_VALUE + PARAM_EQUALIZER + value
+				, getRequestHeaders());
+		if (response.getResponseCode() == HttpStatus.SC_OK) {
+			return response.getData();
+		} else {
+			throw new AppCloudIntegrationTestException("Add Application Runtime Property failed " + response.getData());
+		}
+	}
+
+	public JSONArray getRuntimeProperties(String versionKey) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + GET_ENV_VAR_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				, getRequestHeaders());
+		if (response.getResponseCode() == HttpStatus.SC_OK) {
+			JSONArray jsonArray = new JSONArray(response.getData());
+			return jsonArray;
+		} else {
+			throw new AppCloudIntegrationTestException("Get Application Runtime Properties failed " + response.getData());
+		}
+	}
+
+	public void updateRuntimeProperty(String versionKey, String previousKey, String newKey, String newValue) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + UPDATE_ENV_VAR_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				+ PARAM_NAME_PREVIOUS_KEY + PARAM_EQUALIZER + previousKey + PARAM_SEPARATOR
+				+ PARAM_NAME_NEW_KEY + PARAM_EQUALIZER + newKey + PARAM_SEPARATOR
+				+ PARAM_NAME_NEW_VALUE + PARAM_EQUALIZER + newValue + PARAM_SEPARATOR
+				, getRequestHeaders());
+		if (response.getResponseCode() != HttpStatus.SC_OK) {
+			throw new AppCloudIntegrationTestException("Get Application Runtime Properties failed " + response.getData());
+		}
+	}
+
+	public void deleteRuntimeProperty(String versionKey, String key) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + DELETE_ENV_VAR_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				+ PARAM_NAME_KEY + PARAM_EQUALIZER + key + PARAM_SEPARATOR
+				, getRequestHeaders());
+		if (response.getResponseCode() != HttpStatus.SC_OK) {
+			throw new AppCloudIntegrationTestException("Delete Application Runtime Properties failed " + response.getData());
+		}
+	}
+
+	public String addTag(String versionKey, String key, String value) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + ADD_TAG_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				+ PARAM_NAME_KEY + PARAM_EQUALIZER + key + PARAM_SEPARATOR
+				+ PARAM_NAME_VALUE + PARAM_EQUALIZER + value
+				, getRequestHeaders());
+		if (response.getResponseCode() == HttpStatus.SC_OK) {
+			return response.getData();
+		} else {
+			throw new AppCloudIntegrationTestException("Add Application Runtime Property failed " + response.getData());
+		}
+	}
+
+	public JSONArray getTags(String versionKey) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + GET_TAG_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				, getRequestHeaders());
+		if (response.getResponseCode() == HttpStatus.SC_OK) {
+			JSONArray jsonArray = new JSONArray(response.getData());
+			return jsonArray;
+		} else {
+			throw new AppCloudIntegrationTestException("Get Application Runtime Properties failed " + response.getData());
+		}
+	}
+
+	public void updateTag(String versionKey, String previousKey, String newKey, String newValue) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + UPDATE_TAG_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				+ PARAM_NAME_PREVIOUS_KEY + PARAM_EQUALIZER + previousKey + PARAM_SEPARATOR
+				+ PARAM_NAME_NEW_KEY + PARAM_EQUALIZER + newKey + PARAM_SEPARATOR
+				+ PARAM_NAME_NEW_VALUE + PARAM_EQUALIZER + newValue + PARAM_SEPARATOR
+				, getRequestHeaders());
+		if (response.getResponseCode() != HttpStatus.SC_OK) {
+			throw new AppCloudIntegrationTestException("Get Application Runtime Properties failed " + response.getData());
+		}
+	}
+
+	public void deleteTag(String versionKey, String key) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + DELETE_TAG_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				+ PARAM_NAME_KEY + PARAM_EQUALIZER + key + PARAM_SEPARATOR
+				, getRequestHeaders());
+		if (response.getResponseCode() != HttpStatus.SC_OK) {
+			throw new AppCloudIntegrationTestException("Delete Application Runtime Properties failed " + response.getData());
 		}
 	}
 
