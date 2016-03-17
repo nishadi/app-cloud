@@ -1242,7 +1242,7 @@ var getIngressPort = function(serviceName){
     }else if(serviceName == "https" || serviceName == "https-alt"){
         return 443;
     } else{
-        return 80;
+        return 443;
     }
 };
 
