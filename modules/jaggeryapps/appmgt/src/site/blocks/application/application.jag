@@ -22,6 +22,7 @@ include('/jagg/constants.jag');
 
 var action = request.getParameter("action");
 var applicationModule = jagg.module("application");
+var gitHubAppModule = jagg.module("application/git");
 var log = new Log();
 (function(){
     if (!jagg.getUser()) {
@@ -65,9 +66,10 @@ var log = new Log();
         }else{
             var gitRepoUrl = request.getParameter("gitRepoUrl");
             var gitRepoBranch = request.getParameter("gitRepoBranch");
-            applicationModule.addApplicationViaGitHub(applicationName, applicationRevision, applicationDescription, replicas,
+            var token = request.getParameter("token");
+            gitHubAppModule.addApplicationViaGitHub(applicationName, applicationRevision, applicationDescription, replicas,
                                              runtimeId, appTypeName, runtimeProperties, tags, appIcon, gitRepoUrl,
-                                             gitRepoBranch);
+                                             gitRepoBranch, token);
         }
         response.status = 200;
         response.message = "Application creation is successfully submitted";

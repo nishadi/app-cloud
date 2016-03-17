@@ -139,7 +139,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 var tags = getProperties("tags-pane");
                 var formData = new FormData($(this)[0]);
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
-                formData.append('tags', JSON.stringify(tags));
                 formData.append('action', 'createApplication');
                 formData.append('isNewVersion', '<%=newVersion%>');
                 formData.append('appTypeName', appTypeName);
@@ -158,7 +157,15 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 } else if (uploadMethod === "github" ) {
                     formData.append('gitRepoUrl', $("#gitRepoUrl").val());
                     formData.append('gitRepoBranch', $("#gitRepoBranch").val());
+                    formData.append('token', $("#token").val());
+
+                    // Add github url as a tag
+                    var property = {};
+                    property["key"] = "gitRepoUrl";
+                    property["value"] = $("#gitRepoUrl").val();
+                    tags.push(property);
                 }
+                formData.append('tags', JSON.stringify(tags));
                 $.ajax({
                         url: $(this).attr("action"),
                         type: 'POST',
@@ -801,12 +808,18 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             <div class="form-group" id="github-block">
                 <div class="input-group">
-                <label for="runtime">URL:
+                     <span class="input-group-addon">URL</span>
                     <input id="gitRepoUrl" name="gitRepoUrl" type="text" class="form-control" placeholder="Enter GitHub Repository URL" />
-                </label>
-                <label for="runtime">Branch:
+                </div>
+                <br/>
+                <div class="input-group">
+                    <span class="input-group-addon">Branch</span>
                     <input id="gitRepoBranch" name="gitRepoBranch" type="text" class="form-control" placeholder="Enter GitHub Repository branch" />
-                </label>
+                </div>
+                <br/>
+                <div class="input-group">
+                    <span class="input-group-addon">Token</span>
+                    <input id="token" name="token" type="text" class="form-control" placeholder="Enter Personal access token" />
                 </div>
             </div>
 
