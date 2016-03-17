@@ -18,6 +18,7 @@
  */
 
 include('/jagg/constants.jag');
+include("/jagg/jagg.jag");
 
 jagg.block("home", {
     initialize:function (data) {
@@ -31,7 +32,9 @@ jagg.block("home", {
     getOutputs:function (inputs) {
         var log = new Log();
         var applicationModule = jagg.module("application");
-        var appTypesProperties = require(APP_TYPES_PROPERTIES_CONFIG);
+        var appTypePropertyConfPath = jagg.getAppTypePropertyConfPath();
+        var parsedObject = parse(appTypePropertyConfPath);
+        var appTypesProperties = require(parsedObject);
         var application = applicationModule.getApplication(inputs.applicationKey);
         application["appTypeIcon"] = appTypesProperties[application.applicationType].icon;
 

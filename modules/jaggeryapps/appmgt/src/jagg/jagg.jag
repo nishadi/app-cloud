@@ -16,7 +16,7 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
-//include('/jagg/constants.jag');
+include('/jagg/constants.jag');
 var site = require("/site/conf/site.json");
 
 //TODO : remove this when log configs are implemented
@@ -68,6 +68,12 @@ var jagg = jagg || (function () {
         session.put("logged.user", user);
     };
 
+    var getAppTypePropertyConfPath = function () {
+        var fileNameUtils = Packages.org.apache.commons.io.FilenameUtils;
+        var appTypePropertyConfPath = fileNameUtils.normalize(APP_TYPES_PROPERTIES_CONFIG);
+        var stringfiedObject = stringify(appTypePropertyConfPath);
+        return stringfiedObject;
+    };
 
 var getThemeFile = function (path) {
         var p, index, theme = getUserTheme();
@@ -588,7 +594,8 @@ return getThemePath() + path;
         addFooterCode:addFooterCode,
         includeJag:includeJag,
         getUserTheme:getUserTheme,
-        getThemeFile:getThemeFile
+        getThemeFile:getThemeFile,
+        getApptypePropertyConfPath:getApptypePropertyConfPath
     };
 
 }());

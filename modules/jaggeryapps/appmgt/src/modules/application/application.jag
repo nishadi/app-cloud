@@ -684,7 +684,9 @@ var getAllApplications = function(){
     var applicationArray = [];
     try {
         var applications = ApplicationManager.getApplicationList();
-        var appTypesProperties = require(APP_TYPES_PROPERTIES_CONFIG);
+        var appTypePropertyConfPath = jagg.getAppTypePropertyConfPath();
+        var parsedObject = parse(appTypePropertyConfPath);
+        var appTypesProperties = require(parsedObject);
 
         for (var i = 0; i < applications.length; i++) {
             var application = applications[i];
