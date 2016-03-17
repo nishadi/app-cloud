@@ -567,6 +567,94 @@ public class ApplicationDAO {
         return versionList;
     }
 
+
+    public List<String> getAllVersionHashIdsOfApplication(Connection dbConnection, String applicationHashId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+        ArrayList<String> hashIdList = new ArrayList<>();
+        ResultSet resultSet = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_VERSION_HASH_IDS_OF_APPLICATION);
+            preparedStatement.setString(1, applicationHashId);
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                hashIdList.add(resultSet.getString(SQLQueryConstants.HASH_ID));
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while getting the list of version hash ids of application : " + applicationHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+
+        return hashIdList;
+    }
+
+
+    public boolean isSingleVersion(Connection dbConnection, String versionHashId) throws AppCloudException {
+
+        PreparedStatement preparedStatement;
+        ResultSet resultSet = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_VERSION_HASH_IDS_OF_APPLICATION_BY_VERSION_HASH_ID);
+            preparedStatement.setString(1, versionHashId);
+
+            resultSet = preparedStatement.executeQuery();
+            resultSet.last();
+
+            if(resultSet.getRow() > 1){
+                return false;
+            } else {
+                return true;
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving the data for checking whether an application has multiple versions";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public String getApplicationHashIdByVersionHashId(Connection dbConnection, String versionHashId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String applicatinHashId = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_APPLICATION_HASH_ID_BY_VERSION_HASH_ID);
+            preparedStatement.setString(1, versionHashId);
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                applicatinHashId = resultSet.getString(SQLQueryConstants.HASH_ID);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while getting application hash id by version hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        return applicatinHashId;
+    }
+
+
     public String getApplicationNameByHashId(Connection dbConnection, String applicationHashId)
             throws AppCloudException {
         PreparedStatement preparedStatement;
@@ -1250,6 +1338,27 @@ public class ApplicationDAO {
             DBUtil.closePreparedStatement(preparedStatement);
         }
         return deleted;
+    }
+
+    public void deleteAllDeploymentOfApplication(Connection dbConnection, String applicationHashId)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_ALL_DEPLOYMENT_OF_APPLICATION);
+            preparedStatement.setString(1, applicationHashId);
+
+            preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg = "Error while deleting all deployment of application with hash id : " + applicationHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+
     }
 
 

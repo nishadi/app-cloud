@@ -5,7 +5,7 @@ $(document).ready(function() {
         submitChangeAppIcon(this);
     });
     initPageView();
-    var nextVersion = generateNextPossibleVersion(applicationRevisions);
+    var nextVersion = generateNextPossibleVersion(application.versions);
     var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+application.applicationType +
                         "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
                         + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;
@@ -200,8 +200,7 @@ function deleteApplication(){
 
     jagg.post("../blocks/application/application.jag", {
         action:"deleteVersion",
-        applicationName:$("#applicationName").val(),
-        applicationVersion:selectedRevision
+        versionKey:selectedApplicationRevision.hashId
     },function (result) {
         jagg.message({content: "Selected version deleted successfully", type: 'success', id:'view_log'});
         setTimeout(redirectAppListing, 2000);

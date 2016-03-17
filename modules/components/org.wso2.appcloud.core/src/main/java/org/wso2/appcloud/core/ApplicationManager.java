@@ -71,6 +71,37 @@ public class ApplicationManager {
     }
 
     /**
+     * Method for adding application version
+     *
+     * @param version version object
+     * @throws AppCloudException
+     */
+    public static void addApplicationVersion(Version version, String applicationHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        try {
+            int applicationId = applicationDAO.getApplicationId(dbConnection, applicationHashId);
+            applicationDAO.addVersion(dbConnection, version,"",applicationId, tenantId);
+            dbConnection.commit();
+        } catch (AppCloudException e){
+            String msg = "Error occurred while adding application version to the database for application id : " +
+                          applicationHashId + ", version:"+ version.getVersionName()+" in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error while committing the application version adding transaction for application id : " +
+                    applicationHashId + ", version:"+ version.getVersionName()+" in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+
+    }
+
+    /**
      * Method for adding runtime properties for a specific version
      *
      * @param runtimeProperties list of runtime properties
@@ -166,6 +197,40 @@ public class ApplicationManager {
         } catch (AppCloudException e){
             String msg = "Error while getting list of version of application with the hash id : " + applicationHashId;
             throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static List<String> getVersionHashIdsOfApplication(String applicationHashId) throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            return applicationDAO.getAllVersionHashIdsOfApplication(dbConnection, applicationHashId);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static boolean isSingleVersion(String versionHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            return applicationDAO.isSingleVersion(dbConnection, versionHashId);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static String getApplicationHashIdByVersionHashId(String versionHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            return applicationDAO.getApplicationHashIdByVersionHashId(dbConnection, versionHashId);
         } finally {
             DBUtil.closeConnection(dbConnection);
         }
@@ -450,8 +515,8 @@ public class ApplicationManager {
         Connection dbConnection = DBUtil.getDBConnection();
 
         try {
+            applicationDAO.deleteAllDeploymentOfApplication(dbConnection, applicationHashId);
             applicationDAO.deleteApplication(dbConnection, applicationHashId);
-            applicationDAO.deleteAllVersionsOfApplication(dbConnection, applicationHashId);
             dbConnection.commit();
         } catch (SQLException e) {
             String msg = "Error while deleting application with hash id : " + applicationHashId;
@@ -467,6 +532,7 @@ public class ApplicationManager {
         Connection dbConnection = DBUtil.getDBConnection();
 
         try {
+            applicationDAO.deleteDeployment(dbConnection, versionHashId);
             applicationDAO.deleteVersion(dbConnection, versionHashId);
             dbConnection.commit();
         }  catch (SQLException e) {

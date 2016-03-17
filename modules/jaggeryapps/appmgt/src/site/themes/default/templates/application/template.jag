@@ -124,7 +124,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
 
                  jagg.post("../blocks/application/application.jag", {
-                    action:"getApplicationHashId",
+                    action:"generateApplicationHashId",
                     applicationName:$("#applicationName").val()
                 },function (result) {
                     applicationHashId = result;
@@ -141,6 +141,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 formData.append('runtimeProperties', JSON.stringify(runtimeProperties));
                 formData.append('tags', JSON.stringify(tags));
                 formData.append('action', 'createApplication');
+                formData.append('isNewVersion', '<%=newVersion%>');
                 formData.append('appTypeName', appTypeName);
                 formData.append('applicationName', $("#applicationName").val());
                 var optionRuntime = $("#runtime option:selected").val();

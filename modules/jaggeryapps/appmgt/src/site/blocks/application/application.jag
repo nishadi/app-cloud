@@ -41,6 +41,10 @@ var log = new Log();
         var applicationDescription = request.getParameter("applicationDescription");
         var replicas = 1;
         var runtimeId = request.getParameter("runtime");
+        var isNewVersion = request.getParameter("isNewVersion");
+        if(isNewVersion == null) {
+            isNewVersion = false;
+        }        
         var runtimeProperties = parse(request.getParameter("runtimeProperties"));
         var tags = parse(request.getParameter("tags"));
         var applicationName = request.getParameter("applicationName");
@@ -57,7 +61,7 @@ var log = new Log();
         if(uploadedFileName) {
             applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
                                              runtimeId, appTypeName, runtimeProperties, tags, appIcon,
-                                             uploadedFileName);
+                                             uploadedFileName, isNewVersion);
         }else{
             var gitRepoUrl = request.getParameter("gitRepoUrl");
             var gitRepoBranch = request.getParameter("gitRepoBranch");
@@ -197,10 +201,10 @@ var log = new Log();
         mod.changeApplicationIcon(applicationKey, appIcon);
         print("<html><script>window.location.replace('/appmgt/site/pages/home.jag?applicationKey=" + applicationKey + "');</script><body></body></html>");
 
-    } else if (action == "getApplicationHashId"){
+    } else if (action == "generateApplicationHashId"){
         var applicationName = request.getParameter("applicationName");
         var mod = jagg.module("application");
-        print(mod.getApplicationHashId(applicationName));
+        print(mod.generateApplicationHashId(applicationName));
 
     } else if (action == "getVersionHashId"){
         var applicationName = request.getParameter("applicationName");
@@ -220,17 +224,16 @@ var log = new Log();
         var applicationHashId = mod.getApplicationHashIdByName(applicationName);
         print(applicationHashId);
     } else if (action == "deleteVersion"){
-        var applicationName = request.getParameter("applicationName");
-        var applicationVersion = request.getParameter("applicationVersion");
+        var versionKey = request.getParameter("versionKey");
         var mod = jagg.module("application");
 
         try {
-            mod.deleteApplicationUploadedPath(applicationName, applicationVersion);
-            mod.deleteApplicationFromDatabase(applicationName, applicationVersion);
-            mod.deleteApplicationFromKubernetes(applicationName, applicationVersion);
+            mod.deleteApplicationUploadedPath(versionKey);
+            mod.deleteVersionFromDatabase(versionKey);
+            mod.deleteApplicationFromKubernetes(versionKey);
             print(true);
         } catch (e) {
-            var msg = "Error while deleting application: " + applicationName + ":" + applicationVersion;
+            var msg = "Error while deleting application version with the hash id : " + versionKey;
             log.error(msg);
             log.error(e);
             response.status = 500;
@@ -238,13 +241,13 @@ var log = new Log();
         }
 
     } else if (action == "deleteApplication"){
-             var applicationName = request.getParameter("applicationName");
+             var applicationKey = request.getParameter("applicationKey");
              var mod = jagg.module("application");
              try {
-                mod.deleteApplication(applicationName);
+                mod.deleteApplication(applicationKey);
                 print(true);
              } catch (e) {
-                 var msg = "Error while deleting application: " + applicationName;
+                 var msg = "Error while deleting application with hash id : " + applicationKey;
                  log.error(msg);
                  log.error(e);
                  response.status = 500;
