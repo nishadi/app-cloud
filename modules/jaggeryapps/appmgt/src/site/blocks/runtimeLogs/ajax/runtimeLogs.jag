@@ -27,11 +27,10 @@ include("/jagg/constants.jag");
 
     var log = new Log();
 
-    /*if (!jagg.getUser()) {
+    if (!jagg.getUser()) {
         print(UNAUTHORIZED_ERROR_RESPONSE);
         return;
-    }*/
-
+    }
     if (action == "getSnapshotLogs") {
 
         var applicationKey = request.getParameter("applicationKey");

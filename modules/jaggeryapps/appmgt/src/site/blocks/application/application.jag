@@ -46,8 +46,19 @@ var log = new Log();
         if(isNewVersion == null) {
             isNewVersion = false;
         }        
-        var runtimeProperties = parse(request.getParameter("runtimeProperties"));
-        var tags = parse(request.getParameter("tags"));
+
+        var unparsedRuntimeProps = request.getParameter("runtimeProperties");
+        var runtimeProperties = [];
+        if(unparsedRuntimeProps){
+            runtimeProperties = parse(unparsedRuntimeProps);
+        }
+
+        var unparsedTags = request.getParameter("tags");
+        var tags = [];
+        if(unparsedTags){
+            tags = parse(unparsedTags);
+        }
+
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
         var appTypeName = request.getParameter("appTypeName");
