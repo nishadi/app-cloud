@@ -267,9 +267,7 @@ var createDockerFileForGitHub =  function(applicationName, versionName, runtimeI
     var absFileUploadedPath;
 
     try {
-
-        var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                     + modManager.getTenantDomain() + "/" + applicationName + "/" + versionName + "/";
+        var fileUploadPath = constructFileUploadPath(applicationName, versionName);
         var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
         var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
 
@@ -311,9 +309,7 @@ var createDockerFile =  function(applicationName, versionName, runtimeId, upload
     var absFileUploadedPath;
 
     try {
-
-        var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                     + modManager.getTenantDomain() + "/" + applicationName + "/" + versionName + "/";
+        var fileUploadPath = constructFileUploadPath(applicationName, versionName);
         var absFileUploadedPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + fileUploadPath;
         var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
 
@@ -1068,8 +1064,7 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
     createDestinationDirsForUploadedApps(applicationName, revision);
     var file = Packages.java.io.File;
     uploadedFileName = uploadedArtifact.getName();
-    var fileUploadPath = file.separator + TMP_UPLOADED_APPLICATIONS_PATH + file.separator
-                                 + modManager.getTenantDomain() + file.separator + applicationName + file.separator + revision + file.separator;
+    var fileUploadPath = constructFileUploadPath(applicationName, revision);
 
     var uploadApplicationTmpPath;
     var checkFileExtZIP = isFileExtZIP(uploadedFileName);
@@ -1095,34 +1090,20 @@ var isFileExtZIP = function(uploadedFileName){
 };
 
 var createDestinationDirsForUploadedApps = function (applicationName, revision) {
-
-    var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH);
-    if (!destinationDir.isExists()) {
-        destinationDir.mkdir();
-    }
-    var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH + "/" + modManager.getTenantDomain());
-    if (!destinationDir.isExists()) {
-        destinationDir.mkdir();
-
-    }
-    var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                          + modManager.getTenantDomain() + "/" + applicationName);
-    if (!destinationDir.isExists()) {
-        destinationDir.mkdir();
-
-    }
-    var destinationDir = new File("/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                          + modManager.getTenantDomain() + "/" + applicationName + "/" + revision);
-    if (!destinationDir.isExists()) {
-        destinationDir.mkdir();
+    var absFileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + constructFileUploadPath(applicationName, revision);
+    var file = new Packages.java.io.File(absFileUploadPath);
+    if (!file.exists()) {
+        var isDirCreated = file.mkdirs();
+        if (!isDirCreated) {
+            log.error("Error while creating the directory : " + absFileUploadPath);
+        }
     }
 };
 
 var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
     log.info("Inside modules downloadFromUrl");
     createDestinationDirsForUploadedApps(applicationName, revision);
-    var fileUploadPath = "/" + TMP_UPLOADED_APPLICATIONS_PATH + "/"
-                                 + modManager.getTenantDomain() + "/" + applicationName + "/" + revision + "/";
+    var fileUploadPath = constructFileUploadPath(applicationName, revision);
     var CARBON_HOME = CarbonUtils.getCarbonHome();
     var filePath = CARBON_HOME + "/repository/deployment/server/jaggeryapps/appmgt";
 
@@ -1154,9 +1135,7 @@ var addEvent = function(name, status, description, versionHashId) {
 };
 
 var deleteApplicationUploadedPath = function(applicationName, revision) {
-    var file = Packages.java.io.File;
-    var fileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + file.separator
-            + TMP_UPLOADED_APPLICATIONS_PATH + file.separator + modManager.getTenantDomain() + file.separator + applicationName;
+    var fileUploadPath = constructFileUploadPath(applicationName, revision);
     var fileUtils = Packages.org.apache.commons.io.FileUtils;
     var file = new Packages.java.io.File(fileUploadPath);
 
@@ -1224,6 +1203,14 @@ var getIngressPort = function(serviceName){
     } else{
         return 80;
     }
+};
+
+var constructFileUploadPath = function (applicationName, revision) {
+    var file = Packages.java.io.File;
+    var fileUploadPath = file.separator + TMP_UPLOADED_APPLICATIONS_PATH + file.separator +
+                         modManager.getTenantDomain() + file.separator + applicationName +
+                         file.separator + revision + file.separator;
+    return fileUploadPath;
 };
 
 %>

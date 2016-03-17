@@ -174,31 +174,32 @@ jagg.template("application", function (inputs, outputs, jagg) {
             });
 
             $('#fileupload').fileupload({
-                submit: function(e, data){
-                      data.url = "<%=jagg.getAbsoluteUrl('/site/blocks/application/application.jag')%>",
-                          data.dataType = 'json',
-                          data.formData = {action:'uploadExistingArchive',
-                                appTypeName:appTypeName,
-                                applicationName:$("#applicationName").val(),
-                                applicationRevision:$("#applicationRevision").val()
-                          }
-                    },
-                    progressall: function (e, data) {
-                        var progress = parseInt(data.loaded / data.total * 100, 10);
-                        $('#progress .progress-bar').css(
-                            'width',
-                            progress + '%'
-                        );
-                        if(progress == 100){
-                            activateCreateApplication();
+                submit: function(e, data) {
+                    data.url = "<%=jagg.getAbsoluteUrl('/site/blocks/application/application.jag') %>",
+                        data.dataType = 'json',
+                        data.formData = {
+                            action: 'uploadExistingArchive',
+                            appTypeName: appTypeName,
+                            applicationName: $("#applicationName").val(),
+                            applicationRevision: $("#applicationRevision").val()
                         }
-                    },
-                    change:function (e, data) {
-                         $.each(data.files, function (index, file) {
-                            $("#uploadedFileName").val(file.name);
-                        });
-                        $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
+                },
+                progressall: function(e, data) {
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    $('#progress .progress-bar').css(
+                        'width',
+                        progress + '%'
+                    );
+                    if (progress == 100) {
+                        activateCreateApplication();
                     }
+                },
+                change: function(e, data) {
+                    $.each(data.files, function(index, file) {
+                        $("#uploadedFileName").val(file.name);
+                    });
+                    $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
+                }
             });
 
         function drawProgressWindow(){
@@ -693,7 +694,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         }
         %>
     </div>
-<!-- EOF App factory menu actionbar-->
+<!-- EOF App Cloud menu actionbar-->
 
 <div class="container-fluid cloud-container">
         <div class="row">
