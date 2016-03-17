@@ -140,8 +140,7 @@ var pushDockerImage = function (applicationName, versionName, applicationRuntime
         log.error(e);
         log.info("Application creation failed because docker image push failed and roll back process" +
                  " is started for application : "+applicationName+" with revision : "+versionName);
-        deleteApplicationUploadedPath(versionHashId);
-        deleteVersionFromDatabase(versionHashId);
+        deleteVersion(versionHashId, true, false);
         throw e;
     }
 
@@ -183,8 +182,7 @@ var buildDockerImage = function (applicationName, versionName, runtimeId, absFil
         log.error(e);
         log.info("Application creation failed because dokcer image build failed and roll back process" +
                  " is started for application : "+applicationName+" with revision : "+versionName);
-        deleteApplicationUploadedPath(versionHashId);
-        deleteVersionFromDatabase(versionHashId);
+        deleteVersion(versionHashId, true, false);
         throw e;
 
     }
@@ -335,8 +333,7 @@ var createDockerFileForGitHub =  function(applicationName, versionName, runtimeI
         log.error(e);
         log.info("Application creation failed because docker file creation failed and roll back process" +
                  " is started for application : "+applicationName+" with revision : "+versionName);
-        deleteApplicationUploadedPath(versionHashId);
-        deleteVersionFromDatabase(versionHashId);
+        deleteVersion(versionHashId, true, false);
         throw e;
     }
 
@@ -387,8 +384,7 @@ var createDockerFile =  function(applicationName, versionName, runtimeId, upload
         log.error(e);
         log.info("Application creation failed because docker file creation failed and roll back process" +
                  " is started for application : "+applicationName+" with revision : "+versionName);
-        deleteApplicationUploadedPath(versionHashId);
-        deleteVersionFromDatabase(versionHashId);
+        deleteVersion(versionHashId, true, false);
         throw e;
     }
 
@@ -427,8 +423,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
         log.error(e);
         log.info("Application deployment failed because kubernetes deployment was failed and roll back process" +
                  " is started for application:"+applicationName+" with revision:"+versionName);
-        deleteApplicationUploadedPath(versionHashId);
-        deleteVersionFromDatabase(versionHashId);
+        deleteVersion(versionHashId, true, false);
         throw e;
     }
     //Adding deployment success event
@@ -453,9 +448,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
         ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
         log.info("Application deployment failed because ingress is not created successfully and roll back process" +
                  " is started for application:"+applicationName+" with revision:"+versionName);
-        deleteApplicationUploadedPath(versionHashId);
-        deleteVersionFromDatabase(versionHashId);
-        deleteApplicationFromKubernetes(versionHashId);
+        deleteVersion(versionHashId, true, true);
         log.error(msg);
         log.error(e);
         throw e;
@@ -486,9 +479,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
             ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
             log.info("Application rollback started for application:"+applicationName + " with revision:"+
                      versionName +" because pods are not running even after 3 minutes.");
-            deleteApplicationUploadedPath(versionHashId);
-            deleteVersionFromDatabase(versionHashId);
-            deleteApplicationFromKubernetes(versionHashId);
+            deleteVersion(versionHashId, true, true);
         } else {
             var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
             if (podStatus !== prevPodStatus) {
@@ -1100,6 +1091,13 @@ var getSelectedRevisionFromSession = function(applicationKey) {
     }
 };
 
+var deleteSelectedVersionFromSession = function(applicationKey){
+    var selectedVersions = session.get("SELECTED_REVISIONS");
+    if(selectedVersions && selectedVersions[applicationKey]){
+        delete selectedVersions[applicationKey];
+    }
+};
+
 var getVersionHashId = function(applicationName, versionName){
     var tenantId = modManager.getTenantId();
     var versionHashId = Util.getVersionHashId(applicationName, versionName, tenantId)
@@ -1223,39 +1221,46 @@ var addEvent = function(name, status, description, versionHashId) {
     }
 };
 
+var deleteApplication = function(applicationHashId) {
+
+    try{
+
+        deleteSelectedVersionFromSession(applicationHashId);
+        var versions = ApplicationManager.getVersionHashIdsOfApplication(applicationHashId);
+
+        for (var i = 0; i < versions.size(); i++) {
+            deleteApplicationUploadedPath(versions.get(i));
+            deleteApplicationFromKubernetes(versions.get(i));
+        }
+        deleteApplicationFromDatabase(applicationHashId);
+    } catch(e){
+        log.error("Error while deleting application with hash id : " + applicationHashId);
+        log.error(e);
+    }
+};
+
+
+var deleteVersion = function(versionHashId, isAutoDelete, isDeployed){
+    if(!isAutoDelete) {
+        deleteApplicationUploadedPath(versionHashId);
+    }
+    if(isDeployed) {
+        deleteApplicationFromKubernetes(versionHashId);
+    }
+
+    var applicationHashId = ApplicationManager.getApplicationHashIdByVersionHashId(versionHashId);
+    deleteSelectedVersionFromSession(applicationHashId);
+    deleteVersionFromDatabase(versionHashId, applicationHashId);
+};
+
 var deleteApplicationUploadedPath = function(versionHashId) {
+
     var fileUploadPath = getVersionDirectoryPath(versionHashId);
     var fileUtils = Packages.org.apache.commons.io.FileUtils;
-    var fileUploadPath = new Packages.java.io.File(fileUploadPath);
-    log.info("Deleting the uploaded file at:"+fileUploadPath.getAbsolutePath());
-    if(fileUploadPath.exists()){
-        //Commenting deleting upload path inorder to work retry app deployment correctly.
-        // Upload path clean up force to upload the artifact again in the retying.
-        //fileUtils.deleteDirectory(fileUploadPath);
-    }
-};
+    var uploadedFile = new Packages.java.io.File(fileUploadPath);
 
-var deleteVersionFromDatabase = function(versionHashId) {
-    try{
-        if(ApplicationManager.isSingleVersion){
-            var applicationHashId = ApplicationManager.getApplicationHashIdByVersionHashId(versionHashId);
-            ApplicationManager.deleteApplication(applicationHashId);
-        } else {
-            //java.lang.Thread.sleep(3000); // database at last after the transaction completes.
-            ApplicationManager.deleteVersion(versionHashId);
-        }
-    }catch(e){
-        log.error("Error while deleting application version from the database with version hash id : " + versionHashId);
-        log.error(e);
-    }
-};
-
-var deleteApplicationFromDatabase = function (applicationHashId){
-    try {
-        ApplicationManager.deleteApplication(applicationHashId);
-    } catch(e){
-        log.error("Error while deleting application from the database with application hash id : " + applicationHashId);
-        log.error(e);
+    if(uploadedFile.exists()){
+        fileUtils.deleteDirectory(uploadedFile);
     }
 };
 
@@ -1274,18 +1279,24 @@ var deleteApplicationFromKubernetes = function(versionHashId) {
     }
 };
 
-var deleteApplication = function(applicationHashId) {
-
+var deleteVersionFromDatabase = function(versionHashId, applicationHashId) {
     try{
-        deleteApplicationFromDatabase(applicationHashId);
-        var versions = ApplicationManager.getVersionHashIdsOfApplication(applicationHashId);
-
-        for (var i = 0; i < versions.length; i++) {
-            deleteApplicationUploadedPath(versions[i]);
-            deleteApplicationFromKubernetes(versions[i]);
+        if(ApplicationManager.isSingleVersion(versionHashId)){
+            ApplicationManager.deleteApplication(applicationHashId);
+        } else {
+            ApplicationManager.deleteVersion(versionHashId);
         }
+    }catch(e){
+        log.error("Error while deleting application version from the database with version hash id : " + versionHashId);
+        log.error(e);
+    }
+};
+
+var deleteApplicationFromDatabase = function (applicationHashId){
+    try {
+        ApplicationManager.deleteApplication(applicationHashId);
     } catch(e){
-        log.error("Error while deleting application with hash id : " + applicationHashId);
+        log.error("Error while deleting application from the database with application hash id : " + applicationHashId);
         log.error(e);
     }
 };
