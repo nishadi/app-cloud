@@ -133,7 +133,7 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		String prevKey = jsonObject.getString(PARAM_NAME_KEY);
 		String newKey = RandomStringUtils.random(5, true, false);
 		String newValue = RandomStringUtils.random(6, true, false);
-		applicationClient.updateRuntimeProperties(versionHash, prevKey, newKey, newValue);
+		applicationClient.updateRuntimeProperty(versionHash, prevKey, newKey, newValue);
 		JSONArray updatedJSONArray = applicationClient.getRuntimeProperties(versionHash);
 		boolean containsNewKey = false;
 		for (Object object : updatedJSONArray) {
@@ -153,8 +153,71 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		JSONArray jsonArray = applicationClient.getRuntimeProperties(versionHash);
 		JSONObject jsonObject = (JSONObject)jsonArray.get(0);
 		String key = jsonObject.getString(PARAM_NAME_KEY);
-		applicationClient.deleteRuntimeProperties(versionHash, key);
+		applicationClient.deleteRuntimeProperty(versionHash, key);
 		JSONArray updatedJSONArray = applicationClient.getRuntimeProperties(versionHash);
+		boolean containsKey = false;
+		for (Object object : updatedJSONArray) {
+			JSONObject jsonOBJ = (JSONObject)object;
+			if(key.equals(jsonOBJ.getString(PARAM_NAME_KEY))){
+				containsKey = true;
+			}
+		}
+		Assert.assertNotEquals("Property is not deleted.", containsKey);
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing add tags", dependsOnMethods = {"testDeleteEnvironmentalVariables"})
+	public void testAddTags() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		Map<String, String> properties = AppCloudIntegrationTestUtils.getKeyValuePairsFromConfig(
+				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_NEW_TAGS_KEY));
+		for (String key : properties.keySet()) {
+			applicationClient.addTag(versionHash, key, properties.get(key));
+		}
+		JSONArray jsonArray = applicationClient.getTags(versionHash);
+		int i = 0;
+		for (Object object : jsonArray) {
+			JSONObject jsonObject = (JSONObject)object;
+			if(properties.containsKey(jsonObject.getString(PARAM_NAME_KEY))){
+				i++;
+				Assert.assertEquals("Value of the property doesn't match.", properties.get(jsonObject.getString(PARAM_NAME_KEY)),
+				                    jsonObject.getString(PARAM_NAME_VALUE));
+			}
+		}
+		Assert.assertTrue("One or more Properties are not added.", i == properties.size());
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing update tags", dependsOnMethods = {"testAddTags"})
+	public void testUpdateTags() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		JSONArray jsonArray = applicationClient.getTags(versionHash);
+		JSONObject jsonObject = (JSONObject)jsonArray.get(0);
+		String prevKey = jsonObject.getString(PARAM_NAME_KEY);
+		String newKey = RandomStringUtils.random(5, true, false);
+		String newValue = RandomStringUtils.random(6, true, false);
+		applicationClient.updateTag(versionHash, prevKey, newKey, newValue);
+		JSONArray updatedJSONArray = applicationClient.getTags(versionHash);
+		boolean containsNewKey = false;
+		for (Object object : updatedJSONArray) {
+			JSONObject jsonOBJ = (JSONObject)object;
+			if(newKey.equals(jsonOBJ.getString(PARAM_NAME_KEY))){
+				containsNewKey = true;
+				Assert.assertEquals("Value of the property doesn't match.", newValue, jsonOBJ.getString(PARAM_NAME_VALUE));
+			}
+		}
+		Assert.assertTrue("Property is not updated.", containsNewKey);
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing update tags", dependsOnMethods = {"testUpdateTags"})
+	public void testDeleteTags() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		JSONArray jsonArray = applicationClient.getTags(versionHash);
+		JSONObject jsonObject = (JSONObject)jsonArray.get(0);
+		String key = jsonObject.getString(PARAM_NAME_KEY);
+		applicationClient.deleteTag(versionHash, key);
+		JSONArray updatedJSONArray = applicationClient.getTags(versionHash);
 		boolean containsKey = false;
 		for (Object object : updatedJSONArray) {
 			JSONObject jsonOBJ = (JSONObject)object;
