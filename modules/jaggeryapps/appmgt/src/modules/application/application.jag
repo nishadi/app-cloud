@@ -78,7 +78,7 @@ var addApplication = function (applicationName, versionName, applicationDescript
 
 var triggerKubernetesDeployment = function(runtimeProperties, applicationRuntime, tagName, applicationName, versionName, runtimeId, replicas, versionHashId){
     var appHostURL = constructAppLaunchURL(applicationName, versionName);
-    var containers = getContainers(applicationRuntime.getRepoURL(), applicationRuntime.getImageName(), tagName, versionHashId ,versionHashId, runtimeProperties, runtimeId, appHostURL);
+    var containers = getContainers(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL), applicationRuntime.getImageName(), tagName, versionHashId ,versionHashId, runtimeProperties, runtimeId, appHostURL);
     var deploymentConfig = getDeploymentConfig(containers, versionHashId, replicas);
     deployApplication(applicationName, versionName, deploymentConfig, false, versionHashId);
 
