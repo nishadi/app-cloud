@@ -185,6 +185,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                         }
                 },
                 progressall: function(e, data) {
+                    //First parameters is percentage, second parameter is decimal radix
                     var progress = parseInt(data.loaded / data.total * 100, 10);
                     $('#progress .progress-bar').css(
                         'width',
