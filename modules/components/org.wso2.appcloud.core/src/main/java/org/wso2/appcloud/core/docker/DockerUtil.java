@@ -31,14 +31,14 @@ public class DockerUtil {
         return DockerOpClientConstants.DOCKER_WAR_LOCATION;
     }
 
-    public static String getDockerFileTemplatePath(String runtimeId, String dockerTemplateFilePath) throws
-                                                                                              AppCloudException {
+    public static String getDockerFileTemplatePath(String runtimeId, String dockerTemplateFilePath,
+            String dockerFileCategory) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
         ApplicationRuntime applicationRuntime = applicationDAO.getRuntimeById(Integer.parseInt(runtimeId));
         String dockerBaseImageName = applicationRuntime.getImageName();
         String dockerBaseImageVersion = applicationRuntime.getTag();
 
-        return dockerTemplateFilePath + "/" + "Dockerfile"+ "." + dockerBaseImageName + "." +
-               dockerBaseImageVersion;
+        return dockerTemplateFilePath + "/" + dockerBaseImageName + "/" + dockerFileCategory + "/Dockerfile" + "."
+                + dockerBaseImageName + "." + dockerBaseImageVersion;
     }
 }

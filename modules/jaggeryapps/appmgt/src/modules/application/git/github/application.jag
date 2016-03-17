@@ -76,7 +76,7 @@ var createDockerFileForGitHub =  function(applicationName, versionName, runtimeI
     try {
         var absFileUploadedPath = appManager.getVersionDirectoryPath(versionHashId);
         var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
-        var dockerTemplateFilePath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + "DockerFiles/GitHub";
+        var dockerTemplateFilePath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + "dockerfiles";
         dockerOpClient.createDockerFileForGitHub(runtimeId, gitHubRepoUrl, gitHubRepoBranch, dockerFilePath,dockerTemplateFilePath);
     } catch(e){
         var msg = "Error while creating docker file";

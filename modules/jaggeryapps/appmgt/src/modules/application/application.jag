@@ -271,6 +271,7 @@ var createAppVersionInDataBase = function( versionName,   runtimeId, runtimeProp
     return application;
 }
 
+
 var createDockerFile =  function(applicationName, versionName, runtimeId, uploadedFileName, versionHashId, dockerOpClient){
     var msg = "Docker file creation successfully triggered in appcloud";
     addEvent(DOCKER_FILE_CREATE, EVENT_PENDING, msg, versionHashId);
@@ -281,7 +282,7 @@ var createDockerFile =  function(applicationName, versionName, runtimeId, upload
         var absFileUploadedPath = getVersionDirectoryPath(versionHashId);
         var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
 
-        var dockerTemplateFilePath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + "DockerFiles";
+        var dockerTemplateFilePath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + "dockerfiles";
 
         var uploadArtifactTmpName;
         var checkFileExtZIP = isFileExtZIP(uploadedFileName);
