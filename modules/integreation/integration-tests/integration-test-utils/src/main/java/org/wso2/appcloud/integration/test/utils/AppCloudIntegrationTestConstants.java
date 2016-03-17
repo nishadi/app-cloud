@@ -44,7 +44,9 @@ public class AppCloudIntegrationTestConstants {
 	public static final String MSS_APP_FILE_NAME_KEY = "//appCloudProperties/application/files/file[@type='msf4j']";
 	public static final String PHP_APP_FILE_NAME_KEY = "//appCloudProperties/application/files/file[@type='php']";
 	public static final String APP_PROPERTIES_KEY = "//appCloudProperties/application/properties/property";
+	public static final String APP_NEW_PROPERTIES_KEY = "//appCloudProperties/application/newProperties/property";
 	public static final String APP_TAGS_KEY = "//appCloudProperties/application/tags/tag";
+	public static final String APP_NEW_TAGS_KEY = "//appCloudProperties/application/newTags/tag";
 
 	// Rest endpoints
 	public static final String REST_APPLICATION_ENDPOINT = "application/application.jag";

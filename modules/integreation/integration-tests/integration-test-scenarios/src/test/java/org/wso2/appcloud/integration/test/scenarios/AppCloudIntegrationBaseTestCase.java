@@ -2,6 +2,7 @@ package org.wso2.appcloud.integration.test.scenarios;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.testng.annotations.AfterClass;
@@ -15,6 +16,7 @@ import org.wso2.carbon.automation.engine.annotations.SetEnvironment;
 import org.wso2.carbon.automation.test.utils.common.TestConfigurationProvider;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * Basic test case to implement things common to all app types.
@@ -22,6 +24,8 @@ import java.io.File;
 public abstract class AppCloudIntegrationBaseTestCase {
 
 	private static final Log log = LogFactory.getLog(AppCloudIntegrationBaseTestCase.class);
+	public static final String PARAM_NAME_KEY = "key";
+	public static final String PARAM_NAME_VALUE = "value";
 	protected String defaultAdmin;
 	protected String defaultAdminPassword;
 	protected String defaultAppName;
@@ -45,9 +49,9 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		this.applicationType = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_TYPE_KEY);
 		this.applicationRevision  = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_REVISION_KEY);
 		this.applicationDescription = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_DESC_KEY);
-		this.properties = AppCloudIntegrationTestUtils.getKeyValuePairAsJson(
+		this.properties = AppCloudIntegrationTestUtils.getKeyValuePairAsJsonFromConfig(
 				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_PROPERTIES_KEY));
-		this.tags = AppCloudIntegrationTestUtils.getKeyValuePairAsJson(
+		this.tags = AppCloudIntegrationTestUtils.getKeyValuePairAsJsonFromConfig(
 				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_TAGS_KEY));
 	}
 
@@ -94,6 +98,28 @@ public abstract class AppCloudIntegrationBaseTestCase {
 
 		//Wait until start application finished
 		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING, "Application start action");
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing add update delete runtime properties", dependsOnMethods = {"testStartApplication"})
+	public void testAddEnvironmentalVariable() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		Map<String, String> properties = AppCloudIntegrationTestUtils.getKeyValuePairsFromConfig(
+				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_NEW_PROPERTIES_KEY));
+		for (String key : properties.keySet()) {
+			applicationClient.addRuntimeProperty(versionHash, key, properties.get(key));
+		}
+		JSONArray jsonArray = applicationClient.getRuntimeProperties(versionHash);
+		int i = 0;
+		for (Object object : jsonArray) {
+			JSONObject jsonObject = (JSONObject)object;
+			if(properties.containsKey(jsonObject.getString(PARAM_NAME_KEY))){
+				i++;
+				Assert.assertEquals("Value of the property doesn't match.", properties.get(jsonObject.getString(PARAM_NAME_KEY)),
+				                    jsonObject.getString(PARAM_NAME_VALUE));
+			}
+		}
+		Assert.assertTrue("One or more Properties are not added.", i == properties.size());
 	}
 
 

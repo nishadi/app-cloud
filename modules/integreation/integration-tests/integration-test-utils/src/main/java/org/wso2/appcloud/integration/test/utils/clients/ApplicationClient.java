@@ -30,6 +30,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestConstants;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestException;
@@ -62,6 +63,8 @@ public class ApplicationClient extends BaseClient{
 	protected static final String PARAM_NAME_PROPERTIES = "runtimeProperties";
 	protected static final String PARAM_NAME_TAGS = "tags";
 	protected static final String PARAM_NAME_VERSION_KEY = "versionKey";
+	protected static final String PARAM_NAME_KEY = "key";
+	protected static final String PARAM_NAME_VALUE = "value";
 	public static final String PARAM_NAME_IS_FILE_ATTACHED = "isFileAttached";
 	public static final String PARAM_NAME_FILE_UPLOAD = "fileupload";
 
@@ -170,7 +173,7 @@ public class ApplicationClient extends BaseClient{
 			JSONObject jsonObject = new JSONObject(response.getData());
 			return jsonObject;
 		} else {
-			throw new AppCloudIntegrationTestException("Get Application Events failed " + response.getData());
+			throw new AppCloudIntegrationTestException("Get Application Bean failed " + response.getData());
 		}
 	}
 
@@ -184,7 +187,36 @@ public class ApplicationClient extends BaseClient{
 		if (response.getResponseCode() == HttpStatus.SC_OK) {
 			return response.getData();
 		} else {
-			throw new AppCloudIntegrationTestException("Get Application Events failed " + response.getData());
+			throw new AppCloudIntegrationTestException("Get Application Version Hash value failed " + response.getData());
+		}
+	}
+
+	public String addRuntimeProperty(String versionKey, String key, String value) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + ADD_ENV_VAR_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				+ PARAM_NAME_KEY + PARAM_EQUALIZER + key + PARAM_SEPARATOR
+				+ PARAM_NAME_VALUE + PARAM_EQUALIZER + value
+				, getRequestHeaders());
+		if (response.getResponseCode() == HttpStatus.SC_OK) {
+			return response.getData();
+		} else {
+			throw new AppCloudIntegrationTestException("Add Application Runtime Property failed " + response.getData());
+		}
+	}
+
+	public JSONArray getRuntimeProperties(String versionKey) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + GET_ENV_VAR_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				, getRequestHeaders());
+		if (response.getResponseCode() == HttpStatus.SC_OK) {
+			JSONArray jsonArray = new JSONArray(response.getData());
+			return jsonArray;
+		} else {
+			throw new AppCloudIntegrationTestException("Get Application Runtime Properties failed " + response.getData());
 		}
 	}
 
