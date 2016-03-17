@@ -1,5 +1,6 @@
 package org.wso2.appcloud.integration.test.scenarios;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -97,12 +98,13 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		applicationClient.startApplicationRevision(applicationName, applicationRevision, versionHash);
 
 		//Wait until start application finished
-		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING, "Application start action");
+		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING,
+		                        "Application start action");
 	}
 
 	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
-	@Test(description = "Testing add update delete runtime properties", dependsOnMethods = {"testStartApplication"})
-	public void testAddEnvironmentalVariable() throws Exception {
+	@Test(description = "Testing add runtime properties", dependsOnMethods = {"testStartApplication"})
+	public void testAddEnvironmentalVariables() throws Exception {
 		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
 		Map<String, String> properties = AppCloudIntegrationTestUtils.getKeyValuePairsFromConfig(
 				AppCloudIntegrationTestUtils.getPropertyNodes(AppCloudIntegrationTestConstants.APP_NEW_PROPERTIES_KEY));
@@ -122,11 +124,52 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		Assert.assertTrue("One or more Properties are not added.", i == properties.size());
 	}
 
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing update runtime properties", dependsOnMethods = {"testAddEnvironmentalVariables"})
+	public void testUpdateEnvironmentalVariables() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		JSONArray jsonArray = applicationClient.getRuntimeProperties(versionHash);
+		JSONObject jsonObject = (JSONObject)jsonArray.get(0);
+		String prevKey = jsonObject.getString(PARAM_NAME_KEY);
+		String newKey = RandomStringUtils.random(5, true, false);
+		String newValue = RandomStringUtils.random(6, true, false);
+		applicationClient.updateRuntimeProperties(versionHash, prevKey, newKey, newValue);
+		JSONArray updatedJSONArray = applicationClient.getRuntimeProperties(versionHash);
+		boolean containsNewKey = false;
+		for (Object object : updatedJSONArray) {
+			JSONObject jsonOBJ = (JSONObject)object;
+			if(newKey.equals(jsonOBJ.getString(PARAM_NAME_KEY))){
+				containsNewKey = true;
+				Assert.assertEquals("Value of the property doesn't match.", newValue, jsonOBJ.getString(PARAM_NAME_VALUE));
+			}
+		}
+		Assert.assertTrue("Property is not updated.", containsNewKey);
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing update runtime properties", dependsOnMethods = {"testUpdateEnvironmentalVariables"})
+	public void testDeleteEnvironmentalVariables() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		JSONArray jsonArray = applicationClient.getRuntimeProperties(versionHash);
+		JSONObject jsonObject = (JSONObject)jsonArray.get(0);
+		String key = jsonObject.getString(PARAM_NAME_KEY);
+		applicationClient.deleteRuntimeProperties(versionHash, key);
+		JSONArray updatedJSONArray = applicationClient.getRuntimeProperties(versionHash);
+		boolean containsKey = false;
+		for (Object object : updatedJSONArray) {
+			JSONObject jsonOBJ = (JSONObject)object;
+			if(key.equals(jsonOBJ.getString(PARAM_NAME_KEY))){
+				containsKey = true;
+			}
+		}
+		Assert.assertNotEquals("Property is not deleted.", containsKey);
+	}
+
 
 	@AfterClass(alwaysRun = true)
 	public void cleanEnvironment() throws Exception {
-		String applicationName = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_NAME_KEY);
-		boolean isDeleted = applicationClient.deleteApplication(applicationName);
+		String applicationHash = applicationClient.getApplicationHash(applicationName);
+		boolean isDeleted = applicationClient.deleteApplication(applicationHash);
 		Assert.assertEquals("Application deletion failed", isDeleted, true);
 	}
 

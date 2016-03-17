@@ -300,7 +300,7 @@
         </defaultTenant>
 
         <application>
-            <applicationName>testapp018</applicationName>
+            <applicationName>intapp006</applicationName>
             <applicationType>war</applicationType>
             <applicationDescription>This is the test application</applicationDescription>
             <defaultRevision>1.0.0</defaultRevision>
