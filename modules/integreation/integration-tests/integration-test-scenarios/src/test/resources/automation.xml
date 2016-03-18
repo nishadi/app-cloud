@@ -286,16 +286,16 @@
 
     <appCloudProperties>
         <urls>
-            <appCloud>https://localhost:9443/</appCloud>
+            <appCloud>https://cloudmgt.cloudstaging.wso2.com:60000/</appCloud>
         </urls>
 
         <defaultTenant>
             <firstName>Danushka</firstName>
             <lastName>Fernando</lastName>
             <email>firstName@example.com</email>
-            <admin>dan</admin>
-            <adminPassword>111111</adminPassword>
-            <tenantDomain>dan001.com</tenantDomain>
+            <admin>amanisoysa.gmail.com</admin>
+            <adminPassword>Admin@123</adminPassword>
+            <tenantDomain>pingpong</tenantDomain>
             <usagePlan>Demo</usagePlan>
         </defaultTenant>
 

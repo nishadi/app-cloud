@@ -26,7 +26,8 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestConstants;
@@ -59,7 +60,7 @@ public class LogsClient extends BaseClient{
     }
 
 	public String getSnapshotLogs(String applicationKey, String applicationRevision) throws Exception {
-		HttpClient httpclient = HttpClientBuilder.create().build();;
+		HttpClient httpclient = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
 		HttpPost httppost = new HttpPost(this.endpoint);
 		List<NameValuePair> params = new ArrayList<NameValuePair>(3);
 		params.add(new BasicNameValuePair(PARAM_NAME_ACTION, GET_SNAPSHOT_LOGS_ACTION));
