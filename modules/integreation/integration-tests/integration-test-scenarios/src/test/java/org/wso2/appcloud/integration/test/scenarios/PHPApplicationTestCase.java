@@ -18,15 +18,24 @@ package org.wso2.appcloud.integration.test.scenarios;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Assert;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestConstants;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestUtils;
 
 public class PHPApplicationTestCase extends AppCloudIntegrationBaseTestCase {
 
 	private static final Log log = LogFactory.getLog(PHPApplicationTestCase.class);
+	public static final String PHP_SERVER_STARTED_MESSAGE = "apache2 -D FOREGROUND";
+	public static final String PHP_APPLICATION_TYPE = "php";
 
 	public PHPApplicationTestCase(){
 		super(AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.PHP_APP_RUNTIME_ID_KEY),
-		      AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.PHP_APP_FILE_NAME_KEY));
+		      AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.PHP_APP_FILE_NAME_KEY),
+		      PHP_APPLICATION_TYPE);
+	}
+
+	@Override
+	protected void assertLogContent(String logContent) {
+		Assert.assertTrue("Container haven't started up", logContent.contains(PHP_SERVER_STARTED_MESSAGE));
 	}
 }

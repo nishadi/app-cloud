@@ -59,6 +59,8 @@ public class ApplicationClient extends BaseClient{
 	protected static final String ADD_TAG_ACTION = "addTag";
 	protected static final String UPDATE_TAG_ACTION = "updateTag";
 	protected static final String DELETE_TAG_ACTION = "deleteTag";
+	protected static final String DELETE_REVISION_ACTION = "deleteVersion";
+	protected static final String GET_REVISIONS_ACTION = "getExistingRevisions";
 	protected static final String PARAM_NAME_APPLICATION_NAME = "applicationName";
 	protected static final String PARAM_NAME_APPLICATION_HASH_ID = "applicationKey";
 	protected static final String PARAM_NAME_APPLICATION_DESCRIPTION = "applicationDescription";
@@ -74,8 +76,9 @@ public class ApplicationClient extends BaseClient{
 	protected static final String PARAM_NAME_NEW_KEY = "newKey";
 	protected static final String PARAM_NAME_VALUE = "value";
 	protected static final String PARAM_NAME_NEW_VALUE = "newValue";
-	public static final String PARAM_NAME_IS_FILE_ATTACHED = "isFileAttached";
-	public static final String PARAM_NAME_FILE_UPLOAD = "fileupload";
+	protected static final String PARAM_NAME_IS_FILE_ATTACHED = "isFileAttached";
+	protected static final String PARAM_NAME_FILE_UPLOAD = "fileupload";
+	protected static final String PARAM_NAME_IS_NEW_VERSION = "isNewVersion";
 
 	private String endpoint;
 
@@ -96,7 +99,7 @@ public class ApplicationClient extends BaseClient{
 
     public void createNewApplication(String applicationName, String runtime, String appTypeName,
             String applicationRevision, String applicationDescription, String uploadedFileName,
-            String runtimeProperties, String tags, File uploadArtifact) throws Exception {
+            String runtimeProperties, String tags, File uploadArtifact, boolean isNewVersion) throws Exception {
 
 	    HttpClient httpclient = HttpClientBuilder.create().build();;
 	    HttpPost httppost = new HttpPost(this.endpoint);
@@ -114,6 +117,7 @@ public class ApplicationClient extends BaseClient{
 	    builder.addPart(PARAM_NAME_PROPERTIES, new StringBody(runtimeProperties, ContentType.TEXT_PLAIN));
 	    builder.addPart(PARAM_NAME_TAGS, new StringBody(tags, ContentType.TEXT_PLAIN));
 	    builder.addPart(PARAM_NAME_IS_FILE_ATTACHED, new StringBody(Boolean.TRUE.toString(), ContentType.TEXT_PLAIN));//Setting true to send the file in request
+	    builder.addPart(PARAM_NAME_IS_NEW_VERSION, new StringBody(Boolean.toString(isNewVersion), ContentType.TEXT_PLAIN));
 
 	    httppost.setEntity(builder.build());
 	    httppost.setHeader(HEADER_COOKIE, getRequestHeaders().get(HEADER_COOKIE));
@@ -190,7 +194,7 @@ public class ApplicationClient extends BaseClient{
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + GET_APPLICATION_HASH_ACTION + PARAM_SEPARATOR
-				+ PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName + PARAM_SEPARATOR
+				+ PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName
 				, getRequestHeaders());
 		if (response.getResponseCode() == HttpStatus.SC_OK) {
 			return response.getData();
@@ -232,7 +236,7 @@ public class ApplicationClient extends BaseClient{
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + GET_ENV_VAR_ACTION + PARAM_SEPARATOR
-				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey
 				, getRequestHeaders());
 		if (response.getResponseCode() == HttpStatus.SC_OK) {
 			JSONArray jsonArray = new JSONArray(response.getData());
@@ -249,10 +253,10 @@ public class ApplicationClient extends BaseClient{
 				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
 				+ PARAM_NAME_PREVIOUS_KEY + PARAM_EQUALIZER + previousKey + PARAM_SEPARATOR
 				+ PARAM_NAME_NEW_KEY + PARAM_EQUALIZER + newKey + PARAM_SEPARATOR
-				+ PARAM_NAME_NEW_VALUE + PARAM_EQUALIZER + newValue + PARAM_SEPARATOR
+				+ PARAM_NAME_NEW_VALUE + PARAM_EQUALIZER + newValue
 				, getRequestHeaders());
 		if (response.getResponseCode() != HttpStatus.SC_OK) {
-			throw new AppCloudIntegrationTestException("Get Application Runtime Properties failed " + response.getData());
+			throw new AppCloudIntegrationTestException("Update Application Runtime Properties failed " + response.getData());
 		}
 	}
 
@@ -261,7 +265,7 @@ public class ApplicationClient extends BaseClient{
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + DELETE_ENV_VAR_ACTION + PARAM_SEPARATOR
 				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
-				+ PARAM_NAME_KEY + PARAM_EQUALIZER + key + PARAM_SEPARATOR
+				+ PARAM_NAME_KEY + PARAM_EQUALIZER + key
 				, getRequestHeaders());
 		if (response.getResponseCode() != HttpStatus.SC_OK) {
 			throw new AppCloudIntegrationTestException("Delete Application Runtime Properties failed " + response.getData());
@@ -279,7 +283,7 @@ public class ApplicationClient extends BaseClient{
 		if (response.getResponseCode() == HttpStatus.SC_OK) {
 			return response.getData();
 		} else {
-			throw new AppCloudIntegrationTestException("Add Application Runtime Property failed " + response.getData());
+			throw new AppCloudIntegrationTestException("Add Application Tag failed " + response.getData());
 		}
 	}
 
@@ -287,13 +291,13 @@ public class ApplicationClient extends BaseClient{
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + GET_TAG_ACTION + PARAM_SEPARATOR
-				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey
 				, getRequestHeaders());
 		if (response.getResponseCode() == HttpStatus.SC_OK) {
 			JSONArray jsonArray = new JSONArray(response.getData());
 			return jsonArray;
 		} else {
-			throw new AppCloudIntegrationTestException("Get Application Runtime Properties failed " + response.getData());
+			throw new AppCloudIntegrationTestException("Get Application Tags failed " + response.getData());
 		}
 	}
 
@@ -304,10 +308,10 @@ public class ApplicationClient extends BaseClient{
 				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
 				+ PARAM_NAME_PREVIOUS_KEY + PARAM_EQUALIZER + previousKey + PARAM_SEPARATOR
 				+ PARAM_NAME_NEW_KEY + PARAM_EQUALIZER + newKey + PARAM_SEPARATOR
-				+ PARAM_NAME_NEW_VALUE + PARAM_EQUALIZER + newValue + PARAM_SEPARATOR
+				+ PARAM_NAME_NEW_VALUE + PARAM_EQUALIZER + newValue
 				, getRequestHeaders());
 		if (response.getResponseCode() != HttpStatus.SC_OK) {
-			throw new AppCloudIntegrationTestException("Get Application Runtime Properties failed " + response.getData());
+			throw new AppCloudIntegrationTestException("Update Application Tag failed " + response.getData());
 		}
 	}
 
@@ -316,10 +320,35 @@ public class ApplicationClient extends BaseClient{
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + DELETE_TAG_ACTION + PARAM_SEPARATOR
 				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey + PARAM_SEPARATOR
-				+ PARAM_NAME_KEY + PARAM_EQUALIZER + key + PARAM_SEPARATOR
+				+ PARAM_NAME_KEY + PARAM_EQUALIZER + key
 				, getRequestHeaders());
 		if (response.getResponseCode() != HttpStatus.SC_OK) {
-			throw new AppCloudIntegrationTestException("Delete Application Runtime Properties failed " + response.getData());
+			throw new AppCloudIntegrationTestException("Delete Application Tag failed " + response.getData());
+		}
+	}
+
+	public void deleteVersion(String versionKey) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + DELETE_REVISION_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionKey
+				, getRequestHeaders());
+		if (response.getResponseCode() != HttpStatus.SC_OK) {
+			throw new AppCloudIntegrationTestException("Delete Application Version failed " + response.getData());
+		}
+	}
+
+	public JSONArray getVersions(String applicationName) throws Exception {
+		HttpResponse response = HttpRequestUtil.doPost(
+				new URL(this.endpoint),
+				PARAM_NAME_ACTION + PARAM_EQUALIZER + GET_REVISIONS_ACTION + PARAM_SEPARATOR
+				+ PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName
+				, getRequestHeaders());
+		if (response.getResponseCode() == HttpStatus.SC_OK) {
+			JSONArray jsonArray = new JSONArray(response.getData());
+			return jsonArray;
+		} else {
+			throw new AppCloudIntegrationTestException("Get Application Versions failed " + response.getData());
 		}
 	}
 

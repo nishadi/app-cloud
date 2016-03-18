@@ -570,11 +570,11 @@
                                     <xs:sequence>
                                         <xs:element type="xs:string" name="applicationName"
                                                     maxOccurs="unbounded" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="applicationType"
-                                                    maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element type="xs:string" name="applicationDescription"
                                                     maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element type="xs:string" name="defaultRevision"
+                                                    maxOccurs="unbounded" minOccurs="0"/>
+                                        <xs:element type="xs:string" name="newRevision"
                                                     maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element name="runtimeIDs">
                                             <xs:complexType>
