@@ -31,3 +31,6 @@ COPY init.sh /usr/local/bin/init.sh
 RUN chmod u+x /usr/local/bin/init.sh
 
 ENV WEB_ROOT /var/www/html/
+
+RUN addgroup wso2 \
+    && adduser --system --shell /bin/bash --gecos 'WSO2User' --ingroup wso2 --disabled-login wso2user

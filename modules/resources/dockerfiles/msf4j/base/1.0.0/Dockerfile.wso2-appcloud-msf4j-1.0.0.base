@@ -30,3 +30,6 @@ COPY netty-transports.yaml "$HTTPS_CONF"
 WORKDIR $MSF4J_HOME
 
 EXPOSE 8080 8443
+
+RUN addgroup wso2 \
+    && adduser --system --shell /bin/bash --gecos 'WSO2User' --ingroup wso2 --disabled-login wso2user
