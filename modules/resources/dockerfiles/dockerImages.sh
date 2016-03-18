@@ -30,4 +30,4 @@ docker build -t wso2-appcloud/carbon:4.2.0-base -f $CURRENT_DIR/carbon/base/1.0.
 docker build -t wso2-appcloud/php:1.0.0-base -f $CURRENT_DIR/php/base/1.0.0/Dockerfile.wso2-appcloud-php-1.0.0.base $CURRENT_DIR/php/base/1.0.0
 
 #tomcat base image
-docker pull dell/tomcat:latest 
+docker build -t wso2-appcloud/tomcat:1.0.0-base -f $CURRENT_DIR/tomcat/base/1.0.0/Dockerfile.wso2-appcloud-tomcat-1.0.0.base $CURRENT_DIR/tomcat/base/1.0.0

@@ -1,0 +1,57 @@
+# ------------------------------------------------------------------------
+#
+# Copyright 2005-2015 WSO2, Inc. (http://wso2.com)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License
+#
+# ------------------------------------------------------------------------
+
+FROM java:8-jre
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update && apt-get install -y pwgen
+
+ENV TOMCAT_VERSION 8.0.9
+
+# Get and unpack Tomcat
+RUN wget http://archive.apache.org/dist/tomcat/tomcat-8/v${TOMCAT_VERSION}/bin/\
+apache-tomcat-${TOMCAT_VERSION}.tar.gz -O /tmp/catalina.tar.gz && \
+    tar xzf /tmp/catalina.tar.gz -C /opt && \
+    ln -s /opt/apache-tomcat-${TOMCAT_VERSION} /opt/tomcat && \
+    rm /tmp/catalina.tar.gz
+
+# Make a copy of the webapps folder, in case an empty or non-existent host
+# folder is specified for the (webapps) volume.
+RUN cp -r /opt/tomcat/webapps /tmp/webapps
+
+# Add the startup script
+ADD init.sh /init.sh
+RUN chmod +x /init.sh
+
+ADD wso2carbon.jks /wso2carbon.jks
+
+ENV CATALINA_HOME /opt/tomcat
+ENV PATH $PATH:$CATALINA_HOME/bin
+ENV ADMIN_PASS ""
+ENV CERT_PASS ""
+
+EXPOSE 8080 8443
+
+#Add WSO2 user
+RUN addgroup wso2 \
+    && adduser --system --shell /bin/bash --gecos 'WSO2User' --ingroup wso2 --disabled-login wso2user
+
+VOLUME ["/opt/tomcat/logs", "/opt/tomcat/work", "/opt/tomcat/webapps"]
+
+CMD ["/init.sh"]
