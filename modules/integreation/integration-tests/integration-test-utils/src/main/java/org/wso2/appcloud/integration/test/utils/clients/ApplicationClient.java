@@ -24,12 +24,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestConstants;
@@ -101,7 +102,7 @@ public class ApplicationClient extends BaseClient{
             String applicationRevision, String applicationDescription, String uploadedFileName,
             String runtimeProperties, String tags, File uploadArtifact, boolean isNewVersion) throws Exception {
 
-	    HttpClient httpclient = HttpClientBuilder.create().build();;
+	    HttpClient httpclient = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
 	    HttpPost httppost = new HttpPost(this.endpoint);
 
 	    MultipartEntityBuilder builder = MultipartEntityBuilder.create();

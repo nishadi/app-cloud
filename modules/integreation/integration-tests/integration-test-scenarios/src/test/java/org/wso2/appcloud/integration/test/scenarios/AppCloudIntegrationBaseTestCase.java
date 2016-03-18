@@ -43,7 +43,7 @@ public abstract class AppCloudIntegrationBaseTestCase {
 	protected String applicationDescription;
 	protected String properties;
 	protected String tags;
-	
+
 	public AppCloudIntegrationBaseTestCase(String runtimeID, String fileName, String applicationType){
 		this.runtimeID = runtimeID;
 		this.fileName = fileName;
