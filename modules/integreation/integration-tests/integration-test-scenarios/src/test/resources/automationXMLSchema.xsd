@@ -576,6 +576,8 @@
                                                     maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element type="xs:string" name="defaultRevision"
                                                     maxOccurs="unbounded" minOccurs="0"/>
+                                        <xs:element type="xs:string" name="newRevision"
+                                                    maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element name="runtimeIDs">
                                             <xs:complexType>
                                                 <xs:sequence>

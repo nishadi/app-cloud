@@ -69,12 +69,10 @@ public abstract class AppCloudIntegrationBaseTestCase {
 	}
 	
 	public void createApplication() throws Exception {
-		//Load the file in resources
-		File uploadArtifact = new File(TestConfigurationProvider.getResourceLocation() + fileName);
 		//Application creation
-		ApplicationClient applicationClient = new ApplicationClient(serverUrl, defaultAdmin, defaultAdminPassword);
+		File uploadArtifact = new File(TestConfigurationProvider.getResourceLocation() + fileName);
 		applicationClient.createNewApplication(applicationName, this.runtimeID, applicationType, applicationRevision,
-		                                       applicationDescription, this.fileName, properties, tags, uploadArtifact);
+		                                       applicationDescription, this.fileName, properties, tags, uploadArtifact, false);
 
 		//Wait until creation finished
 		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING, "Application creation");
@@ -226,6 +224,35 @@ public abstract class AppCloudIntegrationBaseTestCase {
 			}
 		}
 		Assert.assertNotEquals("Property is not deleted.", containsKey);
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing create version", dependsOnMethods = {"testDeleteTags"})
+	public void testCreateVersion() throws Exception {
+		String applicationRevision =
+				AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_NEW_REVISION_KEY);
+		File uploadArtifact = new File(TestConfigurationProvider.getResourceLocation() + fileName);
+		applicationClient.createNewApplication(applicationName, this.runtimeID, applicationType, applicationRevision,
+		                                       applicationDescription, this.fileName, properties, tags, uploadArtifact, true);
+
+		//Wait until creation finished
+		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING, "Application version creation");
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing delete version", dependsOnMethods = {"testCreateVersion"})
+	public void testDeleteVersion() throws Exception {
+		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
+		applicationClient.deleteVersion(versionHash);
+		JSONArray jsonArray = applicationClient.getVersions(applicationName);
+		boolean isDeleted = true;
+		for (Object obj : jsonArray) {
+			String versionName = obj.toString();
+			if(versionName.equals(applicationRevision)){
+				isDeleted = false;
+			}
+		}
+		Assert.assertTrue("Version Deletion Failed", isDeleted);
 	}
 
 

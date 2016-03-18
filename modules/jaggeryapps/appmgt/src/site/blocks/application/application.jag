@@ -214,8 +214,9 @@ var log = new Log();
 
     } else if (action == "getExistingRevisions"){
         var applicationName = request.getParameter("applicationName");
+        var applicationHashId = mod.getApplicationHashIdByName(applicationName);
         var mod = jagg.module("application");
-        var versions = mod.getAllRevisionsOfApplication(applicationName);
+        var versions = mod.getVersionListOfApplication(applicationHashId);
         print(versions);
 
     } else if (action == "getApplicationHashIdByName"){
