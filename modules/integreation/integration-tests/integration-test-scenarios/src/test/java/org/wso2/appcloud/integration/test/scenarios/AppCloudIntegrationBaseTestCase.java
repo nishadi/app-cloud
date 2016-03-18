@@ -245,8 +245,10 @@ public abstract class AppCloudIntegrationBaseTestCase {
 
 
 	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
-	@Test(description = "Testing get logs")
+	@Test(description = "Testing get logs", dependsOnMethods = {"testCreateVersion"})
 	public void testGetLogs() throws Exception {
+		long timeOutPeriod = AppCloudIntegrationTestUtils.getTimeOutPeriod();
+		Thread.sleep(timeOutPeriod);
 		String applicationHash = applicationClient.getApplicationHash(applicationName);
 		String result = logsClient.getSnapshotLogs(applicationHash, applicationRevision);
 		assertLogContent(result);
