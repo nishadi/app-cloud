@@ -1,0 +1,9 @@
+FROM java:7-jre
+
+RUN apt-get update && \
+    apt-get install -y zip && \
+    apt-get clean
+
+ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
+EXPOSE 9443 9763
+

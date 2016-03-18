@@ -23,6 +23,9 @@ CURRENT_DIR=`pwd`
 #msf4j base image
 docker build -t wso2-appcloud/msf4j:1.0.0-base -f $CURRENT_DIR/msf4j/base/1.0.0/Dockerfile.wso2-appcloud-msf4j-1.0.0.base $CURRENT_DIR/msf4j/base/1.0.0/
 
+#carbon 4.2.0 base image
+docker build -t wso2-appcloud/carbon:4.2.0-base -f $CURRENT_DIR/carbon/base/1.0.0/Dockerfile.wso2-appcloud-carbon-4.2.0.base $CURRENT_DIR/carbon/base/1.0.0/
+
 #php base image
 docker build -t wso2-appcloud/php:1.0.0-base -f $CURRENT_DIR/php/base/1.0.0/Dockerfile.wso2-appcloud-php-1.0.0.base $CURRENT_DIR/php/base/1.0.0
 

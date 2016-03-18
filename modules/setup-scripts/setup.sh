@@ -98,7 +98,7 @@ cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.provisioning.runtime
 cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.common/target/org.wso2.appcloud.common-1.0.0-SNAPSHOT.jar $AS_HOME/repository/components/dropins/
 mkdir -p $AS_HOME/repository/conf/appcloud
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/appcloud/appcloud.properties $AS_HOME/repository/conf/appcloud/
-cp -R $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.core/src/main/resources/DockerFiles $AS_HOME/repository/deployment/server/jaggeryapps/appmgt/
+cp -R $APP_CLOUD_SRC_HOME/modules/resources/dockerfiles $AS_HOME/repository/deployment/server/jaggeryapps/appmgt/
 sed -i -e "s|APP_CLOUD_HOME|$APPCLOUD_HOME|g" $AS_HOME/repository/conf/appcloud/appcloud.properties
 
 echo "Updaing IS node with new configuraitons"
@@ -137,5 +137,7 @@ sleep 60
 sh $SS_HOME/bin/wso2server.sh -Dsetup &
 sleep 60
 sh $DAS_HOME/bin/wso2server.sh -Dsetup &
+
+echo "If you are setting up App Cloud for the first time, please make sure to run app-cloud/modules/resources/dockerfiles/dockerImages.sh script to build docker base images"
 echo "Set up is completed."
 
