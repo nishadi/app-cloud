@@ -31,8 +31,8 @@
     <test name="AppF-Sample-Test" preserve-order="true" verbose="2">
         <classes>
             <class name="org.wso2.appcloud.integration.test.scenarios.WARApplicationTestCase"/>
-            <!--<class name="org.wso2.appcloud.integration.test.scenarios.MSF4JApplicationTestCase"/>-->
-            <!--<class name="org.wso2.appcloud.integration.test.scenarios.PHPApplicationTestCase"/>-->
+            <class name="org.wso2.appcloud.integration.test.scenarios.MSF4JApplicationTestCase"/>
+            <class name="org.wso2.appcloud.integration.test.scenarios.PHPApplicationTestCase"/>
         </classes>
     </test>
 </suite>

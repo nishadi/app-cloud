@@ -301,7 +301,6 @@
 
         <application>
             <applicationName>integrationapp</applicationName>
-            <applicationType>war</applicationType>
             <applicationDescription>This is the test application</applicationDescription>
             <defaultRevision>1.0.0</defaultRevision>
             <newRevision>2.0.0</newRevision>

@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestConstants;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestUtils;
 import org.wso2.appcloud.integration.test.utils.clients.ApplicationClient;
+import org.wso2.appcloud.integration.test.utils.clients.LogsClient;
 import org.wso2.carbon.automation.engine.annotations.ExecutionEnvironment;
 import org.wso2.carbon.automation.engine.annotations.SetEnvironment;
 import org.wso2.carbon.automation.test.utils.common.TestConfigurationProvider;
@@ -35,6 +36,7 @@ public abstract class AppCloudIntegrationBaseTestCase {
 	private String fileName;
 	private String runtimeID;
 	private ApplicationClient applicationClient;
+	private LogsClient logsClient;
 	protected String applicationName;
 	protected String applicationType;
 	protected String applicationRevision;
@@ -42,12 +44,12 @@ public abstract class AppCloudIntegrationBaseTestCase {
 	protected String properties;
 	protected String tags;
 	
-	public AppCloudIntegrationBaseTestCase(String runtimeID, String fileName){
+	public AppCloudIntegrationBaseTestCase(String runtimeID, String fileName, String applicationType){
 		this.runtimeID = runtimeID;
 		this.fileName = fileName;
 		//Application details
 		this.applicationName = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_NAME_KEY);
-		this.applicationType = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_TYPE_KEY);
+		this.applicationType = applicationType;
 		this.applicationRevision  = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_REVISION_KEY);
 		this.applicationDescription = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_DESC_KEY);
 		this.properties = AppCloudIntegrationTestUtils.getKeyValuePairAsJsonFromConfig(
@@ -65,6 +67,8 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		tenantDomain =  AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.DEFAULT_TENANT_TENANT_DOMAIN);
 
 		applicationClient = new ApplicationClient(serverUrl, defaultAdmin, defaultAdminPassword);
+		logsClient = new LogsClient(serverUrl, defaultAdmin, defaultAdminPassword);
+
 		createApplication();
 	}
 	
@@ -239,8 +243,17 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING, "Application version creation");
 	}
 
+
 	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
-	@Test(description = "Testing delete version", dependsOnMethods = {"testCreateVersion"})
+	@Test(description = "Testing get logs")
+	public void testGetLogs() throws Exception {
+		String applicationHash = applicationClient.getApplicationHash(applicationName);
+		String result = logsClient.getSnapshotLogs(applicationHash, applicationRevision);
+		assertLogContent(result);
+	}
+
+	@SetEnvironment(executionEnvironments = { ExecutionEnvironment.PLATFORM})
+	@Test(description = "Testing delete version", dependsOnMethods = {"testGetLogs"})
 	public void testDeleteVersion() throws Exception {
 		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
 		applicationClient.deleteVersion(versionHash);
@@ -291,4 +304,6 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		}
 		Assert.assertEquals(action + " failed", expectedStatus, actualStatus);
 	}
+
+	protected abstract void assertLogContent(String logContent);
 }

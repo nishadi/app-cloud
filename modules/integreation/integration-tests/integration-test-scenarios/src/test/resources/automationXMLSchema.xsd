@@ -570,8 +570,6 @@
                                     <xs:sequence>
                                         <xs:element type="xs:string" name="applicationName"
                                                     maxOccurs="unbounded" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="applicationType"
-                                                    maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element type="xs:string" name="applicationDescription"
                                                     maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element type="xs:string" name="defaultRevision"

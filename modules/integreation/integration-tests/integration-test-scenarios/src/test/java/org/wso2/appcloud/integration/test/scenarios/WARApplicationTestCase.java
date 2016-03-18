@@ -18,15 +18,24 @@ package org.wso2.appcloud.integration.test.scenarios;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Assert;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestConstants;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestUtils;
 
 public class WARApplicationTestCase extends AppCloudIntegrationBaseTestCase {
 
 	private static final Log log = LogFactory.getLog(WARApplicationTestCase.class);
-	
+	public static final String TOMCAT_SERVER_STARTED_MESSAGE = "org.apache.catalina.startup.Catalina.start Server startup in";
+	public static final String WAR_APPLICATION_TYPE = "war";
+
 	public WARApplicationTestCase(){
 		super(AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.TOMCAT_APP_RUNTIME_ID_KEY),
-		      AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.TOMCAT_APP_FILE_NAME_KEY));
+		      AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.TOMCAT_APP_FILE_NAME_KEY),
+		      WAR_APPLICATION_TYPE);
+	}
+
+	@Override
+	protected void assertLogContent(String logContent) {
+		Assert.assertTrue("Container haven't started up", logContent.contains(TOMCAT_SERVER_STARTED_MESSAGE));
 	}
 }

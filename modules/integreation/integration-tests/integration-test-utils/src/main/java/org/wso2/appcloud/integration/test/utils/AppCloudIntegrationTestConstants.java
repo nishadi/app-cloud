@@ -34,7 +34,6 @@ public class AppCloudIntegrationTestConstants {
 
 	// Default Application Details
 	public static final String APP_NAME_KEY = "//appCloudProperties/application/applicationName";
-	public static final String APP_TYPE_KEY = "//appCloudProperties/application/applicationType";
 	public static final String APP_DESC_KEY = "//appCloudProperties/application/applicationDescription";
 	public static final String APP_REVISION_KEY = "//appCloudProperties/application/defaultRevision";
 	public static final String APP_NEW_REVISION_KEY = "//appCloudProperties/application/newRevision";
@@ -51,6 +50,7 @@ public class AppCloudIntegrationTestConstants {
 
 	// Rest endpoints
 	public static final String REST_APPLICATION_ENDPOINT = "application/application.jag";
+	public static final String REST_LOGS_ENDPOINT = "runtimeLogs/ajax/runtimeLogs.jag";
 	public static final String APPMGT_USER_LOGIN = "user/login/ajax/login.jag";
 	public static final String APPMGT_URL_SURFIX = "appmgt/site/blocks/";
 
