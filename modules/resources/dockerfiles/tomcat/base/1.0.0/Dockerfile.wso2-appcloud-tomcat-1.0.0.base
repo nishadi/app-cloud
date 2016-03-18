@@ -16,7 +16,7 @@
 #
 # ------------------------------------------------------------------------
 
-FROM java:8
+FROM java:8-jre
 
 ENV DEBIAN_FRONTEND noninteractive
 
