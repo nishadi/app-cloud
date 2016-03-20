@@ -319,7 +319,7 @@ var createDockerFile =  function(applicationName, versionName, runtimeId, upload
         var checkFileExtZIP = isFileExtZIP(uploadedFileName);
         if (checkFileExtZIP) {
             var fileName = uploadedFileName.substring(0, uploadedFileName.lastIndexOf("."));
-            uploadArtifactTmpName = fileName + ".upload";
+            uploadArtifactTmpName = fileName + FILE_EXTENSTION_ALTER;
         } else {
             uploadArtifactTmpName = uploadedFileName;
         }
@@ -1070,10 +1070,10 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
 
     var uploadApplicationTmpPath;
     var checkFileExtZIP = isFileExtZIP(uploadedFileName);
-
+    //.zip files are auto extracted inside the AS. So if file extension is zip, then extension change to .upload.
     if(checkFileExtZIP){
         var fileName = uploadedFileName.substring(0, uploadedFileName.lastIndexOf("."));
-        uploadApplicationTmpPath = fileUploadPath + fileName + ".upload";
+        uploadApplicationTmpPath = fileUploadPath + fileName + FILE_EXTENSTION_ALTER;
         log.info(uploadApplicationTmpPath);
     }else{
         uploadApplicationTmpPath = fileUploadPath + uploadedFileName;
@@ -1085,7 +1085,7 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
 
 var isFileExtZIP = function(uploadedFileName){
     var fileExt = uploadedFileName.substr(uploadedFileName.lastIndexOf(".") + 1, uploadedFileName.length);
-    if(fileExt == "zip"){
+    if(fileExt == FILE_EXTENTION_ZIP){
         return true;
     }
     return false;

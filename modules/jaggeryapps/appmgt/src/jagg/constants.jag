@@ -55,4 +55,7 @@ var APPLICATION_CREATED = "created";
 var APPLICATION_ERROR = "error";
 var APPLICATION_STOPPED = "stopped";
 
+var FILE_EXTENSTION_ALTER = ".upload";
+var FILE_EXTENTION_ZIP = "zip";
+
 %>
