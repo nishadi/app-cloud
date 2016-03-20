@@ -792,7 +792,8 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             log.debug("Ingress path: " + ingressPathStr);
         }
 
-        HTTPIngressPath ingressPath = new HTTPIngressPath(new IngressBackend(), KubernetesPovisioningConstants.DEFAULT_INGRESS_PATH);
+        HTTPIngressPath ingressPath = new HTTPIngressPath(new IngressBackend(),
+                KubernetesPovisioningConstants.DEFAULT_INGRESS_PATH);
 
         for (Service service : serviceList.getItems()) {
             if (log.isDebugEnabled()){
@@ -803,9 +804,9 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     .withApiVersion(Ingress.ApiVersion.EXTENSIONS_V_1_BETA_1)
                     .withKind(KubernetesPovisioningConstants.KIND_INGRESS)
                     .withNewMetadata()
-                    .withName(
-                            KubernetesProvisioningUtils.createIngressMetaName(ingressName))
-                    .withNamespace(namespace.getMetadata().getName()).withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
+                    .withName(KubernetesProvisioningUtils.createIngressMetaName(ingressName))
+                    .withNamespace(namespace.getMetadata().getName())
+                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
                     .endMetadata()
                     .withNewSpec()
                     .withRules()
