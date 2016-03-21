@@ -595,7 +595,7 @@ return getThemePath() + path;
         includeJag:includeJag,
         getUserTheme:getUserTheme,
         getThemeFile:getThemeFile,
-        getApptypePropertyConfPath:getApptypePropertyConfPath
+        getAppTypePropertyConfPath:getAppTypePropertyConfPath
     };
 
 }());

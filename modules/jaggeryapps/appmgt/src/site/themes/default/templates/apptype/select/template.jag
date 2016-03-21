@@ -36,19 +36,17 @@ jagg.template("apptype/select", function(inputs, outputs, jagg) {
           <%
             if (appTypes.length > 0) {
                 for (var x = 0; x < appTypes.length; x++) {
-                    %>
+          %>
                 <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 ">
-                    <div class="cloud-app-type <%=appTypes[x].cssProperties.color%> cloud-app-type-max" id="<%=x + 1
-                    %>"
-                                            data-description="<%=appTypes[x].description%>"
+                    <div class="cloud-app-type <%=appTypes[x].cssProperties.color%> cloud-app-type-max" id="<%=x + 1%>"
+                                data-description="<%=appTypes[x].description%>"
                                 data-appname="<%=appTypes[x].cssProperties.displayName%>"
-                                 app-type="<%=appTypes[x].name%>">
+                                app-type="<%=appTypes[x].name%>">
                                 <i class="fw <%=appTypes[x].cssProperties.icon%> fw-5x"></i>
-                                <div class="type-name" ><%=appTypes[x].cssProperties.displayName
-                    %></div>
-                                    </div>
-                              </div>
-                              <%
+                                <div class="type-name" ><%=appTypes[x].cssProperties.displayName%></div>
+                    </div>
+                </div>
+        <%
                 }
             }
         %>
@@ -109,7 +107,7 @@ jagg.template("apptype/select", function(inputs, outputs, jagg) {
         $('.app-type-info-template').find('.app-description').html(appDescription);
         $('.app-type-info-template').find("a").attr("href", appCreationPage);
         var appendHtml =$('.app-type-info-template').html();
-
+        //The tile count adjust according to the resolution to keep responsiveness
         if(width >= 1170){
             if(currentcount%7 == 0){
                 $('#' + currentcount + '\\.0').parent().after(appendHtml);
