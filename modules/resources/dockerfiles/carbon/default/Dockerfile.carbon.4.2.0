@@ -25,6 +25,7 @@ ENV SERVER_PATH /mnt/
 
 COPY "$CARBON_APP_ZIP" "$UPLOAD_PATH/"
 RUN unzip -q "$UPLOAD_PATH/$CARBON_APP_ZIP" -d "$SERVER_PATH"
+RUN chmod +x "${SERVER_PATH}/${CARBON_APP_NAME}/bin/wso2server.sh"
 
 CMD ["sh", "-c", "${SERVER_PATH}/${CARBON_APP_NAME}/bin/wso2server.sh"]
 
