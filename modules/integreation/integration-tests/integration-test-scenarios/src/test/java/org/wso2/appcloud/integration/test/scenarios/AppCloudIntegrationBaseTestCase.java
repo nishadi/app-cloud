@@ -276,6 +276,8 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		String applicationHash = applicationClient.getApplicationHash(applicationName);
 		boolean isDeleted = applicationClient.deleteApplication(applicationHash);
 		Assert.assertEquals("Application deletion failed", isDeleted, true);
+		long timeOutPeriod = AppCloudIntegrationTestUtils.getTimeOutPeriod();
+                Thread.sleep(timeOutPeriod);
 	}
 
 	/**
