@@ -337,7 +337,7 @@
         </domainMapping>
 
         <timeOutSetting>
-              <period>10000</period>
+              <period>60000</period>
               <retryCount>15</retryCount>
         </timeOutSetting>
 

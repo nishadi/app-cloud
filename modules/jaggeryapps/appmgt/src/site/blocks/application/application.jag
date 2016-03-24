@@ -227,8 +227,8 @@ var log = new Log();
 
     } else if (action == "getExistingRevisions"){
         var applicationName = request.getParameter("applicationName");
-        var applicationHashId = mod.getApplicationHashIdByName(applicationName);
         var mod = jagg.module("application");
+        var applicationHashId = mod.getApplicationHashIdByName(applicationName);
         var versions = mod.getVersionListOfApplication(applicationHashId);
         print(versions);
 
