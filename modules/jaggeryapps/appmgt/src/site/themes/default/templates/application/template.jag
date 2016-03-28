@@ -422,33 +422,21 @@ jagg.template("application", function (inputs, outputs, jagg) {
         function validateApplicationNameChar(value){
             var patternNonAlphaNumExceptHyphen = /[^\w -]/g;
             var isPattern = patternNonAlphaNumExceptHyphen.test(value);
-            var message = "Application Name has invalid characters. Valid characters are a-z A-Z 0-9 -";
-            validationFailErrorMsg = message;
-            var isValid = validateWithRegexPatterns(isPattern);
+            validationFailErrorMsg = "Application Name has invalid characters. Valid characters are a-z A-Z 0-9 -";
 
-            return isValid;
+            return !isPattern;
         }
 
         function validationApplicationRevisionChar(value){
             var patternNonAlphaNum = /^(?:(\d{1,2})\.)?(?:(\d{1,2})\.)?(\*|\d{1,2})$/g;
-            var isPattern = !patternNonAlphaNum.test(value);
-            var message = "Invalid version number - Provide version number in format major.minor.patch";
-            validationFailErrorMsg = message;
+            var isPattern = patternNonAlphaNum.test(value);
+            validationFailErrorMsg = "Invalid version number - Provide version number in format major.minor.patch";
 
-            return validateWithRegexPatterns(isPattern);
+            return isPattern;
         }
 
         function validateRuntimeSelection(value){
             return (value > 0 ) ? true : false;
-        }
-
-        function validateWithRegexPatterns(regexPatterns) {
-            var isValueValid = true;
-
-            if (regexPatterns) {
-                isValueValid = false;
-            }
-            return isValueValid;
         }
 
         function validateContent(value, element) {
