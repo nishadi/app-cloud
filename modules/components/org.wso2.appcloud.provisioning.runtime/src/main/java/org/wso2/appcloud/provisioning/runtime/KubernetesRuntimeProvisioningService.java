@@ -848,28 +848,16 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
     }
 
     /**
-     * Delete deployment wich are associated with all k8s kinds
-     *
-     * @return true if deleted all kinds from K8s
+     * {@inheritDoc}
      */
     @Override
-    public boolean deleteDeployment() {
-        //If it is not deleted one object successfully, continue deleting others.
-        boolean deleteCompleted = true;
-        try {
-            deleteK8sKind(KubernetesPovisioningConstants.KIND_REPLICATION_CONTROLLER);
-            deleteK8sKind(KubernetesPovisioningConstants.KIND_DEPLOYMENT);
-            deleteK8sKind(KubernetesPovisioningConstants.KIND_POD);
-            deleteK8sKind(KubernetesPovisioningConstants.KIND_INGRESS);
-            deleteK8sKind(KubernetesPovisioningConstants.KIND_SECRETS);
-            deleteK8sKind(KubernetesPovisioningConstants.KIND_SERVICE);
-        } catch (RuntimeProvisioningException e) {
-            String message = "Error while deleting kubernetes kind and continue deleting others";
-            log.warn(message, e);
-            deleteCompleted = false;
-        }
-
-        return deleteCompleted;
+    public void deleteDeployment() throws RuntimeProvisioningException {
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_REPLICATION_CONTROLLER);
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_DEPLOYMENT);
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_POD);
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_INGRESS);
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_SECRETS);
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_SERVICE);
     }
 
     /**
@@ -903,11 +891,12 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                 kubernetesClient.services().inNamespace(namespace).withLabels(labels).delete();
                 break;
             default:
-                String message = "The given kubernetes kind : " + k8sKind + " is not supported";
+                String message = "The kubernetes kind : " + k8sKind + " deletion is not supported";
                 throw new IllegalArgumentException(message);
             }
         } catch (KubernetesClientException e) {
             String message = "Error while deleting kubernetes kind : " + k8sKind + " from deployment";
+            log.error(message, e);
             throw new RuntimeProvisioningException(message, e);
         }
     }

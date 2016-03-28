@@ -1193,7 +1193,7 @@ public class ApplicationDAO {
 
             deleted = preparedStatement.execute();
         } catch (SQLException e) {
-            String msg = "Error while executing the application deletion sql query with hash id : " + applicationHashId;
+            String msg = "Error while executing the application deletion sql query with applicationHashId : " + applicationHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
@@ -1211,7 +1211,7 @@ public class ApplicationDAO {
 
             return preparedStatement.execute();
         } catch (SQLException e) {
-            String msg = "Error while executing the version deletion sql query with hash id : " + versionHashId;
+            String msg = "Error while executing the version deletion sql query with versionHashId : " + versionHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {

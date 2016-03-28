@@ -33,7 +33,7 @@ jagg.block("apptype/select", {
         var log = new Log();
         var applicationModule = jagg.module("application");
         var appTypes = applicationModule.getAllAppTypes();
-        var appTypePropertyConfPath = jagg.getAppTypePropertyConfPath();
+        var appTypePropertyConfPath = jagg.getAppTypePropertyConfFilePath();
         var parsedObject = parse(appTypePropertyConfPath);
         var appTypesProperties = require(parsedObject);
         if(appTypes.length > 0) {

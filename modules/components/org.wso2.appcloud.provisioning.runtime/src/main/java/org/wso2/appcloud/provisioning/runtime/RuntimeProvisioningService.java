@@ -172,8 +172,7 @@ public interface RuntimeProvisioningService {
     /**
      * Delete deployment related K8 objects
      *
-     * @return false if one object deletion is fail
      * @throws RuntimeProvisioningException
      */
-    boolean deleteDeployment() throws RuntimeProvisioningException;
+    void deleteDeployment() throws RuntimeProvisioningException;
 }

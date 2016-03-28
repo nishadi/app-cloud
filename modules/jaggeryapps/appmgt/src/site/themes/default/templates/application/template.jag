@@ -420,36 +420,33 @@ jagg.template("application", function (inputs, outputs, jagg) {
         });
 
         function validateApplicationNameChar(value){
-            var regexPattern = [];
             var patternNonAlphaNumExceptHyphen = /[^\w -]/g;
             var isPattern = patternNonAlphaNumExceptHyphen.test(value);
-            regexPattern.push(isPattern);
             var message = "Application Name has invalid characters. Valid characters are a-z A-Z 0-9 -";
-            var isValid = validateWithRegexPatterns(regexPattern, message);
+            validationFailErrorMsg = message;
+            var isValid = validateWithRegexPatterns(isPattern);
 
             return isValid;
         }
 
         function validationApplicationRevisionChar(value){
-            var regexPattern = [];
             var patternNonAlphaNum = /^(?:(\d{1,2})\.)?(?:(\d{1,2})\.)?(\*|\d{1,2})$/g;
             var isPattern = !patternNonAlphaNum.test(value);
-            regexPattern.push(isPattern);
             var message = "Invalid version number - Provide version number in format major.minor.patch";
-            return validateWithRegexPatterns(regexPattern, message);
+            validationFailErrorMsg = message;
+
+            return validateWithRegexPatterns(isPattern);
         }
 
         function validateRuntimeSelection(value){
             return (value > 0 ) ? true : false;
         }
 
-        function validateWithRegexPatterns(regexPatterns, message){
+        function validateWithRegexPatterns(regexPatterns) {
             var isValueValid = true;
-            for(var i = 0; i < regexPatterns.length; i++){
-                if(regexPatterns[i]){
-                   validationFailErrorMsg = message;
-                   return isValueValid = false;
-                }
+
+            if (regexPatterns) {
+                isValueValid = false;
             }
             return isValueValid;
         }
@@ -458,10 +455,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
             var isValueValid = true;
             var valueLength = (value).length;
             if (valueLength == 0) {
-                contentInvalidErrorMsg = "Empty values are not allowed for filed : " + $(element).attr("name");
+                contentInvalidErrorMsg = "Empty values are not allowed for " + $(element).attr("name");
                 isValueValid = false;
             } else if (!isNaN(value)) {
-                contentInvalidErrorMsg = "Non-alphanumeric characters are not allowed for field : " + $(element).attr("name");
+                contentInvalidErrorMsg = "Non-alphanumeric characters are not allowed for " + $(element).attr("name");
                 isValueValid = false;
             }
             return isValueValid;

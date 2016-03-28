@@ -684,7 +684,7 @@ var getAllApplications = function(){
     var applicationArray = [];
     try {
         var applications = ApplicationManager.getApplicationList();
-        var appTypePropertyConfPath = jagg.getAppTypePropertyConfPath();
+        var appTypePropertyConfPath = jagg.getAppTypePropertyConfFilePath();
         var parsedObject = parse(appTypePropertyConfPath);
         var appTypesProperties = require(parsedObject);
 
@@ -1092,14 +1092,17 @@ var isFileExtZIP = function(uploadedFileName){
 };
 
 var createDestinationDirsForUploadedApps = function (applicationName, revision) {
-    var absFileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + constructFileUploadPath(applicationName, revision);
-    var file = new Packages.java.io.File(absFileUploadPath);
-    if (!file.exists()) {
-        var isDirCreated = file.mkdirs();
-        if (!isDirCreated) {
-            log.error("Error while creating the directory : " + absFileUploadPath);
-        }
+    var fileUtils = Packages.org.apache.commons.io.FileUtils;
+    var absFileUploadPath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) +
+                            constructFileUploadPath(applicationName, revision);
+    var uploadedFilePath = new Packages.java.io.File(absFileUploadPath);
+    try {
+        fileUtils.forceMkdir(uploadedFilePath);
+    } catch (e) {
+        log.error("Error while creating the directory : " + absFileUploadPath);
+        log.error(e);
     }
+
 };
 
 var downloadFromUrl = function(artifactUrl,applicationName, revision, apptype){
@@ -1153,7 +1156,7 @@ var deleteApplicationFromDatabase = function (versionHashId) {
         java.lang.Thread.sleep(3000); // database at last after the transaction completes.
         ApplicationManager.deleteVersion(versionHashId);
     } catch (e) {
-        log.error("Error while deleting application from the database versionHashId : " + versionHashId);
+        log.error("Error while deleting application from the database with versionHashId : " + versionHashId);
         throw e;
     }
 };
@@ -1208,10 +1211,10 @@ var getIngressPort = function(serviceName){
 };
 
 var constructFileUploadPath = function (applicationName, revision) {
-    var file = Packages.java.io.File;
-    var fileUploadPath = file.separator + TMP_UPLOADED_APPLICATIONS_PATH + file.separator +
-                         modManager.getTenantDomain() + file.separator + applicationName +
-                         file.separator + revision + file.separator;
+    var fileSeparator = Packages.java.io.File.separator;
+    var fileUploadPath = fileSeparator + TMP_UPLOADED_APPLICATIONS_PATH + fileSeparator +
+                         modManager.getTenantDomain() + fileSeparator + applicationName +
+                         fileSeparator + revision + fileSeparator;
     return fileUploadPath;
 };
 

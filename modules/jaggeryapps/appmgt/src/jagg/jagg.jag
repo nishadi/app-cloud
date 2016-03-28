@@ -68,7 +68,7 @@ var jagg = jagg || (function () {
         session.put("logged.user", user);
     };
 
-    var getAppTypePropertyConfPath = function () {
+    var getAppTypePropertyConfFilePath = function () {
         var fileNameUtils = Packages.org.apache.commons.io.FilenameUtils;
         var appTypePropertyConfPath = fileNameUtils.normalize(APP_TYPES_PROPERTIES_CONFIG);
         var stringfiedObject = stringify(appTypePropertyConfPath);
@@ -595,7 +595,7 @@ return getThemePath() + path;
         includeJag:includeJag,
         getUserTheme:getUserTheme,
         getThemeFile:getThemeFile,
-        getAppTypePropertyConfPath:getAppTypePropertyConfPath
+        getAppTypePropertyConfFilePath:getAppTypePropertyConfFilePath
     };
 
 }());
