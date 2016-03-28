@@ -15,13 +15,12 @@ cat >/opt/apache-tomcat-${TOMCAT_VERSION}/conf/tomcat-users.xml <<EOL
 </tomcat-users>
 EOL
 
-echo "*********************************************************************"
+echo "========================================================================="
 echo "Credentials for the insatnce:"
 echo
 echo "    user name: admin"
 echo "    password : $ADMIN_PASSWORD"
-echo
-echo "*********************************************************************"
+echo "========================================================================="
 
 # If the webapps directory is empty (the user has specified a volume), copy the
 # contents from the folder in tmp (which is created when the image was built).
@@ -34,7 +33,6 @@ fi
 
 CERT_PASSWORD="wso2carbon"
 
-echo
 echo "========================================================================="
 echo "Using certificate password: $CERT_PASSWORD"
 echo "========================================================================"
@@ -48,5 +46,10 @@ sed -i '$!N;s/<!--\s*\n\s*<Connector port="8443"/<Connector port="8443" keyAlias
 
 sed -i '$!N;s/clientAuth="false" sslProtocol="TLS" \/>\n\s*-->/clientAuth="false" sslProtocol="TLS" \/>/g;P;D' \
 /opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
+
+sed -i "s/unpackWARs=\"true\"/unpackWARs=\"false\"/g" /opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
+
+sed -i "/\/Host/i  \\\t<Context path=\"/\" docBase=\"$APP_WAR\" debug=\"0\" reloadable=\"true\"></Context>" /opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
+
 
 /opt/tomcat/bin/catalina.sh run

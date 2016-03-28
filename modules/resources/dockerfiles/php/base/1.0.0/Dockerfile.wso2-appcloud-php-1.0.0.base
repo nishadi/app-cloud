@@ -15,22 +15,24 @@
 # limitations under the License
 #
 # ------------------------------------------------------------------------
-
-FROM php:5.6-apache
+FROM php:7.0-apache
 
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y libcurl4-gnutls-dev libpng-dev unzip cron re2c php5-imap python git
-
-RUN docker-php-ext-install mysql curl gd zip mbstring mysqli
+RUN docker-php-ext-install curl gd zip mbstring mysqli
 RUN a2enmod headers expires deflate rewrite
 
+COPY ssl-cert-snakeoil.key /etc/ssl/private/ssl-cert-snakeoil.key
+COPY ssl-cert-snakeoil.pem /etc/ssl/certs/ssl-cert-snakeoil.pem
 COPY config/php.ini /usr/local/etc/php/
-
 COPY init.sh /usr/local/bin/init.sh
-
 RUN chmod u+x /usr/local/bin/init.sh
 
-ENV WEB_ROOT /var/www/html/
+RUN /usr/sbin/a2ensite default-ssl
+RUN /usr/sbin/a2enmod ssl
 
-RUN addgroup wso2 \
-    && adduser --system --shell /bin/bash --gecos 'WSO2User' --ingroup wso2 --disabled-login wso2user
+EXPOSE 80
+EXPOSE 443
+
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+
