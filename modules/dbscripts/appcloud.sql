@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_VERSION` (
   CONSTRAINT `fk_AC_VERSION_AC_APPLICATION1`
     FOREIGN KEY (`application_id`)
     REFERENCES `AppCloudDB`.`AC_APPLICATION` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_AC_VERSION_ApplicationRuntime1`
     FOREIGN KEY (`runtime_id`)
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_VERSION` (
   CONSTRAINT `fk_AC_VERSION_ApplicationDeployment1`
     FOREIGN KEY (`deployment_id`)
     REFERENCES `AppCloudDB`.`AC_DEPLOYMENT` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE SET NULL
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
@@ -245,12 +245,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_EVENT` (
   `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `description` VARCHAR(1000) NULL,
   `tenant_id` INT NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `fk_AC_EVENT_AC_VERSION1`
-    FOREIGN KEY (`version_id`)
-    REFERENCES `AppCloudDB`.`AC_VERSION` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
 
@@ -356,11 +351,11 @@ INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `description`) VAL
 -- Populate Data to `AppCloudDB`.`ApplicationRuntimeService`
 -- -----------------------------------------------------
 INSERT INTO `AC_RUNTIME_TRANSPORT` (`transport_id`, `runtime_id`) VALUES
-(3, 1),
-(3, 2),
-(1, 3),
-(1, 4),
-(5, 5),
+(4, 1),
+(4, 2),
+(2, 3),
+(2, 4),
+(6, 5),
 (6, 5);
 
 

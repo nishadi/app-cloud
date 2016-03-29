@@ -21,3 +21,27 @@ To start with your local setup, you need to add below jars in current directory.
 
 * If you are using DAS for the Dashboard, you need to install SSO module 1.4.4 from the feature repo http://product-dist.wso2.com/p2/carbon/releases/wilkes to DAS.
 
+* To setup the cluster, first install the HAProxy load balancer as described in the guide [1]. Following is the sample configuration for this HAProxy.
+
+frontend http-in
+        bind *:80
+        default_backend bk_http
+
+backend bk_http
+        balance roundrobin
+        server node1 localhost:9763
+        server node2 localhost:9767
+
+
+frontend https-in
+        bind *:443 ssl crt /etc/haproxy/ssl/server.pem
+        default_backend bk_https
+
+backend bk_https
+        balance roundrobin
+        server node1 localhost:9443 check ssl verify none
+        server node2 localhost:9447 check ssl verify none
+
+
+1. https://docs.wso2.com/display/CLUSTER420/Configuring+HAProxy
+

@@ -286,28 +286,34 @@
 
     <appCloudProperties>
         <urls>
-            <appCloud>https://localhost:9443/</appCloud>
+            <appCloud>https://cloudmgt.cloudstaging.wso2.com:60000/</appCloud>
         </urls>
 
         <defaultTenant>
             <firstName>Danushka</firstName>
             <lastName>Fernando</lastName>
             <email>firstName@example.com</email>
-            <admin>dan</admin>
-            <adminPassword>111111</adminPassword>
-            <tenantDomain>dan001.com</tenantDomain>
+            <admin>amanisoysa.gmail.com</admin>
+            <adminPassword>Admin@123</adminPassword>
+            <tenantDomain>pingpong</tenantDomain>
             <usagePlan>Demo</usagePlan>
         </defaultTenant>
 
-        <defaultApplication>
-            <applicationName>te001</applicationName>
-            <applicationKey>test</applicationKey>
-            <applicationType>war</applicationType>
+        <application>
+            <applicationName>integrationapp</applicationName>
             <applicationDescription>This is the test application</applicationDescription>
             <defaultRevision>1.0.0</defaultRevision>
-            <runtimeID>1</runtimeID>
-            <filename>sample.war</filename>
-            <resource_path>sample.war</resource_path>
+            <newRevision>2.0.0</newRevision>
+            <runtimeIDs>
+                <runtimeID key="tomcat">1</runtimeID>
+                <runtimeID key="msf4j">2</runtimeID>
+                <runtimeID key="php">3</runtimeID>
+            </runtimeIDs>
+            <files>
+                <file type="war">sample.war</file>
+                <file type="msf4j">helloworld.jar</file>
+                <file type="php">sample.zip</file>
+            </files>
             <properties>
                 <property key="key1">value1</property>
                 <property key="key2">value2</property>
@@ -316,15 +322,23 @@
                 <tag key="tag1">tagValue1</tag>
                 <tag key="tag2">tagValue2</tag>
             </tags>
-        </defaultApplication>
+            <newProperties>
+                <property key="key3">value3</property>
+                <property key="key4">value4</property>
+            </newProperties>
+            <newTags>
+                <tag key="tag3">tagValue3</tag>
+                <tag key="tag4">tagValue4</tag>
+            </newTags>
+        </application>
 
         <domainMapping>
             <domainName>example.com</domainName>
         </domainMapping>
 
         <timeOutSetting>
-              <period>10000L</period>
-              <retryCount>8</retryCount>
+              <period>60000</period>
+              <retryCount>15</retryCount>
         </timeOutSetting>
 
         <!--bamResources>

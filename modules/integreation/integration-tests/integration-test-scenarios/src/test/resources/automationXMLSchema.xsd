@@ -565,25 +565,47 @@
                                     </xs:sequence>
                                 </xs:complexType>
                             </xs:element>
-                            <xs:element name="defaultApplication">
+                            <xs:element name="application">
                                 <xs:complexType>
                                     <xs:sequence>
                                         <xs:element type="xs:string" name="applicationName"
-                                                    maxOccurs="unbounded" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="applicationKey"
-                                                    maxOccurs="unbounded" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="applicationType"
                                                     maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element type="xs:string" name="applicationDescription"
                                                     maxOccurs="unbounded" minOccurs="0"/>
                                         <xs:element type="xs:string" name="defaultRevision"
                                                     maxOccurs="unbounded" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="runtimeID"
+                                        <xs:element type="xs:string" name="newRevision"
                                                     maxOccurs="unbounded" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="filename"
-                                                    maxOccurs="unbounded" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="resource_path"
-                                                    maxOccurs="unbounded" minOccurs="0"/>
+                                        <xs:element name="runtimeIDs">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="runtimeID" maxOccurs="unbounded" minOccurs="0">
+                                                        <xs:complexType>
+                                                            <xs:simpleContent>
+                                                                <xs:extension base="xs:string">
+                                                                    <xs:attribute type="xs:string" name="key" use="required"/>
+                                                                </xs:extension>
+                                                            </xs:simpleContent>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="files">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="file" maxOccurs="unbounded" minOccurs="0">
+                                                        <xs:complexType>
+                                                            <xs:simpleContent>
+                                                                <xs:extension base="xs:string">
+                                                                    <xs:attribute type="xs:string" name="type" use="required"/>
+                                                                </xs:extension>
+                                                            </xs:simpleContent>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
                                         <xs:element name="properties">
                                             <xs:complexType>
                                                 <xs:sequence>
@@ -600,6 +622,36 @@
                                             </xs:complexType>
                                         </xs:element>
                                         <xs:element name="tags">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="tag" maxOccurs="unbounded" minOccurs="0">
+                                                        <xs:complexType>
+                                                            <xs:simpleContent>
+                                                                <xs:extension base="xs:string">
+                                                                    <xs:attribute type="xs:string" name="key" use="required"/>
+                                                                </xs:extension>
+                                                            </xs:simpleContent>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="newProperties">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="property" maxOccurs="unbounded" minOccurs="0">
+                                                        <xs:complexType>
+                                                            <xs:simpleContent>
+                                                                <xs:extension base="xs:string">
+                                                                    <xs:attribute type="xs:string" name="key" use="required"/>
+                                                                </xs:extension>
+                                                            </xs:simpleContent>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="newTags">
                                             <xs:complexType>
                                                 <xs:sequence>
                                                     <xs:element name="tag" maxOccurs="unbounded" minOccurs="0">

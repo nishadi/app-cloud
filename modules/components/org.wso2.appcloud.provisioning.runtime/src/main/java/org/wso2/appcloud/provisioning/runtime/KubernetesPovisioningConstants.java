@@ -48,4 +48,12 @@ public class KubernetesPovisioningConstants {
     public static final String VOLUME_MOUNT_PATH = "/etc/";
 
     public static final String DEFAULT_INGRESS_PATH = "/";
+
+    public static final String ANNOTATION_KEY_HOST = "serviceloadbalancer/lb.host";
+    public static final String ANNOTATION_KEY_SSL_TERM = "serviceloadbalancer/lb.sslTerm";
+    public static final String ANNOTATION_VALUE_SSL_TERM = "true";
+    public static final String SERVICE_SESSION_AFFINITY_MODE = "ClientIP";
+    public static final int HTTPS_SERVICE_PORT = 443;
+
+
 }

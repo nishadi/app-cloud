@@ -34,30 +34,11 @@ public class AppCloudTestManagerListner extends TestManagerListener {
     @Override
     public void onStart(ITestContext iTestContext) {
         super.onStart(iTestContext);
-        try {
-            //AFDefaultDataPopulator AFDefaultDataPopulator= new AFDefaultDataPopulator();
-            //AFDefaultDataPopulator.initTenantApplicationAndVersionCreation();
-            // Thread.sleep(60000);
-            //AFDefaultDataPopulator.addDefaultAPI();
-        } catch (Exception e) {
-            final String msg = "Error occurred while populating initial data ";
-            log.error(msg, e);
-            throw new IllegalStateException(msg, e);
-        }
     }
 
     @Override
     public void onFinish(ITestContext iTestContext) {
         super.onFinish(iTestContext);
-        //AFDefaultDataPopulator afDefaultDataPopulator = new AFDefaultDataPopulator();
-        try {
-            //log.info("Deleting default application");
-            //afDefaultDataPopulator.deleteDefaultApplication();
-        } catch (Exception e) {
-            final String msg = "Error occurred while deleting default app ";
-            log.error(msg, e);
-            throw new IllegalStateException(msg, e);
-        }
     }
 
 }

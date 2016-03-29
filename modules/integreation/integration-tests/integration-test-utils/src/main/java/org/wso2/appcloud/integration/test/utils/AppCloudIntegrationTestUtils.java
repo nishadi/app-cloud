@@ -21,11 +21,14 @@ package org.wso2.appcloud.integration.test.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.automation.engine.context.AutomationContext;
 import org.wso2.carbon.automation.engine.context.TestUserMode;
 
 import javax.xml.xpath.XPathExpressionException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AppCloudIntegrationTestUtils {
 
@@ -106,4 +109,45 @@ public class AppCloudIntegrationTestUtils {
         }
         return result;
     }
+
+	/**
+	 * [{key="key1",value=value1},...]
+	 * @param propertyNodes
+	 * @return
+	 */
+	public static String getKeyValuePairAsJsonFromConfig(NodeList propertyNodes) {
+		StringBuilder result = new StringBuilder("[");
+		for (int i = 0 ; i < propertyNodes.getLength() ; i++) {
+			if(i != 0){
+				result.append(",");
+			}
+			Element element = (Element)propertyNodes.item(i);
+			String key = element.getAttribute(AppCloudIntegrationTestConstants.ATTRIBUTE_KEY);
+			String value = element.getTextContent();
+			result.append("{\"key\":\"");
+			result.append(key);
+			result.append("\",\"value\":\"");
+			result.append(value);
+			result.append("\"}");
+		}
+		result.append("]");
+		return result.toString();
+	}
+
+	/**
+	 * [{key="key1",value=value1},...]
+	 * @param propertyNodes
+	 * @return
+	 */
+	public static Map<String, String> getKeyValuePairsFromConfig(NodeList propertyNodes) {
+		Map<String, String> keyValuePair = new HashMap<String, String>();
+		for (int i = 0 ; i < propertyNodes.getLength() ; i++) {
+			Element element = (Element)propertyNodes.item(i);
+			String key = element.getAttribute(AppCloudIntegrationTestConstants.ATTRIBUTE_KEY);
+			String value = element.getTextContent();
+			keyValuePair.put(key, value);
+		}
+		return keyValuePair;
+	}
+
 }
