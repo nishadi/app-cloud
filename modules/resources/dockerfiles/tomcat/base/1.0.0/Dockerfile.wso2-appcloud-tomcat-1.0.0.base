@@ -54,4 +54,3 @@ RUN addgroup wso2 \
 
 VOLUME ["/opt/tomcat/logs", "/opt/tomcat/work", "/opt/tomcat/webapps"]
 
-CMD ["/init.sh"]

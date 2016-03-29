@@ -1,6 +1,7 @@
+#!/bin/sh
 # ------------------------------------------------------------------------
 #
-# Copyright 2005-2015 WSO2, Inc. (http://wso2.com)
+# Copyright 2005-2016 WSO2, Inc. (http://wso2.com)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,12 +16,12 @@
 # limitations under the License
 #
 # ------------------------------------------------------------------------
+echo "Creating SSL certificates"
+openssl genrsa -out /etc/ssl/private/${KEY_NAME}.key 1024
 
-FROM wso2-appcloud/tomcat:1.0.0-base
+openssl req  -new -newkey rsa:4096 -days 365 -nodes -config /crt-config.cnf -subj "/" -keyout /etc/ssl/private/${KEY_NAME}.key -out /etc/ssl/private/${KEY_NAME}.csr  && \
+    openssl x509 -req -days 365 -in /etc/ssl/private/${KEY_NAME}.csr -signkey /etc/ssl/private/${KEY_NAME}.key -out /etc/ssl/private/${KEY_NAME}.crt
 
-ENV APP_WAR ARTIFACT_NAME
-ENV WEB_APP_HOME /opt/tomcat/webapps/
+cat /etc/ssl/private/${KEY_NAME}.crt /etc/ssl/private/${KEY_NAME}.key \
+           |  tee /etc/ssl/certs/${KEY_NAME}.pem
 
-#COPY "$APP_WAR" "$WEB_APP_HOME/"
-
-CMD ["/init.sh"]
