@@ -20,7 +20,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
 import org.wso2.appcloud.core.dao.ApplicationDAO;
-import org.wso2.appcloud.core.dto.*;
+import org.wso2.appcloud.core.dto.Application;
+import org.wso2.appcloud.core.dto.RuntimeProperty;
+import org.wso2.appcloud.core.dto.Tag;
+import org.wso2.appcloud.core.dto.Deployment;
+import org.wso2.appcloud.core.dto.ApplicationType;
+import org.wso2.appcloud.core.dto.ApplicationRuntime;
+import org.wso2.appcloud.core.dto.Transport;
+import org.wso2.appcloud.core.dto.Version;
 import org.wso2.carbon.context.CarbonContext;
 
 import java.io.IOException;
@@ -109,10 +116,8 @@ public class ApplicationManager {
      * @throws AppCloudException
      */
     public static void addRuntimeProperties(List<RuntimeProperty> runtimeProperties, String versionHashId) throws AppCloudException {
-
         ApplicationDAO applicationDAO = new ApplicationDAO();
         Connection dbConnection = DBUtil.getDBConnection();
-
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         try {
@@ -141,14 +146,11 @@ public class ApplicationManager {
      */
     public static void addTags(List<Tag> tags, String versionHashId)
             throws AppCloudException {
-
         ApplicationDAO applicationDAO = new ApplicationDAO();
         Connection dbConnection = DBUtil.getDBConnection();
-
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         try {
-
             if (tags != null) {
                 applicationDAO.addTags(dbConnection, tags, versionHashId, tenantId);
                 dbConnection.commit();
@@ -510,7 +512,6 @@ public class ApplicationManager {
      * @throws AppCloudException
      */
     public static void deleteApplication(String applicationHashId) throws AppCloudException {
-
         ApplicationDAO applicationDAO = new ApplicationDAO();
         Connection dbConnection = DBUtil.getDBConnection();
 
@@ -527,7 +528,6 @@ public class ApplicationManager {
 
 
     public static void deleteVersion(String versionHashId) throws AppCloudException {
-
         ApplicationDAO applicationDAO = new ApplicationDAO();
         Connection dbConnection = DBUtil.getDBConnection();
 

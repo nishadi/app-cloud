@@ -182,31 +182,33 @@ jagg.template("application", function (inputs, outputs, jagg) {
             });
 
             $('#fileupload').fileupload({
-                submit: function(e, data){
-                      data.url = "<%=jagg.getAbsoluteUrl('/site/blocks/application/application.jag')%>",
-                          data.dataType = 'json',
-                          data.formData = {action:'uploadExistingArchive',
-                                appTypeName:appTypeName,
-                                applicationName:$("#applicationName").val(),
-                                applicationRevision:$("#applicationRevision").val()
-                          }
-                    },
-                    progressall: function (e, data) {
-                        var progress = parseInt(data.loaded / data.total * 100, 10);
-                        $('#progress .progress-bar').css(
-                            'width',
-                            progress + '%'
-                        );
-                        if(progress == 100){
-                            activateCreateApplication();
+                submit: function(e, data) {
+                    data.url = "<%=jagg.getAbsoluteUrl('/site/blocks/application/application.jag') %>",
+                        data.dataType = 'json',
+                        data.formData = {
+                            action: 'uploadExistingArchive',
+                            appTypeName: appTypeName,
+                            applicationName: $("#applicationName").val(),
+                            applicationRevision: $("#applicationRevision").val()
                         }
-                    },
-                    change:function (e, data) {
-                         $.each(data.files, function (index, file) {
-                            $("#uploadedFileName").val(file.name);
-                        });
-                        $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
+                },
+                progressall: function(e, data) {
+                    //First parameters is percentage, second parameter is decimal radix
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    $('#progress .progress-bar').css(
+                        'width',
+                        progress + '%'
+                    );
+                    if (progress == 100) {
+                        activateCreateApplication();
                     }
+                },
+                change: function(e, data) {
+                    $.each(data.files, function(index, file) {
+                        $("#uploadedFileName").val(file.name);
+                    });
+                    $('#progress .progress-bar').replaceWith("<div class=\"progress-bar progress-bar-success\" style=\"width: 0%;\"></div>");
+                }
             });
 
         function drawProgressWindow(){
@@ -383,18 +385,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
         //Initially the create button is disabled
         $("#add-application").prop("disabled", true);
 
-        $.validator.addMethod("validateContent",
-            validateContent, getContentInvalidErrorMsg);
-        $.validator.addMethod("validateAppIcon",
-            validateAppIcon, getIconErrorMessage);
-        $.validator.addMethod("validateApplicationNameChar",
-            validateApplicationNameChar, getValidationFailErrorMsg);
-        $.validator.addMethod("validationApplicationRevisionChar",
-            validationApplicationRevisionChar, getValidationFailErrorMsg);
-        $.validator.addMethod("validateRuntimeSelection",
-                    validateRuntimeSelection, "Please select a valid runtime");
-        $.validator.addMethod("validateArtifact",
-                            validateArtifact, getArtifactErrorMessage);
+        $.validator.addMethod("validateContent", validateContent, getContentInvalidErrorMsg);
+        $.validator.addMethod("validateAppIcon", validateAppIcon, getIconErrorMessage);
+        $.validator.addMethod("validateApplicationNameChar", validateApplicationNameChar, getValidationFailErrorMsg);
+        $.validator.addMethod("validationApplicationRevisionChar", validationApplicationRevisionChar, getValidationFailErrorMsg);
+        $.validator.addMethod("validateRuntimeSelection", validateRuntimeSelection, "Please select a valid runtime");
+        $.validator.addMethod("validateArtifact", validateArtifact, getArtifactErrorMessage);
 
         $("#appIcon").change(function() {
              $("#icon").val($("#appIcon").val());
@@ -432,55 +428,36 @@ jagg.template("application", function (inputs, outputs, jagg) {
         });
 
         function validateApplicationNameChar(value){
-            var regexPattern = [];
             var patternNonAlphaNumExceptHyphen = /[^\w -]/g;
-            var isPattern = patternNonAlphaNumExceptHyphen.test(value);
-            regexPattern.push(isPattern);
-            var message = "Application Name has invalid characters. Valid characters are a-z A-Z 0-9 -";
-            var isValid = validateWithRegexPatters(regexPattern, message);
+            var isPatternMatch = patternNonAlphaNumExceptHyphen.test(value);
+            validationFailErrorMsg = "Application Name has invalid characters. Valid characters are a-z A-Z 0-9 -";
 
-            return isValid;
+            return !isPatternMatch;
         }
 
         function validationApplicationRevisionChar(value){
-            var regexPattern = [];
             var patternNonAlphaNum = /^(?:(\d{1,2})\.)?(?:(\d{1,2})\.)?(\*|\d{1,2})$/g;
-            var isPattern = !patternNonAlphaNum.test(value);
-            regexPattern.push(isPattern);
-            var message = "Invalid version number - Provide version number in format major.minor.patch";
-            return validateWithRegexPatters(regexPattern, message);
+            var isPatternMatch = patternNonAlphaNum.test(value);
+            validationFailErrorMsg = "Invalid version number - Provide version number in format major.minor.patch";
+
+            return isPatternMatch;
         }
 
         function validateRuntimeSelection(value){
             return (value > 0 ) ? true : false;
         }
 
-        function validateWithRegexPatters(regexPatters, message){
+        function validateContent(value, element) {
             var isValueValid = true;
-            for(var i = 0; i < regexPatters.length; i++){
-                if(regexPatters[i]){
-                   validationFailErrorMsg = message;
-                   return isValueValid = false;
-                }
+            var valueLength = (value).length;
+            if (valueLength == 0) {
+                contentInvalidErrorMsg = "Empty values are not allowed for " + $(element).attr("name");
+                isValueValid = false;
+            } else if (!isNaN(value)) {
+                contentInvalidErrorMsg = "Non-alphanumeric characters are not allowed for " + $(element).attr("name");
+                isValueValid = false;
             }
             return isValueValid;
-        }
-
-        function validateContent(value, element) {
-             var isValueValid = true;
-             var valueLength = (value).length;
-             if (valueLength == 0) {
-                 // Here we are setting the error message as duplicated app name since we are not allowing to change
-                 // the app key
-                 contentInvalidErrorMsg = "Invalid value - Enter a value which is not empty";
-                 isValueValid = false;
-             } else if (!isNaN(value)){
-                 // Here we are setting the error message as duplicated app name since we are not allowing to change
-                 // the app key
-                 contentInvalidErrorMsg =  "Invalid value - Enter a value which has only alphanumeric characters";
-                 isValueValid = false;
-             }
-             return isValueValid;
         }
 
         function getContentInvalidErrorMsg(){
@@ -711,7 +688,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         }
         %>
     </div>
-<!-- EOF App factory menu actionbar-->
+<!-- EOF App Cloud menu actionbar-->
 
 <div class="container-fluid cloud-container">
         <div class="row">
@@ -925,7 +902,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.iframe-transport.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.validate.min.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/additional-methods.min.js'))%>"></script>
-
     <!-- --------------------------------------- Overlay ----------------------------------------- -->
     <div class="modal fade build-logs-modal" id="app_creation_progress_modal">
         <div class="modal-dialog modal-dialog-margin-top-md ">

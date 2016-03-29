@@ -172,7 +172,6 @@ $(document).ready(function () {
             $(this).parent().parent().parent().find('#value')[0].readOnly = true;
 
             displayAppRedeployNotification();
-
         });
     });
 
@@ -226,7 +225,7 @@ $(document).on('click', '.panel-heading a', function (e) {
 });
 
 function displayAppRedeployNotification(){
-    jagg.message({content: "Please redeploy the application for effect updated runtime variables", type: 'info'});
+    jagg.message({content: "Please redeploy the application to take effect updated runtime variables", type: 'info'});
 }
 
 

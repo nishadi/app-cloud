@@ -190,7 +190,7 @@ public class SQLQueryConstants {
     public static final String DELETE_TAG =
             "DELETE FROM AC_TAG WHERE version_id=(SELECT id FROM AC_VERSION WHERE hash_id=?) AND name=?";
 
-    public static final String DELETE_APPLICATION = "DELETE FROM AC_APPLICATION WHERE hash_id = ?";
+    public static final String DELETE_APPLICATION = "DELETE FROM AC_APPLICATION WHERE hash_id=?";
 
     public static final String DELETE_VERSION = "DELETE FROM AC_VERSION WHERE hash_id=?";
 

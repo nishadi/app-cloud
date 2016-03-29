@@ -109,8 +109,7 @@ var log = new Log();
         response.status = 200;
         response.message = "Application starting requested is completed successfully.";
 
-    }else if (action == "getApplicationCreationEvents"){
-
+    } else if (action == "getApplicationCreationEvents") {
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
 
