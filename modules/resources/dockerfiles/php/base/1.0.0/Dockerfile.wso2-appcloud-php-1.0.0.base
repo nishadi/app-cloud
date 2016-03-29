@@ -21,12 +21,18 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y libcurl4-gnutls-dev libpng-dev unzip cron re2c php5-imap python git
 RUN docker-php-ext-install curl gd zip mbstring mysqli
 RUN a2enmod headers expires deflate rewrite
+RUN apt-get install openssl
 
-COPY ssl-cert-snakeoil.key /etc/ssl/private/ssl-cert-snakeoil.key
-COPY ssl-cert-snakeoil.pem /etc/ssl/certs/ssl-cert-snakeoil.pem
+ENV KEY_NAME ssl-cert-snakeoil
+ENV COMMON_NAME localhost
+
 COPY config/php.ini /usr/local/etc/php/
 COPY init.sh /usr/local/bin/init.sh
 RUN chmod u+x /usr/local/bin/init.sh
+
+COPY base-init.sh /base-init.sh
+COPY crt-config.cnf /crt-config.cnf
+RUN /bin/sh /base-init.sh
 
 RUN /usr/sbin/a2ensite default-ssl
 RUN /usr/sbin/a2enmod ssl
@@ -36,3 +42,6 @@ EXPOSE 443
 
 CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
 
+#Add WSO2 user
+RUN addgroup wso2 \
+    && adduser --system --shell /bin/bash --gecos 'WSO2User' --ingroup wso2 --disabled-login wso2user
