@@ -18,6 +18,7 @@
  */
 var TMP_UPLOADED_APPLICATIONS_PATH = "tmpUploadedApps";
 var ARTIFACT_UPLOAD_DIRECTORY = "/tmp/";
+var POD_TIMEOUT = "Pod.TimeOut";
 var PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH="Appmgt.DeploymentDirPath";
 var PROPERTY_DOCKER_REGISTRY_URL="DockerRegistryURL";
 var PROPERTY_STORAGE_SERVER_URL="StorageServerURL";

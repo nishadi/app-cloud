@@ -7,8 +7,8 @@ $(document).ready(function() {
     initPageView();
     var nextVersion = generateNextPossibleVersion(application.versions);
     var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+application.applicationType +
-                        "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
-                        + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;
+                            "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
+                                    + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;
     $('#upload-revision').attr("href", uploadRevisionUrl);
 });
 
@@ -23,7 +23,7 @@ function initPageView() {
         changeSelectedRevision(newRevision);
     });
 
-    $('#btn-launchApp').click(function() {
+    $('body').on('click', '#btn-launchApp', function() {
         var appUrl = $('#btn-launchApp').attr("url");
         var newWindow = window.open('','_blank');
         newWindow.location = appUrl;
@@ -53,7 +53,7 @@ function listTags(){
     }
     if(tagListLength > 3) {
         tagString += "</br><a class='view-tag' href='/appmgt/site/pages/tags.jag?applicationKey=" + applicationKey
-        + "&versionKey=" + selectedApplicationRevision.hashId + "'>View All Tags</a>";
+                             + "&versionKey=" + selectedApplicationRevision.hashId + "'>View All Tags</a>";
     }
 
     $('#tag-list').html(tagString);
@@ -69,8 +69,8 @@ function loadAppIcon() {
         iconDiv = '<img id="app-icon"  src="data:image/bmp;base64,' + application.icon + '" width="100px"/>'
     } else {
         iconDiv = '<div class="app-icon" style="background:' + application.uniqueColor + '">' +
-                      '<i class="fw ' + application.appTypeIcon + ' fw-4x" data-toggle="tooltip" ></i>' +
-                      '</div>';
+                  '<i class="fw ' + application.appTypeIcon + ' fw-4x" data-toggle="tooltip" ></i>' +
+                  '</div>';
     }
 
     $("#app-icon").html(iconDiv);
@@ -105,10 +105,58 @@ function changeSelectedRevision(newRevision){
     // Change replica status
     $("#tableStatus").html(selectedApplicationRevision.status);
 
+    // Change version status in UI
+    if(selectedApplicationRevision.status == 'running'){
+
+        $('.sec').empty();
+        $('.sec').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"' +
+                       'url="' + deploymentURL + '">Launch App</button>' +
+                       '<div class="btn-group ctrl-edit-button btn-edit-code"><a type="button" ' +
+                       'class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication();">Stop' +
+                       '<span id="stop-in-progress"><span></a></div>');
+
+        $('.block-replica').empty();
+        $('.block-replica').html('<h3>Replicas</h3><div class="block-replicas"><figure class="node-cicle" ' +
+                                 'data-percent="100"><figcaption>01</figcaption><svg width="200" height="200">' +
+                                 '<circle class="outer" cx="95" cy="95" r="85" transform="rotate(-90, 95, 95)"/></svg>' +
+                                 '<a href="/appmgt/site/pages/runtimeLogs.jag?applicationKey= ' + applicationKey + '&selectedRevision=' + newRevision + '>' +
+                                 '<span class="view-log">View Logs</span></a></figure></div><div class="block-replicas">' +
+                                 '<figure class="node-cicle"><figcaption><span class="fw-stack fw-lg ">' +
+                                 '<i class="fw fw-ring fw-stack-2x"></i><i class="fw fw-add fw-stack-1x" ' +
+                                 'data-toggle="tooltip" title="Adding replicas to your application will not support in this release."></i>' +
+                                 '</span></figcaption></figure></div>');
+
+    } else if(selectedApplicationRevision.status == 'stopped'){
+
+        $('.sec').empty();
+        $('.sec').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"' +
+                       'url="' + deploymentURL + '" disabled>Launch App</button>' +
+                       '<div class="btn-group ctrl-edit-button btn-edit-code"><a type="button" ' +
+                       'class="btn cu-btn cu-btn-md cu-btn-blue" onclick="startApplication();">Start</a></div>');
+
+        $('.block-replica').empty();
+        $('.block-replica').html('<h3>Replicas</h3><div class="block-replicas"><figure class="node-cicle" data-percent="100">' +
+                                 '<figcaption>01</figcaption><svg width="200" height="200"><circle class="outer" ' +
+                                 'style="stroke: #ACAFAD;" cx="95" cy="95" r="85" transform="rotate(-90, 95, 95)"/></svg>' +
+                                 '</figure></div><div class="block-replicas"><figure class="node-cicle"><figcaption>' +
+                                 '<span class="fw-stack fw-lg "><i class="fw fw-ring fw-stack-2x"></i>' +
+                                 '<i class="fw fw-add fw-stack-1x" data-toggle="tooltip"' +
+                                 ' title="Adding replicas to your application will not support in this release.">' +
+                                 '</i></span></figcaption></figure></div>');
+    } else {
+
+        $('.sec').empty();
+        $('.sec').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp" ' +
+                       'url="' + deploymentURL + '" disabled>Launch App</button>' +
+                       '<div class="btn-group ctrl-edit-button btn-edit-code"><a type="button" ' +
+                       'class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Error has occurred.</a></div>');
+
+    }
+
     // Set upload revision btn
     var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+application.applicationType + //"&applicationName="+applicationName;
-                        "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
-                        + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;
+                            "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
+                                    + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;
     $('#upload-revision').attr("href", uploadRevisionUrl);
 
     changeRuntimeProps(selectedApplicationRevision);
@@ -211,10 +259,10 @@ function deleteApplication(){
 
 function deleteApplicationPopUp(){
     jagg.popMessage({type:'confirm', modalStatus: true, title:'Delete Application Version',content:'Are you sure you want to delete this version:' + selectedRevision + ' ?',
-        okCallback:function(){
-           deleteApplication();
-        }, cancelCallback:function(){}
-    });
+                        okCallback:function(){
+                            deleteApplication();
+                        }, cancelCallback:function(){}
+                    });
 }
 
 function redirectAppListing() {
