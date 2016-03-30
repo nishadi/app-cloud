@@ -56,8 +56,8 @@ var addApplication = function (applicationName, versionName, applicationDescript
     var tenantId = modManager.getTenantId();
     var applicationHashId = Util.getApplicationHashId(applicationName, tenantId);
     var versionHashId = Util.getVersionHashId(applicationName, versionName, tenantId);
-   
-    if(isNewVersion == 'true'){        
+
+    if(isNewVersion == 'true'){
         createAppVersionInDataBase(versionName, runtimeId, runtimePropertiesArray, tagArray, applicationHashId, versionHashId);
     }else{
         createAppInDataBase(applicationName, versionName, applicationDescription, replicas, runtimeId, appTypeName,
@@ -268,7 +268,7 @@ var createAppVersionInDataBase = function( versionName,   runtimeId, runtimeProp
        // deleteApplicationUploadedPath(applicationName, versionName);
         throw e;
     }
-    return application;
+    return version;
 }
 
 
@@ -386,7 +386,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
     var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
     var prevPodStatus = "";
     addEvent(POD_STATUS, EVENT_PENDING, podStatus, versionHashId);
-    
+
     var timeOut = modManager.getPropertyValue(POD_TIMEOUT);
     var counter = 0;
     while(counter < timeOut){ // Waiting 5 minutes to gets pods up and running
@@ -440,6 +440,15 @@ var deleteDeployment = function(versionHashId){
 var updateApplicationStatus = function(versionHashId, status){
     ApplicationManager.updateVersionStatus(versionHashId, status);
 };
+
+var redeployVersion = function(applicationName, versionName, versionHashId){
+    deleteApplicationFromKubernetes(versionHashId);
+    updateApplicationStatus(versionHashId, APPLICATION_STOPPED);
+    java.lang.Thread.sleep(20000);
+    redeployApplication(applicationName, versionName, versionHashId);
+    return true;
+};
+
 
 var redeployApplication = function(applicationName, versionName, versionHashId){
     var deploymentConfig = buildDeploymentConfigFromDB(versionHashId);

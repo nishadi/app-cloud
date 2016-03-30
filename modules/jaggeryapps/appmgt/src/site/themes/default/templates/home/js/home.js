@@ -113,14 +113,16 @@ function changeSelectedRevision(newRevision){
                        'url="' + deploymentURL + '">Launch App</button>' +
                        '<div class="btn-group ctrl-edit-button btn-edit-code"><a type="button" ' +
                        'class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication();">Stop' +
-                       '<span id="stop-in-progress"><span></a></div>');
+                       '<span id="stop-in-progress"><span></a></div><div class="btn-group ctrl-edit-button btn-edit-code">' +
+                       '<a type="button" class="btn cu-btn cu-btn-md cu-btn-gray" onclick="redeployApplication();">' +
+                       'Redeploy<span id="redeploy-in-progress"><span></a></div>');
 
         $('.block-replica').empty();
         $('.block-replica').html('<h3>Replicas</h3><div class="block-replicas"><figure class="node-cicle" ' +
                                  'data-percent="100"><figcaption>01</figcaption><svg width="200" height="200">' +
                                  '<circle class="outer" cx="95" cy="95" r="85" transform="rotate(-90, 95, 95)"/></svg>' +
-                                 '<a href="/appmgt/site/pages/runtimeLogs.jag?applicationKey= ' + applicationKey + '&selectedRevision=' + newRevision +
-                                 '<span class="view-log">View Logs</span></a></figure></div><div class="block-replicas">' +
+                                 '<a href="/appmgt/site/pages/runtimeLogs.jag?applicationKey=' + applicationKey + '&selectedRevision=' + newRevision +
+                                 '"><span class="view-log">View Logs</span></a></figure></div><div class="block-replicas">' +
                                  '<figure class="node-cicle"><figcaption><span class="fw-stack fw-lg ">' +
                                  '<i class="fw fw-ring fw-stack-2x"></i><i class="fw fw-add fw-stack-1x" ' +
                                  'data-toggle="tooltip" title="Adding replicas to your application will not support in this release."></i>' +
