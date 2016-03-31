@@ -43,7 +43,7 @@ var Util = Packages.org.wso2.appcloud.core.Util;
  */
 
 var addApplicationViaGitHub = function (applicationName, versionName, applicationDescription, replicas,
-                                        runtimeId, appTypeName, runtimePropertiesArray, tagArray, appIcon, gitHubRepoUrl, gitHubRepoBranch, token) {
+                                        runtimeId, appTypeName, runtimePropertiesArray, tagArray, appIcon, gitHubRepoUrl, gitHubRepoBranch, token, isNewVersion) {
 
     log.info("Started creating App => name : " + applicationName + " Version : " + versionName + " Description " +
              ": " + applicationDescription + " runtimeId : " + runtimeId + " apptype : " + appTypeName + " GitHub url: "
@@ -52,15 +52,22 @@ var addApplicationViaGitHub = function (applicationName, versionName, applicatio
     var tenantId = modManager.getTenantId();
     var applicationHashId = Util.getApplicationHashId(applicationName, tenantId);
     var versionHashId = Util.getVersionHashId(applicationName, versionName, tenantId);
-    var application = appManager.createAppInDataBase(applicationName, versionName, applicationDescription, replicas, runtimeId, appTypeName,
-                                                     runtimePropertiesArray, tagArray, appIcon, applicationHashId, versionHashId);
+    var version;
+
+    if(isNewVersion == 'true'){
+        version = appManager.createAppVersionInDataBase(versionName, runtimeId, runtimePropertiesArray, tagArray, applicationHashId, versionHashId);
+    }else{
+        var application = appManager.createAppInDataBase(applicationName, versionName, applicationDescription, replicas, runtimeId, appTypeName,
+                                                         runtimePropertiesArray, tagArray, appIcon, applicationHashId, versionHashId);
+        version = application.getVersions().get(0);
+    }
+
     var applicationRuntime = ApplicationManager.getRuntimeById(runtimeId);
     var tagName = applicationRuntime.getTag() +"-"+ versionHashId;
     var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
     var dockerOpClient = new DockerOpClient(modManager.getPropertyValue("DockerClientURL"));
-    var version = application.getVersions().get(0);
-    var runtimeProperties = version.getRuntimeProperties();
 
+    var runtimeProperties = version.getRuntimeProperties();
     var absFileUploadedPath =  createDockerFileForGitHub(applicationName, versionName, runtimeId, gitHubRepoUrl, gitHubRepoBranch, versionHashId, dockerOpClient);
     appManager.buildDockerImage(applicationName, versionName, runtimeId, absFileUploadedPath, applicationRuntime, tagName, versionHashId, dockerOpClient);
     appManager.pushDockerImage(applicationName, versionName, applicationRuntime, tagName, versionHashId, dockerOpClient);
