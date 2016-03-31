@@ -48,14 +48,14 @@ public class DockerOpClient {
 
     public DockerOpClient() {
         Config config = new ConfigBuilder()
-                .withMasterUrl(DockerOpClientConstants.DEFAULT_DOCKER_URL)
+                .withDockerUrl(DockerOpClientConstants.DEFAULT_DOCKER_URL)
                 .build();
         dockerClient = new DefaultDockerClient(config);
     }
 
     public DockerOpClient(String uri) {
         Config config = new ConfigBuilder()
-                .withMasterUrl(uri)
+                .withDockerUrl(uri)
                 .withConnectionTimeout(Integer.parseInt(AppCloudUtil.getPropertyValue(DockerOpClientConstants
                         .DOCKER_CONNECTION_TIMEOUT)))
                 .withRequestTimeout(Integer.parseInt(AppCloudUtil.getPropertyValue(DockerOpClientConstants
