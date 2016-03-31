@@ -204,4 +204,7 @@ public class SQLQueryConstants {
             "DELETE FROM AC_DEPLOYMENT WHERE id in (SELECT deployment_id from AC_VERSION WHERE application_id = " +
             "(SELECT id FROM AC_APPLICATION WHERE hash_id=?))";
 
+    public static final String DELETE_ALL_APP_VERSION_EVENTS =
+            "Delete from AC_EVENT where version_id = (SELECT id FROM AC_VERSION WHERE hash_id=?)";
+
 }
