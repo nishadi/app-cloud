@@ -46,6 +46,10 @@ jagg.module("application", {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").buildDockerImage.apply(this, arguments);
     },
 
+    deleteEventsOfAppVersions:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteEventsOfAppVersions.apply(this, arguments);
+    },
+
     deleteApplicationFromKubernetes:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteApplicationFromKubernetes.apply(this, arguments);
     },

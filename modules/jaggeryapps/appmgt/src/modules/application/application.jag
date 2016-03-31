@@ -444,10 +444,16 @@ var updateApplicationStatus = function(versionHashId, status){
 var redeployVersion = function(applicationName, versionName, versionHashId){
     deleteApplicationFromKubernetes(versionHashId);
     updateApplicationStatus(versionHashId, APPLICATION_STOPPED);
-    java.lang.Thread.sleep(20000);
+    deleteEventsOfAppVersions(versionHashId);
+    java.lang.Thread.sleep(30000);
     redeployApplication(applicationName, versionName, versionHashId);
     return true;
 };
+
+var deleteEventsOfAppVersions = function(versionHashId){
+    var eventsManager = new EventsManager();
+    eventsManager.deleteAllEventsofAppVersion(versionHashId);
+}
 
 
 var redeployApplication = function(applicationName, versionName, versionHashId){
@@ -1157,11 +1163,13 @@ var deleteApplication = function(applicationHashId) {
     try{
 
         deleteSelectedVersionFromSession(applicationHashId);
-        var versions = ApplicationManager.getVersionHashIdsOfApplication(applicationHashId);
+        var versionHashIds = ApplicationManager.getVersionHashIdsOfApplication(applicationHashId);
 
-        for (var i = 0; i < versions.size(); i++) {
-            deleteApplicationUploadedPath(versions.get(i));
-            deleteApplicationFromKubernetes(versions.get(i));
+        for (var i = 0; i < versionHashIds.size(); i++) {
+            var versionHashId = versionHashIds.get(i);
+            deleteApplicationUploadedPath(versionHashId);
+            deleteApplicationFromKubernetes(versionHashId);
+            deleteEventsOfAppVersions(versionHashId);
         }
         deleteApplicationFromDatabase(applicationHashId);
     } catch(e){
@@ -1177,6 +1185,7 @@ var deleteVersion = function(versionHashId, isAutoDelete, isDeployed){
     }
     if(isDeployed) {
         deleteApplicationFromKubernetes(versionHashId);
+        deleteEventsOfAppVersions(versionHashId);
     }
 
     var applicationHashId = ApplicationManager.getApplicationHashIdByVersionHashId(versionHashId);

@@ -94,6 +94,7 @@ var log = new Log();
         applicationModule.deleteApplicationFromKubernetes(versionKey);
         // update application status to stopped
         applicationModule.updateApplicationStatus(versionKey, APPLICATION_STOPPED);
+        applicationModule.deleteEventsOfAppVersions(versionKey);
 
         response.status = 200;
         response.message = "Application is successfully stopped.";
