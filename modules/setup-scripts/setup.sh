@@ -73,7 +73,7 @@ cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-dsl-1.0.10.jar $AS_HOME/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-model-1.0.10.jar $AS_HOME/repository/components/dropins/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-annotations-2.7.3.jar $AS_HOME/repository/components/dropins/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-core-2.7.3.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-databind-2.6.3.jar $AS_HOME/repository/components/dropins/
+cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-databind-2.7.3.jar $AS_HOME/repository/components/dropins/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-dataformat-yaml-2.7.3.jar $AS_HOME/repository/components/dropins/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/slf4j-api-1.7.12.wso2v1.jar $AS_HOME/repository/components/dropins/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/snakeyaml-1.15.jar $AS_HOME/repository/components/dropins/
