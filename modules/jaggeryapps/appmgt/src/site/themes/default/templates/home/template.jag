@@ -156,6 +156,11 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                         <span id="stop-in-progress"><span>
                                       </a>
                                     </div>
+                                    <div class="btn-group ctrl-edit-button btn-edit-code">
+                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-gray" onclick="redeployApplication();">Redeploy
+                                        <span id="redeploy-in-progress"><span>
+                                      </a>
+                                    </div>
                                 <%
                                 }else if(selectedApplicationRevision.status=='stopped'){
                                 %>
@@ -327,6 +332,21 @@ jagg.template("home", function(inputs, outputs, jagg) {
         }
     });
 
+  // stop application
+    function redeployApplication(){
+        $("#redeploy-in-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
+        //executeAsync(waitAndReloadAfterStop());
+        executeAsync(drawProgressWindow("Redeploying..."));
+        jagg.post("../blocks/application/application.jag", {
+            action: "redeployApplication",
+            applicationName: applicationName,
+            applicationRevision: selectedRevision,
+            versionKey: selectedApplicationRevision.hashId
+        }, function (result) {
+            jagg.message({content: "Application redeploy request submitted successfully.", type: 'info'});
+        });
+    }
+
     // stop application
     function stopApplication(){
         $("#stop-in-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
@@ -353,7 +373,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
     // redeploy application
     function startApplication(){
 
-        executeAsync(drawProgressWindow());
+        executeAsync(drawProgressWindow("Restarting..."));
 
         jagg.post("../blocks/application/application.jag", {
             action: "startApplication",
@@ -366,10 +386,10 @@ jagg.template("home", function(inputs, outputs, jagg) {
         });
     }
 
-    function drawProgressWindow(){
+    function drawProgressWindow(heading){
         $('#app_creation_progress_modal').modal({ backdrop: 'static', keyboard: false});
         $("#app_creation_progress_modal").show();
-        $("#modal-title").text("Restarting...");
+        $("#modal-title").text(heading);
         setInterval(pollEvents, 5000);
     }
 

@@ -794,10 +794,10 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     <input id="gitRepoBranch" name="gitRepoBranch" type="text" class="form-control" placeholder="Enter GitHub Repository branch" />
                 </div>
                 <br/>
-                <div class="input-group">
+                <!--div class="input-group">
                     <span class="input-group-addon">Token</span>
                     <input id="token" name="token" type="text" class="form-control" placeholder="Enter Personal access token" />
-                </div>
+                </div-->
             </div>
 
             <div class="form-group">

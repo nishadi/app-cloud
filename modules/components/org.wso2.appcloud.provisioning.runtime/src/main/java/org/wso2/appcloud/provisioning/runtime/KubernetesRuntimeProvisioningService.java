@@ -863,7 +863,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
     public void deleteK8sKind(String k8sKind) throws RuntimeProvisioningException {
         KubernetesClient kubernetesClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
         String namespace = this.namespace.getMetadata().getName();
-        Map<String, String> labels = KubernetesProvisioningUtils.getLableMap(applicationContext);
+        Map<String, String> labels = KubernetesProvisioningUtils.getDeleteLables(applicationContext);
 
         try {
             switch (k8sKind) {

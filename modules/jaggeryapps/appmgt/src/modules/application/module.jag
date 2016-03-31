@@ -26,6 +26,10 @@ jagg.module("application", {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").createAppInDataBase.apply(this, arguments);
     },
 
+    createAppVersionInDataBase:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").createAppVersionInDataBase.apply(this, arguments);
+    },
+
     addEvent:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").addEvent.apply(this, arguments);
     },
@@ -60,6 +64,10 @@ jagg.module("application", {
 
     redeployApplication:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").redeployApplication.apply(this, arguments);
+    },
+
+    redeployVersion:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").redeployVersion.apply(this, arguments);
     },
 
     updateApplicationStatus:function () {

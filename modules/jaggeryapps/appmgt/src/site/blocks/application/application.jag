@@ -45,7 +45,7 @@ var log = new Log();
         var isNewVersion = request.getParameter("isNewVersion");
         if(isNewVersion == null) {
             isNewVersion = false;
-        }        
+        }
 
         var unparsedRuntimeProps = request.getParameter("runtimeProperties");
         var runtimeProperties = [];
@@ -79,8 +79,8 @@ var log = new Log();
             var gitRepoBranch = request.getParameter("gitRepoBranch");
             var token = request.getParameter("token");
             gitHubAppModule.addApplicationViaGitHub(applicationName, applicationRevision, applicationDescription, replicas,
-                                             runtimeId, appTypeName, runtimeProperties, tags, appIcon, gitRepoUrl,
-                                             gitRepoBranch, token);
+                                                    runtimeId, appTypeName, runtimeProperties, tags, appIcon, gitRepoUrl,
+                                                    gitRepoBranch, token, isNewVersion);
         }
         response.status = 200;
         response.message = "Application creation is successfully submitted";
@@ -97,6 +97,17 @@ var log = new Log();
 
         response.status = 200;
         response.message = "Application is successfully stopped.";
+
+    } else if(action == "redeployApplication"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var versionKey = request.getParameter("versionKey");
+
+        // redeploy application from kubernetes
+        applicationModule.redeployVersion(applicationName, applicationRevision, versionKey);
+
+        response.status = 200;
+        response.message = "Application is successfully redeployed.";
 
     }else if(action == "startApplication"){
         var applicationName = request.getParameter("applicationName");
@@ -252,18 +263,18 @@ var log = new Log();
         }
 
     } else if (action == "deleteApplication"){
-             var applicationKey = request.getParameter("applicationKey");
-             var mod = jagg.module("application");
-             try {
-                mod.deleteApplication(applicationKey);
-                print(true);
-             } catch (e) {
-                 var msg = "Error while deleting application with hash id : " + applicationKey;
-                 log.error(msg);
-                 log.error(e);
-                 response.status = 500;
-                 response.content = msg;
-             }
+        var applicationKey = request.getParameter("applicationKey");
+        var mod = jagg.module("application");
+        try {
+            mod.deleteApplication(applicationKey);
+            print(true);
+        } catch (e) {
+            var msg = "Error while deleting application with hash id : " + applicationKey;
+            log.error(msg);
+            log.error(e);
+            response.status = 500;
+            response.content = msg;
+        }
 
     } else {
         throw new Error("No action specified for: " + action);
