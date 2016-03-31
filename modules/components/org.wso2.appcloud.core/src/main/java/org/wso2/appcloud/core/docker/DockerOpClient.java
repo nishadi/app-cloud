@@ -27,8 +27,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
 import org.wso2.appcloud.common.util.AppCloudUtil;
-import org.wso2.appcloud.core.dao.ApplicationDAO;
-import org.wso2.appcloud.core.dto.ApplicationRuntime;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,25 +68,39 @@ public class DockerOpClient {
         dockerClient = new DefaultDockerClient(config);
     }
 
-    public void createDockerFile(String runtimeId, String appType, String artifactName, String dockerFilePath,
+    public void createDockerFile(String runtimeId, String artifactName, String dockerFilePath,
                                  String dockerTemplateFilePath)
             throws IOException, AppCloudException {
 
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-        ApplicationRuntime applicationRuntime = applicationDAO.getRuntime(Integer.parseInt(runtimeId));
-
-        String dockerRegistryUrl = DockerUtil.getDockerRegistryUrl();
-        String dockerBaseImageName = applicationRuntime.getImageName();
-        String dockerBaseImageVersion = applicationRuntime.getTag();
+        String dockerFileTemplatePath = DockerUtil.getDockerFileTemplatePath(runtimeId, dockerTemplateFilePath, "default");
+        String artifactNameWithoutExtension = artifactName.substring(0, artifactName.lastIndexOf("."));
         List<String> dockerFileConfigs = new ArrayList<String>();
-        String dockerFileTemplatePath = dockerTemplateFilePath + "/" + "Dockerfile"+ "." + dockerBaseImageName + "." +
-                dockerBaseImageVersion;
         for(String line: FileUtils.readLines(new File(dockerFileTemplatePath))) {
             if(line.contains("ARTIFACT_NAME")) {
                 dockerFileConfigs.add(line.replace("ARTIFACT_NAME", artifactName));
-            }else {
+            } else if (line.contains("ARTIFACT_DIR")) {
+                dockerFileConfigs.add(line.replace("ARTIFACT_DIR", artifactNameWithoutExtension));
+            } else {
                 dockerFileConfigs.add(line);
             }
+        }
+        FileUtils.writeLines(new File(dockerFilePath), dockerFileConfigs);
+    }
+
+    public void createDockerFileForGitHub(String runtimeId, String gitRepoUrl, String gitRepoBranch,
+                                          String dockerFilePath, String dockerGitHubTemplateFilePath)
+            throws IOException, AppCloudException {
+
+        String dockerFileTemplatePath = DockerUtil.getDockerFileTemplatePath(runtimeId, dockerGitHubTemplateFilePath, "github");
+        List<String> dockerFileConfigs = new ArrayList<String>();
+        for (String line : FileUtils.readLines(new File(dockerFileTemplatePath))) {
+            if (line.contains("GIT_REPO_URL")) {
+                line = line.replace("GIT_REPO_URL", gitRepoUrl);
+            }
+            if (line.contains("GIT_REPO_BRANCH")) {
+                line = line.replace("GIT_REPO_BRANCH", gitRepoBranch);
+            }
+            dockerFileConfigs.add(line);
         }
         FileUtils.writeLines(new File(dockerFilePath), dockerFileConfigs);
     }
@@ -98,19 +110,19 @@ public class DockerOpClient {
 
         String dockerImage = repoUrl + "/" + imageName + ":" + tag;
         final boolean[] dockerStatusCheck = new boolean[1];
+	    dockerStatusCheck[0] = true;
         handle = dockerClient.image().build()
                 .withRepositoryName(dockerImage)
                 .usingListener(new EventListener() {
                     @Override
                     public void onSuccess(String message) {
-                        log.info("Success:" + message);
+                        log.info("Build Success:" + message);
                         buildDone.countDown();
-                        dockerStatusCheck[0] = true;
                     }
 
                     @Override
                     public void onError(String message) {
-                        log.error("Failure:" +message);
+                        log.error("Build Failure:" + message);
                         buildDone.countDown();
                         dockerStatusCheck[0] = false;
                     }
@@ -137,18 +149,18 @@ public class DockerOpClient {
             throws InterruptedException, IOException, AppCloudException {
 
         final boolean[] dockerStatusCheck = new boolean[1];
-        String dockerImgeName = repoUrl + "/" + imageName;
-        handle = dockerClient.image().withName(dockerImgeName).push().usingListener(new EventListener() {
+	    dockerStatusCheck[0] = true;
+        String dockerImageName = repoUrl + "/" + imageName;
+        handle = dockerClient.image().withName(dockerImageName).push().usingListener(new EventListener() {
             @Override
             public void onSuccess(String message) {
-                log.info("Success:" + message);
+                log.info("Push Success:" + message);
                 pushDone.countDown();
-                dockerStatusCheck[0] = true;
             }
 
             @Override
             public void onError(String message) {
-                log.error("Error:" + message);
+                log.error("Push Failure:" + message);
                 pushDone.countDown();
                 dockerStatusCheck[0] = false;
             }

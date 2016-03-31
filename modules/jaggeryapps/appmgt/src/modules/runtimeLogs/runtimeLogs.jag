@@ -21,21 +21,27 @@ include("/jagg/jagg.jag");
 
 var log = new Log("module/runtimeLogs/runtimeLogs.jag");
 var modManager = jagg.module("manager");
+var Util = Packages.org.wso2.appcloud.core.Util;
+var ApplicationManager = Packages.org.wso2.appcloud.core.ApplicationManager;
 
 var getRuntimeLogs = function (applicationKey, selectedRevision, applicationType) {
 
     var deploymentLog;
+    var applicationName = ApplicationManager.getApplicationNameByHashId(applicationKey);
+    var runtimeValidApplicationName = Util.getRuntimeValidAppName(applicationName);
+    var versionHashId = Util.getVersionHashId(applicationName, selectedRevision, modManager.getTenantId());
+
     try {
         var KubernetesRuntime = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
         var KubernetesProvisioningUtils = Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
-        var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(applicationKey, selectedRevision,
+        var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(runtimeValidApplicationName, selectedRevision,
                                                                                applicationType,
                                                                                modManager.getTenantId(),
-                                                                               modManager.getTenantDomain());
+                                                                               modManager.getTenantDomain(), versionHashId);
         var kubService = new KubernetesRuntime(applicationCtx);
         deploymentLog = kubService.getRuntimeLogs(null);
     } catch(e){
-        log.error("Error while getting runtime logs for application : " + applicationKey + " revision : " + selectedRevision);
+        log.error("Error while getting runtime logs for application : " + applicationName + " revision : " + selectedRevision);
         log.error(e);
         throw e;
     }

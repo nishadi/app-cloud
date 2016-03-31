@@ -119,7 +119,16 @@ public class KubernetesProvisioningUtils {
         Map<String, String> selector = new HashMap<>();
         selector.put("app", applicationContext.getId());
         selector.put("version", applicationContext.getVersion());
+        selector.put("versionHashId", applicationContext.getVersionHashId());
         return selector;
+    }
+
+    public static Map<String, String> getDeleteLables(ApplicationContext applicationContext){
+
+        Map<String, String> deleteLables = new HashMap<>();
+        deleteLables.put("versionHashId", applicationContext.getVersionHashId());
+
+        return deleteLables;
     }
 
     /**
@@ -133,7 +142,7 @@ public class KubernetesProvisioningUtils {
     }
 
     public static ApplicationContext getApplicationContext(String id, String version, String type, int tenantId,
-            String tenantDomain) {
+            String tenantDomain, String versionHashId) {
 
         ApplicationContext applicationContext = new ApplicationContext();
         applicationContext.setId(id);
@@ -143,6 +152,7 @@ public class KubernetesProvisioningUtils {
         tenantInfo.setTenantId(tenantId);
         tenantInfo.setTenantDomain(tenantDomain);
         applicationContext.setTenantInfo(tenantInfo);
+        applicationContext.setVersionHashId(versionHashId);
         return applicationContext;
     }
 
@@ -167,20 +177,19 @@ public class KubernetesProvisioningUtils {
      * @param applicationContext application context object
      * @return
      */
-    public static boolean getPodStatus(ApplicationContext applicationContext){
+    public static String getPodStatus(ApplicationContext applicationContext){
+        //todo have to fix this for multiple replicas (this only works for one replica)
         PodList podList = getPods(applicationContext);
-
-        if (podList.getItems().size() == 0) {
-            return false;
-        } else {
+        String status = "Created";
+        if (podList.getItems().size() > 0) {
             for (Pod pod : podList.getItems()) {
-                String status = KubernetesHelper.getPodStatusText(pod);
-                if (!"Running".equals(status)) {
+                status = KubernetesHelper.getPodStatusText(pod);
+                /*if (!"Running".equals(status)) {
                     return false;
-                }
+                }*/
             }
         }
-        return true;
+        return status;
 
     }
 }

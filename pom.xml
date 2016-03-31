@@ -73,6 +73,16 @@
                 <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.core</artifactId>
+                <version>${carbon.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nimbusds.wso2</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>2.26.1.wso2v2</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.appcloud</groupId>
                 <artifactId>org.wso2.appcloud.common</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
@@ -149,6 +159,7 @@
         <module>modules/components/org.wso2.appcloud.core</module>
         <module>modules/components/org.wso2.appcloud.provisioning.runtime</module>
         <module>modules/jaggeryapps/appmgt</module>
+        <!--module>modules/integreation/integration-tests</module-->
     </modules>
 
     <repositories>

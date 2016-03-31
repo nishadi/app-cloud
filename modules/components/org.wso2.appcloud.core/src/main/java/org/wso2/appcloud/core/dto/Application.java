@@ -22,33 +22,19 @@ import java.util.List;
 
 public class Application {
 
-    private int applicationId;
     private String applicationName;
+    private String hashId;
     private String description;
-    private String revision;
-    private int runtimeId;
-    private String runtimeName;
+    private String defaultVersion;
     private String applicationType;
-    private String endpointURL;
-    private String status;
-    private int numberOfReplicas;
-    private List<RuntimeProperty> runtimeProperties;
-    private List<Label> labels;
-    private List<Endpoint> endpoints;
     private Blob icon;
+    private List<Version> versions;
 
 
     public Application(){
 
     }
 
-    public int getApplicationId() {
-        return applicationId;
-    }
-
-    public void setApplicationId(int applicationId) {
-        this.applicationId = applicationId;
-    }
 
     public String getApplicationName() {
         return applicationName;
@@ -56,6 +42,22 @@ public class Application {
 
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    public String getHashId() {
+        return hashId;
+    }
+
+    public void setHashId(String hashId) {
+        this.hashId = hashId;
+    }
+
+    public String getDefaultVersion() {
+        return defaultVersion;
+    }
+
+    public void setDefaultVersion(String defaultVersion) {
+        this.defaultVersion = defaultVersion;
     }
 
     public String getDescription() {
@@ -66,22 +68,6 @@ public class Application {
         this.description = description;
     }
 
-    public String getRevision() {
-        return revision;
-    }
-
-    public void setRevision(String revision) {
-        this.revision = revision;
-    }
-
-    public int getRuntimeId() {
-        return runtimeId;
-    }
-
-    public void setRuntimeId(int runtimeId) {
-        this.runtimeId = runtimeId;
-    }
-
     public String getApplicationType() {
         return applicationType;
     }
@@ -90,67 +76,19 @@ public class Application {
         this.applicationType = applicationType;
     }
 
-    public String getEndpointURL() {
-        return endpointURL;
-    }
-
-    public void setEndpointURL(String endpointURL) {
-        this.endpointURL = endpointURL;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public int getNumberOfReplicas() {
-        return numberOfReplicas;
-    }
-
-    public void setNumberOfReplicas(int numberOfReplicas) {
-        this.numberOfReplicas = numberOfReplicas;
-    }
-
-    public List<RuntimeProperty> getRuntimeProperties() {
-        return runtimeProperties;
-    }
-
-    public void setRuntimeProperties(List<RuntimeProperty> runtimeProperties) {
-        this.runtimeProperties = runtimeProperties;
-    }
-
-    public List<Label> getLabels() {
-        return labels;
-    }
-
-    public void setLabels(List<Label> labels) {
-        this.labels = labels;
-    }
-
-    public List<Endpoint> getEndpoints() {
-        return endpoints;
-    }
-
-    public void setEndpoints(List<Endpoint> endpoints) {
-        this.endpoints = endpoints;
-    }
-
-    public String getRuntimeName() {
-        return runtimeName;
-    }
-
-    public void setRuntimeName(String runtimeName) {
-        this.runtimeName = runtimeName;
-    }
-
     public void setIcon(Blob icon) {
         this.icon = icon;
     }
 
     public Blob getIcon() {
         return icon;
+    }
+
+    public List<Version> getVersions() {
+        return versions;
+    }
+
+    public void setVersions(List<Version> versions) {
+        this.versions = versions;
     }
 }

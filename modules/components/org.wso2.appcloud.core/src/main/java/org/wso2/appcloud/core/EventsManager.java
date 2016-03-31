@@ -17,7 +17,6 @@
 package org.wso2.appcloud.core;
 
 import org.wso2.appcloud.common.AppCloudException;
-import org.wso2.appcloud.core.dao.ApplicationDAO;
 import org.wso2.appcloud.core.dao.EventsDAO;
 import org.wso2.appcloud.core.dto.Event;
 import org.wso2.carbon.context.CarbonContext;
@@ -29,40 +28,36 @@ public class EventsManager {
     /**
      * Method for updating app creation events
      *
-     * @param applicationName application name
-     * @param revision application revision
-     * @param event event object
+     * @param versionHashId version Hash id
+     * @param event
      * @throws AppCloudException
      */
-    public void addAppCreationEvent(String applicationName, String revision, Event event) throws AppCloudException {
+    public void addAppCreationEvent(String versionHashId, Event event) throws AppCloudException {
 
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-        int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
-
         EventsDAO eventsDAO = new EventsDAO();
-        eventsDAO.addAppCreationEvent(applicationId, event);
+        eventsDAO.addAppCreationEvent(versionHashId, event, tenantId);
     }
 
     /**
      * Method for retrieve application creation event stream
      *
-     * @param applicationName application name
-     * @param revision application revision
+     * @param versionHashId version hash id
      * @return
      * @throws AppCloudException
      */
-    public Event[] getEventsOfApplication(String applicationName, String revision) throws AppCloudException {
-
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-        int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
+    public Event[] getEventsOfApplication(String versionHashId) throws AppCloudException {
 
         EventsDAO eventsDAO = new EventsDAO();
-        List<Event> events = eventsDAO.getEventsOfApplication(applicationId);
+        List<Event> events = eventsDAO.getEventsOfApplication(versionHashId);
 
         return events.toArray(new Event[events.size()]);
+    }
+
+    public void deleteAllEventsofAppVersion(String versionHashId)throws AppCloudException {
+
+        EventsDAO eventsDAO = new EventsDAO();
+        eventsDAO.deleteAppVersionEvents(versionHashId);
+
     }
 }

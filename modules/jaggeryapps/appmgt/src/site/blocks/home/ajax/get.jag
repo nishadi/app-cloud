@@ -39,9 +39,9 @@ include("/jagg/constants.jag");
         }
 
     } else if(action == "putSelectedRevisionToSession"){
-        var applicationName = request.getParameter("applicationName");
+        var applicationKey = request.getParameter("applicationKey");
         var selectedRevision = request.getParameter("selectedRevision");
-        applicationMod.putSelectedRevisionToSession(applicationName, selectedRevision)
+        applicationMod.putSelectedRevisionToSession(applicationKey, selectedRevision)
     } else {
 		throw new Error("No action specified");
 	}

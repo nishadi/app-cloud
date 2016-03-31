@@ -10,7 +10,12 @@ $(document).on('click', '.panel-heading a', function(e){
 
 $(document).on("click",".fw-cancel", function(e){ //user click on remove text
     var propBlock = $(this).parent('span').parent('div').parent('div');
-    propBlock.remove();
+    jagg.popMessage({type:'confirm', modalStatus: true, title:'Delete Tag',content:'Are you sure you want to delete this?',
+        okCallback:function(){
+            propBlock.remove();
+        }, cancelCallback:function(){}
+    });
+
 });
 
 $(document).on('click', '.fw-edit', function () {

@@ -35,7 +35,7 @@ jagg.template("page/master", function(inputs, outputs, jagg) {%>
     <link rel="shortcut icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/img/favicon-wso2-logo.ico'))%>" type="image/x-icon"/>
 </head>
 <body>
-    <div class="top-notification">This app cloud offering is currently in pre-alpha stage. Your applications will be stopped automatically after 24 hours. Please do not deploy any production applications.</div>
+    <div class="top-notification">This offering is currently in pre-alpha stage. Application availability is not guaranteed. Please do not deploy any production applications.</div>
     <div id="wrap">
         <div id="header"><% jagg.includeBlocks(outputs.header); %></div>
         <div id="body"><% jagg.includeBlocks(outputs.body); %></div>

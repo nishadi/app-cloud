@@ -48,8 +48,10 @@ var log=new Log();
         			print('false');
         		}
         	} catch (e) {
-        		log.error("Error while login user"+userName+"\n" + e.message);
-        		throw "Error while login user";
+        		log.error("Error while login user : "+userName+"\n");
+				log.error(e);
+				response.status = 401;
+				response.content = "Error while login user : "+userName;
         	}
         } else {
             response.status = 400;

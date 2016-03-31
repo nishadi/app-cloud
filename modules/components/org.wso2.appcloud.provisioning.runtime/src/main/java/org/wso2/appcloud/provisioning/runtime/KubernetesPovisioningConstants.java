@@ -36,6 +36,8 @@ public class KubernetesPovisioningConstants {
     public static final String KIND_INGRESS = "Ingress";
     public static final String KIND_SERVICE = "Service";
     public static final String KIND_SECRETS = "Secret";
+    public static final String KIND_POD = "Pod";
+    public static final String KIND_REPLICATION_CONTROLLER = "ReplicationController";
 
     public static final String ITEMS = "items";
     public static final String SPEC = "spec";
@@ -46,4 +48,12 @@ public class KubernetesPovisioningConstants {
     public static final String VOLUME_MOUNT_PATH = "/etc/";
 
     public static final String DEFAULT_INGRESS_PATH = "/";
+
+    public static final String ANNOTATION_KEY_HOST = "serviceloadbalancer/lb.host";
+    public static final String ANNOTATION_KEY_SSL_TERM = "serviceloadbalancer/lb.sslTerm";
+    public static final String ANNOTATION_VALUE_SSL_TERM = "true";
+    public static final String SERVICE_SESSION_AFFINITY_MODE = "ClientIP";
+    public static final int HTTPS_SERVICE_PORT = 443;
+
+
 }

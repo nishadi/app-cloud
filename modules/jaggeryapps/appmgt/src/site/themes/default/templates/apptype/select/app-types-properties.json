@@ -1,7 +1,8 @@
 {
-  "default":{"type":"default", "icon":"fw-java", "color":"app-color-one", "displayName":"Default Application"},
-  "war":{"type":"war", "icon":"fw-java", "color":"app-color-one", "displayName":"Java Web Application"},
-  "php":{"type":"php", "icon":"fw-website", "color":"app-color-three", "displayName":"PHP Web Application"},
-  "mss":{"type":"mss", "icon":"fw-service", "color":"app-color-two", "displayName":"Java Microservice"},
-  "car":{"type":"car", "icon":"fw-nodejs", "color":"app-color-three", "displayName":"WSO2 ESB Application"}
+    "default":{"type":"default", "icon":"fw-java", "color":"app-color-one", "displayName":"Default Application", "buildable":"false"},
+    "war":{"type":"war", "icon":"fw-java", "color":"app-color-one", "displayName":"Java Web Application", "buildable":"true"},
+    "php":{"type":"php", "icon":"fw-website", "color":"app-color-three", "displayName":"PHP Web Application", "buildable":"false"},
+    "mss":{"type":"mss", "icon":"fw-service", "color":"app-color-two", "displayName":"Java Microservice", "buildable":"true"},
+    "car":{"type":"car", "icon":"fw-nodejs", "color":"app-color-three", "displayName":"WSO2 ESB Application", "buildable":"true"},
+    "carbon":{"type":"carbon", "icon":"fw-java", "color":"app-color-six", "displayName":"WSO2 Carbon Server", "buildable":"true"}
 }

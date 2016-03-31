@@ -22,6 +22,7 @@ public class ApplicationContext {
     private String version;
     private String type;
     private TenantInfo tenantInfo;
+    private String versionHashId;
 
     public String getType() {
         return type;
@@ -53,5 +54,13 @@ public class ApplicationContext {
 
     public void setTenantInfo(TenantInfo tenantInfo) {
         this.tenantInfo = tenantInfo;
+    }
+
+    public String getVersionHashId() {
+        return versionHashId;
+    }
+
+    public void setVersionHashId(String versionHashId) {
+        this.versionHashId = versionHashId;
     }
 }

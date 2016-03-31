@@ -20,11 +20,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
 import org.wso2.appcloud.core.dao.ApplicationDAO;
-import org.wso2.appcloud.core.dto.*;
+import org.wso2.appcloud.core.dto.Application;
+import org.wso2.appcloud.core.dto.RuntimeProperty;
+import org.wso2.appcloud.core.dto.Tag;
+import org.wso2.appcloud.core.dto.Deployment;
+import org.wso2.appcloud.core.dto.ApplicationType;
+import org.wso2.appcloud.core.dto.ApplicationRuntime;
+import org.wso2.appcloud.core.dto.Transport;
+import org.wso2.appcloud.core.dto.Version;
 import org.wso2.carbon.context.CarbonContext;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -42,66 +51,119 @@ public class ApplicationManager {
      * @throws AppCloudException
      */
     public static void addApplication(Application application) throws AppCloudException {
-        ApplicationDAO applicationDAO = new ApplicationDAO();
 
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        boolean isApplicationAdded = applicationDAO.addApplication(application, tenantId);
-        if (isApplicationAdded) {
-            String applicationName = application.getApplicationName();
-            String applicationRevision = application.getRevision();
-            List<Label> labels = application.getLabels();
-            addTags(applicationName, applicationRevision, labels);
-            List<RuntimeProperty> propertyList = application.getRuntimeProperties();
-            addRuntimeProperties(applicationName, applicationRevision, propertyList);
+
+        try {
+
+            applicationDAO.addApplication(dbConnection, application, tenantId);
+            dbConnection.commit();
+
+        } catch (AppCloudException e){
+            String msg = "Error occurred while adding application to the database for application : " +
+                         application.getApplicationName() + " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error while committing the application adding transaction for application : " +
+                         application.getApplicationName() + " in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+
+    }
+
+    /**
+     * Method for adding application version
+     *
+     * @param version version object
+     * @throws AppCloudException
+     */
+    public static void addApplicationVersion(Version version, String applicationHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        try {
+            int applicationId = applicationDAO.getApplicationId(dbConnection, applicationHashId);
+            applicationDAO.addVersion(dbConnection, version,"",applicationId, tenantId);
+            dbConnection.commit();
+        } catch (AppCloudException e){
+            String msg = "Error occurred while adding application version to the database for application id : " +
+                          applicationHashId + ", version:"+ version.getVersionName()+" in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error while committing the application version adding transaction for application id : " +
+                    applicationHashId + ", version:"+ version.getVersionName()+" in tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+
+    }
+
+    /**
+     * Method for adding runtime properties for a specific version
+     *
+     * @param runtimeProperties list of runtime properties
+     * @param versionHashId version hash id
+     * @throws AppCloudException
+     */
+    public static void addRuntimeProperties(List<RuntimeProperty> runtimeProperties, String versionHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        try {
+            int versionId = applicationDAO.getVersionId(dbConnection, versionHashId);
+
+            if (runtimeProperties != null) {
+                applicationDAO.addRunTimeProperties(dbConnection, runtimeProperties, versionHashId, tenantId);
+                dbConnection.commit();
+            }
+        } catch (SQLException e) {
+            String msg = "Error while committing the transaction when adding runtime properties for version with version" +
+                         " id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
         }
     }
 
     /**
-     *  Adding runtime properties for the application
+     * Method for adding tags for a specific version
      *
-     * @param applicationName
-     * @param applicationRevision
-     * @param runtimeProperties
+     * @param tags list of tags
+     * @param versionHashId version hash id
      * @throws AppCloudException
      */
-    public static void addRuntimeProperties(String applicationName, String applicationRevision,
-            List<RuntimeProperty> runtimeProperties) throws AppCloudException {
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (runtimeProperties != null) {
-            applicationDAO.addRunTimeProperty(applicationName, applicationRevision, tenantId, runtimeProperties);
-        }
-    }
-
-    /**
-     * Adding label for the application
-     *
-     * @param applicationName
-     * @param applicationRevision
-     * @param labels
-     * @throws AppCloudException
-     */
-    public static void addTags(String applicationName, String applicationRevision, List<Label> labels)
+    public static void addTags(List<Tag> tags, String versionHashId)
             throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (labels != null) {
-            applicationDAO.addLabel(applicationName, applicationRevision, tenantId, labels);
+
+        try {
+            if (tags != null) {
+                applicationDAO.addTags(dbConnection, tags, versionHashId, tenantId);
+                dbConnection.commit();
+            }
+        } catch (SQLException e) {
+            String msg = "Error while committing the transaction when adding tags for version with hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
         }
     }
 
-    /**
-     * Method for adding endpoint associated with an application
-     *
-     * @param endpoint endpoint object
-     * @return
-     * @throws AppCloudException
-     */
-    public static boolean addEndpoint(Endpoint endpoint, String applicationName, String revision) throws AppCloudException {
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-        return applicationDAO.addEndpoint(endpoint, applicationName, revision, tenantId);
-    }
 
     /**
      * Method for getting the list of application of a tenant
@@ -109,25 +171,102 @@ public class ApplicationManager {
      * @return
      * @throws AppCloudException
      */
-    public static ApplicationSummery[] getApplicationList() throws AppCloudException {
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+    public static Application[] getApplicationList() throws AppCloudException {
+
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        List<ApplicationSummery> applicationSummeries = applicationDAO.getAllApplicationsList(tenantId);
-        return applicationSummeries.toArray(new ApplicationSummery[applicationSummeries.size()]);
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        List<Application> applications;
+
+        try {
+            applications = applicationDAO.getAllApplicationsList(dbConnection, tenantId);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+
+        return applications.toArray(new Application[applications.size()]);
     }
 
-    /**
-     * Method for getting all the revisions of a given application
-     *
-     * @param applicationName name of the application
-     * @return
-     * @throws AppCloudException
-     */
-    public static String[] getAllRevisionsOfApplication(String applicationName) throws AppCloudException {
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+    public static List<String> getVersionListOfApplication(String applicationHashId) throws AppCloudException {
+
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        List<String> revisions = applicationDAO.getAllRevisionsOfApplication(applicationName, tenantId);
-        return revisions.toArray(new String[revisions.size()]);
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            return applicationDAO.getAllVersionListOfApplication(dbConnection, applicationHashId);
+        } catch (AppCloudException e){
+            String msg = "Error while getting list of version of application with the hash id : " + applicationHashId;
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static List<String> getVersionHashIdsOfApplication(String applicationHashId) throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            return applicationDAO.getAllVersionHashIdsOfApplication(dbConnection, applicationHashId);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static boolean isSingleVersion(String versionHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            return applicationDAO.isSingleVersion(dbConnection, versionHashId);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static String getApplicationHashIdByVersionHashId(String versionHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            return applicationDAO.getApplicationHashIdByVersionHashId(dbConnection, versionHashId);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static String getApplicationNameByHashId(String applicationHashId) throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+
+            return applicationDAO.getApplicationNameByHashId(dbConnection, applicationHashId);
+        } catch (AppCloudException e) {
+            String msg = "Error while getting the application name for application with hash id : " + applicationHashId;
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static String getApplicationHashIdByName(String applicationName) throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        try {
+            return applicationDAO.getApplicationHashIdByName(dbConnection, applicationName, tenantId);
+        } catch (AppCloudException e) {
+            String msg = "Error while getting application hash id for application name : " + applicationName;
+            throw new AppCloudException(msg, e);
+        }
     }
 
     /**
@@ -139,141 +278,171 @@ public class ApplicationManager {
      */
 
     /**
-     *Method for getting application by id
+     * Method for getting application by hash id
      *
-     * @param applicationName name of the application
-     * @param revision revision of the application
+     * @param applicationHashId application hash id
      * @return
      * @throws AppCloudException
      */
-    public static Application getApplicationByNameRevision(String applicationName, String revision) throws AppCloudException {
-        ApplicationDAO applicationDAO = new ApplicationDAO();
+    public static Application getApplicationByHashId(String applicationHashId) throws AppCloudException {
 
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
         try {
-            Application application = applicationDAO.getApplicationByNameRevision(applicationName, revision, tenantId);
-            int applicationId = application.getApplicationId();
-            application.setEndpoints(applicationDAO.getAllEndpointsOfApplication(applicationId));
-            application.setRuntimeProperties(applicationDAO.getAllRuntimePropertiesOfApplication(applicationId));
-            application.setLabels(applicationDAO.getAllLabelsOfApplication(applicationId));
-            return application;
+
+            return applicationDAO.getApplicationByHashId(dbConnection, applicationHashId);
+
         } catch (AppCloudException e) {
-            String msg = "Error while getting the application detail for application : " + applicationName + " revision :" +
-                         " " + revision + " in tenant : " + tenantId;
+            String msg = "Error while getting the application detail for application with hash id : " + applicationHashId;
             throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
         }
     }
 
-    public static RuntimeProperty[] getApplicationRuntimePropertiesByNameRevision(String applicationName, String revision) throws AppCloudException {
-        ApplicationDAO applicationDAO = new ApplicationDAO();
+    public static List<RuntimeProperty> getAllRuntimePropertiesOfVersion (String versionHashId) throws AppCloudException {
 
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        try {
-            List<RuntimeProperty> runtimeProperties = applicationDAO.getAllRuntimePropertiesOfApplication(
-                    applicationName, revision, tenantId);
-            return runtimeProperties.toArray(new RuntimeProperty[runtimeProperties.size()]);
-        } catch (AppCloudException e) {
-            String msg = "Error while getting the runtime properties for application : " + applicationName + " revision :" +
-                         " " + revision + " in tenant : " + tenantId;
-            throw new AppCloudException(msg, e);
-        }
-    }
-    public static Label[] getTags(String applicationName, String revision) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
 
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
-            List<Label> labels = applicationDAO.getAllLabelsOfApplication(applicationName, revision, tenantId);
-            return labels.toArray(new Label[labels.size()]);
+
+            return applicationDAO.getAllRuntimePropertiesOfVersion(dbConnection, versionHashId);
+
         } catch (AppCloudException e) {
-            String msg = "Error while getting the tags for application : " + applicationName + " revision :" +
-                         " " + revision + " in tenant : " + tenantId;
+            String msg = "Error while getting the runtime properties for version with hash id : " + versionHashId;
             throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
         }
     }
 
 
-    public static void updateApplicationRuntimeProperty(String applicationName, String revision, String oldKey, String newKey, String oldValue, String newValue) throws AppCloudException {
-        ApplicationDAO applicationDAO = new ApplicationDAO();
+    public static List<Tag> getAllTagsOfVersion(String versionHashId) throws AppCloudException {
 
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
         try {
-            int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
-            applicationDAO.updateApplicationRuntimeProperty(applicationId, oldKey, newKey, oldValue, newValue,
-                    tenantId);
+
+            return applicationDAO.getAllTagsOfVersion(dbConnection, versionHashId);
 
         } catch (AppCloudException e) {
-            String msg = "Error while getting the runtime properties for application : " + applicationName + " revision :" +
-                         " " + revision + " in tenant : " + tenantId;
+            String msg = "Error while getting the tags for version with hash id : " + versionHashId;
             throw new AppCloudException(msg, e);
-        }
-    }
-    public static void updateTag(String applicationName, String revision, String oldKey, String newKey, String oldValue, String newValue) throws AppCloudException {
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        try {
-            int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
-            applicationDAO.updateTag(applicationId, oldKey, newKey, oldValue, newValue, tenantId);
-
-        } catch (AppCloudException e) {
-            String msg = "Error while updating the tag for application : " + applicationName + " revision :" +
-                         " " + revision + " in tenant : " + tenantId;
-            throw new AppCloudException(msg, e);
-        }
-    }
-    public static void deleteApplicationRuntimeProperty(String applicationName, String revision, String key, String value) throws AppCloudException {
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        try {
-            int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
-            applicationDAO.deleteApplicationRuntimeProperty(applicationId, key, value, tenantId);
-
-        } catch (AppCloudException e) {
-            String msg = "Error while getting the runtime properties for application : " + applicationName + " revision :" +
-                         " " + revision + " in tenant : " + tenantId;
-            throw new AppCloudException(msg, e);
-        }
-    }
-    public static void deleteTag(String applicationName, String revision, String key, String value) throws AppCloudException {
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        try {
-            int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
-            applicationDAO.deleteTag(applicationId, key, value, tenantId);
-
-        } catch (AppCloudException e) {
-            String msg = "Error while getting the runtime properties for application : " + applicationName + " revision :" +
-                         " " + revision + " in tenant : " + tenantId;
-            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
         }
     }
 
-    public static void updateApplicationIcon(String applicationName, Object iconStream)
+
+    public static void updateRuntimeProperty(String versionHashId, String oldKey, String newKey,
+                                                        String newValue) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            applicationDAO.updateRuntimeProperty(dbConnection, versionHashId, oldKey, newKey, newValue);
+            dbConnection.commit();
+
+        }  catch (SQLException e) {
+            String msg = "Error while committing transaction when adding runtime property with key : " + oldKey +
+                         " for version with hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+
+    public static void updateTag(String versionHashId, String oldKey, String newKey, String newValue)
             throws AppCloudException {
+
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            applicationDAO.updateTag(dbConnection, versionHashId, oldKey, newKey, newValue);
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while committing the transaction when updating tag with the key : " + oldKey +
+                         " for version with hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static void deleteRuntimeProperty(String versionHashId, String key)
+            throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            applicationDAO.deleteRuntimeProperty(dbConnection, versionHashId, key);
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while deleting runtime property with key : " + key + " for version with hash id : " +
+                         versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+
+    public static void deleteTag(String versionHashId, String key)
+            throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            applicationDAO.deleteTag(dbConnection, versionHashId, key);
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while committing transaction when deleting tag with key : " + key +
+                         " for version with hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public static void updateApplicationIcon(String applicationHashId, Object iconStream)
+            throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
         if( iconStream instanceof InputStream){
             InputStream iconInputStream = (InputStream) iconStream;
             try {
-                applicationDAO.updateApplicationIcon(iconInputStream, applicationName, tenantId);
-            } catch (AppCloudException e) {
-                String msg = "Error ouccered while updating application icon for application : " + applicationName +
-                             " in tenant : " + tenantId;
+                applicationDAO.updateApplicationIcon(dbConnection, iconInputStream, applicationHashId);
+                dbConnection.commit();
+            } catch (SQLException e) {
+                String msg = "Error while committing the transaction when updating the application icon for application " +
+                             "with hash id : " + applicationHashId;
+                log.error(msg, e);
                 throw new AppCloudException(msg, e);
             } finally {
                 try {
                     iconInputStream.close();
                 } catch (IOException e) {
-                    log.error("Error occurred while closing input stream for application : " + applicationName +
-                              " in tenant : " + tenantId);
+                    log.error("Error occurred while closing input stream for application with hash id : " +
+                              applicationHashId);
+                } finally {
+                    DBUtil.closeConnection(dbConnection);
                 }
             }
         } else {
-            String msg = "Cannot read the provided icon stream for application : " + applicationName + " revision : " +
-                         " in tenant : " + tenantId;
+            String msg = "Cannot read the provided icon stream for application with hash id : " + applicationHashId;
             log.error(msg);
             throw new AppCloudException(msg);
         }
@@ -315,95 +484,112 @@ public class ApplicationManager {
      * @return
      * @throws AppCloudException
      */
-    public static boolean updateApplicationStatus(String status, String applicationName, String revision) throws AppCloudException {
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+    public static boolean updateVersionStatus(String versionHashId, String status) throws AppCloudException {
+
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        return applicationDAO.updateApplicationStatus(status, applicationName, revision, tenantId);
-    }
+        Connection dbConnection = DBUtil.getDBConnection();
+        boolean isUpdateSuccess = false;
 
-
-    /**
-     * Method for updating the number of replicas for a given application
-     *
-     * @param numberOfReplica number of replicas, which should be persisted to database
-     * @param applicationName name of the application
-     * @param revision revision of the application
-     * @return
-     * @throws AppCloudException
-     */
-    public static boolean updateNumberOfReplicas(int numberOfReplica, String applicationName, String revision) throws AppCloudException {
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-        return applicationDAO.updateNumberOfReplicas(numberOfReplica, applicationName, revision, tenantId);
-    }
-
-    /**
-     * Delete a application
-     *
-     * @param applicationName
-     * @param applicationRevision
-     * @throws AppCloudException
-     */
-    public static void deleteApplication(String applicationName, String applicationRevision) throws AppCloudException {
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
-            applicationDAO.deleteApplication(applicationName, applicationRevision, tenantId);
+            isUpdateSuccess = applicationDAO.updateVersionStatus(dbConnection, status, versionHashId);
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while committing the transaction when updating version status with status : " + status +
+                         " for version with hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
 
-        } catch (AppCloudException e) {
-            String msg = "Error while delete the application : " + applicationName + " revision :" + applicationRevision
-                    + " in tenant : " + tenantId;
+        return isUpdateSuccess;
+    }
+
+    /**
+     * Method for delete an application completely
+     *
+     * @param applicationHashId application hash id
+     * @throws AppCloudException
+     */
+    public static void deleteApplication(String applicationHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            applicationDAO.deleteAllDeploymentOfApplication(dbConnection, applicationHashId);
+            applicationDAO.deleteApplication(dbConnection, applicationHashId);
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while deleting application with hash id : " + applicationHashId;
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
+
+    public static void deleteVersion(String versionHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        try {
+            applicationDAO.deleteDeployment(dbConnection, versionHashId);
+            applicationDAO.deleteVersion(dbConnection, versionHashId);
+            dbConnection.commit();
+        }  catch (SQLException e) {
+            String msg = "Error while committing the transaction when deleting the version with hash id : " + versionHashId;
+            log.error(msg, e);
             throw new AppCloudException(msg, e);
         }
     }
 
-    /**
-     * Delete all revision for a application
-     *
-     * @param applicationName
-     * @throws AppCloudException
-     */
-    public static void deleteApplicationRevisions(String applicationName) throws AppCloudException {
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-
+    public static void addDeployment(String versionHashId, Deployment deployment)throws AppCloudException {
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbcConnection = DBUtil.getDBConnection();
         try {
-            applicationDAO.deleteApplicationRevisions(applicationName, tenantId);
-
-        } catch (AppCloudException e) {
-            String msg = "Error while delete the application : " + applicationName + " in tenant : " + tenantId;
+            applicationDAO.addDeployment(dbcConnection, versionHashId, deployment, tenantId);
+            dbcConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while committing transaction when adding deployment for version with hash id : " +
+                         versionHashId;
+            log.error(msg, e);
             throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbcConnection);
         }
-	}
-    public static void addDeployment(String applicationName, String revision, Deployment deployment)throws AppCloudException {
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        ApplicationDAO applicationDAO = new ApplicationDAO();
-        applicationDAO.addDeployment(applicationName, revision, tenantId, deployment);
+
     }
 
-    public static Deployment getDeployment(String applicationName, String revision)throws AppCloudException {
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+    public static Deployment getDeployment(String versionHashId)throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        int applicationId = applicationDAO.getIdOfApplication(applicationName, revision, tenantId);
-        return applicationDAO.getDeployment(applicationId);
+        return applicationDAO.getDeployment(versionHashId);
     }
 
-    public static void deleteDeployment(String applicationName, String revision)throws AppCloudException {
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+    public static void deleteDeployment(String versionHashId)throws AppCloudException {
+
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        applicationDAO.deleteDeployment(applicationName, revision, tenantId);
+        Connection dbConnection = DBUtil.getDBConnection();
+        try {
+            applicationDAO.deleteDeployment(dbConnection, versionHashId);
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while committing transaction when deleting deployment for version with hash id : " +
+                         versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
     }
 
-    public static Service[] getServices(int runtimeId) throws AppCloudException {
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+    public static Transport[] getTransportsForRuntime (int runtimeId) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        List<Service> services = applicationDAO.getServices(runtimeId);
-        return services.toArray(new Service[services.size()]);
+        List<Transport> transports = applicationDAO.getTransportsForRuntime(runtimeId);
+        return transports.toArray(new Transport[transports.size()]);
     }
 
-    public static ApplicationRuntime getApplicationRuntime(int runtimeId) throws AppCloudException {
+    public static ApplicationRuntime getRuntimeById (int runtimeId) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        return applicationDAO.getRuntime(runtimeId);
+        return applicationDAO.getRuntimeById(runtimeId);
     }
 }

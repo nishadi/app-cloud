@@ -21,12 +21,59 @@ jagg.module("application", {
     addApplication:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").addApplication.apply(this, arguments);
     },
+
+    createAppInDataBase:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").createAppInDataBase.apply(this, arguments);
+    },
+
+    createAppVersionInDataBase:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").createAppVersionInDataBase.apply(this, arguments);
+    },
+
+    addEvent:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").addEvent.apply(this, arguments);
+    },
+
+    pushDockerImage:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").pushDockerImage.apply(this, arguments);
+    },
+
+    triggerKubernetesDeployment:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").triggerKubernetesDeployment.apply(this, arguments);
+    },
+
+    buildDockerImage:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").buildDockerImage.apply(this, arguments);
+    },
+
+    deleteEventsOfAppVersions:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteEventsOfAppVersions.apply(this, arguments);
+    },
+
     deleteApplicationFromKubernetes:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteApplicationFromKubernetes.apply(this, arguments);
     },
+
+    deleteApplicationUploadedPath:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteApplicationUploadedPath.apply(this, arguments);
+    },
+
+    deleteApplicationFromDatabase:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteApplicationFromDatabase.apply(this, arguments);
+    },
+
+    deleteApplication:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteApplication.apply(this, arguments);
+    },
+
     redeployApplication:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").redeployApplication.apply(this, arguments);
     },
+
+    redeployVersion:function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").redeployVersion.apply(this, arguments);
+    },
+
     updateApplicationStatus:function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").updateApplicationStatus.apply(this, arguments);
     },
@@ -42,56 +89,100 @@ jagg.module("application", {
     getAllApplications:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getAllApplications.apply(this, arguments);
     },
-    getApplicationByNameRevision:function() {
-        return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationByNameRevision.apply(this, arguments);
+
+    getVersionDirectoryPath:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getVersionDirectoryPath.apply(this, arguments);
     },
-    getEnvVariablesByNameRevision:function() {
-        return jagg.require(jagg.getModulesDir() + "application/application.jag").getEnvVariablesByNameRevision.apply(this, arguments);
+
+    getApplication:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplication.apply(this, arguments);
     },
-    updateApplicationRuntimeProperty:function() {
-        return jagg.require(jagg.getModulesDir() + "application/application.jag").updateApplicationRuntimeProperty.apply(this, arguments);
+
+    getEnvVariablesOfVersion:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getEnvVariablesOfVersion.apply(this, arguments);
     },
-    deleteApplicationRuntimeProperty:function() {
-        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteApplicationRuntimeProperty.apply(this, arguments);
+
+    updateRuntimeProperty:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").updateRuntimeProperty.apply(this, arguments);
     },
-    addApplicationRuntimeProperty:function() {
-        return jagg.require(jagg.getModulesDir() + "application/application.jag").addApplicationRuntimeProperty.apply(this, arguments);
+
+    deleteRuntimeProperty:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteRuntimeProperty.apply(this, arguments);
     },
+
+    addRuntimeProperty:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").addRuntimeProperty.apply(this, arguments);
+    },
+
     getTags:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getTags.apply(this, arguments);
     },
+
     updateTag:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").updateTag.apply(this, arguments);
     },
+
     deleteTag:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteTag.apply(this, arguments);
     },
+
     addTag:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").addTag.apply(this, arguments);
     },
-    getAllRevisionsOfApplication:function() {
-        return jagg.require(jagg.getModulesDir() + "application/application.jag").getAllRevisionsOfApplication.apply(this, arguments);
+
+    getVersionListOfApplication:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getVersionListOfApplication.apply(this, arguments);
     },
+
     getDeploymentURL:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getDeploymentURL.apply(this, arguments);
     },
+
     getSelectedRevisionFromSession:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getSelectedRevisionFromSession.apply(this, arguments);
     },
+
     putSelectedRevisionToSession:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").putSelectedRevisionToSession.apply(this, arguments);
     },
+
     getApplicationCreationEvents:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationCreationEvents.apply(this, arguments);
     },
+
     changeApplicationIcon:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").changeApplicationIcon.apply(this, arguments);
     },
+
     uploadExistingArchive:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").uploadExistingArchive.apply(this, arguments);
     },
+
     downloadFromUrl:function() {
-            return jagg.require(jagg.getModulesDir() + "application/application.jag").downloadFromUrl.apply(this, arguments);
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").downloadFromUrl.apply(this, arguments);
+    },
+
+    generateApplicationHashId:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").generateApplicationHashId.apply(this, arguments);
+    },
+
+    getApplicationHashIdByName:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationHashIdByName.apply(this, arguments);
+    },
+
+    getVersionHashId:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getVersionHashId.apply(this, arguments);
+    },
+
+    getApplicationNameByHashId:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getApplicationNameByHashId.apply(this, arguments);
+    },
+
+    deleteVersionFromDatabase:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteVersionFromDatabase.apply(this, arguments);
+    },
+    deleteVersion:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deleteVersion.apply(this, arguments);
     }
 });
 %>

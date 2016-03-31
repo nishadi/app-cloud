@@ -34,21 +34,21 @@ jagg.template("apptype/select", function(inputs, outputs, jagg) {
     <div class="container-fluid app-type-listing">
        <div class="row listing padding-bottom-xlg" data-count="<%=appTypes.length%>">
           <%
-        if(appTypes.length > 0){
-            for(var x=0; x < appTypes.length; x++){
-                %>
-            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 ">
-                <div class="cloud-app-type <%=appTypes[x].cssProperties.color%> cloud-app-type-max" id="<%=x+1%>"
-                        data-description="<%=appTypes[x].description%>"
-                        data-appname="<%=appTypes[x].cssProperties.displayName%>"
-                         app-type="<%=appTypes[x].name%>">
-                        <i class="fw <%=appTypes[x].cssProperties.icon%> fw-5x"></i>
-                        <div class="type-name" ><%=appTypes[x].cssProperties.displayName%></div>
+            if (appTypes.length > 0) {
+                for (var x = 0; x < appTypes.length; x++) {
+          %>
+                <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 ">
+                    <div class="cloud-app-type <%=appTypes[x].cssProperties.color%> cloud-app-type-max" id="<%=x + 1%>"
+                                data-description="<%=appTypes[x].description%>"
+                                data-appname="<%=appTypes[x].cssProperties.displayName%>"
+                                app-type="<%=appTypes[x].name%>">
+                                <i class="fw <%=appTypes[x].cssProperties.icon%> fw-5x"></i>
+                                <div class="type-name" ><%=appTypes[x].cssProperties.displayName%></div>
+                    </div>
                 </div>
-          </div>
-          <%
+        <%
+                }
             }
-        }
         %>
     </div>
 
@@ -86,90 +86,75 @@ jagg.template("apptype/select", function(inputs, outputs, jagg) {
      * this function use to append description block on app type selection
      * */
     $(document).on('click', '.cloud-app-type', function(){
-
         $('.listing').find('.longme').detach();
         if($('.cloud-app-type').hasClass('cloud-app-selected')){
             $('.cloud-app-type').removeClass('cloud-app-selected');
             $(this).addClass('cloud-app-selected');
         }else{
             $(this).addClass('cloud-app-selected');
-
         }
 
         var width = $( window ).width(),
-                currentcount = parseInt($(this).attr('id')),
-                appDescription = $(this).attr('data-description'),
-                appName = $(this).attr('data-appname'),
-                appType = $(this).attr('app-type'),
-                dataCount = parseInt($('.listing').attr('data-count'));
+                    currentcount = parseInt($(this).attr('id')),
+                    appDescription = $(this).attr('data-description'),
+                    appName = $(this).attr('data-appname'),
+                    appType = $(this).attr('app-type'),
+                    dataCount = parseInt($('.listing').attr('data-count'));
 
-        var appCreationPage = '<%=jagg.getAbsoluteUrl("/site/pages/application.jag")%>?appTypeName='+ appType;
-
-        //content replace with data attributes
+        var appCreationPage = '<%=jagg.getAbsoluteUrl("/site/pages/application.jag")%>?appTypeName=' + appType;
+        //content replace with custom html attributes call data
         $('.app-type-info-template').find('.data-appname').html(appName);
         $('.app-type-info-template').find('.app-description').html(appDescription);
         $('.app-type-info-template').find("a").attr("href", appCreationPage);
         var appendHtml =$('.app-type-info-template').html();
-
-
-        if(width >=1170){
+        //The tile count adjust according to the resolution to keep responsiveness
+        if(width >= 1170){
             if(currentcount%7 == 0){
-                $('#'+currentcount+'\\.0').parent().after(appendHtml);
+                $('#' + currentcount + '\\.0').parent().after(appendHtml);
                 $('.longme').fadeIn('slow')
             }else{
-                var ctest = currentcount+(7- currentcount%7);
-                console.log(ctest)
+                var ctest = currentcount+(7 - currentcount%7);
                 if(ctest > dataCount){
-                    $('#'+ dataCount+'\\.0').parent().after(appendHtml);
+                    $('#' + dataCount + '\\.0').parent().after(appendHtml);
                     $('.longme').fadeIn('slow')
                 }else{
-                    $('#'+ctest+'\\.0').parent().after(appendHtml);
+                    $('#' + ctest + '\\.0').parent().after(appendHtml);
                     $('.longme').fadeIn('slow')
                 }
-
             }
-        }else if(width >=970){
+        }else if(width >= 970){
             if(currentcount%4 == 0){
-                $('#'+currentcount+'\\.0').parent().after(appendHtml);
+                $('#' + currentcount + '\\.0').parent().after(appendHtml);
                 $('.longme').fadeIn('slow')
             }else{
-                var ctest = parseInt(currentcount)+(4- currentcount%4);
+                var ctest = parseInt(currentcount) + (4 - currentcount%4);
                 if(ctest > dataCount){
-                    $('#'+ dataCount+'\\.0').parent().after(appendHtml);
+                    $('#' + dataCount + '\\.0').parent().after(appendHtml);
                     $('.longme').fadeIn('slow')
                 }else{
-                    $('#'+ctest+'\\.0').parent().after(appendHtml);
+                    $('#' + ctest + '\\.0').parent().after(appendHtml);
                     $('.longme').fadeIn('slow')
-
                 }
-
             }
-        }else if(width >=750 ){
+        }else if(width >= 750){
             if(currentcount%2 == 0){
-                $('#'+currentcount+'\\.0').parent().after(appendHtml);
+                $('#' + currentcount + '\\.0').parent().after(appendHtml);
                 $('.longme').fadeIn('slow')
             }else{
                 var ctest = parseInt(currentcount)+1;
                 if(ctest > dataCount){
-                    $('#'+ dataCount+'\\.0').parent().after(appendHtml);
+                    $('#' + dataCount + '\\.0').parent().after(appendHtml);
                     $('.longme').fadeIn('slow')
                 }else{
-                    $('#'+ctest+'\\.0').parent().after(appendHtml);
+                    $('#' + ctest + '\\.0').parent().after(appendHtml);
                     $('.longme').fadeIn('slow')
-
                 }
-
             }
-
-        }else if(width <750 ){
-            $('#'+currentcount+'\\.0').parent().after(appendHtml);
+        }else if(width < 750){
+            $('#' + currentcount + '\\.0').parent().after(appendHtml);
             $('.longme').fadeIn('slow')
-
         }
-
-
     })
-
     </script>
 
     <%

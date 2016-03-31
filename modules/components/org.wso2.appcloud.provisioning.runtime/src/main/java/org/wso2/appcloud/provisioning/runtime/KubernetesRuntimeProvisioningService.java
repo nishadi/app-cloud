@@ -179,58 +179,20 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             for (Container container : containers) {
                 List<ServiceProxy> serviceProxies = container.getServiceProxies();
                 for (ServiceProxy serviceProxy : serviceProxies) {
-                    ServicePort servicePorts = new ServicePortBuilder()
-                            .withName(serviceProxy.getServiceName())
-                            .withProtocol(serviceProxy.getServiceProtocol())
-                            .withPort(serviceProxy.getServicePort())
-                            .withTargetPort(new IntOrString(serviceProxy.getServiceBackendPort()))
-                            .build();
-                    ServiceSpec serviceSpec = new ServiceSpecBuilder()
-                            .withSelector(KubernetesProvisioningUtils.getLableMap(applicationContext))
-                            .withPorts(servicePorts)
-                            .build();
-                    //Deployment Unique service name is built using deployment name and the service name.
-                    String srvBackendPort = Integer.toString(serviceProxy.getServiceBackendPort());
-                    String serviceName = serviceProxy.getServiceName() + "-" + srvBackendPort;
-                    Service service = new ServiceBuilder()
-                            .withKind(KubernetesPovisioningConstants.KIND_SERVICE)
-                            .withSpec(serviceSpec)
-                            .withMetadata(new ObjectMetaBuilder()
-                                    .withName(serviceName.toLowerCase())
-                                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
-                                    .build())
-                            .build();
+                    Service service = getService(serviceProxy);
                     serviceList.add(service);
                 }
             }
 
             kubClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
-            DeploymentList deploymentList = kubClient.extensions().deployments().list();
 
-            Deployment currentDeployement = kubClient.inNamespace(namespace.getMetadata().getName()).extensions()
-                    .deployments().withName(config.getDeploymentName().toLowerCase()).get();
-            if (currentDeployement != null) {
-                //Redeployment
-                //Deployment recreation should happen after comparing the new Deployment config with
-                // running service configs.
-                kubClient.inNamespace(namespace.getMetadata().getName()).extensions()
-                        .deployments().withName(config.getDeploymentName().toLowerCase()).replace(deployment);
-
-                //todo need to change service replacement because need to check whether service object is available
-                //Service recreation should happen after comparing the new service config with running service configs.
-//                for (Service service : serviceList) {
-//                    kubClient.inNamespace(namespace.getMetadata().getName()).services().replace(service);
-//                    serviceNameList.add(service.getMetadata().getName());
-//                }
-            } else {
-                //New Deployment
-                kubClient.inNamespace(namespace.getMetadata().getName()).extensions()
-                        .deployments().create(deployment);
-                for (Service service : serviceList) {
-                    kubClient.inNamespace(namespace.getMetadata().getName()).services().create(service);
-                    serviceNameList.add(service.getMetadata().getName());
-                }
+            //create a new deployement with servies
+            kubClient.inNamespace(namespace.getMetadata().getName()).extensions().deployments().create(deployment);
+            for (Service service : serviceList) {
+                kubClient.inNamespace(namespace.getMetadata().getName()).services().create(service);
+                serviceNameList.add(service.getMetadata().getName());
             }
+
         } catch (KubernetesClientException e) {
             String msg = "Error while creating Deployment : " + config.getDeploymentName();
             log.error(msg, e);
@@ -241,6 +203,39 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             }
         }
         return serviceNameList;
+    }
+
+    /**
+     * Get service with service port and service specification
+     * @param serviceProxy service information
+     * @return K8s service
+     */
+    private Service getService(ServiceProxy serviceProxy) {
+        Map<String, String> annotationMap = new HashMap<String, String>();
+        annotationMap.put(KubernetesPovisioningConstants.ANNOTATION_KEY_HOST, serviceProxy.getAppHostURL());
+        //Check whether service is https and enable ssl term
+        if (serviceProxy.getServicePort() == KubernetesPovisioningConstants.HTTPS_SERVICE_PORT) {
+            annotationMap.put(KubernetesPovisioningConstants.ANNOTATION_KEY_SSL_TERM,
+                    KubernetesPovisioningConstants.ANNOTATION_VALUE_SSL_TERM);
+        }
+        ServicePort servicePorts = new ServicePortBuilder().withName(serviceProxy.getServiceName())
+                .withProtocol(serviceProxy.getServiceProtocol())
+                .withPort(serviceProxy.getServicePort())
+                .withTargetPort(new IntOrString(serviceProxy.getServiceBackendPort())).build();
+        ServiceSpec serviceSpec = new ServiceSpecBuilder()
+                .withSelector(KubernetesProvisioningUtils.getLableMap(applicationContext))
+                .withPorts(servicePorts)
+                .withSessionAffinity(KubernetesPovisioningConstants.SERVICE_SESSION_AFFINITY_MODE).build();
+
+        //Deployment Unique service name is built using deployment name and the service name.
+        String serviceName = serviceProxy.getServiceName();
+        return new ServiceBuilder()
+                .withKind(KubernetesPovisioningConstants.KIND_SERVICE)
+                .withSpec(serviceSpec)
+                .withMetadata(new ObjectMetaBuilder()
+                        .withName(serviceName.toLowerCase())
+                        .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
+                        .withAnnotations(annotationMap).build()).build();
     }
 
     @Override
@@ -792,7 +787,8 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             log.debug("Ingress path: " + ingressPathStr);
         }
 
-        HTTPIngressPath ingressPath = new HTTPIngressPath(new IngressBackend(), KubernetesPovisioningConstants.DEFAULT_INGRESS_PATH);
+        HTTPIngressPath ingressPath = new HTTPIngressPath(new IngressBackend(),
+                KubernetesPovisioningConstants.DEFAULT_INGRESS_PATH);
 
         for (Service service : serviceList.getItems()) {
             if (log.isDebugEnabled()){
@@ -803,9 +799,9 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                     .withApiVersion(Ingress.ApiVersion.EXTENSIONS_V_1_BETA_1)
                     .withKind(KubernetesPovisioningConstants.KIND_INGRESS)
                     .withNewMetadata()
-                    .withName(
-                            KubernetesProvisioningUtils.createIngressMetaName(ingressName))
-                    .withNamespace(namespace.getMetadata().getName()).withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
+                    .withName(KubernetesProvisioningUtils.createIngressMetaName(ingressName))
+                    .withNamespace(namespace.getMetadata().getName())
+                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext))
                     .endMetadata()
                     .withNewSpec()
                     .withRules()
@@ -847,80 +843,56 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
     }
 
     /**
-     * Delete deployment
-     *
-     * @return false if one of the objects deletion is fail
+     * {@inheritDoc}
      */
     @Override
-    public boolean deleteDeployment() {
-        boolean deleted = true;
+    public void deleteDeployment() throws RuntimeProvisioningException {
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_REPLICATION_CONTROLLER);
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_DEPLOYMENT);
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_POD);
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_INGRESS);
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_SECRETS);
+        deleteK8sKind(KubernetesPovisioningConstants.KIND_SERVICE);
+    }
+
+    /**
+     * Delete K8s object for given kind with labels
+     *
+     * @param k8sKind k8s object type
+     */
+    public void deleteK8sKind(String k8sKind) throws RuntimeProvisioningException {
         KubernetesClient kubernetesClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
         String namespace = this.namespace.getMetadata().getName();
-
-        //If it is not deleted one object successfully, continue deleting others.
-        try {
-            kubernetesClient.extensions().deployments().inNamespace(namespace).withLabels(
-                    KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
-        } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes deployment : "
-                    + " and continue deleting replication controller";
-            log.warn(message, e);
-            deleted = false;
-        }
-
-        //Replication controller will be deleted with related pods
-        try {
-            kubernetesClient.replicationControllers().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
-        } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes replication controller in deployment"
-                    + " and continue deleting services";
-            log.warn(message, e);
-            deleted = false;
-
-        }
-
-        //Service will be deleted from the K8
-        try {
-            kubernetesClient.services().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
-        } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes services in deployment"
-                    + " and continue deleting ingress";
-            log.warn(message, e);
-            deleted = false;
-        }
-
-        //Ingress will be deleted from the K8
-        try {
-            kubernetesClient.extensions().ingress().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
-        } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes ingress in deployment"
-                    + " and continue deleting secrets";
-            log.warn(message, e);
-            deleted = false;
-        }
-
-        //Secrete will be deleted from the K8
-        try {
-            kubernetesClient.secrets().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
-        } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes secrets in deployment";
-            log.warn(message, e);
-            deleted = false;
-        }
+        Map<String, String> labels = KubernetesProvisioningUtils.getDeleteLables(applicationContext);
 
         try {
-            kubernetesClient.pods().inNamespace(namespace)
-                    .withLabels(KubernetesProvisioningUtils.getLableMap(applicationContext)).delete();
+            switch (k8sKind) {
+            case KubernetesPovisioningConstants.KIND_REPLICATION_CONTROLLER:
+                kubernetesClient.replicationControllers().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            case KubernetesPovisioningConstants.KIND_DEPLOYMENT:
+                kubernetesClient.extensions().deployments().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            case KubernetesPovisioningConstants.KIND_POD:
+                kubernetesClient.pods().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            case KubernetesPovisioningConstants.KIND_INGRESS:
+                kubernetesClient.extensions().ingress().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            case KubernetesPovisioningConstants.KIND_SECRETS:
+                kubernetesClient.secrets().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            case KubernetesPovisioningConstants.KIND_SERVICE:
+                kubernetesClient.services().inNamespace(namespace).withLabels(labels).delete();
+                break;
+            default:
+                String message = "The kubernetes kind : " + k8sKind + " deletion is not supported";
+                throw new IllegalArgumentException(message);
+            }
         } catch (KubernetesClientException e) {
-            String message = "Error while deleting kubernetes pods in deployment";
-            log.warn(message, e);
-            deleted = false;
+            String message = "Error while deleting kubernetes kind : " + k8sKind + " from deployment";
+            log.error(message, e);
+            throw new RuntimeProvisioningException(message, e);
         }
-
-        return deleted;
     }
 }

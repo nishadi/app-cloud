@@ -621,7 +621,7 @@ a.btn-action {
     padding-top: 5px;
     margin-right: 20px;
     float: left;
-    max-height: 100px;
+    max-height: 110px;
     overflow: hidden;
 }
 .app-preview .app-desc {
@@ -634,6 +634,12 @@ a.btn-action {
 .app-preview-action-bar div.sec {
     float: left;
 }
+
+.app-thumb-edit:hover{
+    cursor:pointer;
+    background-color: #757575;
+}
+
 .prod-url {
     padding: 10px 15px 11px 20px;
     font-size: 1.1em;
@@ -695,7 +701,7 @@ a.btn-action {
     margin-bottom: 2em;
     cursor: pointer;
 }
-.cloud-app-listing i {
+.cloud-app-listing i.app-type-icon {
     position: absolute;
     z-index: 98;
     right: 16px;
@@ -712,7 +718,7 @@ a.btn-action {
     z-index: 99;
     position: absolute;
     left: 130px;
-    top: 135px;
+    top: 130px;
 }
 .app-thumb span i {
     padding-left: 4px;
@@ -784,20 +790,39 @@ a.btn-action {
     top:5%;
 }
 
-.app-name {
+.app-name, .app-extra{
     position: absolute;
-    color:#000;
+    color:#fff;
     bottom: 0;
     padding: 9px 5px 2px;
-    width: 100%;
+    width: 98%;
     min-height: 3em;
     font-size: 17px;
-    background-color: #fff;
+    background-color: #383d44;
     font-weight: 300;
+    text-transform: uppercase;
 }
 
 .app-name i{
     position: relative;
+    float: left;
+}
+.app-extra{
+    right: 0;
+    width: 2%;
+    padding: 14px 12px 2px;
+    background-color: #434548;
+}
+.app-extra-menu{
+    right: 0px;
+    left: inherit;
+    border: none;
+    border-radius: 0px;
+    margin-top: 0px;
+    background-color: #434548;
+}
+.app-extra-menu li a{
+    color: #fff;
 }
 /* cloud app details */
 
@@ -2459,7 +2484,7 @@ th.hide-column-data, td.hide-column-data {
 }
 
 .div-search {
-    padding: 19px 0px 5px;
+    padding: 31px 0px 5px;
     background-color: #5F5F5F;
     margin: -15px;
 }
@@ -2625,15 +2650,17 @@ svg .outer {
     }
 }
 .top-notification {
-    position: absolute;
+    position: relative;
     background: rgba(254, 223, 45, 0.74);
     height: 32px;
     z-index: 1039;
     border: 1px solid #FEE62D;
     padding: 5px;
-    top: 8px;
-    left: 21%;
+    text-align: center;
+    width: 900px;
     border-top: none;
+    margin: 0px auto;
+    top: -40px;
 }
 
 .edit-key-values{

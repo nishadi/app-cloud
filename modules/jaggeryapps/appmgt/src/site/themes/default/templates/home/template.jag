@@ -21,29 +21,32 @@ include("/jagg/jagg.jag");
 include("/jagg/constants.jag");
 
 jagg.template("home", function(inputs, outputs, jagg) {
-    var applicationRevisions = outputs.applicationRevisions;
+    var application = outputs.application;
     var selectedRevision = outputs.selectedRevision;
-    var selectedApplicationRevision = applicationRevisions[selectedRevision];
+    var selectedApplicationRevision = application.versions[selectedRevision];
     var revisions = outputs.revision;
-    var applicationName = request.getParameter("applicationName");
-    var defaultAppIconUrl = jagg.getAbsoluteUrl("/site/themes/default/images/sample-app-image.png");
+    var applicationName = application.applicationName;
+    var applicationKey = application.hashId;
     var appCreationPageBaseUrl = jagg.getAbsoluteUrl("/site/pages/application.jag");
     var dashboardBaseUrl = DASHBOARD_BASE_URL;
     var dashboardUrl = dashboardBaseUrl + applicationName + "-" + selectedRevision;
-    var encodedLabels = encodeURIComponent(stringify(selectedApplicationRevision.labels), "UTF-8");
+    var encodedLabels = encodeURIComponent(stringify(selectedApplicationRevision.tags), "UTF-8");
     var encodedEnvs = encodeURIComponent(stringify(selectedApplicationRevision.runtimeProperties), "UTF-8");
 %>
 
 <script>
 
     var applicationName = "<%=applicationName%>";
-    var defaultAppIconUrl = "<%=defaultAppIconUrl%>";
-    var applicationRevisions = jQuery.parseJSON('<%=applicationRevisions%>');
+    var applicationKey = "<%=applicationKey%>";
+    var application = jQuery.parseJSON('<%=application%>');
     var selectedRevision = "<%=selectedRevision%>";
     var revisions = jQuery.parseJSON('<%=revisions%>');
     var appCreationPageBaseUrl = "<%=appCreationPageBaseUrl%>";
     var selectedApplicationRevision =  jQuery.parseJSON('<%=selectedApplicationRevision%>');
     var dashboardBaseUrl = "<%=dashboardBaseUrl%>";
+    var encodedLabels = "<%=encodedLabels%>";
+    var encodedEnvs = "<%=encodedEnvs%>";
+
 
 
 </script>
@@ -68,13 +71,13 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 <a href="#"><i class="fa fa-laptop"></i> Overview</a>
             </li>
             <li>
-                <a href="/appmgt/site/pages/envs.jag?applicationName=<%=applicationName%>&revision=<%=selectedRevision%>"><i class="fa fa-wrench"></i> Env Variables</a>
+                <a href="/appmgt/site/pages/envs.jag?versionKey=<%=selectedApplicationRevision.hashId%>&applicationKey=<%=applicationKey%>"><i class="fa fa-wrench"></i> Env Variables</a>
             </li>
             <li>
-                <a href="/appmgt/site/pages/tags.jag?applicationName=<%=applicationName%>&revision=<%=selectedRevision%>"><i class="fa fa-tag"></i> Tags</a>
+                <a href="/appmgt/site/pages/tags.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>"><i class="fa fa-tag"></i> Tags</a>
             </li>
             <li>
-                <a href="/appmgt/site/pages/runtimeLogs.jag?applicationName=<%=applicationName%>&selectedRevision=<%=selectedRevision%>"><i class="fa
+                <a href="/appmgt/site/pages/runtimeLogs.jag?applicationKey=<%=applicationKey%>&selectedRevision=<%=selectedRevision%>"><i class="fa
                 fa-hdd-o"></i>Runtime Logs</a>
             </li>
         </ul>
@@ -99,18 +102,17 @@ jagg.template("home", function(inputs, outputs, jagg) {
               <div class="app-thumb">
                   <div id="app-icon" class="home-app-icon">
                   </div>
-                  <span><i class="fa fa-pencil" onclick="document.getElementById('change_app_icon').click();"></i></span>
+                  <span class="app-thumb-edit"><i class="fa fa-pencil" onclick="document.getElementById('change_app_icon').click();"></i></span>
                 <form id="changeAppIcon" action="/appmgt/site/blocks/application/application.jag" method="post" enctype="multipart/form-data">
                     <input id="change_app_icon" type="file" style="display:none" name="changeIcon" />
                     <input id="action" type="hidden" name="action" value="changeAppIcon" />
-                    <input id="applicationName" type="hidden" name="applicationName" value="<%=applicationName%>"/>
-                    <input id="selectedRevision" type="hidden" name="selectedRevision" value="<%=selectedRevision%>"/>
+                    <input id="applicationKey" type="hidden" name="applicationKey" value="<%=applicationKey%>"/>
                 </form>
               </div>
               <div class="app-desc">
-                <h2><%=selectedApplicationRevision.applicationName%></h2>
+                <h2><%=applicationName%></h2>
                   <h4 class="app-run-time">Runtime: <span id="runtime"><%=selectedApplicationRevision.runtimeName%></span></h4>
-                <p id="app-description"><%=(selectedApplicationRevision.description)?selectedApplicationRevision.description:''%></p>
+                <p id="app-description"><%=(application.description)?application.description:''%></p>
                 <!--div class="app-preview-action-bar">
                     <div class="sec prod-url"><a href="#" >http://javatest.djcompany.wso2app.com</a>
                     <a href="#"><i class="fw fw-settings"></i></a>
@@ -129,9 +131,11 @@ jagg.template("home", function(inputs, outputs, jagg) {
                               </button>
                               <ul id="appVersionList" class="dropdown-menu" >
                               <%
-                                for (var x = 0; x < revisions.length; x++) {
+                                var versions = application.versions;
+                                var keyArray = Object.keys(versions);
+                                for (var x = 0; x < keyArray.length; x++) {
                               %>
-                                  <li ><a href="#"><%=revisions[x]%></a></li>
+                                  <li ><a href="#"><%=versions[keyArray[x]].versionName%></a></li>
                               <%
                               }
                               %>
@@ -148,15 +152,20 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                 if(selectedApplicationRevision.status=='running'){
                                 %>
                                     <div class="btn-group ctrl-edit-button btn-edit-code">
-                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication(document.getElementById('applicationName').value, document.getElementById('selectedRevision').value);">Stop
+                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication();">Stop
                                         <span id="stop-in-progress"><span>
+                                      </a>
+                                    </div>
+                                    <div class="btn-group ctrl-edit-button btn-edit-code">
+                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-gray" onclick="redeployApplication();">Redeploy
+                                        <span id="redeploy-in-progress"><span>
                                       </a>
                                     </div>
                                 <%
                                 }else if(selectedApplicationRevision.status=='stopped'){
                                 %>
                                     <div class="btn-group ctrl-edit-button btn-edit-code">
-                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-blue" onclick="startApplication(document.getElementById('applicationName').value, document.getElementById('selectedRevision').value);">Start</a>
+                                      <a type="button" class="btn cu-btn cu-btn-md cu-btn-blue" onclick="startApplication();">Start</a>
                                     </div>
                                 <%
 
@@ -171,11 +180,19 @@ jagg.template("home", function(inputs, outputs, jagg) {
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-12 col-lg-3">
-                         <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=selectedApplicationRevision.applicationType%>&applicationName=<%=applicationName%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>&newVersion=true">
+                          <a id="delete-version" onclick="deleteApplicationPopUp();">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
                                     <i class="fw fw-ring fw-stack-2x"></i>
-                                    <i class="fw fw-add fw-stack-1x"></i>
+                                    <i class="fw fw-delete fw-stack-1x"></i>
+                                  </span> Delete
+                              </div>
+                          </a>
+                          <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=application.applicationType%>&applicationKey=<%=applicationKey%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>&newVersion=true">
+                              <div class="btn-create-version">
+                                  <span class="fw-stack fw-lg btn-action-ico">
+                                     <i class="fw fw-ring fw-stack-2x"></i>
+                                     <i class="fw fw-add fw-stack-1x"></i>
                                   </span> Upload Version
                               </div>
                           </a>
@@ -191,7 +208,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                                 <svg width="200" height="200">
                                                    <circle class="outer" cx="95" cy="95" r="85" transform="rotate(-90, 95, 95)"/>
                                                 </svg>
-                                                <a href="/appmgt/site/pages/runtimeLogs.jag?applicationName=<%=applicationName%>&selectedRevision=<%=selectedRevision%>"><span class="view-log">View Logs</span></a>
+                                                <a href="/appmgt/site/pages/runtimeLogs.jag?applicationKey=<%=applicationKey%>&selectedRevision=<%=selectedRevision%>"><span class="view-log">View Logs</span></a>
                                         <%  } else { %>
                                                 <svg width="200" height="200">
                                                     <circle class="outer" style="stroke: #ACAFAD;" cx="95" cy="95" r="85" transform="rotate(-90, 95, 95)"/>
@@ -236,7 +253,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                    <span id="runtimePropCount"><%=selectedApplicationRevision.runtimeProperties.length.toString()%></span>
                   </div>
                   <div class="clearfix"></div>
-                  <a href="/appmgt/site/pages/envs.jag?applicationName=<%=applicationName%>&revision=<%=selectedRevision%>">
+                  <a href="/appmgt/site/pages/envs.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">
                       <div class="block-action-button">
                             <span class="fw-stack fw-lg btn-action-ico">
                                 <i class="fw fw-ring fw-stack-2x"></i>
@@ -252,7 +269,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                   </div>
                   <div class="tag-list" id="tag-list"></div>
                   <div class="clearfix"></div>
-                  <a href="/appmgt/site/pages/tags.jag?applicationName=<%=applicationName%>&revision=<%=selectedRevision%>">
+                  <a href="/appmgt/site/pages/tags.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">
                       <div class="block-action-button">
                         <span class="fw-stack fw-lg btn-action-ico">
                             <i class="fw fw-ring fw-stack-2x"></i>
@@ -272,7 +289,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
         <div class="modal-dialog modal-dialog-margin-top-md ">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="modal-title">Application Restarting</h4>
+                    <h4 class="modal-title" id="modal-title"></h4>
                 </div>
                 <div class="modal-body">
                     <div class="container-fluid">
@@ -286,6 +303,20 @@ jagg.template("home", function(inputs, outputs, jagg) {
        </div><!-- /.modal-content -->
      </div><!-- /.modal -->
 <script>
+
+    function generateNextPossibleVersion(revisionsSet){
+        var revArry = [];
+        for (var x in revisionsSet){
+            var rev = x.split(".")[0];
+            console.log(rev);
+            revArry.push(rev);
+        }
+        revArry.sort(function(a, b){return a-b});
+        var x = parseInt(revArry.pop()) + 1;
+        var nextVersion = x + '.0.0';
+
+        return nextVersion;
+    }
 
     $('.side-pane-trigger').click(function(){
         var rightPane = $('.right-pane');
@@ -301,14 +332,30 @@ jagg.template("home", function(inputs, outputs, jagg) {
         }
     });
 
+  // stop application
+    function redeployApplication(){
+        $("#redeploy-in-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
+        //executeAsync(waitAndReloadAfterStop());
+        executeAsync(drawProgressWindow("Redeploying..."));
+        jagg.post("../blocks/application/application.jag", {
+            action: "redeployApplication",
+            applicationName: applicationName,
+            applicationRevision: selectedRevision,
+            versionKey: selectedApplicationRevision.hashId
+        }, function (result) {
+            jagg.message({content: "Application redeploy request submitted successfully.", type: 'info'});
+        });
+    }
+
     // stop application
-    function stopApplication(applicationName, revision){
+    function stopApplication(){
         $("#stop-in-progress").html("<i class=\"fa fa-circle-o-notch fa-spin\"></i>");
         executeAsync(waitAndReloadAfterStop());
         jagg.post("../blocks/application/application.jag", {
             action: "stopApplication",
             applicationName: applicationName,
-            applicationRevision: revision
+            applicationRevision: selectedRevision,
+            versionKey: selectedApplicationRevision.hashId
 
         }, function (result) {
             jagg.message({content: "Application stop request is submitted successfully.", type: 'info'});
@@ -324,23 +371,25 @@ jagg.template("home", function(inputs, outputs, jagg) {
     }
 
     // redeploy application
-    function startApplication(applicationName, revision){
+    function startApplication(){
 
-        executeAsync(drawProgressWindow());
+        executeAsync(drawProgressWindow("Restarting..."));
 
         jagg.post("../blocks/application/application.jag", {
             action: "startApplication",
             applicationName: applicationName,
-            applicationRevision: revision
+            applicationRevision: selectedRevision,
+            versionKey: selectedApplicationRevision.hashId
 
         }, function (result) {
-             jagg.message({content: "Application start request is submitted successfully.", type: 'info'});
+             //jagg.message({content: "Application start request is submitted successfully.", type: 'info'});
         });
     }
 
-    function drawProgressWindow(){
+    function drawProgressWindow(heading){
         $('#app_creation_progress_modal').modal({ backdrop: 'static', keyboard: false});
         $("#app_creation_progress_modal").show();
+        $("#modal-title").text(heading);
         setInterval(pollEvents, 5000);
     }
 
@@ -362,18 +411,40 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 var statusStyle;
                 var event = result[i];
 
-                if (event.name === "Status" && event.status === "success" ){
+                if(event.status == "success"){
                     statusStyle = "success";
-                    table = table + "<tr class='" + statusStyle + "'><td>Restart Status</td>" +
-                                    "<td><i class=\"fa fa-check\"></i></td></tr>";
-                } else if (event.status == "failed"){
+                    if (event.name === "Status") {
+                            table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                            "<td>"+event.description+"</td>" +
+                                            "<td><i class=\"fa fa-check\"></i></td></tr>";
+                    } else {
+                            table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                            "<td></td>" +
+                                            "<td><i class=\"fa fa-check\"></i></td></tr>";
+                    }
+                } else if (event.status == "failed") {
                     statusStyle = "danger";
-                    table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
-                                    "<td><i class=\"fa fa-times\"></i></td></tr>";
-                } else if (event.name === "Status" && event.status === "pending" ){
-                    statusStyle = "active";
-                    table = table + "<tr class='" + statusStyle + "'><td>Starting up containers</td>" +
-                                    "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                    if (event.name === "Status") {
+                            table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                            "<td>"+event.description+"</td>" +
+                                            "<td><i class=\"fa fa-times\"></i></td></tr>";
+                    } else {
+                            table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                            "<td></td>" +
+                                            "<td><i class=\"fa fa-times\"></i></td></tr>";
+                    }
+                } else if (event.status == "pending"){
+                    if (event.name === "Status") {
+                        statusStyle = "active";
+                            table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                            "<td>"+event.description+"</td>" +
+                                            "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                    } else {
+                        statusStyle = "active";
+                            table = table + "<tr class='" + statusStyle + "'><td>" + event.name + "</td>" +
+                                            "<td></td>" +
+                                            "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
+                    }
                 }
             }
 
@@ -386,7 +457,8 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 if(event.name === "Status" && event.status === "success"){
                     setTimeout(redirectAppHome, 2000);
                     function redirectAppHome(){
-                        window.location.replace("home.jag?applicationName=" + $("#applicationName").val());
+                        window.location.replace("home.jag?applicationKey=<%=applicationKey%>");
+
                     }
                 } else if(event.status == "failed"){
                     jagg.message({content: "Error occurred while creating application.", type: 'error'});

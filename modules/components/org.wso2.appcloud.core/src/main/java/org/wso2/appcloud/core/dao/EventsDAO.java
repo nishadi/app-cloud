@@ -21,12 +21,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
 import org.wso2.appcloud.core.DBUtil;
 import org.wso2.appcloud.core.SQLQueryConstants;
-import org.wso2.appcloud.core.dto.Application;
 import org.wso2.appcloud.core.dto.Event;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -40,23 +38,24 @@ public class EventsDAO {
     /**
      * Method for adding application creation events to database
      *
-     * @param applicationId application id
+     * @param versionHashId version hash id
      * @param event application creation event
      * @return
      * @throws AppCloudException
      */
-    public boolean addAppCreationEvent(int applicationId, Event event) throws AppCloudException {
+    public boolean addAppCreationEvent(String versionHashId, Event event, int tenantId) throws AppCloudException {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
 
         try {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_APP_CREATION_EVENT);
-            preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, event.getEventName());
-            preparedStatement.setString(3, event.getEventStatus());
+            preparedStatement.setString(1, event.getEventName());
+            preparedStatement.setString(2, event.getEventStatus());
+            preparedStatement.setString(3, versionHashId);
             preparedStatement.setTimestamp(4, event.getTimestamp());
             preparedStatement.setString(5, event.getEventDescription());
+            preparedStatement.setInt(6, tenantId);
 
             boolean result = preparedStatement.execute();
             dbConnection.commit();
@@ -74,13 +73,44 @@ public class EventsDAO {
     }
 
     /**
-     *  Method to get event stream of an application
-     *
-     * @param applicationId application id
+     * Delete all the events related to a particular app version
+     * @param versionHashId version hash id
      * @return
      * @throws AppCloudException
      */
-    public List<Event> getEventsOfApplication(int applicationId) throws AppCloudException {
+    public boolean deleteAppVersionEvents(String versionHashId) throws AppCloudException {
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_ALL_APP_VERSION_EVENTS);
+            preparedStatement.setString(1, versionHashId);
+
+            int result = preparedStatement.executeUpdate();
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting all the events for the app version has id " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return true;
+    }
+
+
+
+    /**
+     *  Method to get event stream of an application
+     *
+     * @param versionHashId application id
+     * @return
+     * @throws AppCloudException
+     */
+    public List<Event> getEventsOfApplication(String versionHashId) throws AppCloudException {
 
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
@@ -89,22 +119,22 @@ public class EventsDAO {
 
         try {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_EVENTS_OF_APPLICATION);
-            preparedStatement.setInt(1, applicationId);
+            preparedStatement.setString(1, versionHashId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             Event event;
             while (resultSet.next()) {
                 event = new Event();
-                event.setEventName(resultSet.getString(SQLQueryConstants.EVENT_NAME));
-                event.setEventStatus(resultSet.getString(SQLQueryConstants.EVENT_STATUS));
+                event.setEventName(resultSet.getString(SQLQueryConstants.NAME));
+                event.setEventStatus(resultSet.getString(SQLQueryConstants.STATUS));
                 event.setTimestamp(resultSet.getTimestamp(SQLQueryConstants.EVENT_TIMESTAMP));
-                event.setEventDescription(resultSet.getString(SQLQueryConstants.EVENT_DESCRIPTION));
+                event.setEventDescription(resultSet.getString(SQLQueryConstants.DESCRIPTION));
 
                 eventList.add(event);
             }
 
         } catch (SQLException e) {
-            String msg = "Error while retrieving Application creation event stream for applicationId: " + applicationId;
+            String msg = "Error while retrieving Application creation event stream for application with hash id : " + versionHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {

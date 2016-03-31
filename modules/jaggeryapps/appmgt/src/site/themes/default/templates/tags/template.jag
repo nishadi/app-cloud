@@ -20,7 +20,8 @@
 include("/jagg/jagg.jag");
 
 jagg.template("tags", function(inputs, outputs, jagg) {
-    var applicationName = request.getParameter("applicationName");
+    var applicationKey = request.getParameter("applicationKey");
+    var versionKey = request.getParameter("versionKey");
     var applicationRevision = request.getParameter("revision");
 %>
      <!-- Bootstrap -->
@@ -44,7 +45,7 @@ jagg.template("tags", function(inputs, outputs, jagg) {
         </div>
     </div>
     <div class="action-bar">
-        <a href="/appmgt/site/pages/home.jag?applicationName=<%=applicationName%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
+        <a href="/appmgt/site/pages/home.jag?applicationKey=<%=applicationKey%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
                 <span class="fw-stack fw-lg btn-action-ico">
                     <i class="fw fw-ring fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
@@ -78,8 +79,7 @@ $(document).ready(function () {
     var prevKey, prevValue;
     jagg.post("../blocks/application/application.jag", {
         action: "getTags",
-        applicationName: '<%=applicationName%>',
-        applicationRevision: '<%=applicationRevision%>'
+        versionKey: '<%=versionKey%>'
 
     }, function (result) {
         var parsedResult = JSON.parse(result);
@@ -150,8 +150,12 @@ $(document).ready(function () {
             }
             var key = $(this).parent().parent().parent().find('#key')[0].value;
             var value = $(this).parent().parent().parent().find('#value')[0].value;
-            deleteTag(key, value);
-            $(this).parent().parent().parent().remove();
+            var tr = $(this).parent().parent().parent();
+            jagg.popMessage({type:'confirm', modalStatus: true, title:'Delete Tag',content:'Are you sure you want to delete this Tag ' + key + ' ?',
+                okCallback:function(){
+                   deleteTag(key, value, tr);
+                }, cancelCallback:function(){}
+            });
         });
 
         $(document).on('click', '.fw-save', function () {
@@ -168,7 +172,7 @@ $(document).ready(function () {
                 $(this).removeClass('save-new-entry');
                 $(this).parent().parent().find('.cancel-new-entry').removeClass('cancel-new-entry');
             } else {
-                updateTag(prevKey, updatedKey, prevValue, updatedValue);
+                updateTag(prevKey, updatedKey, updatedValue);
             }
             $(this).parent().find('#saveIcon').hide();
             $(this).parent().find('#editIcon').show();
@@ -178,14 +182,12 @@ $(document).ready(function () {
         });
     });
 
-    function updateTag(prevKey, newKey, prevValue, newValue) {
+    function updateTag(prevKey, newKey, newValue) {
         jagg.post("../blocks/application/application.jag", {
             action: "updateTag",
-            applicationName: '<%=applicationName%>',
-            applicationRevision: '<%=applicationRevision%>',
+            versionKey: '<%=versionKey%>',
             prevKey: prevKey,
             newKey: newKey,
-            prevValue: prevValue,
             newValue: newValue
 
         }, function (result) {
@@ -196,8 +198,7 @@ $(document).ready(function () {
     function addTag(newKey, newValue) {
         jagg.post("../blocks/application/application.jag", {
             action: "addTag",
-            applicationName: '<%=applicationName%>',
-            applicationRevision: '<%=applicationRevision%>',
+            versionKey: '<%=versionKey%>',
             key: newKey,
             value: newValue
 
@@ -206,16 +207,14 @@ $(document).ready(function () {
         });
     }
 
-    function deleteTag(key, value) {
+    function deleteTag(key, value, tr) {
         jagg.post("../blocks/application/application.jag", {
             action: "deleteTag",
-            applicationName: '<%=applicationName%>',
-            applicationRevision: '<%=applicationRevision%>',
-            key: key,
-            value: value
+            versionKey: '<%=versionKey%>',
+            key: key
 
         }, function (result) {
-
+            tr.remove();
         });
     }
 

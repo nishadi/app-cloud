@@ -19,17 +19,9 @@ package org.wso2.appcloud.core.dto;
 
 public class ApplicationType {
 
-    private int id;
     private String appTypeName;
     private String description;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
+    private boolean buildable;
 
     public String getAppTypeName() {
         return appTypeName;
@@ -45,5 +37,13 @@ public class ApplicationType {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isBuildable() {
+        return buildable;
+    }
+
+    public void setBuildable(boolean buildable) {
+        this.buildable = buildable;
     }
 }

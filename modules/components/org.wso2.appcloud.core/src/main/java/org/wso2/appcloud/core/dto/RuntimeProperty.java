@@ -19,18 +19,10 @@ package org.wso2.appcloud.core.dto;
 
 public class RuntimeProperty {
 
-    private int id;
     private String propertyName;
     private String propertyValue;
     private String description;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
+    private boolean isSecured;
 
     public String getPropertyName() {
         return propertyName;
@@ -56,4 +48,11 @@ public class RuntimeProperty {
         this.description = description;
     }
 
+    public boolean isSecured() {
+        return isSecured;
+    }
+
+    public void setSecured(boolean isSecured) {
+        this.isSecured = isSecured;
+    }
 }

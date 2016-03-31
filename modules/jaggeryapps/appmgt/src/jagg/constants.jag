@@ -18,6 +18,7 @@
  */
 var TMP_UPLOADED_APPLICATIONS_PATH = "tmpUploadedApps";
 var ARTIFACT_UPLOAD_DIRECTORY = "/tmp/";
+var POD_TIMEOUT = "Pod.TimeOut";
 var PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH="Appmgt.DeploymentDirPath";
 var PROPERTY_DOCKER_REGISTRY_URL="DockerRegistryURL";
 var PROPERTY_STORAGE_SERVER_URL="StorageServerURL";
@@ -25,7 +26,7 @@ var PROPERTY_RSS_ENVIRONMENT_NAME="RSSEnvironmentName";
 var DOCKER_FILE_NAME = "Dockerfile";
 var TENANT_DOMAIN_NAME = "tenantDomainName";
 var SUPER_TENANT_DOMAIN_NAME = "carbon.super";
-var CLOUD_TYPE="AppCloud";
+var CLOUD_TYPE = "AppCloud";
 var DOCUMENTATION_REDIRECTION_URL = "https://docs.wso2.org/display/AF210/WSO2+App+Factory+Documentation";
 var SUPPORT_REDIRECTION_URL = "http://wso2.com/support/";
 var APP_TYPES_PROPERTIES_CONFIG = "/site/themes/default/templates/apptype/select/app-types-properties.json";
@@ -54,5 +55,8 @@ var APPLICATION_RUNNING = "running";
 var APPLICATION_CREATED = "created";
 var APPLICATION_ERROR = "error";
 var APPLICATION_STOPPED = "stopped";
+
+var FILE_EXTENSTION_ALTER = ".upload";
+var FILE_EXTENTION_ZIP = "zip";
 
 %>

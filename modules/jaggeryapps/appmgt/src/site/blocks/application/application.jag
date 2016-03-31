@@ -22,6 +22,7 @@ include('/jagg/constants.jag');
 
 var action = request.getParameter("action");
 var applicationModule = jagg.module("application");
+var gitHubAppModule = jagg.module("application/git");
 var log = new Log();
 (function(){
     if (!jagg.getUser()) {
@@ -34,48 +35,93 @@ var log = new Log();
         var appTypeName = request.getParameter("appTypeName");
         var applicationRevision = request.getParameter("applicationRevision");
         applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName, applicationRevision);
+        response.status = 200;
+        response.message = "Artifact is successfully uploaded!";
 
     }else if(action == "createApplication"){
         var applicationDescription = request.getParameter("applicationDescription");
         var replicas = 1;
         var runtimeId = request.getParameter("runtime");
-        var runtimeProperties = parse(request.getParameter("runtimeProperties"));
-        var tags = parse(request.getParameter("tags"));
+        var isNewVersion = request.getParameter("isNewVersion");
+        if(isNewVersion == null) {
+            isNewVersion = false;
+        }
+
+        var unparsedRuntimeProps = request.getParameter("runtimeProperties");
+        var runtimeProperties = [];
+        if(unparsedRuntimeProps){
+            runtimeProperties = parse(unparsedRuntimeProps);
+        }
+
+        var unparsedTags = request.getParameter("tags");
+        var tags = [];
+        if(unparsedTags){
+            tags = parse(unparsedTags);
+        }
+
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
         var appTypeName = request.getParameter("appTypeName");
         var uploadedFileName = request.getParameter("uploadedFileName");
         var appIcon = request.getFile("appIcon");
+        var uploadedArtifact = request.getFile("fileupload");
+        var isFileAttached = request.getParameter("isFileAttached");
 
-        applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
-                runtimeId, appTypeName, runtimeProperties, tags, appIcon, uploadedFileName);
+        if (isFileAttached) {
+            applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName, applicationRevision);
+        }
+        if(uploadedFileName) {
+            applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
+                                             runtimeId, appTypeName, runtimeProperties, tags, appIcon,
+                                             uploadedFileName, isNewVersion);
+        }else{
+            var gitRepoUrl = request.getParameter("gitRepoUrl");
+            var gitRepoBranch = request.getParameter("gitRepoBranch");
+            var token = request.getParameter("token");
+            gitHubAppModule.addApplicationViaGitHub(applicationName, applicationRevision, applicationDescription, replicas,
+                                                    runtimeId, appTypeName, runtimeProperties, tags, appIcon, gitRepoUrl,
+                                                    gitRepoBranch, token, isNewVersion);
+        }
         response.status = 200;
-        response.message = "Artifact is successfully uploaded!";
+        response.message = "Application creation is successfully submitted";
 
     }else if(action == "stopApplication"){
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
+        var versionKey = request.getParameter("versionKey");
 
         // delete application from kubernetes
-        applicationModule.deleteApplicationFromKubernetes(applicationName, applicationRevision);
+        applicationModule.deleteApplicationFromKubernetes(versionKey);
         // update application status to stopped
-        applicationModule.updateApplicationStatus(applicationName, applicationRevision, APPLICATION_STOPPED);
+        applicationModule.updateApplicationStatus(versionKey, APPLICATION_STOPPED);
+        applicationModule.deleteEventsOfAppVersions(versionKey);
 
         response.status = 200;
         response.message = "Application is successfully stopped.";
 
+    } else if(action == "redeployApplication"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var versionKey = request.getParameter("versionKey");
+
+        // redeploy application from kubernetes
+        applicationModule.redeployVersion(applicationName, applicationRevision, versionKey);
+
+        response.status = 200;
+        response.message = "Application is successfully redeployed.";
+
     }else if(action == "startApplication"){
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
+        var versionKey = request.getParameter("versionKey");
 
         // redeploy application from kubernetes
-        applicationModule.redeployApplication(applicationName, applicationRevision);
+        applicationModule.redeployApplication(applicationName, applicationRevision, versionKey);
 
         response.status = 200;
         response.message = "Application starting requested is completed successfully.";
 
-    }else if (action == "getApplicationCreationEvents"){
-
+    } else if (action == "getApplicationCreationEvents") {
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
 
@@ -83,49 +129,46 @@ var log = new Log();
 
         var events = mod.getApplicationCreationEvents(applicationName, applicationRevision);
         print(events);
-
-    }else if (action == "getEnvVariablesByNameRevision"){
-
+    }else if (action == "getApplication"){
         var applicationName = request.getParameter("applicationName");
-        var applicationRevision = request.getParameter("applicationRevision");
+        var mod = jagg.module("application");
+        var applicationHashId = mod.getApplicationHashIdByName(applicationName);
+        var application = mod.getApplication(applicationHashId);
+        print(application);
+    }else if (action == "getEnvVariablesOfVersion"){
 
+        var versionKey = request.getParameter("versionKey");
         var mod = jagg.module("application");
 
-        var events = mod.getEnvVariablesByNameRevision(applicationName, applicationRevision);
+        var events = mod.getEnvVariablesOfVersion(versionKey);
         print(events);
-
-    }else if (action == "updateApplicationRuntimeProperty"){
-        var applicationName = request.getParameter("applicationName");
-        var applicationRevision = request.getParameter("applicationRevision");
+    }else if (action == "updateRuntimeProperty"){
+        var versionKey = request.getParameter("versionKey");
         var prevKey = request.getParameter("prevKey");
         var newKey = request.getParameter("newKey");
-        var prevValue = request.getParameter("prevValue");
         var newValue = request.getParameter("newValue");
 
         var mod = jagg.module("application");
-        mod.updateApplicationRuntimeProperty(applicationName, applicationRevision,prevKey,newKey,prevValue,newValue);
+        mod.updateRuntimeProperty(versionKey,prevKey,newKey,newValue);
         response.status = 200;
         response.content = "Runtime property successfully updated.";
 
-    }else if (action == "deleteApplicationRuntimeProperty"){
-        var applicationName = request.getParameter("applicationName");
-        var applicationRevision = request.getParameter("applicationRevision");
+    }else if (action == "deleteRuntimeProperty"){
+        var versionKey = request.getParameter("versionKey");
         var key = request.getParameter("key");
-        var value = request.getParameter("value");
 
         var mod = jagg.module("application");
-        mod.deleteApplicationRuntimeProperty(applicationName, applicationRevision,key,value);
+        mod.deleteRuntimeProperty(versionKey,key);
         response.status = 200;
         response.content = "Runtime property successfully deleted.";
 
-    }else if (action == "addApplicationRuntimeProperty"){
-        var applicationName = request.getParameter("applicationName");
-        var applicationRevision = request.getParameter("applicationRevision");
+    }else if (action == "addRuntimeProperty"){
+        var versionKey = request.getParameter("versionKey");
         var key = request.getParameter("key");
         var value = request.getParameter("value");
 
         var mod = jagg.module("application");
-        mod.addApplicationRuntimeProperty(applicationName, applicationRevision,key,value);
+        mod.addRuntimeProperty(versionKey,key,value);
         response.status = 200;
         response.content = "Runtime property successfully added.";
 
@@ -138,59 +181,104 @@ var log = new Log();
         var mod = jagg.module("application");
         mod.downloadFromUrl(artfactUrl,applicationName,applicationRevision,appTypeName);
     }else if (action == "addTag"){
-        var applicationName = request.getParameter("applicationName");
-        var applicationRevision = request.getParameter("applicationRevision");
+        var versionKey = request.getParameter("versionKey");
         var key = request.getParameter("key");
         var value = request.getParameter("value");
 
         var mod = jagg.module("application");
-        mod.addTag(applicationName, applicationRevision,key,value);
+        mod.addTag(versionKey,key,value);
         response.status = 200;
         response.content = "Tag successfully added.";
 
     }else if (action == "deleteTag"){
-        var applicationName = request.getParameter("applicationName");
-        var applicationRevision = request.getParameter("applicationRevision");
+        var versionKey = request.getParameter("versionKey");
         var key = request.getParameter("key");
-        var value = request.getParameter("value");
 
         var mod = jagg.module("application");
-        mod.deleteTag(applicationName, applicationRevision,key,value);
+        mod.deleteTag(versionKey,key);
         response.status = 200;
         response.content = "Tag successfully deleted.";
 
     }else if (action == "updateTag"){
-        var applicationName = request.getParameter("applicationName");
-        var applicationRevision = request.getParameter("applicationRevision");
+        var versionKey = request.getParameter("versionKey");
         var prevKey = request.getParameter("prevKey");
         var newKey = request.getParameter("newKey");
-        var prevValue = request.getParameter("prevValue");
         var newValue = request.getParameter("newValue");
 
         var mod = jagg.module("application");
-        mod.updateTag(applicationName, applicationRevision,prevKey,newKey,prevValue,newValue);
+        mod.updateTag(versionKey,prevKey,newKey,newValue);
         response.status = 200;
         response.content = "Runtime property successfully updated.";
 
     }else if (action == "getTags"){
 
-        var applicationName = request.getParameter("applicationName");
-        var applicationRevision = request.getParameter("applicationRevision");
-
+        var versionKey = request.getParameter("versionKey");
         var mod = jagg.module("application");
 
-        var events = mod.getTags(applicationName, applicationRevision);
-        print(events);
+        var tags = mod.getTags(versionKey);
+        print(tags);
 
     } else if (action == "changeAppIcon"){
         var appIcon = request.getFile("changeIcon");
-        var applicationName = request.getParameter("applicationName");
-        var revision = request.getParameter("selectedRevision");
+        var applicationKey = request.getParameter("applicationKey");
         var mod = jagg.module("application");
-        mod.changeApplicationIcon(applicationName, revision, appIcon);
-        print("<html><script>window.location.replace('/appmgt/site/pages/home.jag?applicationName=" + applicationName + "');</script><body></body></html>");
+        mod.changeApplicationIcon(applicationKey, appIcon);
+        print("<html><script>window.location.replace('/appmgt/site/pages/home.jag?applicationKey=" + applicationKey + "');</script><body></body></html>");
+
+    } else if (action == "generateApplicationHashId"){
+        var applicationName = request.getParameter("applicationName");
+        var mod = jagg.module("application");
+        print(mod.generateApplicationHashId(applicationName));
+
+    } else if (action == "getVersionHashId"){
+        var applicationName = request.getParameter("applicationName");
+        var applicationRevision = request.getParameter("applicationRevision");
+        var mod = jagg.module("application");
+        print(mod.getVersionHashId(applicationName, applicationRevision));
+
+    } else if (action == "getExistingRevisions"){
+        var applicationName = request.getParameter("applicationName");
+        var mod = jagg.module("application");
+        var applicationHashId = mod.getApplicationHashIdByName(applicationName);
+        var versions = mod.getVersionListOfApplication(applicationHashId);
+        print(versions);
+
+    } else if (action == "getApplicationHashIdByName"){
+        var applicationName = request.getParameter("applicationName");
+        var mod = jagg.module("application");
+        var applicationHashId = mod.getApplicationHashIdByName(applicationName);
+        print(applicationHashId);
+    } else if (action == "deleteVersion"){
+        var versionKey = request.getParameter("versionKey");
+        var mod = jagg.module("application");
+
+        try {
+            mod.deleteVersion(versionKey, false, true);
+            print(true);
+        } catch (e) {
+            var msg = "Error while deleting application version with the hash id : " + versionKey;
+            log.error(msg);
+            log.error(e);
+            response.status = 500;
+            response.content = msg;
+        }
+
+    } else if (action == "deleteApplication"){
+        var applicationKey = request.getParameter("applicationKey");
+        var mod = jagg.module("application");
+        try {
+            mod.deleteApplication(applicationKey);
+            print(true);
+        } catch (e) {
+            var msg = "Error while deleting application with hash id : " + applicationKey;
+            log.error(msg);
+            log.error(e);
+            response.status = 500;
+            response.content = msg;
+        }
+
     } else {
-        throw new Error("No action specified");
+        throw new Error("No action specified for: " + action);
     }
 }());
 

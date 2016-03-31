@@ -20,8 +20,8 @@
 include("/jagg/jagg.jag");
 
 jagg.template("envs", function(inputs, outputs, jagg) {
-    var applicationName = request.getParameter("applicationName");
-    var applicationRevision = request.getParameter("revision");
+    var versionKey = request.getParameter("versionKey");
+    var applicationKey = request.getParameter("applicationKey");
 
     %>
      <!-- Bootstrap -->
@@ -32,7 +32,7 @@ jagg.template("envs", function(inputs, outputs, jagg) {
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
 
     <div class="action-bar">
-        <a href="/appmgt/site/pages/home.jag?applicationName=<%=applicationName%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
+        <a href="/appmgt/site/pages/home.jag?applicationKey=<%=applicationKey%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
                 <span class="fw-stack fw-lg btn-action-ico">
                     <i class="fw fw-ring fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
@@ -69,9 +69,8 @@ jagg.template("envs", function(inputs, outputs, jagg) {
 $(document).ready(function () {
     var prevKey, prevValue;
     jagg.post("../blocks/application/application.jag", {
-        action: "getEnvVariablesByNameRevision",
-        applicationName: '<%=applicationName%>',
-        applicationRevision: '<%=applicationRevision%>'
+        action: "getEnvVariablesOfVersion",
+        versionKey: '<%=versionKey%>'
 
     }, function (result) {
         var parsedResult = JSON.parse(result);
@@ -140,12 +139,15 @@ $(document).ready(function () {
                 $(this).parent().parent().parent().remove();
                 return;
             }
+            var tr = $(this).parent().parent().parent();
             var key = $(this).parent().parent().parent().find('#key')[0].value;
             var value = $(this).parent().parent().parent().find('#value')[0].value;
-            deleteRuntimeAttribute(key, value);
-            $(this).parent().parent().parent().remove();
 
-            displayAppRedeployNotification();
+            jagg.popMessage({type:'confirm', modalStatus: true, title:'Delete Environment Variables',content:'Are you sure you want to delete this Env ' + key + ' ?',
+                okCallback:function(){
+                   deleteRuntimeAttribute(key, value, tr);
+                }, cancelCallback:function(){}
+            });
         });
 
         $(document).on('click', '.fw-save', function () {
@@ -162,7 +164,7 @@ $(document).ready(function () {
                 $(this).removeClass('save-new-entry');
                 $(this).parent().parent().find('.cancel-new-entry').removeClass('cancel-new-entry');
             } else {
-                updateRuntimeAttribute(prevKey, updatedKey, prevValue, updatedValue);
+                updateRuntimeAttribute(prevKey, updatedKey, updatedValue);
             }
             $(this).parent().find('#saveIcon').hide();
             $(this).parent().find('#editIcon').show();
@@ -170,18 +172,15 @@ $(document).ready(function () {
             $(this).parent().parent().parent().find('#value')[0].readOnly = true;
 
             displayAppRedeployNotification();
-
         });
     });
 
-    function updateRuntimeAttribute(prevKey, newKey, prevValue, newValue) {
+    function updateRuntimeAttribute(prevKey, newKey, newValue) {
         jagg.post("../blocks/application/application.jag", {
-            action: "updateApplicationRuntimeProperty",
-            applicationName: '<%=applicationName%>',
-            applicationRevision: '<%=applicationRevision%>',
+            action: "updateRuntimeProperty",
+            versionKey: '<%=versionKey%>',
             prevKey: prevKey,
             newKey: newKey,
-            prevValue: prevValue,
             newValue: newValue
 
         }, function (result) {
@@ -191,9 +190,8 @@ $(document).ready(function () {
 
     function addRuntimeAttribute(newKey, newValue) {
         jagg.post("../blocks/application/application.jag", {
-            action: "addApplicationRuntimeProperty",
-            applicationName: '<%=applicationName%>',
-            applicationRevision: '<%=applicationRevision%>',
+            action: "addRuntimeProperty",
+            versionKey: '<%=versionKey%>',
             key: newKey,
             value: newValue
 
@@ -202,16 +200,15 @@ $(document).ready(function () {
         });
     }
 
-    function deleteRuntimeAttribute(key, value) {
+    function deleteRuntimeAttribute(key, value, tr) {
         jagg.post("../blocks/application/application.jag", {
-            action: "deleteApplicationRuntimeProperty",
-            applicationName: '<%=applicationName%>',
-            applicationRevision: '<%=applicationRevision%>',
-            key: key,
-            value: value
+            action: "deleteRuntimeProperty",
+            applicationKey: '<%=versionKey%>',
+            key: key
 
         }, function (result) {
-
+            tr.remove();
+            displayAppRedeployNotification();
         });
     }
 
@@ -228,7 +225,7 @@ $(document).on('click', '.panel-heading a', function (e) {
 });
 
 function displayAppRedeployNotification(){
-    jagg.message({content: "Please redeploy the application for effect updated runtime variables", type: 'info'});
+    jagg.message({content: "Please redeploy the application to take effect updated runtime variables", type: 'info'});
 }
 
 
