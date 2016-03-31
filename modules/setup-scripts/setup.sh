@@ -154,8 +154,6 @@ read -p "Do you wish to do a clustered setup?" yn
         * ) echo "Please answer yes or no.";;
     esac
 
->>>>>>> faadb14d829a6d887ffdce8793d645992d275b61
-
 echo "Updaing IS node with new configuraitons"
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $IS_HOME/repository/components/lib/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2is-5.0.0/repository/conf/datasources/master-datasources.xml $IS_HOME/repository/conf/datasources/
