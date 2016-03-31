@@ -21,6 +21,6 @@ FROM wso2-appcloud/tomcat:1.0.0-base
 ENV APP_WAR ARTIFACT_NAME
 ENV WEB_APP_HOME /opt/tomcat/webapps/
 
-#COPY "$APP_WAR" "$WEB_APP_HOME/"
+COPY "$APP_WAR" "$WEB_APP_HOME/"
 
 CMD ["/init.sh"]
