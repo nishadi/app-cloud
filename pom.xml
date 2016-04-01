@@ -30,7 +30,7 @@
     <groupId>org.wso2.appcloud</groupId>
     <artifactId>appcloud-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.0-alpha</version>
+    <version>3.0.0-SNAPSHOT</version>
     <name>WSO2 AppCloud</name>
     <licenses>
         <license>
@@ -276,7 +276,7 @@
     <properties>
         <carbon.platform.version>4.2.0</carbon.platform.version>
         <equinox.osgi.version>3.10.2.v20150203-1939</equinox.osgi.version>
-        <appcloud.version>3.0.0-alpha</appcloud.version>
+        <appcloud.version>3.0.0-SNAPSHOT</appcloud.version>
         <equinox.osgi.services.version>3.4.0.v20140312-2051</equinox.osgi.services.version>
         <maven.checkstyleplugin.version>2.16</maven.checkstyleplugin.version>
         <maven.findbugsplugin.version>3.0.2</maven.findbugsplugin.version>
