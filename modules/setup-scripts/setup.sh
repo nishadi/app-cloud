@@ -97,7 +97,6 @@ cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/velocity-1.7.0.wso2v1.jar $AS_H
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/kubernetes-client-1.3.76.wso2v1.jar $AS_HOME/repository/components/dropins/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/kubernetes-model-1.0.43.wso2v1.jar $AS_HOME/repository/components/dropins/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/dnsjava-2.1.7.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/openshift-client-1.3.75.wso2v1.jar $AS_HOME/repository/components/dropins/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/json-20160212.jar $AS_HOME/repository/components/dropins/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/fabric8-utils-2.2.100.jar $AS_HOME/repository/components/dropins/
 
