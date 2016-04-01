@@ -53,4 +53,11 @@ public class EventsManager {
 
         return events.toArray(new Event[events.size()]);
     }
+
+    public void deleteAllEventsofAppVersion(String versionHashId)throws AppCloudException {
+
+        EventsDAO eventsDAO = new EventsDAO();
+        eventsDAO.deleteAppVersionEvents(versionHashId);
+
+    }
 }

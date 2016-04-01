@@ -73,6 +73,37 @@ public class EventsDAO {
     }
 
     /**
+     * Delete all the events related to a particular app version
+     * @param versionHashId version hash id
+     * @return
+     * @throws AppCloudException
+     */
+    public boolean deleteAppVersionEvents(String versionHashId) throws AppCloudException {
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.DELETE_ALL_APP_VERSION_EVENTS);
+            preparedStatement.setString(1, versionHashId);
+
+            int result = preparedStatement.executeUpdate();
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting all the events for the app version has id " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return true;
+    }
+
+
+
+    /**
      *  Method to get event stream of an application
      *
      * @param versionHashId application id

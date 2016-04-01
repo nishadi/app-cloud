@@ -364,9 +364,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     $("#btn-artifact-upload").attr("disabled", true);
                     $("#url-upload").attr("disabled", true);
                 } else {
-                    $("#add-application").prop("disabled", false);
-                    $("#btn-artifact-upload").attr("disabled", false);
-                    $("#url-upload").attr("disabled", false);
+                    activateCreateApplication();
                 }
                 this.defaultShowErrors();
             },
@@ -499,7 +497,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
     });
 
     function activateCreateApplication() {
-        if ($('#applicationName').val() && $('#applicationRevision').val() && $('#runtime').val() > 0 && ($("#uploadedFileName").val() || $("#artifactUrl").val())) {// checks form for validity
+        if ($('#applicationName').val() && $('#applicationRevision').val() 
+                        && $('#runtime').val() > 0 && ($("#uploadedFileName").val() || $("#artifactUrl").val() || ($("#gitRepoUrl").val()  && $("#gitRepoBranch").val()))) {// checks form for validity
 
             if($("#uploadedFileName").val()){
                 if(validateArtifactType($("#uploadedFileName").val())){
@@ -513,6 +512,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 } else {
                     $("#add-application").prop("disabled", true);
                 }
+            }else if($("#gitRepoUrl").val()  && $("#gitRepoBranch").val()){
+		$("#add-application").prop("disabled", false);
             }
         } else {
             $("#add-application").prop("disabled", true);      // enables button
