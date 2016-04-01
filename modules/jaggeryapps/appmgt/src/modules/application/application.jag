@@ -516,7 +516,6 @@ var buildDeploymentConfigFromDB = function(versionHashId, appHostURL){
         provisioningContainer.setContainerName(versionHashId);
         provisioningContainer.setBaseImageName(deploymentContainer.getImageName());
         provisioningContainer.setBaseImageVersion(deploymentContainer.getImageVersion());
-        provisioningProxy.setAppHostURL(appHostURL);
 
         //Adding runtime properties to k8 container
         var runtimeProperties = deploymentContainer.getRuntimeProperties();
@@ -530,6 +529,7 @@ var buildDeploymentConfigFromDB = function(versionHashId, appHostURL){
             var deploymentProxy = proxyIterator.next();
             var provisioningProxy = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
             provisioningProxy.setServiceName(deploymentProxy.getServiceName());
+            provisioningProxy.setAppHostURL(appHostURL);
             provisioningProxy.setServiceName(deploymentProxy.getServiceName());
             provisioningProxy.setServiceProtocol(deploymentProxy.getServiceProtocol());
             provisioningProxy.setServicePort(deploymentProxy.getServicePort());
