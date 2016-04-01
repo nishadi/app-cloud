@@ -49,7 +49,6 @@ sed -i '$!N;s/clientAuth="false" sslProtocol="TLS" \/>\n\s*-->/clientAuth="false
 
 sed -i "s/unpackWARs=\"true\"/unpackWARs=\"false\"/g" /opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
 
-sed -i "/\/Host/i  \\\t<Context path=\"/\" docBase=\"$APP_WAR\" debug=\"0\" reloadable=\"true\"></Context>" /opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
-
+sed -i "/\/Host/i  \\\t<Context path=\"""\" docBase=\"$APP_WAR\" debug=\"0\" reloadable=\"true\"></Context>" /opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
 
 /opt/tomcat/bin/catalina.sh run
