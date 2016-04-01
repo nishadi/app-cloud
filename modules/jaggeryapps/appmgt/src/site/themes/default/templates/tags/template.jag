@@ -31,19 +31,6 @@ jagg.template("tags", function(inputs, outputs, jagg) {
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/web-fonts/Roboto.css'))%>">
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
 
-    <div class="navbar navbar-secondary">
-        <div class="container-fliud">
-            <div class="row">
-                 <div class="side-pane-trigger">
-                    <i class="fa fa-reorder"></i>
-                </div>
-                <div class="col-md-3 breadcrumb-secondary">
-                    <a href="/appmgt/site/pages/index.jag"><i class="fa fa-cubes visible-xs visible-lg"></i></a>
-                    <span class="hidden-xs"><a href="/appmgt/site/pages/index.jag">Application Cloud</a></span>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="action-bar">
         <a href="/appmgt/site/pages/home.jag?applicationKey=<%=applicationKey%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
                 <span class="fw-stack fw-lg btn-action-ico">
