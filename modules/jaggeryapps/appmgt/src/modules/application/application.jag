@@ -457,7 +457,8 @@ var deleteEventsOfAppVersions = function(versionHashId){
 
 
 var redeployApplication = function(applicationName, versionName, versionHashId){
-    var deploymentConfig = buildDeploymentConfigFromDB(versionHashId);
+    var appHostURL = constructAppLaunchURL(applicationName, versionName);
+    var deploymentConfig = buildDeploymentConfigFromDB(versionHashId, appHostURL);
     deployApplication(applicationName, versionName, deploymentConfig, true, versionHashId);
 };
 var persistDeploymentConfig = function(deploymentConfig, versionHashId){
@@ -499,7 +500,7 @@ var persistDeploymentConfig = function(deploymentConfig, versionHashId){
     ApplicationManager.addDeployment(versionHashId, deployment );
 };
 
-var buildDeploymentConfigFromDB = function(versionHashId){
+var buildDeploymentConfigFromDB = function(versionHashId, appHostURL){
     var deployment = ApplicationManager.getDeployment(versionHashId);
 
     var deploymentConfig = new Packages.org.wso2.appcloud.provisioning.runtime.beans.DeploymentConfig();
@@ -515,6 +516,7 @@ var buildDeploymentConfigFromDB = function(versionHashId){
         provisioningContainer.setContainerName(versionHashId);
         provisioningContainer.setBaseImageName(deploymentContainer.getImageName());
         provisioningContainer.setBaseImageVersion(deploymentContainer.getImageVersion());
+        provisioningProxy.setAppHostURL(appHostURL);
 
         //Adding runtime properties to k8 container
         var runtimeProperties = deploymentContainer.getRuntimeProperties();
@@ -527,6 +529,7 @@ var buildDeploymentConfigFromDB = function(versionHashId){
         while(proxyIterator.hasNext()){
             var deploymentProxy = proxyIterator.next();
             var provisioningProxy = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
+            provisioningProxy.setServiceName(deploymentProxy.getServiceName());
             provisioningProxy.setServiceName(deploymentProxy.getServiceName());
             provisioningProxy.setServiceProtocol(deploymentProxy.getServiceProtocol());
             provisioningProxy.setServicePort(deploymentProxy.getServicePort());
