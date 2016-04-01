@@ -113,6 +113,7 @@ public class DockerOpClient {
 	    dockerStatusCheck[0] = true;
         handle = dockerClient.image().build()
                 .withRepositoryName(dockerImage)
+                .withNoCache()
                 .usingListener(new EventListener() {
                     @Override
                     public void onSuccess(String message) {
