@@ -60,8 +60,6 @@ DAS_HOME=$SETUP_DIR/$DAS_VERSION/
 
 
 function as_setup(){
-
-<<<<<<< Updated upstream
     mkdir -p $1/repository/deployment/server/jaggeryapps/appmgt/
     unzip -q $APP_CLOUD_SRC_HOME/modules/jaggeryapps/appmgt/target/appmgt-3.0.0-alpha.zip -d $1/repository/deployment/server/jaggeryapps/appmgt/
     sed -e "s@AS_HOME@$1@g" $APP_CLOUD_SRC_HOME/modules/setup-scripts/jaggery/site.json > $1/repository/deployment/server/jaggeryapps/appmgt/site/conf/site.json
@@ -113,7 +111,6 @@ function as_setup(){
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/appcloud/appcloud.properties $1/repository/conf/appcloud/
     sed -i -e "s|AS_HOME|$1|g" $1/repository/conf/appcloud/appcloud.properties
 }
-
 function as_cluster_setup(){
 
     mkdir -p $SETUP_DIR/AS_NODE1
