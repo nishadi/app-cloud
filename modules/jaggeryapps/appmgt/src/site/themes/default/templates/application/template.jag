@@ -160,10 +160,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     formData.append('token', $("#token").val());
 
                     // Add github url as a tag
-                    var property = {};
-                    property["key"] = "gitRepoUrl";
-                    property["value"] = $("#gitRepoUrl").val();
-                    tags.push(property);
+                    if ('<%=newVersion%>' == 'null') {
+                        var property = {};
+                        property["key"] = "gitRepoUrl";
+                        property["value"] = $("#gitRepoUrl").val();
+                        tags.push(property);
+                    }
                 }
                 formData.append('tags', JSON.stringify(tags));
                 $.ajax({
