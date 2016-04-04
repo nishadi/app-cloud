@@ -175,4 +175,12 @@ public interface RuntimeProvisioningService {
      * @throws RuntimeProvisioningException
      */
     void deleteDeployment() throws RuntimeProvisioningException;
+
+    /**
+     * Create a service in K8s
+     *
+     * @param serviceProxy description of the service
+     * @throws RuntimeProvisioningException
+     */
+    public void createService(ServiceProxy serviceProxy) throws RuntimeProvisioningException;
 }

@@ -108,8 +108,8 @@ function changeSelectedRevision(newRevision){
     // Change version status in UI
     if(selectedApplicationRevision.status == 'running'){
 
-        $('.sec').empty();
-        $('.sec').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"' +
+        $('#version-app-launch-block').empty();
+        $('#version-app-launch-block').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"' +
                        'url="' + deploymentURL + '">Launch App</button>' +
                        '<div class="btn-group ctrl-edit-button btn-edit-code"><a type="button" ' +
                        'class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication();">Stop' +
@@ -130,8 +130,8 @@ function changeSelectedRevision(newRevision){
 
     } else if(selectedApplicationRevision.status == 'stopped'){
 
-        $('.sec').empty();
-        $('.sec').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"' +
+        $('#version-app-launch-block').empty();
+        $('#version-app-launch-block').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"' +
                        'url="' + deploymentURL + '" disabled>Launch App</button>' +
                        '<div class="btn-group ctrl-edit-button btn-edit-code"><a type="button" ' +
                        'class="btn cu-btn cu-btn-md cu-btn-blue" onclick="startApplication();">Start</a></div>');
@@ -147,8 +147,8 @@ function changeSelectedRevision(newRevision){
                                  '</i></span></figcaption></figure></div>');
     } else {
 
-        $('.sec').empty();
-        $('.sec').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp" ' +
+        $('#version-app-launch-block').empty();
+        $('#version-app-launch-block').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp" ' +
                        'url="' + deploymentURL + '" disabled>Launch App</button>' +
                        '<div class="btn-group ctrl-edit-button btn-edit-code"><a type="button" ' +
                        'class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Error has occurred.</a></div>');
