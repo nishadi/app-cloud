@@ -908,7 +908,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             KubernetesClient kubClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
             kubClient.inNamespace(namespace).services().create(service);
         } catch (KubernetesClientException e) {
-            String message = "Error while creating kubernetes kind service with tenant domain : " + namespace;
+            String message = "Error while creating kubernetes kind service with namespace : " + namespace;
             log.error(message, e);
             throw new RuntimeProvisioningException(message, e);
         }

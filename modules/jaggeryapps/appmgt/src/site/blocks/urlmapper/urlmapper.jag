@@ -28,9 +28,9 @@ var mod = jagg.module("application");
 
     if (action == "verifyCustomDomain") {
         var customUrl = request.getParameter("customUrl");
+        //The url which is generated for application version
         var pointedUrl = request.getParameter("pointedUrl");
-        var stripedPointedUrl = pointedUrl.replace(/.*?:\/\//g, "");
-        var success = mod.verifyCustomUrl(stripedPointedUrl, customUrl);
+        var success = mod.verifyCustomUrl(pointedUrl, customUrl);
 
         if (!success) {
             response.status = 400;
@@ -45,11 +45,7 @@ var mod = jagg.module("application");
         var versionName = request.getParameter("versionName");
 
         mod.addCustomUrl(customUrl, applicationName, versionName);
-    } else if (action == "getCustomUrl") {
-        var applicationName = request.getParameter("applicationName");
-        var versionName = request.getParameter("applicationName");
-    }
-    else {
+    } else {
         throw new Error("No action specified");
     }
 

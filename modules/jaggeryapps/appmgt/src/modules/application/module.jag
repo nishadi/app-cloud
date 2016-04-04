@@ -189,9 +189,6 @@ jagg.module("application", {
     },
     addCustomUrl: function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").addCustomUrl.apply(this, arguments);
-    },
-    getCustomUrl: function () {
-        return jagg.require(jagg.getModulesDir() + "application/application.jag").getCustomUrl.apply(this, arguments);
     }
 });
 %>

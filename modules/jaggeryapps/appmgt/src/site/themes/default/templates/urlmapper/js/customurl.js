@@ -24,10 +24,9 @@ $(document).ready(function () {
 });
 
 function setExistingCustomUrl() {
-    console.log(versions);
     if (defaultVersionName !== null && versions[defaultVersionName] != undefined) {
-        var customUrl = versions[defaultVersionName].deploymentURL;
-        var hostUrl = customUrl.replace(/.*?:\/\//g, "")
+        var customUrl = versions[defaultVersionName].customtUrl;
+        var hostUrl = stripedUrl(customUrl);
         $('#productionCustom').val(hostUrl);
         uiElementStateChange(true, true, true);
         showEditButton();
@@ -40,19 +39,27 @@ function setExistingCustomUrl() {
 function verifyCustomUrl() {
     var pointedUrl = $('#productionVersion').val();
     var customUrl = $('#productionCustom').val();
+    var stripedPointedUrl = stripedUrl(pointedUrl);
 
     jagg.post("../blocks/urlmapper/urlmapper.jag", {
             action: "verifyCustomDomain",
             customUrl: customUrl,
-            pointedUrl: pointedUrl
+            pointedUrl: stripedPointedUrl
         }, verifyCustomUrlSuccess,
         function (jqXHR, textStatus, errorThrown) {
-            jagg.message({content: "The custom domain is not valid", type: 'error', id: 'view_log'});
+            var errorMsg = "CNAME record does not exist for this config : \"" +
+                customUrl + " CNAME " + stripedPointedUrl + "\". Please publish a CNAME record first."
+            jagg.message({content: errorMsg, type: 'error', id: 'view_log'});
         });
 }
 
+function stripedUrl(url){
+    var stripedUrl = url.replace(/.*?:\/\//g, "");
+    return stripedUrl;
+}
+
 function verifyCustomUrlSuccess() {
-    jagg.message({content: "The custom domain successfully added to the application", type: 'success', id: 'view_log'});
+    jagg.message({content: "The custom domain successfully added to the application.", type: 'success', id: 'view_log'});
     uiElementStateChange(true, true, true);
     showUpdateButton();
     $('#updateCustomUrl').prop('disabled', false);
@@ -77,18 +84,16 @@ function showEditButton() {
 function updateCustomUrl() {
     var customUrl = $('#productionCustom').val();
     var versionName = $("#productionVersion option:selected").text();
-    console.log(customUrl);
-    console.log(versionName);
     jagg.post("../blocks/urlmapper/urlmapper.jag", {
         action: "updateCustomUrl",
         customUrl: customUrl,
         applicationName: applicationName,
         versionName: versionName
     }, function (result) {
-        jagg.message({content: "Custom url successfully updated.", type: 'success', id: 'view_log'});
+        jagg.message({content: "Custom domain successfully updated.", type: 'success', id: 'view_log'});
         showEditButton();
     }, function (jqXHR, textStatus, errorThrown) {
-        jagg.message({content: "Error occurred while updating custom url.", type: 'error', id: 'view_log'});
+        jagg.message({content: "Error occurred while updating custom domain.", type: 'error', id: 'view_log'});
 
     });
 }

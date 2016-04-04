@@ -767,13 +767,12 @@ var generateVersionList = function (versions, applicationName, defaultVersionNam
         for (var i = 0; i < versions.size(); i++) {
             var versionObject = {};
             var version = versions.get(i);
-            var deploymentUrl;
+
             if (version.versionName == defaultVersionName) {
-                deploymentUrl = getCustomUrl(version.hashId);
-            } else {
-                deploymentUrl = getDeploymentURL(applicationName, version.versionName);
+                versionObject.customtUrl = getCustomUrl(version.hashId);
             }
 
+            var deploymentUrl = getDeploymentURL(applicationName, version.versionName);
             versionObject.versionName = version.versionName;
             versionObject.hashId = version.hashId;
             versionObject.runtimeId = version.runtimeId;
@@ -1337,6 +1336,7 @@ var verifyCustomUrl = function (pointedUrl, customUrl) {
         success = domainMappingManager.verifyCustomUrlByCname(pointedUrl, customUrl);
     } catch (e) {
         log.error("Error while verifying custom url : " + customUrl);
+        log.error(e);
         success = false;
     }
 

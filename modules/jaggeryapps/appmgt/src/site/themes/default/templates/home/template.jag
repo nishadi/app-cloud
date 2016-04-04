@@ -24,11 +24,14 @@ jagg.template("home", function(inputs, outputs, jagg) {
     var application = outputs.application;
     var selectedRevision = outputs.selectedRevision;
     var versions = application.versions;
+    var defaultVersionName = application.defaultVersionName;
+    if (application.defaultVersionName != null && versions[defaultVersionName] != undefined) {
+        versions[defaultVersionName].deploymentURL = versions[defaultVersionName].customtUrl;
+    }
     var selectedApplicationRevision = versions[selectedRevision];
     var revisions = outputs.revision;
     var applicationName = application.applicationName;
     var applicationKey = application.hashId;
-    var defaultVersionName = application.defaultVersionName;
     var appCreationPageBaseUrl = jagg.getAbsoluteUrl("/site/pages/application.jag");
     var dashboardBaseUrl = DASHBOARD_BASE_URL;
     var dashboardUrl = dashboardBaseUrl + applicationName + "-" + selectedRevision;
@@ -121,7 +124,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 <p id="app-description"><%=(application.description)?application.description:''%></p>
                 <%if(defaultVersionName !== null && versions[defaultVersionName] != undefined) { %>
                 <div class="app-preview-action-bar" id="custom-url-block">
-                    <div class="sec prod-url"><a href="<%=versions[defaultVersionName].deploymentURL%>"><%=versions[defaultVersionName].deploymentURL%></a>
+                    <div class="sec prod-url"><a href="<%=versions[defaultVersionName].customtUrl%>"><%=versions[defaultVersionName].customtUrl%></a>
                     <a href="/appmgt/site/pages/customurl.jag?applicationKey=<%=applicationKey%>&selectedRevision=<%=selectedRevision%>"><i class="fw fw-settings"></i></a>
                     </div>
                 </div>
