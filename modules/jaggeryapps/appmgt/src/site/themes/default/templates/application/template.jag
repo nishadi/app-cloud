@@ -157,6 +157,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 } else if (uploadMethod === "github" ) {
                     formData.append('gitRepoUrl', $("#gitRepoUrl").val());
                     formData.append('gitRepoBranch', $("#gitRepoBranch").val());
+                    if($("#projectRoot").val()){
+                        formData.append('projectRoot', $("#projectRoot").val());
+                    }else{
+                        formData.append('projectRoot', "/");
+                    }
                     formData.append('token', $("#token").val());
 
                     // Add github url as a tag
@@ -515,7 +520,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     $("#add-application").prop("disabled", true);
                 }
             }else if($("#gitRepoUrl").val()  && $("#gitRepoBranch").val()){
-		$("#add-application").prop("disabled", false);
+		        $("#add-application").prop("disabled", false);
             }
         } else {
             $("#add-application").prop("disabled", true);      // enables button
@@ -795,6 +800,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <div class="input-group">
                     <span class="input-group-addon">Branch</span>
                     <input id="gitRepoBranch" name="gitRepoBranch" type="text" class="form-control" placeholder="Enter GitHub Repository branch" />
+                </div>
+                <br/>
+                <div class="input-group">
+                    <span class="input-group-addon">Project Root</span>
+                    <input id="projectRoot" name="projectRoot" type="text" class="form-control" placeholder="Project Root" />
                 </div>
                 <br/>
                 <!--div class="input-group">

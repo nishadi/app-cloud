@@ -88,7 +88,7 @@ public class DockerOpClient {
     }
 
     public void createDockerFileForGitHub(String runtimeId, String gitRepoUrl, String gitRepoBranch,
-                                          String dockerFilePath, String dockerGitHubTemplateFilePath)
+                                          String dockerFilePath, String projectRoot, String dockerGitHubTemplateFilePath)
             throws IOException, AppCloudException {
 
         String dockerFileTemplatePath = DockerUtil.getDockerFileTemplatePath(runtimeId, dockerGitHubTemplateFilePath, "github");
@@ -99,6 +99,9 @@ public class DockerOpClient {
             }
             if (line.contains("GIT_REPO_BRANCH")) {
                 line = line.replace("GIT_REPO_BRANCH", gitRepoBranch);
+            }
+            if (line.contains("PROJECT_ROOT")) {
+                line = line.replace("PROJECT_ROOT", projectRoot);
             }
             dockerFileConfigs.add(line);
         }
