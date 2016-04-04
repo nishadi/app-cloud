@@ -13,6 +13,8 @@ IS_VERSION=wso2is-5.0.0
 SS_VERSION=wso2ss-1.1.0
 DAS_VERSION=wso2das-3.0.1
 
+IP="$(ifconfig | grep -A 1 'eth0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1)"
+
 APP_CLOUD_SRC_HOME=`pwd`/../../
 
 # Build source code
@@ -58,100 +60,100 @@ DAS_HOME=$SETUP_DIR/$DAS_VERSION/
 
 
 function as_setup(){
+    mkdir -p $1/repository/deployment/server/jaggeryapps/appmgt/
+    unzip -q $APP_CLOUD_SRC_HOME/modules/jaggeryapps/appmgt/target/appmgt-3.0.0-SNAPSHOT.zip -d $1/repository/deployment/server/jaggeryapps/appmgt/
+    sed -e "s@AS_HOME@$1@g" $APP_CLOUD_SRC_HOME/modules/setup-scripts/jaggery/site.json > $1/repository/deployment/server/jaggeryapps/appmgt/site/conf/site.json
+    cp -R $APP_CLOUD_SRC_HOME/modules/resources/dockerfiles $1/repository/deployment/server/jaggeryapps/appmgt/
 
-echo "Updaing AS node with new configurations"
+    cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/jaggery/modules/* $1/modules/
 
-mkdir -p $1/repository/deployment/server/jaggeryapps/appmgt/
-unzip -q $APP_CLOUD_SRC_HOME/modules/jaggeryapps/appmgt/target/appmgt-1.0.0-SNAPSHOT.zip -d $1/repository/deployment/server/jaggeryapps/appmgt/
-sed -e "s@AS_HOME@${AS_HOME}@g" $APP_CLOUD_SRC_HOME/modules/setup-scripts/jaggery/site.json > $1/repository/deployment/server/jaggeryapps/appmgt/site/conf/site.json
-cp -R $APP_CLOUD_SRC_HOME/modules/resources/dockerfiles $1/repository/deployment/server/jaggeryapps/appmgt/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/org.wso2.carbon.hostobjects.sso_4.2.0.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/nimbus-jose-jwt_2.26.1.wso2v2.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-codec-1.10.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-compress-1.9.wso2v1.jar $1/repository/components/dropins/
 
-cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/jaggery/modules/* $1/modules/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-client-1.0.10.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-dsl-1.0.10.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-model-1.0.10.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-annotations-2.7.3.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-core-2.7.3.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-databind-2.7.3.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-dataformat-yaml-2.7.3.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/slf4j-api-1.7.12.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/snakeyaml-1.15.jar $1/repository/components/dropins/
 
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/org.wso2.carbon.hostobjects.sso_4.2.0.jar $1/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/nimbus-jose-jwt_2.26.1.wso2v2.jar $1/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-codec-1.10.wso2v1.jar $1/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-compress-1.9.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $1/repository/components/lib/
 
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-client-1.0.10.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-dsl-1.0.10.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-model-1.0.10.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-annotations-2.7.3.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-core-2.7.3.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-databind-2.7.3.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-dataformat-yaml-2.7.3.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/slf4j-api-1.7.12.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/snakeyaml-1.15.jar $AS_HOME/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/dsl-annotations-0.1.26.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/junixsocket-common-2.0.4.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/logging-interceptor-2.7.2.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okhttp-2.7.2.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okhttp-ws-2.7.2.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okio-1.6.0.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/sundr-codegen-0.1.25.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/sundr-core-0.1.25.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/validation-api-1.1.0.Final.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/velocity-1.7.0.wso2v1.jar $1/repository/components/dropins/
 
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/dsl-annotations-0.1.26.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/junixsocket-common-2.0.4.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/logging-interceptor-2.7.2.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okhttp-2.7.2.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okhttp-ws-2.7.2.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okio-1.6.0.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/sundr-codegen-0.1.25.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/sundr-core-0.1.25.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/validation-api-1.1.0.Final.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/velocity-1.7.0.wso2v1.jar $AS_HOME/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/kubernetes-client-1.3.76.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/kubernetes-model-1.0.43.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/dnsjava-2.1.7.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/openshift-client-1.3.75.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/json-20160212.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/fabric8-utils-2.2.100.jar $1/repository/components/dropins/    
 
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/kubernetes-client-1.3.76.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/kubernetes-model-1.0.43.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/dnsjava-2.1.7.wso2v1.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/json-20160212.jar $AS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/fabric8-utils-2.2.100.jar $AS_HOME/repository/components/dropins/
-
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $AS_HOME/repository/components/lib/
-
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/datasources/master-datasources.xml $1/repository/conf/datasources/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/datasources/appcloud-datasources.xml $1/repository/conf/datasources/
-cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.core/target/org.wso2.appcloud.core-1.0.0-SNAPSHOT.jar $1/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.provisioning.runtime/target/org.wso2.appcloud.provisioning.runtime-1.0.0-SNAPSHOT.jar $1/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.common/target/org.wso2.appcloud.common-1.0.0-SNAPSHOT.jar $1/repository/components/dropins/
-mkdir -p $1/repository/conf/appcloud
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/appcloud/appcloud.properties $1/repository/conf/appcloud/
-sed -i -e "s|APP_CLOUD_HOME|$APPCLOUD_HOME|g" $1/repository/conf/appcloud/appcloud.properties
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/datasources/master-datasources.xml $1/repository/conf/datasources/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/datasources/appcloud-datasources.xml $1/repository/conf/datasources/
+    cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.core/target/org.wso2.appcloud.core-3.0.0-SNAPSHOT.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.provisioning.runtime/target/org.wso2.appcloud.provisioning.runtime-3.0.0-SNAPSHOT.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/components/org.wso2.appcloud.common/target/org.wso2.appcloud.common-3.0.0-SNAPSHOT.jar $1/repository/components/dropins/
+    mkdir -p $1/repository/conf/appcloud
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/appcloud/appcloud.properties $1/repository/conf/appcloud/
+    sed -i -e "s|AS_HOME|$1|g" $1/repository/conf/appcloud/appcloud.properties
 }
-
 function as_cluster_setup(){
 
-mkdir -p $SETUP_DIR/AS_NODE1
-mkdir -p $SETUP_DIR/AS_NODE2
-unzip -q $PACK_DIR/$AS_VERSION.zip -d $SETUP_DIR/AS_NODE1/
-unzip -q $PACK_DIR/$AS_VERSION.zip -d $SETUP_DIR/AS_NODE2/
+    mkdir -p $SETUP_DIR/AS_NODE1
+    mkdir -p $SETUP_DIR/AS_NODE2
+    unzip -q $PACK_DIR/$AS_VERSION.zip -d $SETUP_DIR/AS_NODE1/
+    unzip -q $PACK_DIR/$AS_VERSION.zip -d $SETUP_DIR/AS_NODE2/
 
-AS_HOME1=$SETUP_DIR/AS_NODE1/$AS_VERSION/
-AS_HOME2=$SETUP_DIR/AS_NODE2/$AS_VERSION/
+    AS_HOME1=$SETUP_DIR/AS_NODE1/$AS_VERSION/
+    AS_HOME2=$SETUP_DIR/AS_NODE2/$AS_VERSION/
 
-as_setup $AS_HOME1
-as_setup $AS_HOME2
+    echo "Starting AS Node 1 setup.."
+    as_setup $AS_HOME1
+    echo "AS Node 1 setup done successfully!"
+    echo "Starting AS Node 2 setup.."
+    as_setup $AS_HOME2
+    echo "AS Node2 setup done successfully!"
 
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/carbon.xml $AS_HOME1/repository/conf/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/carbon.xml $AS_HOME2/repository/conf/
-sed -i -e "s/<Offset>0<\/Offset>/<Offset>4<\/Offset>/g" $AS_HOME2/repository/conf/carbon.xml
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/carbon.xml $AS_HOME1/repository/conf/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/carbon.xml $AS_HOME2/repository/conf/
+    sed -i -e "s/<Offset>0<\/Offset>/<Offset>4<\/Offset>/g" $AS_HOME2/repository/conf/carbon.xml
+    sed -i -e "s/<HostName>localhost<\/HostName>/<HostName>$IP<\/HostName>/g" $AS_HOME1/repository/conf/carbon.xml
+    sed -i -e "s/<HostName>localhost<\/HostName>/<HostName>$IP<\/HostName>/g" $AS_HOME2/repository/conf/carbon.xml
+    sed -i -e "s/<MgtHostName>localhost<\/MgtHostName>/<MgtHostName>$IP<\/MgtHostName>/g" $AS_HOME1/repository/conf/carbon.xml
+    sed -i -e "s/<MgtHostName>localhost<\/MgtHostName>/<MgtHostName>$IP<\/MgtHostName>/g" $AS_HOME2/repository/conf/carbon.xml
 
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/axis2/axis2.xml $AS_HOME1/repository/conf/axis2/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/axis2/axis2.xml $AS_HOME2/repository/conf/axis2/
+    sed -i -e "s/https:\/\/localhost:9443\/appmgt\/jagg\/jaggery_acs.jag/http:\/\/$IP\/appmgt\/jagg\/jaggery_acs.jag/g" $IS_HOME/repository/conf/security/sso-idp-config.xml
 
-echo "AS cluster setup successfully done!"
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/axis2/axis2.xml $AS_HOME1/repository/conf/axis2/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/axis2/axis2.xml $AS_HOME2/repository/conf/axis2/
+
+    echo "AS cluster setup successfully done!"
 
 }
 
 function as_non_cluster_setup(){
 
-unzip -q $PACK_DIR/$AS_VERSION.zip -d $SETUP_DIR
-AS_HOME=$SETUP_DIR/$AS_VERSION/
+    unzip -q $PACK_DIR/$AS_VERSION.zip -d $SETUP_DIR
+    AS_HOME=$SETUP_DIR/$AS_VERSION/
 
-as_setup $AS_HOME
-echo "AS non cluster setup successfully done!"
+    as_setup $AS_HOME
+    echo "AS non cluster setup successfully done!"
 }
 
-
-read -p "Do you wish to do a clustered setup?" yn
-    case $yn in
-        [Yy]* ) as_cluster_setup;;
-        [Nn]* ) as_non_cluster_setup;;
-        * ) echo "Please answer yes or no.";;
-    esac
 
 echo "Updaing IS node with new configuraitons"
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $IS_HOME/repository/components/lib/
@@ -160,6 +162,16 @@ cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2is-5.0.0/repository/conf/i
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2is-5.0.0/repository/conf/user-mgt.xml $IS_HOME/repository/conf/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2is-5.0.0/repository/conf/carbon.xml $IS_HOME/repository/conf/
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2is-5.0.0/repository/conf/security/sso-idp-config.xml $IS_HOME/repository/conf/security/sso-idp-config.xml
+
+
+echo "Updaing AS node with new configurations"
+read -p "Do you wish to do a clustered setup?" yn
+     case $yn in
+         [Yy]* ) as_cluster_setup;;
+         [Nn]* ) as_non_cluster_setup;;
+         * ) echo "Please answer yes or no.";;
+     esac
+
 
 echo "Updating SS node with new configurations"
 cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $SS_HOME/repository/components/lib/
