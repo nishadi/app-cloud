@@ -88,7 +88,7 @@
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">100</stringProp>
+        <stringProp name="ThreadGroup.num_threads">20</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${global_ramp_up_time}</stringProp>
         <longProp name="ThreadGroup.start_time">1388980923000</longProp>
         <longProp name="ThreadGroup.end_time">1388980923000</longProp>
@@ -355,7 +355,7 @@
               <elementProp name="applicationName" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.name">applicationName</stringProp>
-                <stringProp name="Argument.value">${app_name}${__threadNum}test6</stringProp>
+                <stringProp name="Argument.value">${app_name}${__threadNum}test9</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
                 <boolProp name="HTTPArgument.use_equals">true</boolProp>
               </elementProp>
