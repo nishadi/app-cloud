@@ -77,10 +77,11 @@ var log = new Log();
         }else{
             var gitRepoUrl = request.getParameter("gitRepoUrl");
             var gitRepoBranch = request.getParameter("gitRepoBranch");
+            var projectRoot = request.getParameter("projectRoot");
             var token = request.getParameter("token");
             gitHubAppModule.addApplicationViaGitHub(applicationName, applicationRevision, applicationDescription, replicas,
                                                     runtimeId, appTypeName, runtimeProperties, tags, appIcon, gitRepoUrl,
-                                                    gitRepoBranch, token, isNewVersion);
+                                                    gitRepoBranch, projectRoot, token, isNewVersion);
         }
         response.status = 200;
         response.message = "Application creation is successfully submitted";
