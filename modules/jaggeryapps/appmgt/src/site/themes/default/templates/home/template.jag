@@ -23,7 +23,12 @@ include("/jagg/constants.jag");
 jagg.template("home", function(inputs, outputs, jagg) {
     var application = outputs.application;
     var selectedRevision = outputs.selectedRevision;
-    var selectedApplicationRevision = application.versions[selectedRevision];
+    var versions = application.versions;
+    var defaultVersionName = application.defaultVersionName;
+    if (application.defaultVersionName != null && versions[defaultVersionName] != undefined) {
+        versions[defaultVersionName].deploymentURL = versions[defaultVersionName].customtUrl;
+    }
+    var selectedApplicationRevision = versions[selectedRevision];
     var revisions = outputs.revision;
     var applicationName = application.applicationName;
     var applicationKey = application.hashId;
@@ -80,6 +85,10 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 <a href="/appmgt/site/pages/runtimeLogs.jag?applicationKey=<%=applicationKey%>&selectedRevision=<%=selectedRevision%>"><i class="fa
                 fa-hdd-o"></i>Runtime Logs</a>
             </li>
+            <li>
+                <a href="/appmgt/site/pages/customurl.jag?applicationKey=<%=applicationKey%>&selectedRevision=<%=selectedRevision%>"><i class="fa
+                fa-link"></i>Custom URL</a>
+            </li>
         </ul>
     </div>
 
@@ -113,11 +122,13 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 <h2><%=applicationName%></h2>
                   <h4 class="app-run-time">Runtime: <span id="runtime"><%=selectedApplicationRevision.runtimeName%></span></h4>
                 <p id="app-description"><%=(application.description)?application.description:''%></p>
-                <!--div class="app-preview-action-bar">
-                    <div class="sec prod-url"><a href="#" >http://javatest.djcompany.wso2app.com</a>
-                    <a href="#"><i class="fw fw-settings"></i></a>
+                <%if(defaultVersionName !== null && versions[defaultVersionName] != undefined) { %>
+                <div class="app-preview-action-bar" id="custom-url-block">
+                    <div class="sec prod-url"><a href="<%=versions[defaultVersionName].customtUrl%>"><%=versions[defaultVersionName].customtUrl%></a>
+                    <a href="/appmgt/site/pages/customurl.jag?applicationKey=<%=applicationKey%>&selectedRevision=<%=selectedRevision%>"><i class="fw fw-settings"></i></a>
                     </div>
-                </div-->
+                </div>
+                <% } %>
               </div>
           </div>
         </div>
@@ -145,7 +156,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                           <a href="<%=selectedApplicationRevision.deploymentURL%>" target="_blank"><span>
                           <b>URL : </b><%=selectedApplicationRevision.deploymentURL%></span></a>
                           </div>
-                          <div class="sec">
+                          <div class="sec" id="version-app-launch-block">
                               <button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"
                               url="<%=selectedApplicationRevision.deploymentURL%>">Launch App</button>
                               <%

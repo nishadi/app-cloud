@@ -29,6 +29,11 @@
             <groupId>org.wso2.appcloud</groupId>
             <artifactId>org.wso2.appcloud.common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava.wso2</groupId>
+            <artifactId>guava</artifactId>
+            <version>12.0.0.wso2v1</version>
+        </dependency>
     </dependencies>
 
     <build>
