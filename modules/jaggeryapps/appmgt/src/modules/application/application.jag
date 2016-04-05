@@ -139,6 +139,18 @@ var buildDockerImage = function (applicationName, versionName, runtimeId, absFil
 
     } catch (e){
 
+        // Retrying to fix thread interrupted error temporarily. Has to find a proper fix from fabric8
+        for (var i = 0 ; i < 3 ; i++){
+            try{
+                log.info("Retrying docker build retry counter value : " + i);
+                var dockerRegTenantSpace = modManager.getTenantDomain().replace(".","-");
+                dockerOpClient.buildDockerImage(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) ,applicationRuntime.getImageName(), tagName, absFileUploadedPath);
+                return;
+            } catch (e){
+                log.error("Error occured while building image, Hence retrying...");
+            }
+        }
+
         var msg = "Error while building docker file";
         addEvent(DOCKER_IMAGE_BUILD, EVENT_FAILED, msg, versionHashId);
 
