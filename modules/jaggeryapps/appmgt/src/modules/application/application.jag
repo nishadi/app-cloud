@@ -357,13 +357,17 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
 
     } catch(e){
         var msg = "Error while submitting application deployment to Kubernetes";
-        addEvent(KUBE_DEPLOY, EVENT_FAILED, msg, versionHashId);
-        ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        if(!isRedeploy) {
+            addEvent(KUBE_DEPLOY, EVENT_FAILED, msg, versionHashId);
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        }
         log.error(msg);
         log.error(e);
         log.info("Application deployment failed because kubernetes deployment was failed and roll back process" +
-                 " is started for application:"+applicationName+" with revision:"+versionName);
-        deleteVersion(versionHashId, true, false);
+                 " is started for application: " + applicationName + " with revision: " + versionName);
+        if(!isRedeploy) {
+            deleteVersion(versionHashId, true, false);
+        }
         throw e;
     }
     //Adding deployment success event
