@@ -34,13 +34,13 @@ jagg.template("tags", function(inputs, outputs, jagg) {
     <div class="action-bar">
         <a href="/appmgt/site/pages/home.jag?applicationKey=<%=applicationKey%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
                 <span class="fw-stack fw-lg btn-action-ico">
-                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-circle-outline fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
                 </span> <span class="hidden-xs">Back to Application</span>
         </a>
         <a class="btn-action add-tag" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
                 <span class="fw-stack fw-lg btn-action-ico">
-                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-circle-outline fw-stack-2x"></i>
                     <i class="fw fw-add fw-stack-1x"></i>
                 </span> <span class="hidden-xs">Add Tag</span>
         </a>
@@ -83,12 +83,12 @@ $(document).ready(function () {
                 '</div>' +
                 '<div class="form-group edit-key-values">' +
                 '<span class="fw-stack fw-lg">' +
-                '<i class="fw fw-ring fw-stack-2x fw-inverse"></i>' +
+                '<i class="fw fw-circle-outline fw-stack-2x fw-inverse"></i>' +
                 '<i id="editIcon" class="fw  fw-edit fw-stack-1x fw-inverse"></i>' +
                 '<i id="saveIcon" class="fw  fw-save fw-stack-1x fw-inverse" style="display: none"></i>' +
                 '</span>' +
                 '<span class="fw-stack fw-lg">' +
-                '<i class="fw fw-ring fw-stack-2x fw-inverse"></i>' +
+                '<i class="fw fw-circle-outline fw-stack-2x fw-inverse"></i>' +
                 '<i class="fw fw-cancel fw-stack-1x fw-inverse"></i>' +
                 '</span>' +
                 '</div>' +
@@ -108,12 +108,12 @@ $(document).ready(function () {
                 '</div>' +
                 '<div class="form-group edit-key-values">' +
                 '<span class="fw-stack fw-lg">' +
-                '<i class="fw fw-ring fw-stack-2x fw-inverse"></i>' +
+                '<i class="fw fw-circle-outline fw-stack-2x fw-inverse"></i>' +
                 '<i id="editIcon" class="fw  fw-edit fw-stack-1x fw-inverse" style="display: none"></i>' +
                 '<i id="saveIcon" class="fw  fw-save fw-stack-1x save-new-entry fw-inverse" disabled></i>' +
                 '</span>' +
                 '<span class="fw-stack fw-lg">' +
-                '<i class="fw fw-ring fw-stack-2x fw-inverse"></i>' +
+                '<i class="fw fw-circle-outline fw-stack-2x fw-inverse"></i>' +
                 '<i class="fw fw-cancel fw-stack-1x cancel-new-entry fw-inverse"></i>' +
                 '</span>' +
                 '</div>' +

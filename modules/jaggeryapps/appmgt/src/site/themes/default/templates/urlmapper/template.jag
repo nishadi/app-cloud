@@ -52,7 +52,7 @@ jagg.template("urlmapper", function (inputs, outputs, jagg) { %>
 <div class="action-bar">
 	<a href="/appmgt/site/pages/home.jag?applicationKey=<%=applicationKey%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
          <span class="fw-stack fw-lg btn-action-ico">
-             <i class="fw fw-ring fw-stack-2x"></i>
+             <i class="fw fw-circle-outline fw-stack-2x"></i>
              <i class="fw fw-left-arrow fw-stack-1x"></i>
          </span> <span class="hidden-xs">Back to Application</span>
     </a>
@@ -94,15 +94,15 @@ jagg.template("urlmapper", function (inputs, outputs, jagg) { %>
          <div class="form-group">
              <button class="cu-btn cu-btn-sm cu-btn-blue" id="updateCustomUrl" onclick="updateCustomUrl()">
              <span class="fw-stack fw-lg btn-action-ico">
-                 <i class="fw fw-ring fw-stack-2x"></i>
+                 <i class="fw fw-circle-outline fw-stack-2x"></i>
                  <i class="fw fw-add fw-stack-1x"></i>
              </span>
                  Update
              </button>
              <button class="cu-btn cu-btn-sm cu-btn-blue" id="editCustomUrl" onclick="editCustomUrl()">
              <span class="fw-stack fw-lg btn-action-ico">
-                 <i class="fw fw-ring fw-stack-2x"></i>
-                 <i class="fw fw-add fw-stack-1x"></i>
+                 <i class="fw fw-circle-outline fw-stack-2x"></i>
+                 <i class="fw fw-circle-outline fw-stack-1x"></i>
              </span>
                  Edit
              </button>
