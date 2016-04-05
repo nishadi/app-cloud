@@ -22,14 +22,14 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get install -y pwgen
 
-ENV TOMCAT_VERSION 8.0.9
+ENV WSO2_AS_VERSION 6.0.0
 
 # Get and unpack Tomcat
-RUN wget http://archive.apache.org/dist/tomcat/tomcat-8/v${TOMCAT_VERSION}/bin/\
-apache-tomcat-${TOMCAT_VERSION}.tar.gz -O /tmp/catalina.tar.gz && \
-    tar xzf /tmp/catalina.tar.gz -C /opt && \
-    ln -s /opt/apache-tomcat-${TOMCAT_VERSION} /opt/tomcat && \
-    rm /tmp/catalina.tar.gz
+RUN wget https://github.com/wso2/product-as/releases/download/v${WSO2_AS_VERSION}-m1/wso2as-${WSO2_AS_VERSION}-m1.zip -O /tmp/catalina.zip && \
+    unzip /tmp/catalina.zip -d /opt && \
+    ln -s /opt/wso2as-${WSO2_AS_VERSION}-m1 /opt/tomcat && \
+    rm /tmp/catalina.zip
+
 
 # Make a copy of the webapps folder, in case an empty or non-existent host
 # folder is specified for the (webapps) volume.
