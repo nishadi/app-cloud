@@ -69,7 +69,7 @@ function as_setup(){
 
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/org.wso2.carbon.hostobjects.sso_4.2.0.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/nimbus-jose-jwt_2.26.1.wso2v2.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-codec-1.10.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-codec-1.10.0.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-compress-1.9.0.wso2v1.jar $1/repository/components/dropins/
 
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-client-1.0.10.wso2v1.jar $1/repository/components/dropins/
