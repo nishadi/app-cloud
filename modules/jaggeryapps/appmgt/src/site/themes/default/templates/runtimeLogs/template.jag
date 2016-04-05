@@ -44,13 +44,13 @@ jagg.template("runtimeLogs", function (inputs, outputs, jagg) {
         <div class="action-bar">
             <a href="/appmgt/site/pages/home.jag?applicationKey=<%=applicationKey%>" class="btn-action" data-toggle="tooltip" data-placement="top" title="Go back to application home page">
                     <span class="fw-stack fw-lg btn-action-ico">
-                        <i class="fw fw-ring fw-stack-2x"></i>
+                        <i class="fw fw-circle-outline fw-stack-2x"></i>
                         <i class="fw fw-left-arrow fw-stack-1x"></i>
                     </span> <span class="hidden-xs">Back to Application</span>
             </a>
             <a class="btn-action" data-toggle="tooltip" data-placement="top" title="reload logs" id="log-reload">
                     <span class="fw-stack fw-lg btn-action-ico">
-                        <i class="fw fw-ring fw-stack-2x"></i>
+                        <i class="fw fw-circle-outline fw-stack-2x"></i>
                         <i class="fw fw-refresh fw-stack-1x"></i>
                     </span> <span class="hidden-xs">Reload Logs</span>
             </a>
