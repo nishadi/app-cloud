@@ -203,7 +203,7 @@ $(document).ready(function () {
     function deleteRuntimeAttribute(key, value, tr) {
         jagg.post("../blocks/application/application.jag", {
             action: "deleteRuntimeProperty",
-            applicationKey: '<%=versionKey%>',
+            versionKey: '<%=versionKey%>',
             key: key
 
         }, function (result) {
