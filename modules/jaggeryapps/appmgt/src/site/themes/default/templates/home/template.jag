@@ -98,7 +98,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
     <div class="action-bar">
         <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action"  title="Back to Application listing">
                 <span class="fw-stack fw-lg btn-action-ico">
-                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-circle-outline fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
                 </span> Back to Listing
         </a>
@@ -194,7 +194,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                           <a id="delete-version" onclick="deleteApplicationPopUp();">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
-                                    <i class="fw fw-ring fw-stack-2x"></i>
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
                                     <i class="fw fw-delete fw-stack-1x"></i>
                                   </span> Delete
                               </div>
@@ -202,7 +202,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                           <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=application.applicationType%>&applicationKey=<%=applicationKey%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>&newVersion=true">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
-                                     <i class="fw fw-ring fw-stack-2x"></i>
+                                     <i class="fw fw-circle-outline fw-stack-2x"></i>
                                      <i class="fw fw-add fw-stack-1x"></i>
                                   </span> Upload Version
                               </div>
@@ -231,7 +231,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                     <figure class="node-cicle">
                                         <figcaption>
                                           <span class="fw-stack fw-lg ">
-                                              <i class="fw fw-ring fw-stack-2x"></i>
+                                              <i class="fw fw-circle-outline fw-stack-2x"></i>
                                               <i class="fw fw-add fw-stack-1x" data-toggle="tooltip" title="Adding replicas to your application will not support in this release."></i>
                                           </span>
                                         </figcaption>
@@ -267,7 +267,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                   <a href="/appmgt/site/pages/envs.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">
                       <div class="block-action-button">
                             <span class="fw-stack fw-lg btn-action-ico">
-                                <i class="fw fw-ring fw-stack-2x"></i>
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
                                 <i class="fw fw-add fw-stack-1x"></i>
                               </span> Add New
                       </div>
@@ -283,7 +283,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                   <a href="/appmgt/site/pages/tags.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">
                       <div class="block-action-button">
                         <span class="fw-stack fw-lg btn-action-ico">
-                            <i class="fw fw-ring fw-stack-2x"></i>
+                            <i class="fw fw-circle-outline fw-stack-2x"></i>
                             <i class="fw fw-add fw-stack-1x"></i>
                           </span> Add New
                       </div>

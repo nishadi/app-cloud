@@ -38,7 +38,7 @@ var log = new Log();
         response.status = 200;
         response.message = "Artifact is successfully uploaded!";
 
-    }else if(action == "createApplication"){
+    } else if (action == "createApplication") {
         var applicationDescription = request.getParameter("applicationDescription");
         var replicas = 1;
         var runtimeId = request.getParameter("runtime");

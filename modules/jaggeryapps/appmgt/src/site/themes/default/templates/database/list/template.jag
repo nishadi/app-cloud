@@ -32,13 +32,13 @@ var isSSRunning = outputs.isSSRunning;
     <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>"
      class="btn-action"  title="Back to Overview">
         <span class="fw-stack fw-lg btn-action-ico">
-            <i class="fw fw-ring fw-stack-2x"></i>
+            <i class="fw fw-circle-outline fw-stack-2x"></i>
             <i class="fw fw-left-arrow fw-stack-1x"></i>
         </span> Back to Overview
     </a>
     <a href="<%=jagg.getAbsoluteUrl("/site/pages/newdatabase.jag")%>?isEdit=false" class="btn-action" data-toggle="tooltip" data-placement="top" title="Add New Database">
         <span class="fw-stack fw-lg btn-action-ico">
-            <i class="fw fw-ring fw-stack-2x"></i>
+            <i class="fw fw-circle-outline fw-stack-2x"></i>
             <i class="fw fw-add fw-stack-1x"></i>
         </span> <span class="hidden-xs">Add New Database</span>
     </a>
@@ -66,7 +66,7 @@ var isSSRunning = outputs.isSSRunning;
                 <div class="add-issue-content">
                     <a href="<%=jagg.getAbsoluteUrl("/site/pages/newdatabase.jag")%>?isEdit=false"  id="add-issue-button" class="cu-btn cu-btn-md cu-btn-blue">
                         <span class="fw-stack fw-lg btn-action-ico">
-                            <i class="fw fw-ring fw-stack-2x"></i>
+                            <i class="fw fw-circle-outline fw-stack-2x"></i>
                             <i class="fw fw-add fw-stack-1x"></i>
                         </span>
                         <span class="hidden-xs">Create your first database</span>

@@ -32,6 +32,7 @@ import org.wso2.appcloud.core.dto.RuntimeProperty;
 import org.wso2.appcloud.core.dto.Tag;
 import org.wso2.appcloud.core.dto.Transport;
 import org.wso2.appcloud.core.dto.Version;
+import org.wso2.carbon.user.core.tenant.JDBCTenantManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1380,6 +1381,7 @@ public class ApplicationDAO {
         }
     }
 
+
     /**
      * Get service proxy for given version
      *
@@ -1479,5 +1481,37 @@ public class ApplicationDAO {
     }
 
 
+    public Version[] getApplicationVersionsByRunningTimePeriod(int numberOfDays) throws AppCloudException {
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        List<Version> versions = new ArrayList<>();
 
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(
+                    SQLQueryConstants.GET_ALL_APP_VERSIONS_CREATED_BEFORE_X_DAYS_AND_NOT_WHITE_LISTED);
+            preparedStatement.setInt(1, numberOfDays);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()){
+                Version version = new Version();
+                version.setHashId(resultSet.getString(SQLQueryConstants.HASH_ID));
+                version.setCreatedTimestamp(resultSet.getTimestamp(SQLQueryConstants.EVENT_TIMESTAMP));
+                version.setTenantId(resultSet.getInt(SQLQueryConstants.TENANT_ID));
+
+                versions.add(version);
+            }
+            dbConnection.commit();
+
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving application version detail for non white listed applications.";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return versions.toArray(new Version[versions.size()]);
+    }
 }

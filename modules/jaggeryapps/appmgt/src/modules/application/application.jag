@@ -139,6 +139,18 @@ var buildDockerImage = function (applicationName, versionName, runtimeId, absFil
 
     } catch (e){
 
+        // Retrying to fix thread interrupted error temporarily. Has to find a proper fix from fabric8
+        for (var i = 0 ; i < 3 ; i++){
+            try{
+                log.info("Retrying docker build retry counter value : " + i);
+                var dockerRegTenantSpace = modManager.getTenantDomain().replace(".","-");
+                dockerOpClient.buildDockerImage(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) ,applicationRuntime.getImageName(), tagName, absFileUploadedPath);
+                return;
+            } catch (e){
+                log.error("Error occured while building image, Hence retrying...");
+            }
+        }
+
         var msg = "Error while building docker file";
         addEvent(DOCKER_IMAGE_BUILD, EVENT_FAILED, msg, versionHashId);
 
@@ -345,13 +357,17 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
 
     } catch(e){
         var msg = "Error while submitting application deployment to Kubernetes";
-        addEvent(KUBE_DEPLOY, EVENT_FAILED, msg, versionHashId);
-        ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        if(!isRedeploy) {
+            addEvent(KUBE_DEPLOY, EVENT_FAILED, msg, versionHashId);
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        }
         log.error(msg);
         log.error(e);
         log.info("Application deployment failed because kubernetes deployment was failed and roll back process" +
-                 " is started for application:"+applicationName+" with revision:"+versionName);
-        deleteVersion(versionHashId, true, false);
+                 " is started for application: " + applicationName + " with revision: " + versionName);
+        if(!isRedeploy) {
+            deleteVersion(versionHashId, true, false);
+        }
         throw e;
     }
     //Adding deployment success event
@@ -1090,7 +1106,7 @@ var getApplicationCreationEvents = function(applicationName, versionName) {
     var events = eventsManager.getEventsOfApplication(versionHashId);
 };
 
-var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationName, revision){
+var uploadExistingArchive = function (uploadedArtifact, appTypeName, applicationName, revision) {
     var uploadedFileName = uploadedArtifact.getName();
     var versionHashId = Util.getVersionHashId(applicationName, revision, modManager.getTenantId());
     createDestinationDirsForUploadedApps(versionHashId);
@@ -1099,11 +1115,11 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
     var uploadApplicationTmpPath;
     var checkFileExtZIP = isFileExtZIP(uploadedFileName);
     //.zip files are auto extracted inside the AS. So if file extension is zip, then extension change to .upload.
-    if(checkFileExtZIP){
+    if (checkFileExtZIP) {
         var fileName = uploadedFileName.substring(0, uploadedFileName.lastIndexOf("."));
         uploadApplicationTmpPath = fileUploadPath + fileName + FILE_EXTENSTION_ALTER;
         log.info(uploadApplicationTmpPath);
-    }else{
+    } else {
         uploadApplicationTmpPath = fileUploadPath + uploadedFileName;
         log.info(uploadApplicationTmpPath);
     }
@@ -1111,9 +1127,9 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
     uploadedArtifact.move(uploadApplicationTmpPath);
 };
 
-var isFileExtZIP = function(uploadedFileName){
+var isFileExtZIP = function (uploadedFileName) {
     var fileExt = uploadedFileName.substr(uploadedFileName.lastIndexOf(".") + 1, uploadedFileName.length);
-    if(fileExt == FILE_EXTENTION_ZIP){
+    if (fileExt == FILE_EXTENTION_ZIP) {
         return true;
     }
     return false;
@@ -1219,7 +1235,7 @@ var deleteApplicationFromKubernetes = function(versionHashId) {
     try{
         var KubernetesRuntimeProvisioningService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
         var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(null, null, null, modManager.getTenantId(),
-                                                                               modManager.getTenantDomain(), versionHashId);
+                                                                               modManager.getTenantDomain(true), versionHashId);
         var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
         kubernetesRuntimeProvisioningService.deleteDeployment();
 

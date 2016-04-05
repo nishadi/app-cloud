@@ -47,8 +47,16 @@ var setAuthHeaders = function (options, httpHeaders, username) {
 /*
  *   getTenantDomain is used to logged user's domain name.
  */
-var getTenantDomain = function () {
-
+var getTenantDomain = function (fromCarbonContext) {
+    if (fromCarbonContext) {
+        var carbon = require('carbon');
+        var context = carbon.multitenancy.getPrivilegedCarbonContext();
+        var tenantDomain = context.getThreadLocalCarbonContext().getTenantDomain();
+        if (tenantDomain) {
+            return tenantDomain;
+        }
+        log.info("tenant domain is NOT picked from carbon context hence continue to take from current logged in username.");
+    }
     var tenantDomain = session.get(TENANT_DOMAIN_NAME);
     if ( tenantDomain == null) {
         var username = jagg.getUser();
@@ -98,11 +106,22 @@ var getDomainlessUserName = function () {
     return strippedUserName;
 };
 
-var getTenantId = function () {
+var getTenantId = function (fromCarbonContext) {
     var carbon = require('carbon');
-    var tenantDomain = getTenantDomain();
+    var tenantDomain;
+    if (fromCarbonContext) {
+        tenantDomain = getTenantDomain(true);
+    } else {
+        tenantDomain = getTenantDomain();
+    }
     var tenantManager = multitenancy.getTenantManager();
     return tenantManager.getTenantId(tenantDomain);
+};
+
+var getTenantDomainById = function (tenantId) {
+    var carbon = require('carbon');
+    var tenantManager = multitenancy.getTenantManager();
+    return tenantManager.getDomain(tenantId);
 };
 
 %>

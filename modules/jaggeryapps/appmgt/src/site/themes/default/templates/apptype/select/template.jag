@@ -26,7 +26,7 @@ jagg.template("apptype/select", function(inputs, outputs, jagg) {
     <div class="action-bar">
         <a href="/appmgt/site/pages/index.jag" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
-                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-circle-outline fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
                 </span> <span class="hidden-xs">Back to Application listing</span>
         </a>
@@ -70,7 +70,7 @@ jagg.template("apptype/select", function(inputs, outputs, jagg) {
                 <div class="col-sm-4 col-md-4 col-lg-5 description-action">
                    <a href="" class="cu-btn cu-btn-md cu-btn-blue">
                    <span class="fw-stack fw-lg">
-                       <i class="fw fw-ring fw-stack-2x"></i>
+                       <i class="fw fw-circle-outline fw-stack-2x"></i>
                        <i class="fw fw-right-arrow fw-stack-1x"></i>
                    </span>
                    Continue</a>

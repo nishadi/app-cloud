@@ -23,4 +23,4 @@ ENV MNT /mnt
 
 RUN git clone GIT_REPO_URL --branch GIT_REPO_BRANCH --single-branch "$MNT/"
 RUN mv "$MNT"PROJECT_ROOT* "$WEB_ROOT/"
-RUN rm -r "$MNT"/*
+RUN rm -rf "$MNT"/*
