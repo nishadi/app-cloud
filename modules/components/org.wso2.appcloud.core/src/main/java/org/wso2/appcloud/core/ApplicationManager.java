@@ -651,8 +651,7 @@ public class ApplicationManager {
         boolean isUpdatedSuccess = false;
 
         try {
-            isUpdatedSuccess = applicationDAO
-                    .updateDefaultVersion(dbConnection, applicationHashId, defaultVersionName);
+            isUpdatedSuccess = applicationDAO.updateDefaultVersion(dbConnection, applicationHashId, defaultVersionName);
             dbConnection.commit();
         } catch (SQLException e) {
             String message = "Error while updating default version with application hash id : " + applicationHashId;
@@ -662,5 +661,11 @@ public class ApplicationManager {
         }
 
         return isUpdatedSuccess;
+    }
+
+    public static Version[] getApplicationVersionsByRunningTimePeriod(int numberOfDays) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        return applicationDAO.getApplicationVersionsByRunningTimePeriod(numberOfDays);
+
     }
 }

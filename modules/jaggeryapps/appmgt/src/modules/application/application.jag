@@ -1235,7 +1235,7 @@ var deleteApplicationFromKubernetes = function(versionHashId) {
     try{
         var KubernetesRuntimeProvisioningService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
         var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(null, null, null, modManager.getTenantId(),
-                                                                               modManager.getTenantDomain(), versionHashId);
+                                                                               modManager.getTenantDomain(true), versionHashId);
         var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
         kubernetesRuntimeProvisioningService.deleteDeployment();
 

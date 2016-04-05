@@ -1,6 +1,7 @@
 package org.wso2.appcloud.core.dto;
 
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public class Version {
@@ -12,6 +13,8 @@ public class Version {
     private String status;
     private List<RuntimeProperty> runtimeProperties;
     private List<Tag> tags;
+    private int tenantId;
+    private Timestamp createdTimestamp;
 
     public String getVersionName() {
         return versionName;
@@ -67,5 +70,21 @@ public class Version {
 
     public void setTags(List<Tag> tags) {
         this.tags = tags;
+    }
+
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public Timestamp getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    public void setCreatedTimestamp(Timestamp createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
     }
 }

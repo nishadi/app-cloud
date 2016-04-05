@@ -47,6 +47,7 @@ public class SQLQueryConstants {
     public static final String RUNTIME_TAG = "tag";
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String HOST_URL = "host_url";
+    public static final String TENANT_ID = "tenant_id";
 
 
     /*==============================
@@ -167,6 +168,9 @@ public class SQLQueryConstants {
             "INNER JOIN AC_DEPLOYMENT ON AC_CONTAINER.deployment_id = AC_DEPLOYMENT.id " +
             "INNER JOIN AC_VERSION ON AC_DEPLOYMENT.id = AC_VERSION.deployment_id WHERE AC_VERSION.hash_id=?";
 
+
+    public static final String GET_ALL_APP_VERSIONS_CREATED_BEFORE_X_DAYS_AND_NOT_WHITE_LISTED =
+            "SELECT * FROM AC_VERSION WHERE is_white_listed=0 AND status='running' AND timestamp <  timestampadd(day, -?, now());";
 
 
     /* Update Queries */
