@@ -354,7 +354,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
             applicationRevision: selectedRevision,
             versionKey: selectedApplicationRevision.hashId
         }, function (result) {
-            jagg.message({content: "Application redeploy request submitted successfully.", type: 'info'});
+            jagg.message({content: "Application redeployed successfully.", type: 'info'});
         });
     }
 
