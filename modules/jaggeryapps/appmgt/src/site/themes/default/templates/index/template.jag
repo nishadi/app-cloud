@@ -184,13 +184,13 @@ jagg.template("index", function(inputs, outputs, jagg) {
     <div class="action-bar">
         <a href="/appmgt/site/pages/select-apptype.jag" class="btn-action" data-toggle="tooltip" data-placement="top" title="Add New Application">
             <span class="fw-stack fw-lg btn-action-ico">
-                <i class="fw fw-ring fw-stack-2x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
                 <i class="fw fw-add fw-stack-1x"></i>
             </span> <span class="hidden-xs">Create Application</span>
         </a>
         <a href="<%=jagg.getAbsoluteUrl("/site/pages/newdatabase.jag")%>?isEdit=false" class="btn-action" data-toggle="tooltip" data-placement="top" title="Add New Database">
             <span class="fw-stack fw-lg btn-action-ico">
-                <i class="fw fw-ring fw-stack-2x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
                 <i class="fw fw-add fw-stack-1x"></i>
             </span> <span class="hidden-xs">Create Database</span>
         </a>

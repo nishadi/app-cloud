@@ -37,7 +37,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
     %>
 
 <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
-      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/fontwso2-1.2/css/font-wso2.css'))%>">
+      <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/font-wso2-1.0.0/css/font-wso2.css'))%>">
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/font-awesome-4.2.0/font-awesome.min.css'))%>">
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/web-fonts/Roboto.css'))%>">
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
@@ -157,6 +157,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 } else if (uploadMethod === "github" ) {
                     formData.append('gitRepoUrl', $("#gitRepoUrl").val());
                     formData.append('gitRepoBranch', $("#gitRepoBranch").val());
+                    if($("#projectRoot").val()){
+                        formData.append('projectRoot', $("#projectRoot").val());
+                    }else{
+                        formData.append('projectRoot', "/");
+                    }
                     formData.append('token', $("#token").val());
 
                     // Add github url as a tag
@@ -515,7 +520,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     $("#add-application").prop("disabled", true);
                 }
             }else if($("#gitRepoUrl").val()  && $("#gitRepoBranch").val()){
-		$("#add-application").prop("disabled", false);
+		        $("#add-application").prop("disabled", false);
             }
         } else {
             $("#add-application").prop("disabled", true);      // enables button
@@ -668,7 +673,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         %>
             <a onclick="goBack();" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
-                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-circle-outline fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
                 </span> Back to App Home
             </a>
@@ -677,13 +682,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
         %>
             <a href="<%=jagg.getAbsoluteUrl("/site/pages/select-apptype.jag")%>" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
-                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-circle-outline fw-stack-2x"></i>
                     <i class="fw fw-left-arrow fw-stack-1x"></i>
                 </span> Back to app type selection
             </a>
             <a href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" class="btn-action">
                 <span class="fw-stack fw-lg btn-action-ico">
-                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-circle-outline fw-stack-2x"></i>
                     <i class="fa fa-mail-reply-all fa-stack-1x"></i>
                 </span> Cancel
             </a>
@@ -797,6 +802,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     <input id="gitRepoBranch" name="gitRepoBranch" type="text" class="form-control" placeholder="Enter GitHub Repository branch" />
                 </div>
                 <br/>
+                <div class="input-group">
+                    <span class="input-group-addon">Project Root</span>
+                    <input id="projectRoot" name="projectRoot" type="text" class="form-control" placeholder="Project Root" />
+                </div>
+                <br/>
                 <!--div class="input-group">
                     <span class="input-group-addon">Token</span>
                     <input id="token" name="token" type="text" class="form-control" placeholder="Enter Personal access token" />
@@ -889,7 +899,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             <div class="form-group">
                 <button class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" id="add-application">
                     <span class="fw-stack fw-lg btn-action-ico">
-                        <i class="fw fw-ring fw-stack-2x"></i>
+                        <i class="fw fw-circle-outline fw-stack-2x"></i>
                         <i class="fw fw-add fw-stack-1x"></i>
                     </span>
                         Create
