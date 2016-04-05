@@ -83,6 +83,7 @@ function changeSelectedRevision(newRevision){
     putSelectedRevisionToSession(applicationKey, newRevision);
     $('#selected-version').html(newRevision+" ");
     $("#selectedRevision").val(newRevision);
+    selectedRevision = newRevision;
     selectedApplicationRevision = application.versions[newRevision];
     //Changing deploymentURL
     var deploymentURL = selectedApplicationRevision.deploymentURL;
@@ -253,7 +254,15 @@ function deleteApplication(){
         versionKey:selectedApplicationRevision.hashId
     },function (result) {
         jagg.message({content: "Selected version deleted successfully", type: 'success', id:'view_log'});
-        setTimeout(redirectAppListing, 2000);
+        var versionCount = 0;
+        for (var version in application.versions){
+            versionCount++;
+        }
+        if(versionCount == 1){
+            setTimeout(redirectAppListing, 2000);
+        } else {
+            setTimeout(redirectAppHome, 2000);
+        }
     },function (jqXHR, textStatus, errorThrown) {
         jagg.message({content: "Error occurred while deleting the selected application version", type: 'error', id:'view_log'});
     });
@@ -269,4 +278,8 @@ function deleteApplicationPopUp(){
 
 function redirectAppListing() {
     window.location.replace("index.jag");
+}
+
+function redirectAppHome() {
+    window.location.replace("home.jag?applicationKey=" + applicationKey);
 }

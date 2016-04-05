@@ -74,6 +74,7 @@ var addApplication = function (applicationName, versionName, applicationDescript
     buildDockerImage(applicationName, versionName, runtimeId, absFileUploadedPath, applicationRuntime, tagName, versionHashId, dockerOpClient);
     pushDockerImage(applicationName, versionName, applicationRuntime, tagName, versionHashId, dockerOpClient);
     triggerKubernetesDeployment(runtimeProperties, applicationRuntime, tagName, applicationName, versionName, runtimeId, replicas, versionHashId);
+    putSelectedRevisionToSession(applicationHashId, versionName);
 };
 
 var triggerKubernetesDeployment = function(runtimeProperties, applicationRuntime, tagName, applicationName, versionName, runtimeId, replicas, versionHashId){
