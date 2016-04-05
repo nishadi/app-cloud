@@ -107,7 +107,7 @@ jagg.template("database/users/add", function(inputs, outputs, jagg) { %>
 
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.form.js'))%>"></script>
-<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.validate.min.js'))%>"></script>
+<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jQueryValidationPlugin-1.14.0/jquery.validate.min.js'))%>"></script>
 <!-- include custom js functions -->
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/pgenerator-1.0.0/pGenerator.jquery.js'))%>"></script>
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('templates/database/users/add/js/add.js'))%>"></script>

@@ -1106,7 +1106,7 @@ var getApplicationCreationEvents = function(applicationName, versionName) {
     var events = eventsManager.getEventsOfApplication(versionHashId);
 };
 
-var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationName, revision){
+var uploadExistingArchive = function (uploadedArtifact, appTypeName, applicationName, revision) {
     var uploadedFileName = uploadedArtifact.getName();
     var versionHashId = Util.getVersionHashId(applicationName, revision, modManager.getTenantId());
     createDestinationDirsForUploadedApps(versionHashId);
@@ -1115,11 +1115,11 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
     var uploadApplicationTmpPath;
     var checkFileExtZIP = isFileExtZIP(uploadedFileName);
     //.zip files are auto extracted inside the AS. So if file extension is zip, then extension change to .upload.
-    if(checkFileExtZIP){
+    if (checkFileExtZIP) {
         var fileName = uploadedFileName.substring(0, uploadedFileName.lastIndexOf("."));
         uploadApplicationTmpPath = fileUploadPath + fileName + FILE_EXTENSTION_ALTER;
         log.info(uploadApplicationTmpPath);
-    }else{
+    } else {
         uploadApplicationTmpPath = fileUploadPath + uploadedFileName;
         log.info(uploadApplicationTmpPath);
     }
@@ -1127,9 +1127,9 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
     uploadedArtifact.move(uploadApplicationTmpPath);
 };
 
-var isFileExtZIP = function(uploadedFileName){
+var isFileExtZIP = function (uploadedFileName) {
     var fileExt = uploadedFileName.substr(uploadedFileName.lastIndexOf(".") + 1, uploadedFileName.length);
-    if(fileExt == FILE_EXTENTION_ZIP){
+    if (fileExt == FILE_EXTENTION_ZIP) {
         return true;
     }
     return false;
