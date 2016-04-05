@@ -114,7 +114,7 @@ isEdit = request.getParameter("isEdit");
     var dbUsers = '<%=dbUsers%>';
 </script>
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/select2-4.0.0/select2.min.js'))%>"></script>
-<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.validate.min.js'))%>"></script>
+<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jQueryValidationPlugin-1.14.0/jquery.validate.min.js'))%>"></script>
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('templates/database/add/js/add.js'))%>"></script>
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/pgenerator-1.0.0/pGenerator.jquery.js'))%>"></script>
 

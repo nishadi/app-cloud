@@ -224,8 +224,11 @@ $(document).on('click', '.panel-heading a', function (e) {
     }
 });
 
-function displayAppRedeployNotification(){
-    jagg.message({content: "Please redeploy the application to take effect updated runtime variables", type: 'info'});
+function displayAppRedeployNotification() {
+    jagg.message({
+        content: "Please redeploy the application to take effect updated runtime variables",
+        type: 'info'
+    });
 }
 
 
