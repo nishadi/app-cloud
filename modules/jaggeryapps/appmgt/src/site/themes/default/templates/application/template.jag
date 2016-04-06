@@ -191,6 +191,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             $('#fileupload').fileupload({
                 submit: function(e, data) {
+                    $('#uploadedFileName').focus();
                     data.url = "<%=jagg.getAbsoluteUrl('/site/blocks/application/application.jag') %>",
                         data.dataType = 'json',
                         data.formData = {
@@ -343,7 +344,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 icon: {                                     // app icon field
                     validateAppIcon: true
                 },
-                fileupload: {
+                uploadedFileName: {
                     validateArtifact: true
                 },
                 runtime: {
@@ -765,7 +766,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             <div class="form-group" id="file-upload-block">
                 <div class="input-group">
-                    <input id="uploadedFileName" type="text" class="form-control" readonly>
+                    <input id="uploadedFileName" name="uploadedFileName" type="text" class="form-control" readonly>
                     <span class="input-group-btn">
                        <span class="btn btn-primary btn-file" id="btn-artifact-upload" disabled>
                            <input id="fileupload" type="file" name="fileupload">Browse
