@@ -16,7 +16,7 @@
 #
 # ------------------------------------------------------------------------
 
-FROM wso2-appcloud/tomcat:1.0.0-base
+FROM wso2-appcloud/wso2as:6.0.0-m1-base
 
 ENV APP_WAR ARTIFACT_NAME
 ENV WEB_APP_HOME /opt/tomcat/webapps/
