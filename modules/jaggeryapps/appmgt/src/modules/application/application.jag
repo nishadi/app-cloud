@@ -399,20 +399,41 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
     }
     //======================================= checking pod status =================================================
     //Adding pod status pending event
-    var msg = "Application pods Scheduled";
-    var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
-    var prevPodStatus = "";
+    var podStatus = "Pending";
     addEvent(POD_STATUS, EVENT_PENDING, podStatus, versionHashId);
+    podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
+
+    //when the pod is in terminating state, still it gives the status as 'running'. Once the pod is termiated and respawned, it will go from 'pending' state to 'runnning' state
 
     var timeOut = modManager.getPropertyValue(POD_TIMEOUT);
     var counter = 0;
     while(counter < timeOut){ // Waiting 5 minutes to gets pods up and running
         java.lang.Thread.sleep(1000);
-        var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
+        podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
+        counter = counter + 1;
+        if (podStatus == "Pending") {
+            //Adding pod status pending event
+            break;
+        }else if(counter == timeOut){ // if pods doesn't starts withing 5 minutes user redirected to user home
+            //Adding pod status error event
+            podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
+            addEvent(POD_STATUS, EVENT_FAILED, podStatus, versionHashId);
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+            log.info("Application rollback started for application:"+applicationName + " with revision:"+
+                     versionName +" because pods are not running even after 5 minutes.");
+            deleteVersion(versionHashId, true, true);
+            return;
+        }
+    }
+
+    counter = 0;
+    timeOut = timeOut/5;
+    while(counter < timeOut){ // Waiting 1 minutes to gets pods up and running
+        java.lang.Thread.sleep(1000);
+        podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
         counter = counter + 1;
         if (podStatus == "Running") {
-            //Adding pod status pending event
-            var msg = "Application started successfully";
+            //Adding pod status Running event
             addEvent(POD_STATUS, EVENT_SUCCEEDED, podStatus, versionHashId);
             ApplicationManager.updateVersionStatus(versionHashId,APPLICATION_RUNNING);
             break;
@@ -423,14 +444,8 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
             addEvent(POD_STATUS, EVENT_FAILED, podStatus, versionHashId);
             ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
             log.info("Application rollback started for application:"+applicationName + " with revision:"+
-                     versionName +" because pods are not running even after 3 minutes.");
+                     versionName +" because pods are not running even after 6 minutes.");
             deleteVersion(versionHashId, true, true);
-        } else {
-            var podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
-            if (podStatus !== prevPodStatus) {
-                addEvent(POD_STATUS, EVENT_PENDING, podStatus, versionHashId);
-                prevPodStatus = podStatus;
-            }
         }
     }
 };
@@ -462,7 +477,6 @@ var redeployVersion = function(applicationName, versionName, versionHashId){
     deleteApplicationFromKubernetes(versionHashId);
     updateApplicationStatus(versionHashId, APPLICATION_STOPPED);
     deleteEventsOfAppVersions(versionHashId);
-    java.lang.Thread.sleep(30000);
     redeployApplication(applicationName, versionName, versionHashId);
     return true;
 };
@@ -1106,7 +1120,7 @@ var getApplicationCreationEvents = function(applicationName, versionName) {
     var events = eventsManager.getEventsOfApplication(versionHashId);
 };
 
-var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationName, revision){
+var uploadExistingArchive = function (uploadedArtifact, appTypeName, applicationName, revision) {
     var uploadedFileName = uploadedArtifact.getName();
     var versionHashId = Util.getVersionHashId(applicationName, revision, modManager.getTenantId());
     createDestinationDirsForUploadedApps(versionHashId);
@@ -1115,11 +1129,11 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
     var uploadApplicationTmpPath;
     var checkFileExtZIP = isFileExtZIP(uploadedFileName);
     //.zip files are auto extracted inside the AS. So if file extension is zip, then extension change to .upload.
-    if(checkFileExtZIP){
+    if (checkFileExtZIP) {
         var fileName = uploadedFileName.substring(0, uploadedFileName.lastIndexOf("."));
         uploadApplicationTmpPath = fileUploadPath + fileName + FILE_EXTENSTION_ALTER;
         log.info(uploadApplicationTmpPath);
-    }else{
+    } else {
         uploadApplicationTmpPath = fileUploadPath + uploadedFileName;
         log.info(uploadApplicationTmpPath);
     }
@@ -1127,9 +1141,9 @@ var uploadExistingArchive = function(uploadedArtifact, appTypeName, applicationN
     uploadedArtifact.move(uploadApplicationTmpPath);
 };
 
-var isFileExtZIP = function(uploadedFileName){
+var isFileExtZIP = function (uploadedFileName) {
     var fileExt = uploadedFileName.substr(uploadedFileName.lastIndexOf(".") + 1, uploadedFileName.length);
-    if(fileExt == FILE_EXTENTION_ZIP){
+    if (fileExt == FILE_EXTENTION_ZIP) {
         return true;
     }
     return false;
@@ -1235,7 +1249,7 @@ var deleteApplicationFromKubernetes = function(versionHashId) {
     try{
         var KubernetesRuntimeProvisioningService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
         var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(null, null, null, modManager.getTenantId(),
-                                                                               modManager.getTenantDomain(), versionHashId);
+                                                                               modManager.getTenantDomain(true), versionHashId);
         var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
         kubernetesRuntimeProvisioningService.deleteDeployment();
 

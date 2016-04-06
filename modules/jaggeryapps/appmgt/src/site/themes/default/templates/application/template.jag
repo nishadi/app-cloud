@@ -57,9 +57,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             $("#runtime").select2();
             //check if application name available
-            if(applicationName != "null"){
+            if (applicationName != "null") {
                 $("#applicationName").val(applicationName);
-                $("#applicationName").attr("disabled", true);
+                $("#applicationName").prop("disabled", true);
             }
             // add existing envs
             var prevEnvs =jQuery.parseJSON('<%=decodedEnvs%>');
@@ -432,7 +432,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             }
         });
 
-        function validateApplicationNameChar(value){
+        function validateApplicationNameChar(value) {
             var patternNonAlphaNumExceptHyphen = /[^\w -]/g;
             var isPatternMatch = patternNonAlphaNumExceptHyphen.test(value);
             validationFailErrorMsg = "Application Name has invalid characters. Valid characters are a-z A-Z 0-9 -";
@@ -440,7 +440,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
             return !isPatternMatch;
         }
 
-        function validationApplicationRevisionChar(value){
+        function validationApplicationRevisionChar(value) {
             var patternNonAlphaNum = /^(?:(\d{1,2})\.)?(?:(\d{1,2})\.)?(\*|\d{1,2})$/g;
             var isPatternMatch = patternNonAlphaNum.test(value);
             validationFailErrorMsg = "Invalid version number - Provide version number in format major.minor.patch";
@@ -913,8 +913,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/vendor/jquery.ui.widget.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.fileupload.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.iframe-transport.js'))%>"></script>
-      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.validate.min.js'))%>"></script>
-      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/additional-methods.min.js'))%>"></script>
+      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jQueryValidationPlugin-1.14.0/jquery.validate.min.js'))%>"></script>
+      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jQueryValidationPlugin-1.14.0/additional-methods.min.js'))%>"></script>
     <!-- --------------------------------------- Overlay ----------------------------------------- -->
     <div class="modal fade build-logs-modal" id="app_creation_progress_modal">
         <div class="modal-dialog modal-dialog-margin-top-md ">
