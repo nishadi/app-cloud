@@ -37,11 +37,13 @@ jagg.block("application", {
         var appTypesProperties = require(parsedObject);
         var appType = appTypesProperties[inputs.appTypeName];
         var applicationName = inputs.applicationName;
+        var applicationCount = applicationModule.getApplicationCount();
 
         return {
             "runtimes" : runtimes,
             "appType" : appType,
-            "applicationName" : applicationName
+            "applicationName" : applicationName,
+            "applicationCount" : applicationCount
         };
     }
 });

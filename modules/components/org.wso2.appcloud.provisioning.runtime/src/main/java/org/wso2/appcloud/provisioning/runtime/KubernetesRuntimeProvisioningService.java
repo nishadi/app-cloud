@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
 import org.wso2.appcloud.provisioning.runtime.beans.*;
 import org.wso2.appcloud.provisioning.runtime.beans.Container;
+import org.wso2.appcloud.provisioning.runtime.beans.ResourceQuotaLimit;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -42,10 +43,12 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
     private static final Log log = LogFactory.getLog(KubernetesRuntimeProvisioningService.class);
     private ApplicationContext applicationContext;
     private Namespace namespace;
+    private ResourceQuotaLimit resourceQuotaLimit;
 
-    public KubernetesRuntimeProvisioningService(ApplicationContext applicationContext) {
+    public KubernetesRuntimeProvisioningService(ApplicationContext applicationContext, ResourceQuotaLimit resourceQuotaLimit) {
         this.applicationContext = applicationContext;
         this.namespace = KubernetesProvisioningUtils.getNameSpace(applicationContext);
+        this.resourceQuotaLimit = resourceQuotaLimit;
 
         //Creating namespace in kubernetes if not available
         KubernetesClient kubernetesClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
@@ -113,6 +116,10 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
         List<Container> containers = config.getContainers();
         ArrayList<io.fabric8.kubernetes.api.model.Container> kubContainerList = new ArrayList<>();
         List<String> serviceNameList = new ArrayList<>();
+        String cpuLimitInt=resourceQuotaLimit.getCpuLimit();
+        String cpuLimit= cpuLimitInt.concat("m");
+        String memoryLimitInt=resourceQuotaLimit.getMemoryLimit();
+        String memoryLimit= memoryLimitInt.concat("Mi");
 
         try {
             //Deployment creation
@@ -120,6 +127,10 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                 io.fabric8.kubernetes.api.model.Container kubContainer = new io.fabric8.kubernetes.api.model.Container();
                 kubContainer.setName(container.getContainerName());
                 kubContainer.setImage(container.getBaseImageName() + ":" + container.getBaseImageVersion());
+
+                ResourceRequirementsBuilder resourceRequirementsBuilder = new ResourceRequirementsBuilder();
+                ResourceRequirements resourceRequirement=resourceRequirementsBuilder.addToLimits("cpu",new Quantity(cpuLimit)).addToLimits("memory",new Quantity(memoryLimit)).build();
+                kubContainer.setResources(resourceRequirement);
 
                 //Checking whether the container is including volume mounts
                 if(container.getVolumeMounts()!= null) {

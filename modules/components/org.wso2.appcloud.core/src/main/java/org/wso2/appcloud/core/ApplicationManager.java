@@ -592,4 +592,13 @@ public class ApplicationManager {
         ApplicationDAO applicationDAO = new ApplicationDAO();
         return applicationDAO.getRuntimeById(runtimeId);
     }
+	
+	public static int getApplicationCount() throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        int applicationCount = applicationDAO.getApplicationCount(tenantId);
+
+        return applicationCount;
+    }
 }
