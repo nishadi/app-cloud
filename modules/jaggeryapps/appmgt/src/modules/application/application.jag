@@ -145,6 +145,9 @@ var buildDockerImage = function (applicationName, versionName, runtimeId, absFil
                 log.info("Retrying docker build retry counter value : " + i);
                 var dockerRegTenantSpace = modManager.getTenantDomain().replace(".","-");
                 dockerOpClient.buildDockerImage(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) ,applicationRuntime.getImageName(), tagName, absFileUploadedPath);
+                //Adding docker build success event
+                var msg = "Docker image build successfully built";
+                addEvent(DOCKER_IMAGE_BUILD, EVENT_SUCCEEDED, msg, versionHashId);
                 return;
             } catch (e){
                 log.error("Error occured while building image, Hence retrying...");
