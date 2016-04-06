@@ -373,30 +373,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
     //Adding deployment success event
     var msg = "Application deployment successfull";
     addEvent(KUBE_DEPLOY, EVENT_SUCCEEDED, msg, versionHashId);
-    //============================================================================================================
 
-    //======================================= Creating Ingress ===================================================
-    //Adding deployment pending event
-    var msg = "Application ingress creation successfully triggered in Kubernetes";
-    addEvent(INGRESS, EVENT_PENDING, msg, versionHashId);
-    try{
-        var appLaunchURL = constructAppLaunchURL(applicationName, versionName);
-
-        var ingressCreated = kubService.createDeploymentUrl(appLaunchURL);
-        log.info("Deployment URL status: " + ingressCreated);
-        var msg = "Application ingress creation successful";
-        addEvent(INGRESS, EVENT_SUCCEEDED, msg, versionHashId);
-    } catch(e){
-        var msg = "Application ingress creation failed in Kubernetes";
-        addEvent(INGRESS, EVENT_FAILED, msg, versionHashId);
-        ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
-        log.info("Application deployment failed because ingress is not created successfully and roll back process" +
-                 " is started for application:"+applicationName+" with revision:"+versionName);
-        deleteVersion(versionHashId, true, true);
-        log.error(msg);
-        log.error(e);
-        throw e;
-    }
     //======================================= checking pod status =================================================
     //Adding pod status pending event
     var podStatus = "Pending";
