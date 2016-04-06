@@ -44,6 +44,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
  <script type="text/javascript">
     var appTypeName = "<%=appType.type%>";
+    const APP_TYPE_EXTENSION = "<%=appType.extension%>";
     var applicationName = "<%=applicationName%>";
     var retryCount = 0;
     var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
@@ -622,18 +623,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
          var ext = getFileExtension(filename);
          var isValidExtension = false;
 
-         // Check extension
-         switch (ext.toLowerCase()) {
-             case 'war':
-             case 'jar':
-             case 'zip':
-                 isValidExtension = true;
-                 break;
-             default:
-                 artifactErrorMsg= "Invalid artifact selected for Application - Select a valid artifact";
-                 isValidExtension = false;
-                 break;
+         if(ext.toLowerCase() === APP_TYPE_EXTENSION){
+            isValidExtension = true;
+         } else {
+            artifactErrorMsg= "Invalid artifact selected for Application - Select a valid artifact";
+            isValidExtension = false;
          }
+
          return (isValidExtension);
     }
 
