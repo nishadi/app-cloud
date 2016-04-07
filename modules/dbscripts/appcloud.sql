@@ -353,14 +353,14 @@ INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `service_prefix`, 
 -- Populate Data to `AppCloudDB`.`ApplicationRuntimeService`
 -- -----------------------------------------------------
 INSERT INTO `AC_RUNTIME_TRANSPORT` (`transport_id`, `runtime_id`) VALUES
-(2, 1),
-(2, 2),
-(2, 3),
-(2, 4),
-(1, 1),
-(1, 2),
-(1, 3),
-(1, 4);
+(4, 1),
+(4, 2),
+(4, 3),
+(4, 4),
+(3, 1),
+(3, 2),
+(3, 3),
+(3, 4);
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
