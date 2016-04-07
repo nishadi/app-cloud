@@ -476,7 +476,6 @@ var persistDeploymentConfig = function(deploymentConfig, versionHashId, applicat
     var containerList = deploymentConfig.getContainers();
     var ctr = containerList.get(0);
     var serviceProxies = ctr.getServiceProxies();
-    var svc = serviceProxies.get(0);
 
     var deployment = new Deployment();
     deployment.setDeploymentName(deploymentConfig.getDeploymentName());
@@ -484,17 +483,23 @@ var persistDeploymentConfig = function(deploymentConfig, versionHashId, applicat
     deployment.setReplicas(parseInt(deploymentConfig.getReplicas()));
     log.info("Replicas:" + deploymentConfig.getReplicas());
 
-    var serviceProxy = new ServiceProxy();
-    serviceProxy.setServiceName(svc.getServiceName());
-    log.info("Service name:" + svc.getServiceName());
-    serviceProxy.setServiceProtocol(svc.getServiceProtocol());
-    log.info("Service protocol:" + svc.getServiceProtocol());
-    serviceProxy.setServicePort(svc.getServicePort());
-    log.info("Service port:" + svc.getServicePort());
-    serviceProxy.setServiceBackendPort(svc.getServiceBackendPort());
-    log.info("Service Backend Port:" + svc.getServiceBackendPort());
     var hostURL = constructAppLaunchURL(applicationName, versionName);
-    serviceProxy.setHostURL(hostURL);
+    var proxies = new java.util.HashSet();
+    for (var i = 0; i < serviceProxies.size(); i++){
+        var svc = serviceProxies.get(i);
+        var serviceProxy = new ServiceProxy();
+        serviceProxy.setServiceName(svc.getServiceName());
+        log.info("Service name:" + svc.getServiceName());
+        serviceProxy.setServiceProtocol(svc.getServiceProtocol());
+        log.info("Service protocol:" + svc.getServiceProtocol());
+        serviceProxy.setServicePort(svc.getServicePort());
+        log.info("Service port:" + svc.getServicePort());
+        serviceProxy.setServiceBackendPort(svc.getServiceBackendPort());
+        log.info("Service Backend Port:" + svc.getServiceBackendPort());
+        serviceProxy.setHostURL(hostURL);
+
+        proxies.add(serviceProxy);
+    }
 
     var container = new Container();
     container.setImageName(ctr.getBaseImageName());
@@ -502,8 +507,6 @@ var persistDeploymentConfig = function(deploymentConfig, versionHashId, applicat
     container.setImageVersion(ctr.getBaseImageVersion());
     log.info("Image version:" + ctr.getBaseImageVersion());
 
-    var proxies = new java.util.HashSet();
-    proxies.add(serviceProxy);
     container.setServiceProxies(proxies);
 
     var containerSet = new java.util.HashSet();
