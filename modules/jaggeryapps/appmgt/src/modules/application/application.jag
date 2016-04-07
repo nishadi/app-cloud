@@ -1354,4 +1354,13 @@ var verifyCustomUrl = function (pointedUrl, customUrl) {
     return success;
 };
 
+var isAplicationVersionExist = function (versionHashId) {
+    var applicationExists = false;
+    var applicationHashId = ApplicationManager.getApplicationHashIdByVersionHashId(versionHashId);
+    if (applicationHashId) {
+        applicationExists = true;
+    }
+    return applicationExists;
+};
+
 %>
