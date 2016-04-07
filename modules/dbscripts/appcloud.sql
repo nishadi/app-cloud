@@ -313,6 +313,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_TRANSPORT` (
   `name` VARCHAR(20) NOT NULL,
   `port` INT NOT NULL,
   `protocol` VARCHAR(4) NOT NULL,
+  `service_prefix` VARCHAR(3) NOT NULL,
   `description` VARCHAR(1000) NULL DEFAULT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
@@ -340,24 +341,26 @@ ENGINE = InnoDB;
 -- Populate Data to `AppCloudDB`.`ApplicationRuntime`
 -- -----------------------------------------------------
 
-INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `description`) VALUES
-(1, 'http', 80, 'TCP', 'HTTP Protocol'),
-(2, 'https', 443, 'TCP', 'HTTPS Protocol'),
-(3, 'http-alt', 8080, 'TCP', 'HTTP Alternate Protocol'),
-(4, 'https-alt', 8443, 'TCP', 'HTTPS Alternate Protocol'),
-(5, 'http', 9763, 'TCP', 'HTTP servlet transport for carbon products'),
-(6, 'https', 9443, 'TCP', 'HTTPS servlet transport for carbon products');
+INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `service_prefix`, `description`) VALUES
+(1, 'http', 80, 'TCP', 'htp', 'HTTP Protocol'),
+(2, 'https', 443, 'TCP', 'hts', 'HTTPS Protocol'),
+(3, 'http-alt', 8080, 'TCP', 'htp', 'HTTP Alternate Protocol'),
+(4, 'https-alt', 8443, 'TCP', 'hts', 'HTTPS Alternate Protocol'),
+(5, 'http', 9763, 'TCP', 'htp', 'HTTP servlet transport for carbon products'),
+(6, 'https', 9443, 'TCP', 'hts', 'HTTPS servlet transport for carbon products');
 
 -- -----------------------------------------------------
 -- Populate Data to `AppCloudDB`.`ApplicationRuntimeService`
 -- -----------------------------------------------------
 INSERT INTO `AC_RUNTIME_TRANSPORT` (`transport_id`, `runtime_id`) VALUES
-(4, 1),
-(4, 2),
+(2, 1),
+(2, 2),
 (2, 3),
 (2, 4),
-(6, 5),
-(6, 5);
+(1, 1),
+(1, 2),
+(1, 3),
+(1, 4);
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

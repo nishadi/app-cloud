@@ -575,7 +575,7 @@ function getContainers(tenantDockerRegistryUrl, baseImageName, tag, versionHashI
     for(var i = 0; i < services.length; i++){
         var serviceProxy = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
         var service = services[i];
-        serviceProxy.setServiceName('srv-' + appServiceName);
+        serviceProxy.setServiceName(service.getServiceNamePrefix() + "-" + appServiceName);
         serviceProxy.setAppHostURL(appHostURL);
         serviceProxy.setServiceProtocol(service.getServiceProtocol());
         serviceProxy.setServicePort(getIngressPort(service.getServiceName()));
