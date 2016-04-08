@@ -499,7 +499,7 @@ public class ApplicationManager {
     }
 
     /**
-     * Method for delete an application completely
+     * Method for delete an application completely.
      *
      * @param applicationHashId application hash id
      * @throws AppCloudException

@@ -54,7 +54,7 @@ public class ApplicationDAO {
     private static final Log log = LogFactory.getLog(ApplicationDAO.class);
 
     /**
-     * Method for adding application details to database
+     * Method for adding application details to database.
      *
      * @param dbConnection database connection
      * @param application application object
@@ -1268,7 +1268,7 @@ public class ApplicationDAO {
 
 
     /**
-     * Delete an application
+     * Delete an application.
      *
      * @param applicationHashId application hash id
      * @return
