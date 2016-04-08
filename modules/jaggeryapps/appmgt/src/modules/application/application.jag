@@ -369,7 +369,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
         log.info("Application deployment failed because kubernetes deployment was failed and roll back process" +
                  " is started for application: " + applicationName + " with revision: " + versionName);
         if(!isRedeploy) {
-            deleteVersion(versionHashId, true, false);
+            deleteVersion(versionHashId, true, true);
         }
         throw e;
     }
