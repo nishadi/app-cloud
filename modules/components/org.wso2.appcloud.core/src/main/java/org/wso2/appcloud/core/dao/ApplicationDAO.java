@@ -98,7 +98,7 @@ public class ApplicationDAO {
             if (application.getIcon() != null) {
                 iconInputStream = IOUtils.toBufferedInputStream(application.getIcon().getBinaryStream());
             }
-            updateApplicationIcon(dbConnection, iconInputStream, application.getHashId());
+            updateApplicationIcon(dbConnection, iconInputStream, applicationId);
 
         } catch (SQLException e) {
 
@@ -389,26 +389,46 @@ public class ApplicationDAO {
     }
 
 
-    public void updateApplicationIcon(Connection dbConnection, InputStream inputStream, String applicationHashId)
+    public void updateApplicationIcon(Connection dbConnection, InputStream inputStream, int applicationId)
             throws AppCloudException {
 
-        PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatement1 = null;
+        PreparedStatement preparedStatement2 = null;
+        ResultSet resultSet = null;
+        String queryString;
 
         try {
 
-            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_APPLICATION_ICON);
-            preparedStatement.setBlob(1, inputStream);
-            preparedStatement.setString(2, applicationHashId);
-            preparedStatement.execute();
+            try {
+                preparedStatement1 = dbConnection.prepareStatement(SQLQueryConstants.GET_APPLICATION_ICON);
+                preparedStatement1.setInt(1, applicationId);
+
+                resultSet = preparedStatement1.executeQuery();
+                resultSet.last();
+
+                if (resultSet.getRow() > 1) {
+                    queryString = SQLQueryConstants.UPDATE_APPLICATION_ICON;
+                } else {
+                    queryString = SQLQueryConstants.INSERT_APPLICATION_ICON;
+                }
+            } finally {
+                DBUtil.closeResultSet(resultSet);
+                DBUtil.closePreparedStatement(preparedStatement1);
+            }
+
+            preparedStatement2 = dbConnection.prepareStatement(queryString);
+            preparedStatement2.setBlob(1, inputStream);
+            preparedStatement2.setInt(2, applicationId);
+            preparedStatement2.executeUpdate();
 
         } catch (SQLException e) {
             String msg =
-                    "Error occurred while updating application icon for application with hash id : " + applicationHashId;
+                    "Error occurred while updating application icon for application with updated hash id : " + applicationId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
 
         } finally {
-            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closePreparedStatement(preparedStatement2);
         }
     }
 
