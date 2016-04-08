@@ -37,6 +37,7 @@ var DEFAULT_TEMPLATE = 'DEFAULT_ALL_PERMISSIONS';
 		var databaseName = request.getParameter("databaseName");
 		var customPassword = request.getParameter("customPassword");
         var userNameFromRequest = request.getParameter("userName");
+        var isBasic = request.getParameter("isBasic");
 
         try{
             var templateCreated = mod.createTemplateWithAllPermissions(DEFAULT_TEMPLATE);
@@ -45,12 +46,20 @@ var DEFAULT_TEMPLATE = 'DEFAULT_ALL_PERMISSIONS';
                 print("database exists");
             }
 
-            var userName = mod.createDatabaseUser(userNameFromRequest, customPassword);
-            if(userName.indexOf('already exists') == -1) {
-                isUserCreated = true;
+            var userName;
+            if(isBasic === 'true'){
+                userName = mod.createDatabaseUser(userNameFromRequest, customPassword);
+                if(userName.indexOf('already exists') == -1) {
+                    isUserCreated = true;
+                }
             }
 
-            var dbResult = mod.attachNewUser(actualDBName, userName, DEFAULT_TEMPLATE);
+            var dbResult;
+            if(isBasic === 'true'){
+                dbResult = mod.attachNewUser(actualDBName, userName, DEFAULT_TEMPLATE);
+            } else {
+                dbResult = mod.attachNewUser(actualDBName, userNameFromRequest, DEFAULT_TEMPLATE);
+            }
         }catch(e){
             log.error(e);
         }
