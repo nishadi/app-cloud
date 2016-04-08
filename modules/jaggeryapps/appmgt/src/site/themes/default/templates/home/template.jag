@@ -425,7 +425,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 if(event.status == "success"){
                     statusStyle = "success";
                     if (event.name === "Status") {
-                            table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                            table = table + "<tr class='" + statusStyle + "'><td>Container Status</td>" +
                                             "<td>"+event.description+"</td>" +
                                             "<td><i class=\"fa fa-check\"></i></td></tr>";
                     } else {
@@ -436,7 +436,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 } else if (event.status == "failed") {
                     statusStyle = "danger";
                     if (event.name === "Status") {
-                            table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                            table = table + "<tr class='" + statusStyle + "'><td>Container Status</td>" +
                                             "<td>"+event.description+"</td>" +
                                             "<td><i class=\"fa fa-times\"></i></td></tr>";
                     } else {
@@ -447,7 +447,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 } else if (event.status == "pending"){
                     if (event.name === "Status") {
                         statusStyle = "active";
-                            table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                            table = table + "<tr class='" + statusStyle + "'><td>Container Status</td>" +
                                             "<td>"+event.description+"</td>" +
                                             "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
                     } else {
