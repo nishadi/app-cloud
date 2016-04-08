@@ -355,11 +355,11 @@ INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `service_prefix`, 
 INSERT INTO `AC_RUNTIME_TRANSPORT` (`transport_id`, `runtime_id`) VALUES
 (4, 1),
 (4, 2),
-(4, 3),
+(1, 3),
 (4, 4),
 (3, 1),
 (3, 2),
-(3, 3),
+(2, 3),
 (3, 4);
 
 
