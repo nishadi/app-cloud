@@ -58,7 +58,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 
 INSERT INTO `AC_RUNTIME` (`id`, `name`, `repo_url`, `image_name`, `tag`) VALUES
-(1, 'Apache Tomcat 8.0.30', 'registry.docker.appfactory.private.wso2.com:5000', 'tomcat', '8.0'),
+(1, 'WSO2 Application Server 6.0.0-M1', 'registry.docker.appfactory.private.wso2.com:5000', 'wso2as', '6.0.0-m1'),
 (2, 'OpenJDK 8', 'registry.docker.appfactory.private.wso2.com:5000', 'msf4j', '1.0'),
 (3, 'Apache 2.4.10', 'registry.docker.appfactory.private.wso2.com:5000','php','5.6'),
 (4, 'Carbon 4.2.0', 'registry.docker.appfactory.private.wso2.com:5000','carbon','4.2.0');
@@ -313,6 +313,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_TRANSPORT` (
   `name` VARCHAR(20) NOT NULL,
   `port` INT NOT NULL,
   `protocol` VARCHAR(4) NOT NULL,
+  `service_prefix` VARCHAR(3) NOT NULL,
   `description` VARCHAR(1000) NULL DEFAULT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
@@ -340,13 +341,13 @@ ENGINE = InnoDB;
 -- Populate Data to `AppCloudDB`.`ApplicationRuntime`
 -- -----------------------------------------------------
 
-INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `description`) VALUES
-(1, 'http', 80, 'TCP', 'HTTP Protocol'),
-(2, 'https', 443, 'TCP', 'HTTPS Protocol'),
-(3, 'http-alt', 8080, 'TCP', 'HTTP Alternate Protocol'),
-(4, 'https-alt', 8443, 'TCP', 'HTTPS Alternate Protocol'),
-(5, 'http', 9763, 'TCP', 'HTTP servlet transport for carbon products'),
-(6, 'https', 9443, 'TCP', 'HTTPS servlet transport for carbon products');
+INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `service_prefix`, `description`) VALUES
+(1, 'http', 80, 'TCP', 'htp', 'HTTP Protocol'),
+(2, 'https', 443, 'TCP', 'hts', 'HTTPS Protocol'),
+(3, 'http-alt', 8080, 'TCP', 'htp', 'HTTP Alternate Protocol'),
+(4, 'https-alt', 8443, 'TCP', 'hts', 'HTTPS Alternate Protocol'),
+(5, 'http', 9763, 'TCP', 'htp', 'HTTP servlet transport for carbon products'),
+(6, 'https', 9443, 'TCP', 'hts', 'HTTPS servlet transport for carbon products');
 
 -- -----------------------------------------------------
 -- Populate Data to `AppCloudDB`.`ApplicationRuntimeService`
@@ -354,10 +355,12 @@ INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `description`) VAL
 INSERT INTO `AC_RUNTIME_TRANSPORT` (`transport_id`, `runtime_id`) VALUES
 (4, 1),
 (4, 2),
-(2, 3),
-(2, 4),
-(6, 5),
-(6, 5);
+(4, 3),
+(4, 4),
+(3, 1),
+(3, 2),
+(3, 3),
+(3, 4);
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

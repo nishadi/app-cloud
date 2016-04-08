@@ -1203,6 +1203,7 @@ public class ApplicationDAO {
                 transport.setServiceName(resultSet.getString(SQLQueryConstants.NAME));
                 transport.setServiceProtocol(resultSet.getString(SQLQueryConstants.PROTOCOL));
                 transport.setServicePort(resultSet.getInt(SQLQueryConstants.PORT));
+                transport.setServiceNamePrefix(resultSet.getString(SQLQueryConstants.SERVICE_NAME_PREFIX));
                 transports.add(transport);
             }
             dbConnection.commit();

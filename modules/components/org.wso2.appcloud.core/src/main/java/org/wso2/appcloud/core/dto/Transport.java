@@ -21,6 +21,7 @@ public class Transport {
     private String serviceName;
     private String serviceProtocol;
     private int servicePort;
+    private String serviceNamePrefix;
 
     public int getId() {
         return id;
@@ -52,5 +53,13 @@ public class Transport {
 
     public void setServiceProtocol(String serviceProtocol) {
         this.serviceProtocol = serviceProtocol;
+    }
+
+    public String getServiceNamePrefix() {
+        return serviceNamePrefix;
+    }
+
+    public void setServiceNamePrefix(String serviceNamePrefix) {
+        this.serviceNamePrefix = serviceNamePrefix;
     }
 }

@@ -69,12 +69,10 @@ function as_setup(){
 
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/org.wso2.carbon.hostobjects.sso_4.2.0.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/nimbus-jose-jwt_2.26.1.wso2v2.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-codec-1.10.wso2v1.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-compress-1.9.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-codec-1.10.0.wso2v1.jar $1/repository/components/dropins/
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/commons-compress-1.9.0.wso2v1.jar $1/repository/components/dropins/
 
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-client-1.0.10.wso2v1.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-dsl-1.0.10.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/docker-model-1.0.10.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-annotations-2.7.3.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-core-2.7.3.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/jackson-databind-2.7.3.jar $1/repository/components/dropins/
@@ -84,21 +82,15 @@ function as_setup(){
 
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $1/repository/components/lib/
 
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/dsl-annotations-0.1.26.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/junixsocket-common-2.0.4.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/logging-interceptor-2.7.2.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okhttp-2.7.2.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okhttp-ws-2.7.2.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/okio-1.6.0.wso2v1.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/sundr-codegen-0.1.25.wso2v1.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/sundr-core-0.1.25.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/validation-api-1.1.0.Final.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/velocity-1.7.0.wso2v1.jar $1/repository/components/dropins/
 
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/kubernetes-client-1.3.76.wso2v1.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/kubernetes-model-1.0.43.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/dnsjava-2.1.7.wso2v1.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/openshift-client-1.3.75.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/json-20160212.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/fabric8-utils-2.2.100.jar $1/repository/components/dropins/    
 

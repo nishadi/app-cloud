@@ -44,6 +44,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
  <script type="text/javascript">
     var appTypeName = "<%=appType.type%>";
+    const APP_TYPE_EXTENSION = "<%=appType.extension%>";
     var applicationName = "<%=applicationName%>";
     var retryCount = 0;
     var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
@@ -190,6 +191,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             $('#fileupload').fileupload({
                 submit: function(e, data) {
+                    $('#uploadedFileName').focus();
                     data.url = "<%=jagg.getAbsoluteUrl('/site/blocks/application/application.jag') %>",
                         data.dataType = 'json',
                         data.formData = {
@@ -246,7 +248,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     if(event.status == "success"){
                         statusStyle = "success";
                         if (event.name === "Status") {
-                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                table = table + "<tr class='" + statusStyle + "'><td>Container Status</td>" +
                                                 "<td>"+event.description+"</td>" +
                                                 "<td><i class=\"fa fa-check\"></i></td></tr>";
                         } else {
@@ -257,7 +259,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     } else if (event.status == "failed") {
                         statusStyle = "danger";
                         if (event.name === "Status") {
-                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                table = table + "<tr class='" + statusStyle + "'><td>Container Status</td>" +
                                                 "<td>"+event.description+"</td>" +
                                                 "<td><i class=\"fa fa-times\"></i></td></tr>";
                         } else {
@@ -268,7 +270,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     } else if (event.status == "pending"){
                         if (event.name === "Status") {
                             statusStyle = "active";
-                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                table = table + "<tr class='" + statusStyle + "'><td>Container Status</td>" +
                                                 "<td>"+event.description+"</td>" +
                                                 "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
                         } else {
@@ -342,7 +344,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 icon: {                                     // app icon field
                     validateAppIcon: true
                 },
-                fileupload: {
+                uploadedFileName: {
                     validateArtifact: true
                 },
                 runtime: {
@@ -622,18 +624,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
          var ext = getFileExtension(filename);
          var isValidExtension = false;
 
-         // Check extension
-         switch (ext.toLowerCase()) {
-             case 'war':
-             case 'jar':
-             case 'zip':
-                 isValidExtension = true;
-                 break;
-             default:
-                 artifactErrorMsg= "Invalid artifact selected for Application - Select a valid artifact";
-                 isValidExtension = false;
-                 break;
+         if(ext.toLowerCase() === APP_TYPE_EXTENSION){
+            isValidExtension = true;
+         } else {
+            artifactErrorMsg= "Invalid artifact selected for Application - Select a valid artifact";
+            isValidExtension = false;
          }
+
          return (isValidExtension);
     }
 
@@ -769,7 +766,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
             <div class="form-group" id="file-upload-block">
                 <div class="input-group">
-                    <input id="uploadedFileName" type="text" class="form-control" readonly>
+                    <input id="uploadedFileName" name="uploadedFileName" type="text" class="form-control" readonly>
                     <span class="input-group-btn">
                        <span class="btn btn-primary btn-file" id="btn-artifact-upload" disabled>
                            <input id="fileupload" type="file" name="fileupload">Browse

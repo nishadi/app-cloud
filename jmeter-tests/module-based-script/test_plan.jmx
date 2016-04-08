@@ -366,7 +366,7 @@
               <elementProp name="applicationName" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.name">applicationName</stringProp>
-                <stringProp name="Argument.value">${app_name}${__threadNum}test9</stringProp>
+                <stringProp name="Argument.value">${app_name}${__threadNum}test10</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
                 <boolProp name="HTTPArgument.use_equals">true</boolProp>
               </elementProp>

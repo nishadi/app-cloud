@@ -2,7 +2,7 @@
 
 ADMIN_PASSWORD=${ADMIN_PASS:-$(pwgen -s 12 1)}
 
-cat >/opt/apache-tomcat-${TOMCAT_VERSION}/conf/tomcat-users.xml <<EOL
+cat >/opt/wso2as-${WSO2_AS_VERSION}-m1/conf/tomcat-users.xml <<EOL
 <?xml version="1.0" encoding="utf-8"?>
 <tomcat-users>
   <role rolename="admin-gui"/>

@@ -256,7 +256,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 </div>
           <div class="col-xs-12 col-md-3 col-lg-3">
               <div class="block-team pull-left">
-                  <h3><a class="block-anch" href="/appmgt/site/pages/envs.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">Env Variables</a></h3>
+                  <h3><a class="block-anch" id="envVars" href="/appmgt/site/pages/envs.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">Env Variables</a></h3>
                   <div class="block-icon pull-left">
                     <i class="fa fa-wrench fa-5x"></i>
                   </div>
@@ -264,7 +264,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                    <span id="runtimePropCount"><%=selectedApplicationRevision.runtimeProperties.length.toString()%></span>
                   </div>
                   <div class="clearfix"></div>
-                  <a href="/appmgt/site/pages/envs.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">
+                  <a id="envVarsAdd" href="/appmgt/site/pages/envs.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">
                       <div class="block-action-button">
                             <span class="fw-stack fw-lg btn-action-ico">
                                 <i class="fw fw-circle-outline fw-stack-2x"></i>
@@ -274,13 +274,13 @@ jagg.template("home", function(inputs, outputs, jagg) {
                   </a>
               </div>
               <div class="block-database pull-left">
-                  <h3><a class="block-anch" href="/appmgt/site/pages/tags.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">Tags</a></h3>
+                  <h3><a class="block-anch" id="tagSet" href="/appmgt/site/pages/tags.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">Tags</a></h3>
                   <div class="block-icon pull-left">
                     <i class="fa fa-tags fa-5x"></i>
                   </div>
                   <div class="tag-list" id="tag-list"></div>
                   <div class="clearfix"></div>
-                  <a href="/appmgt/site/pages/tags.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">
+                  <a id="tagSetAdd" href="/appmgt/site/pages/tags.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>">
                       <div class="block-action-button">
                         <span class="fw-stack fw-lg btn-action-ico">
                             <i class="fw fw-circle-outline fw-stack-2x"></i>

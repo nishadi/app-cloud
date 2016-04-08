@@ -106,6 +106,16 @@ function changeSelectedRevision(newRevision){
     // Change replica status
     $("#tableStatus").html(selectedApplicationRevision.status);
 
+    //Change Env Variables
+    $("#envVars").attr('href',"/appmgt/site/pages/envs.jag?applicationKey=" + applicationKey + "&versionKey=" + selectedApplicationRevision.hashId);
+    $("#envVarsAdd").attr('href',"/appmgt/site/pages/envs.jag?applicationKey=" + applicationKey + "&versionKey=" + selectedApplicationRevision.hashId);
+    $("#runtimePropCount").text(selectedApplicationRevision.runtimeProperties.length.toString());
+
+    //Change Tags
+    $("#tagSet").attr('href',"/appmgt/site/pages/tags.jag?applicationKey=" + applicationKey + "&versionKey=" + selectedApplicationRevision.hashId);
+    $("#tagSetAdd").attr('href',"/appmgt/site/pages/tags.jag?applicationKey=" + applicationKey + "&versionKey=" + selectedApplicationRevision.hashId);
+    listTags();
+
     // Change version status in UI
     if(selectedApplicationRevision.status == 'running'){
 

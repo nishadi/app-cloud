@@ -145,6 +145,9 @@ var buildDockerImage = function (applicationName, versionName, runtimeId, absFil
                 log.info("Retrying docker build retry counter value : " + i);
                 var dockerRegTenantSpace = modManager.getTenantDomain().replace(".","-");
                 dockerOpClient.buildDockerImage(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL) ,applicationRuntime.getImageName(), tagName, absFileUploadedPath);
+                //Adding docker build success event
+                var msg = "Docker image build successfully built";
+                addEvent(DOCKER_IMAGE_BUILD, EVENT_SUCCEEDED, msg, versionHashId);
                 return;
             } catch (e){
                 log.error("Error occured while building image, Hence retrying...");
@@ -373,30 +376,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
     //Adding deployment success event
     var msg = "Application deployment successfull";
     addEvent(KUBE_DEPLOY, EVENT_SUCCEEDED, msg, versionHashId);
-    //============================================================================================================
 
-    //======================================= Creating Ingress ===================================================
-    //Adding deployment pending event
-    var msg = "Application ingress creation successfully triggered in Kubernetes";
-    addEvent(INGRESS, EVENT_PENDING, msg, versionHashId);
-    try{
-        var appLaunchURL = constructAppLaunchURL(applicationName, versionName);
-
-        var ingressCreated = kubService.createDeploymentUrl(appLaunchURL);
-        log.info("Deployment URL status: " + ingressCreated);
-        var msg = "Application ingress creation successful";
-        addEvent(INGRESS, EVENT_SUCCEEDED, msg, versionHashId);
-    } catch(e){
-        var msg = "Application ingress creation failed in Kubernetes";
-        addEvent(INGRESS, EVENT_FAILED, msg, versionHashId);
-        ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
-        log.info("Application deployment failed because ingress is not created successfully and roll back process" +
-                 " is started for application:"+applicationName+" with revision:"+versionName);
-        deleteVersion(versionHashId, true, true);
-        log.error(msg);
-        log.error(e);
-        throw e;
-    }
     //======================================= checking pod status =================================================
     //Adding pod status pending event
     var podStatus = "Pending";
@@ -496,7 +476,6 @@ var persistDeploymentConfig = function(deploymentConfig, versionHashId, applicat
     var containerList = deploymentConfig.getContainers();
     var ctr = containerList.get(0);
     var serviceProxies = ctr.getServiceProxies();
-    var svc = serviceProxies.get(0);
 
     var deployment = new Deployment();
     deployment.setDeploymentName(deploymentConfig.getDeploymentName());
@@ -504,17 +483,23 @@ var persistDeploymentConfig = function(deploymentConfig, versionHashId, applicat
     deployment.setReplicas(parseInt(deploymentConfig.getReplicas()));
     log.info("Replicas:" + deploymentConfig.getReplicas());
 
-    var serviceProxy = new ServiceProxy();
-    serviceProxy.setServiceName(svc.getServiceName());
-    log.info("Service name:" + svc.getServiceName());
-    serviceProxy.setServiceProtocol(svc.getServiceProtocol());
-    log.info("Service protocol:" + svc.getServiceProtocol());
-    serviceProxy.setServicePort(svc.getServicePort());
-    log.info("Service port:" + svc.getServicePort());
-    serviceProxy.setServiceBackendPort(svc.getServiceBackendPort());
-    log.info("Service Backend Port:" + svc.getServiceBackendPort());
     var hostURL = constructAppLaunchURL(applicationName, versionName);
-    serviceProxy.setHostURL(hostURL);
+    var proxies = new java.util.HashSet();
+    for (var i = 0; i < serviceProxies.size(); i++){
+        var svc = serviceProxies.get(i);
+        var serviceProxy = new ServiceProxy();
+        serviceProxy.setServiceName(svc.getServiceName());
+        log.info("Service name:" + svc.getServiceName());
+        serviceProxy.setServiceProtocol(svc.getServiceProtocol());
+        log.info("Service protocol:" + svc.getServiceProtocol());
+        serviceProxy.setServicePort(svc.getServicePort());
+        log.info("Service port:" + svc.getServicePort());
+        serviceProxy.setServiceBackendPort(svc.getServiceBackendPort());
+        log.info("Service Backend Port:" + svc.getServiceBackendPort());
+        serviceProxy.setHostURL(hostURL);
+
+        proxies.add(serviceProxy);
+    }
 
     var container = new Container();
     container.setImageName(ctr.getBaseImageName());
@@ -522,8 +507,6 @@ var persistDeploymentConfig = function(deploymentConfig, versionHashId, applicat
     container.setImageVersion(ctr.getBaseImageVersion());
     log.info("Image version:" + ctr.getBaseImageVersion());
 
-    var proxies = new java.util.HashSet();
-    proxies.add(serviceProxy);
     container.setServiceProxies(proxies);
 
     var containerSet = new java.util.HashSet();
@@ -595,7 +578,7 @@ function getContainers(tenantDockerRegistryUrl, baseImageName, tag, versionHashI
     for(var i = 0; i < services.length; i++){
         var serviceProxy = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
         var service = services[i];
-        serviceProxy.setServiceName('srv-' + appServiceName);
+        serviceProxy.setServiceName(service.getServiceNamePrefix() + "-" + appServiceName);
         serviceProxy.setAppHostURL(appHostURL);
         serviceProxy.setServiceProtocol(service.getServiceProtocol());
         serviceProxy.setServicePort(getIngressPort(service.getServiceName()));
@@ -1372,6 +1355,15 @@ var verifyCustomUrl = function (pointedUrl, customUrl) {
     }
 
     return success;
+};
+
+var isAplicationVersionExist = function (versionHashId) {
+    var applicationExists = false;
+    var applicationHashId = ApplicationManager.getApplicationHashIdByVersionHashId(versionHashId);
+    if (applicationHashId) {
+        applicationExists = true;
+    }
+    return applicationExists;
 };
 
 %>
