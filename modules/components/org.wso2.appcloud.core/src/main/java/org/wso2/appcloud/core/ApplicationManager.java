@@ -417,7 +417,8 @@ public class ApplicationManager {
         if( iconStream instanceof InputStream){
             InputStream iconInputStream = (InputStream) iconStream;
             try {
-                applicationDAO.updateApplicationIcon(dbConnection, iconInputStream, applicationHashId);
+                int applicationId = applicationDAO.getApplicationId(dbConnection, applicationHashId);
+                applicationDAO.updateApplicationIcon(dbConnection, iconInputStream, applicationId);
                 dbConnection.commit();
             } catch (SQLException e) {
                 String msg = "Error while committing the transaction when updating the application icon for application " +
