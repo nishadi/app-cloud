@@ -239,8 +239,8 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xs-12 col-md-3 col-lg-3">
-                            <a class="block-anch" href="<%=dashboardUrl%>" target="_blank">
+                        <div class="col-xs-12 col-md-3 col-lg-3" data-toggle="tooltip" title="HTTP Monitoring Dashboard is not supported in this release. It will be available soon!">
+                            <a class="block-anch" href="#" target="_blank">
                                 <div class="block-monitoring">
                                     <h3>HTTP Monitoring Dashboard</h3>
                                     <div class="block-icon pull-left">
