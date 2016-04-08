@@ -38,9 +38,12 @@ var DASHBOARD_BASE_URL="https://analytics.cloud.wso2.com/monitoring/webapps/";
 
 //events related constants
 var DATABASE_ADD = "Adding application to database";
+var DATABASE_CUSTOM_TRANSPORT_ADD = "Adding port exposing details to database";
 var DOCKER_FILE_CREATE = "Creating docker file";
 var DOCKER_IMAGE_BUILD = "Building docker image";
 var DOCKER_REGISTRY_PUSH = "Updating docker registry";
+var DOCKER_IMAGE_PULL = "Pulling docker image";
+var DOCKER_IMAGE_TAG = "Tagging custom docker image";
 var KUBE_DEPLOY = "Initializing deployment";
 var INGRESS = "Creating ingress";
 var POD_STATUS = "Status";

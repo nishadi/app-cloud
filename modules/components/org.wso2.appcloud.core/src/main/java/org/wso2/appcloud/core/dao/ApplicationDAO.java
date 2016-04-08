@@ -32,6 +32,7 @@ import org.wso2.appcloud.core.dto.RuntimeProperty;
 import org.wso2.appcloud.core.dto.Tag;
 import org.wso2.appcloud.core.dto.Transport;
 import org.wso2.appcloud.core.dto.Version;
+import org.wso2.appcloud.core.dto.CustomTransport;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -386,6 +387,36 @@ public class ApplicationDAO {
         }
     }
 
+    /**
+     *  Method for adding transport details including port details of a custom application to the database
+     *
+     * @param dbConnection database connection
+     * @param customTransport custom transport details
+     * @throws AppCloudException
+     */
+    public void addTransportsForCustomApplication(Connection dbConnection, CustomTransport customTransport)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_CUSTOM_APP_TRANSPORT, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, customTransport.getVersionHashId());
+            preparedStatement.setString(2, customTransport.getName());
+            preparedStatement.setInt(3, customTransport.getPort());
+            preparedStatement.setString(4, customTransport.getProtocol());
+
+            preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while adding custom application transports";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+    }
 
     public void updateApplicationIcon(Connection dbConnection, InputStream inputStream, String applicationHashId)
             throws AppCloudException {
@@ -1215,6 +1246,45 @@ public class ApplicationDAO {
         return transports;
     }
 
+    /**
+     * Method for getting https transport details of a custom application from the database
+     *
+     * @param versionHashId application version hash ID
+     * @return returns the transports array
+     * @throws AppCloudException
+     */
+    public List<Transport> getTransportsForCustomApplication(String versionHashId) throws AppCloudException{
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        List<Transport> transports = new ArrayList<>();
+
+        try {
+            //Only retrieves the transport details for https
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_TRANSPORTS_FOR_CUSTOM_APPLICATION);
+            preparedStatement.setString(1, "https");
+            preparedStatement.setString(2, versionHashId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()){
+                Transport transport = new Transport();
+                transport.setServiceName(resultSet.getString(SQLQueryConstants.NAME));
+                transport.setServiceProtocol(resultSet.getString(SQLQueryConstants.PROTOCOL));
+                transport.setServicePort(resultSet.getInt(SQLQueryConstants.PORT));
+                transports.add(transport);
+            }
+            dbConnection.commit();
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving custom application transport detail for application version : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return transports;
+    }
 
     public boolean deleteRuntimeProperty(Connection dbConnection, String versionHashId, String key) throws AppCloudException {
 

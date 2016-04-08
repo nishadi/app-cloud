@@ -143,28 +143,37 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 formData.append('isNewVersion', '<%=newVersion%>');
                 formData.append('appTypeName', appTypeName);
                 formData.append('applicationName', $("#applicationName").val());
-                var optionRuntime = $("#runtime option:selected").val();
-                formData.append('runtime', optionRuntime);
 
-                if(uploadMethod === "file"){
-                    formData.append('uploadedFileName', $("#uploadedFileName").val());
-                } else if (uploadMethod === "url" ) {
-                    if (appTypeName == "war") {
-                        formData.append('uploadedFileName', $("#applicationName").val() + ".war");
-                    } else if (appTypeName == "mss") {
-                        formData.append('uploadedFileName', $("#applicationName").val() + ".jar");
-                    }
-                } else if (uploadMethod === "github" ) {
-                    formData.append('gitRepoUrl', $("#gitRepoUrl").val());
-                    formData.append('gitRepoBranch', $("#gitRepoBranch").val());
-                    formData.append('token', $("#token").val());
+                if(appTypeName == 'custom'){
+                    formData.append('dockerUrl', $("#dockerUrl").val());
+                    formData.append('imageTag', $("#imageTag").val());
+                    formData.append('httpPort', $("#httpPort").val());
+                    formData.append('httpsPort', $("#httpsPort").val());
 
-                    // Add github url as a tag
-                    if ('<%=newVersion%>' == 'null') {
-                        var property = {};
-                        property["key"] = "gitRepoUrl";
-                        property["value"] = $("#gitRepoUrl").val();
-                        tags.push(property);
+                }else{
+                    var optionRuntime = $("#runtime option:selected").val();
+                    formData.append('runtime', optionRuntime);
+
+                    if(uploadMethod === "file"){
+                        formData.append('uploadedFileName', $("#uploadedFileName").val());
+                    } else if (uploadMethod === "url" ) {
+                        if (appTypeName == "war") {
+                            formData.append('uploadedFileName', $("#applicationName").val() + ".war");
+                        } else if (appTypeName == "mss") {
+                            formData.append('uploadedFileName', $("#applicationName").val() + ".jar");
+                        }
+                    } else if (uploadMethod === "github" ) {
+                        formData.append('gitRepoUrl', $("#gitRepoUrl").val());
+                        formData.append('gitRepoBranch', $("#gitRepoBranch").val());
+                        formData.append('token', $("#token").val());
+
+                        // Add github url as a tag
+                        if ('<%=newVersion%>' == 'null') {
+                            var property = {};
+                            property["key"] = "gitRepoUrl";
+                            property["value"] = $("#gitRepoUrl").val();
+                            tags.push(property);
+                        }
                     }
                 }
                 formData.append('tags', JSON.stringify(tags));
@@ -499,27 +508,38 @@ jagg.template("application", function (inputs, outputs, jagg) {
     });
 
     function activateCreateApplication() {
-        if ($('#applicationName').val() && $('#applicationRevision').val() 
+
+         if(appTypeName=='custom'){
+            if ($('#applicationName').val() && $('#applicationRevision').val()
+                        && $('#dockerUrl').val() && $("#imageTag").val() && $("#httpPort").val() && $("#httpsPort").val()) {// checks form for validity
+                        $("#add-application").prop("disabled", false);
+            } else {
+                $("#add-application").prop("disabled", true);      // enables button
+            }
+         }
+         else{
+            if ($('#applicationName').val() && $('#applicationRevision').val()
                         && $('#runtime').val() > 0 && ($("#uploadedFileName").val() || $("#artifactUrl").val() || ($("#gitRepoUrl").val()  && $("#gitRepoBranch").val()))) {// checks form for validity
 
-            if($("#uploadedFileName").val()){
-                if(validateArtifactType($("#uploadedFileName").val())){
-                    $("#add-application").prop("disabled", false);
-                }else{
-                    $("#add-application").prop("disabled", true);
+                if($("#uploadedFileName").val()){
+                    if(validateArtifactType($("#uploadedFileName").val())){
+                        $("#add-application").prop("disabled", false);
+                    }else{
+                        $("#add-application").prop("disabled", true);
+                    }
+                }else if ($("#artifactUrl").val()){
+                    if(urlUploadComplete){
+                        $("#add-application").prop("disabled", false);
+                    } else {
+                        $("#add-application").prop("disabled", true);
+                    }
+                }else if($("#gitRepoUrl").val()  && $("#gitRepoBranch").val()){
+            $("#add-application").prop("disabled", false);
                 }
-            }else if ($("#artifactUrl").val()){
-                if(urlUploadComplete){
-                    $("#add-application").prop("disabled", false);
-                } else {
-                    $("#add-application").prop("disabled", true);
-                }
-            }else if($("#gitRepoUrl").val()  && $("#gitRepoBranch").val()){
-		$("#add-application").prop("disabled", false);
+            } else {
+                $("#add-application").prop("disabled", true);      // enables button
             }
-        } else {
-            $("#add-application").prop("disabled", true);      // enables button
-        }
+         }
     }
 
 
@@ -745,162 +765,189 @@ jagg.template("application", function (inputs, outputs, jagg) {
             </select>
             </div-->
 
-            <div class="form-group col-md-12">
-                <label class="radio-inline">
-                    <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="upload-from-file"
-                           checked="checked" class="custom-radio"> Upload from file system
-                </label>
-                <label class="radio-inline">
-                    <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="upload-from-url"
-                           class="custom-radio"> Upload from URL
-                </label>
-                <%  if(isAppTypeBuildable == 'false'){ %>
+            <%
+                if(appTypeName!='custom'){
+            %>
+
+                <div class="form-group col-md-12">
                     <label class="radio-inline">
-                        <input type="radio" name="inlineRadioOptions" id="inlineRadio3" value="github-repo-url"
-                               class="custom-radio"> Connect to GitHub repo
+                        <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="upload-from-file"
+                               checked="checked" class="custom-radio"> Upload from file system
                     </label>
-                <% } %>
-            </div>
-
-            <div class="form-group" id="file-upload-block">
-                <div class="input-group">
-                    <input id="uploadedFileName" type="text" class="form-control" readonly>
-                    <span class="input-group-btn">
-                       <span class="btn btn-primary btn-file" id="btn-artifact-upload" disabled>
-                           <input id="fileupload" type="file" name="fileupload">Browse
-                       </span>
-                    </span>
+                    <label class="radio-inline">
+                        <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="upload-from-url"
+                               class="custom-radio"> Upload from URL
+                    </label>
+                    <%  if(isAppTypeBuildable == 'false'){ %>
+                        <label class="radio-inline">
+                            <input type="radio" name="inlineRadioOptions" id="inlineRadio3" value="github-repo-url"
+                                   class="custom-radio"> Connect to GitHub repo
+                        </label>
+                    <% } %>
                 </div>
-                <div id="progress" class="progress">
-                    <div class="progress-bar progress-bar-success" style="width: 0%;"></div>
-                </div>
-            </div>
 
-            <div class="form-group" id="url-upload-block">
-                <div class="input-group">
-                    <input id="artifactUrl" name="artifactUrl" type="text" class="form-control" placeholder="Enter artifact URL" />
-                    <span class="input-group-btn">
-                        <a class="btn btn-primary" id="url-upload" type="button" disabled>Upload from URL
-                        <span id="url-upload-progress"><span></a>
-                    </span>
-                </div>
-            </div>
-
-            <div class="form-group" id="github-block">
-                <div class="input-group">
-                     <span class="input-group-addon">URL</span>
-                    <input id="gitRepoUrl" name="gitRepoUrl" type="text" class="form-control" placeholder="Enter GitHub Repository URL" />
-                </div>
-                <br/>
-                <div class="input-group">
-                    <span class="input-group-addon">Branch</span>
-                    <input id="gitRepoBranch" name="gitRepoBranch" type="text" class="form-control" placeholder="Enter GitHub Repository branch" />
-                </div>
-                <br/>
-                <!--div class="input-group">
-                    <span class="input-group-addon">Token</span>
-                    <input id="token" name="token" type="text" class="form-control" placeholder="Enter Personal access token" />
-                </div-->
-            </div>
-
-            <div class="form-group">
-                <label for="runtime">Runtime:
-                    <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left" title="Select an appropriate runtime to run your application"></i>
-                </label>
-                <select name="runtime" id="runtime" class="form-control"></select>
-            </div>
-
-            <div class="form-group">
-                <label for="application-icon">Icon:
-                    <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left"
-                title="Recommended image size : 300 x 300 pixels, file size 70 k (maximum)"></i>
-                </label>
-                <div class="input-group">
-                    <input type="text" id="icon" name="icon" class="form-control" readonly>
-                    <span class="input-group-btn">
-                        <span class="btn btn-primary btn-file">
-                            Browse <input type="file" id="appIcon" name="appIcon"/>
+                <div class="form-group" id="file-upload-block">
+                    <div class="input-group">
+                        <input id="uploadedFileName" type="text" class="form-control" readonly>
+                        <span class="input-group-btn">
+                           <span class="btn btn-primary btn-file" id="btn-artifact-upload" disabled>
+                               <input id="fileupload" type="file" name="fileupload">Browse
+                           </span>
                         </span>
-                        <span class="btn btn-primary btn-file" onclick="clearUploadIconField()" id="clear">
-                            Clear
-                        </span>
-                    </span>
+                    </div>
+                    <div id="progress" class="progress">
+                        <div class="progress-bar progress-bar-success" style="width: 0%;"></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="panel-group property-accordion" id="property-accordion">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-                                    Env Variables
-                                    <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
-                                </a>
-                            </h4>
+                <div class="form-group" id="url-upload-block">
+                    <div class="input-group">
+                        <input id="artifactUrl" name="artifactUrl" type="text" class="form-control" placeholder="Enter artifact URL" />
+                        <span class="input-group-btn">
+                            <a class="btn btn-primary" id="url-upload" type="button" disabled>Upload from URL
+                            <span id="url-upload-progress"><span></a>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-group" id="github-block">
+                    <div class="input-group">
+                         <span class="input-group-addon">URL</span>
+                        <input id="gitRepoUrl" name="gitRepoUrl" type="text" class="form-control" placeholder="Enter GitHub Repository URL" />
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">Branch</span>
+                        <input id="gitRepoBranch" name="gitRepoBranch" type="text" class="form-control" placeholder="Enter GitHub Repository branch" />
+                    </div>
+                    <br/>
+                    <!--div class="input-group">
+                        <span class="input-group-addon">Token</span>
+                        <input id="token" name="token" type="text" class="form-control" placeholder="Enter Personal access token" />
+                    </div-->
+                </div>
+
+                <div class="form-group">
+                    <label for="runtime">Runtime:
+                        <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left" title="Select an appropriate runtime to run your application"></i>
+                    </label>
+                    <select name="runtime" id="runtime" class="form-control"></select>
+                </div>
+
+            <%
+                }else {
+                    %>
+                        <div class="form-group">
+                            <label for="docker-url">Docker URL: </label>
+                            <input id="dockerUrl" name="dockerUrl" type="text" class="form-control" placeholder="Enter Docker URL" />
                         </div>
-                        <div id="collapseOne" class="panel-collapse collapse in">
-                            <div class="panel-body" id="env-pane">
-                                <div class="form-inline property-seperator">
-                                    <div class="form-group">
-                                        <label class="sr-only" for="key">Key</label>
-                                        <input type="text" class="form-control element-add-key" placeholder="Key">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="sr-only" for="value">Value</label>
-                                        <input type="text" class="form-control element-add-value" placeholder="Value">
-                                    </div>
-                                    <div class="form-group">
-                                        <button class="btn btn-primary btn-primary-add btn-primary-add-val" disabled>Add</button>
-                                    </div>
+                        <div class="form-group">
+                            <label for="image-tag">Docker Image Tag: </label>
+                            <input id="imageTag" name="imageTag" type="text" class="form-control" placeholder="1.0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="http-port">HTTP port exposing: </label>
+                            <input id="httpPort" name="httpPort" type="int" class="form-control" placeholder="1.0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="https-port">HTTPS port exposing: </label>
+                            <input id="httpsPort" name="httpsPort" type="int" class="form-control" placeholder="1.0" />
+                        </div>
+                    <%
+                }
+            %>
+
+        <div class="form-group">
+            <label for="application-icon">Icon:
+                <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left"
+            title="Recommended image size : 300 x 300 pixels, file size 70 k (maximum)"></i>
+            </label>
+            <div class="input-group">
+                <input type="text" id="icon" name="icon" class="form-control" readonly>
+                <span class="input-group-btn">
+                    <span class="btn btn-primary btn-file">
+                        Browse <input type="file" id="appIcon" name="appIcon"/>
+                    </span>
+                    <span class="btn btn-primary btn-file" onclick="clearUploadIconField()" id="clear">
+                        Clear
+                    </span>
+                </span>
+            </div>
+        </div>
+
+        <div class="panel-group property-accordion" id="property-accordion">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                                Env Variables
+                                <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse in">
+                        <div class="panel-body" id="env-pane">
+                            <div class="form-inline property-seperator">
+                                <div class="form-group">
+                                    <label class="sr-only" for="key">Key</label>
+                                    <input type="text" class="form-control element-add-key" placeholder="Key">
+                                </div>
+                                <div class="form-group">
+                                    <label class="sr-only" for="value">Value</label>
+                                    <input type="text" class="form-control element-add-value" placeholder="Value">
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-primary btn-primary-add btn-primary-add-val" disabled>Add</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
-                                    Tags
-                                    <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
-                                </a>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                                Tags
+                                <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                            </a>
 
-                            </h4>
-                        </div>
-                        <div id="collapseTwo" class="panel-collapse collapse">
-                            <div class="panel-body " id="tags-pane">
-                                <div class="form-inline property-seperator">
-                                    <div class="form-group">
-                                        <label class="sr-only" for="key">Key</label>
-                                        <input type="text" class="form-control element-add-key" placeholder="Key">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="sr-only" for="value">Value</label>
-                                        <input type="text" class="form-control element-add-value" placeholder="Value">
-                                    </div>
-                                    <div class="form-group">
-                                        <button class="btn btn-primary btn-primary-add btn-primary-add-val" disabled>Add</button>
-                                    </div>
+                        </h4>
+                    </div>
+                    <div id="collapseTwo" class="panel-collapse collapse">
+                        <div class="panel-body " id="tags-pane">
+                            <div class="form-inline property-seperator">
+                                <div class="form-group">
+                                    <label class="sr-only" for="key">Key</label>
+                                    <input type="text" class="form-control element-add-key" placeholder="Key">
+                                </div>
+                                <div class="form-group">
+                                    <label class="sr-only" for="value">Value</label>
+                                    <input type="text" class="form-control element-add-value" placeholder="Value">
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-primary btn-primary-add btn-primary-add-val" disabled>Add</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-            </div>
-            <div class="form-group">
-                <button class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" id="add-application">
-                    <span class="fw-stack fw-lg btn-action-ico">
-                        <i class="fw fw-ring fw-stack-2x"></i>
-                        <i class="fw fw-add fw-stack-1x"></i>
-                    </span>
-                        Create
-                </button>
-            </div>
-        </form>
+                </div>
         </div>
+        <div class="form-group">
+            <button class="cu-btn cu-btn-sm cu-btn-blue cu-btn-position" id="add-application">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-ring fw-stack-2x"></i>
+                    <i class="fw fw-add fw-stack-1x"></i>
+                </span>
+                    Create
+            </button>
         </div>
-      </div><!-- /.container -->
+    </form>
+    </div>
+    </div>
+  </div><!-- /.container -->
 
-      <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/vendor/jquery.ui.widget.js'))%>"></script>
+  <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/vendor/jquery.ui.widget.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.fileupload.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.iframe-transport.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.validate.min.js'))%>"></script>

@@ -43,6 +43,7 @@ public class DockerOpClient {
 
     final CountDownLatch buildDone = new CountDownLatch(1);
     final CountDownLatch pushDone = new CountDownLatch(1);
+    final CountDownLatch pullDone = new CountDownLatch(1);
 
     public DockerOpClient() {
         Config config = new ConfigBuilder()
@@ -178,6 +179,51 @@ public class DockerOpClient {
             log.error("Docker image push failed: " + imageName + " repo: " + repoUrl + " tag: " + tag);
             throw new AppCloudException(
                     "Docker image push failed: " + imageName + " repo: " + repoUrl + " tag: " + tag);
+        }
+    }
+
+    public void pullDockerImage(String dockerUrl, String imageTag)
+            throws InterruptedException, IOException, AppCloudException {
+
+        final boolean[] dockerStatusCheck = new boolean[1];
+        handle = dockerClient.image().withName(dockerUrl).pull().usingListener(new EventListener() {
+            @Override
+            public void onSuccess(String message) {
+                log.info("Success:" + message);
+                pullDone.countDown();
+                dockerStatusCheck[0] = true;
+            }
+
+            @Override
+            public void onError(String message) {
+                log.error("Error:" + message);
+                pullDone.countDown();
+                dockerStatusCheck[0] = false;
+            }
+
+            @Override
+            public void onEvent(String event) {
+                log.info(event);
+            }
+        }).withTag(imageTag).fromRegistry();
+        pullDone.await();
+        handle.close();
+
+        if (!dockerStatusCheck[0]) {
+            log.error("Docker image pull failed: " + dockerUrl);
+            throw new AppCloudException(
+                    "Docker image pull failed: " + dockerUrl);
+        }
+    }
+    public void tagDockerImage(String imageName,String currentTag, String repo, String newTag)
+            throws InterruptedException, IOException, AppCloudException{
+        boolean dockerStatusCheck = false;
+        dockerStatusCheck = dockerClient.image().withName(imageName+":"+currentTag).tag().inRepository(repo+'/'+imageName).withTagName(newTag);
+
+        if (!dockerStatusCheck) {
+            log.error("Docker custom image tag failed: " + imageName);
+            throw new AppCloudException(
+                    "Docker custom image tag failed: " + imageName);
         }
     }
 

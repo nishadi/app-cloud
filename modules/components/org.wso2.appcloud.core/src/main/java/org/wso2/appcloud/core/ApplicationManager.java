@@ -28,6 +28,8 @@ import org.wso2.appcloud.core.dto.ApplicationType;
 import org.wso2.appcloud.core.dto.ApplicationRuntime;
 import org.wso2.appcloud.core.dto.Transport;
 import org.wso2.appcloud.core.dto.Version;
+import org.wso2.appcloud.core.dto.CustomTransport;
+
 import org.wso2.carbon.context.CarbonContext;
 
 import java.io.IOException;
@@ -587,6 +589,49 @@ public class ApplicationManager {
         List<Transport> transports = applicationDAO.getTransportsForRuntime(runtimeId);
         return transports.toArray(new Transport[transports.size()]);
     }
+
+    /**
+     * Method to get transport details for custom application created via docker URL
+     *
+     * @param versionHashId version hash id of the application
+     * @return returns the list of transports
+     * @throws AppCloudException
+     */
+    public static Transport[] getTransportsForCustomApplication (String versionHashId) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        List<Transport> transports = applicationDAO.getTransportsForCustomApplication(versionHashId);
+        return transports.toArray(new Transport[transports.size()]);
+    }
+
+    /**
+     * Method to add transport details for custom application created via docker URL
+     *
+     * @param customTransport Custom Transports
+     * @throws AppCloudException
+     */
+    public static void addTransportsForCustomApplication (CustomTransport customTransport) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+        try {
+
+            applicationDAO.addTransportsForCustomApplication(dbConnection, customTransport);
+            dbConnection.commit();
+
+        } catch (AppCloudException e){
+            String msg = "Error occurred while adding custom application port details to the database for application : " +
+                    customTransport.getVersionHashId();
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error while committing the application adding transaction custom application port details for application : " +
+                    customTransport.getVersionHashId();
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+    }
+
 
     public static ApplicationRuntime getRuntimeById (int runtimeId) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();

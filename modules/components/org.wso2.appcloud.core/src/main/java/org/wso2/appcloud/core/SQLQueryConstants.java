@@ -84,6 +84,9 @@ public class SQLQueryConstants {
             "INSERT INTO AC_CONTAINER_SERVICE_PROXY (name, protocol, port, backend_port, container_id, tenant_id) "
                     + "values (?, ?, ?, ?, ?, ?)";
 
+    public static final String ADD_CUSTOM_APP_TRANSPORT =
+            "INSERT INTO AC_TRANSPORT_CUSTOM (version_hash_id, name, port, protocol) VALUES (?, ?, ?, ?)";
+
 
 
     /*Select Queries*/
@@ -138,6 +141,9 @@ public class SQLQueryConstants {
     public static final String GET_TRANSPORTS_FOR_RUNTIME =
             "SELECT name, port, protocol FROM AC_TRANSPORT WHERE id IN (SELECT transport_id FROM AC_RUNTIME_TRANSPORT " +
             "WHERE runtime_id=?)";
+
+    public static final String GET_TRANSPORTS_FOR_CUSTOM_APPLICATION =
+            "SELECT name, port, protocol FROM AC_TRANSPORT_CUSTOM WHERE name=? AND version_hash_id=?";
 
     public static final String GET_ALL_APP_TYPES = "SELECT * FROM AC_APP_TYPE";
 
