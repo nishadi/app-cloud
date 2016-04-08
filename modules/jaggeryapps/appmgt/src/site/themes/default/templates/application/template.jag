@@ -370,7 +370,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 // Disable app creation button if the form is not valid
                 if (this.numberOfInvalids() > 0) {
                     $("#add-application").prop("disabled", true);
-                    $("#btn-artifact-upload").attr("disabled", true);
+                    if(Object.keys(event)[0] != "uploadedFileName"){
+                        $("#btn-artifact-upload").attr("disabled", true);
+                    }
                     $("#url-upload").attr("disabled", true);
                 } else {
                     activateCreateApplication();
