@@ -1297,6 +1297,13 @@ var addCustomUrl = function (customUrl, applicationName, versionName) {
     var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
             applicationName, versionName, null, modManager.getTenantId(), modManager.getTenantDomain(), versionHashId);
     var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
+    var applicationHashId = Util.getApplicationHashId(applicationName, tenantId);
+    var application = ApplicationManager.getApplicationByHashId(applicationHashId);
+    var defaultVersionName = application.getDefaultVersion();
+
+    if (versionName != defaultVersionName) {
+        setPreviousVersionUrl(applicationName, defaultVersionName);
+    }
 
     //delete version specific service from K8s
     var k8sKindService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesPovisioningConstants.KIND_SERVICE;
@@ -1304,20 +1311,49 @@ var addCustomUrl = function (customUrl, applicationName, versionName) {
 
     //create service for custom url in K8s
     var ServiceProxy = Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
-    var containerServiceProxy = getContainerServiceProxy(versionHashId);
-    ServiceProxy.setServiceName(containerServiceProxy.getServiceName());
-    ServiceProxy.setServiceProtocol(containerServiceProxy.getServiceProtocol());
-    ServiceProxy.setServicePort(parseInt(containerServiceProxy.getServicePort()));
-    ServiceProxy.setServiceBackendPort(parseInt(containerServiceProxy.getServiceBackendPort()));
-    ServiceProxy.setAppHostURL(customUrl);
-    kubernetesRuntimeProvisioningService.createService(ServiceProxy);
+    var containerServiceProxies = getContainerServiceProxies(versionHashId);
+    for (var i = 0; i < containerServiceProxies.size(); i++) {
+        var containerServiceProxy = containerServiceProxies.get(i);
+        ServiceProxy.setServiceName(containerServiceProxy.getServiceName());
+        ServiceProxy.setServiceProtocol(containerServiceProxy.getServiceProtocol());
+        ServiceProxy.setServicePort(parseInt(containerServiceProxy.getServicePort()));
+        ServiceProxy.setServiceBackendPort(parseInt(containerServiceProxy.getServiceBackendPort()));
+        ServiceProxy.setAppHostURL(customUrl);
+        kubernetesRuntimeProvisioningService.createService(ServiceProxy);
+    }
 
     //persist custom url in database AC_Application
-    var applicationHashId = Util.getApplicationHashId(applicationName, tenantId);
     updateServiceToCustomUrl(versionHashId, customUrl, applicationHashId, versionName);
 };
 
-var getContainerServiceProxy = function (versionHashId) {
+var setPreviousVersionUrl = function (applicationName, versionName) {
+    var versionHashId = getVersionHashId(applicationName, versionName);
+    var KubernetesRuntimeProvisioningService =
+            Packages.org.wso2.appcloud.provisioning.runtime.KubernetesRuntimeProvisioningService;
+    var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
+            applicationName, versionName, null, modManager.getTenantId(), modManager.getTenantDomain(), versionHashId);
+    var kubernetesRuntimeProvisioningService = new KubernetesRuntimeProvisioningService(applicationCtx);
+    var ServiceProxy = Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
+    var containerServiceProxies = getContainerServiceProxies(versionHashId);
+
+    var k8sKindService = Packages.org.wso2.appcloud.provisioning.runtime.KubernetesPovisioningConstants.KIND_SERVICE;
+    kubernetesRuntimeProvisioningService.deleteK8sKind(k8sKindService);
+
+    for (var i = 0; i < containerServiceProxies.size(); i++) {
+        var containerServiceProxy = containerServiceProxies.get(i);
+        ServiceProxy.setServiceName(containerServiceProxy.getServiceName());
+        ServiceProxy.setServiceProtocol(containerServiceProxy.getServiceProtocol());
+        ServiceProxy.setServicePort(parseInt(containerServiceProxy.getServicePort()));
+        ServiceProxy.setServiceBackendPort(parseInt(containerServiceProxy.getServiceBackendPort()));
+        var appHostUrl = constructAppLaunchURL(applicationName, versionName);
+        ServiceProxy.setAppHostURL(appHostUrl);
+        kubernetesRuntimeProvisioningService.createService(ServiceProxy);
+    }
+
+    ApplicationManager.updateContainerServiceProxyService(versionHashId, appHostUrl);
+};
+
+var getContainerServiceProxies = function (versionHashId) {
     var containerServiceProxy;
     try {
         containerServiceProxy = ApplicationManager.getContainerServiceProxyByVersion(versionHashId);
@@ -1331,9 +1367,9 @@ var getContainerServiceProxy = function (versionHashId) {
 
 var getCustomUrl = function (versionHashId) {
     //get custom url from database and show in home page
-    var containerServiceProxy = getContainerServiceProxy(versionHashId);
+    var containerServiceProxy = getContainerServiceProxies(versionHashId);
     var urlScheme = CloudUtil.getPropertyValue("DeploymentUrlScheme");
-    var customAppLaunchUrl = urlScheme + "://" + containerServiceProxy.hostURL;
+    var customAppLaunchUrl = urlScheme + "://" + containerServiceProxy.get(0).hostURL;
 
     return customAppLaunchUrl;
 };

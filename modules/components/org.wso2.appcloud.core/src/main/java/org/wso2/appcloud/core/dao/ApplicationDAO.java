@@ -1390,22 +1390,24 @@ public class ApplicationDAO {
      * @return
      * @throws AppCloudException
      */
-    public ContainerServiceProxy getContainerServiceProxyByVersion(String versionHashId) throws AppCloudException {
+    public List<ContainerServiceProxy> getContainerServiceProxyByVersion(String versionHashId)
+            throws AppCloudException {
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-        ContainerServiceProxy containerServiceProxy = new ContainerServiceProxy();
+        List<ContainerServiceProxy> containerServiceProxies = new ArrayList<ContainerServiceProxy>();
 
         try {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_CONTAINER_SERVICE_PROXY);
             preparedStatement.setString(1, versionHashId);
-
             ResultSet rs = preparedStatement.executeQuery();
-            if (rs.next()) {
+            while (rs.next()) {
+                ContainerServiceProxy containerServiceProxy = new ContainerServiceProxy();
                 containerServiceProxy.setServiceName(rs.getString(SQLQueryConstants.NAME));
                 containerServiceProxy.setServiceProtocol(rs.getString(SQLQueryConstants.PROTOCOL));
                 containerServiceProxy.setServicePort(rs.getInt(SQLQueryConstants.PORT));
                 containerServiceProxy.setServiceBackendPort(rs.getString(SQLQueryConstants.BACKEND_PORT));
                 containerServiceProxy.setHostURL(rs.getString(SQLQueryConstants.HOST_URL));
+                containerServiceProxies.add(containerServiceProxy);
             }
 
             dbConnection.commit();
@@ -1418,7 +1420,7 @@ public class ApplicationDAO {
             DBUtil.closeConnection(dbConnection);
         }
 
-        return containerServiceProxy;
+        return containerServiceProxies;
     }
 
     /**

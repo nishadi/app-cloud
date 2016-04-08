@@ -593,19 +593,19 @@ public class ApplicationManager {
      * @return
      * @throws AppCloudException
      */
-    public static ContainerServiceProxy getContainerServiceProxyByVersion(String versionHashId)
+    public static List<ContainerServiceProxy> getContainerServiceProxyByVersion(String versionHashId)
             throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        ContainerServiceProxy containerServiceProxy = null;
+        List<ContainerServiceProxy> containerServiceProxies = null;
 
         try {
-            containerServiceProxy = applicationDAO.getContainerServiceProxyByVersion(versionHashId);
+            containerServiceProxies = applicationDAO.getContainerServiceProxyByVersion(versionHashId);
         } catch (AppCloudException e) {
             String message = "Error while getting container service proxy with version hash id : " + versionHashId;
             throw new AppCloudException(message, e);
         }
 
-        return containerServiceProxy;
+        return containerServiceProxies;
     }
 
     /**
