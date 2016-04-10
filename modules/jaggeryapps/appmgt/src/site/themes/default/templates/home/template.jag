@@ -76,10 +76,10 @@ jagg.template("home", function(inputs, outputs, jagg) {
                 <a href="#"><i class="fa fa-laptop"></i> Overview</a>
             </li>
             <li>
-                <a href="/appmgt/site/pages/envs.jag?versionKey=<%=selectedApplicationRevision.hashId%>&applicationKey=<%=applicationKey%>"><i class="fa fa-wrench"></i> Env Variables</a>
+                <a id="leftMenuEnvVars" href="/appmgt/site/pages/envs.jag?versionKey=<%=selectedApplicationRevision.hashId%>&applicationKey=<%=applicationKey%>"><i class="fa fa-wrench"></i> Env Variables</a>
             </li>
             <li>
-                <a href="/appmgt/site/pages/tags.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>"><i class="fa fa-tag"></i> Tags</a>
+                <a id="leftMenuTagSet" href="/appmgt/site/pages/tags.jag?applicationKey=<%=applicationKey%>&versionKey=<%=selectedApplicationRevision.hashId%>"><i class="fa fa-tag"></i> Tags</a>
             </li>
             <li>
                 <a href="/appmgt/site/pages/runtimeLogs.jag?applicationKey=<%=applicationKey%>&selectedRevision=<%=selectedRevision%>"><i class="fa
