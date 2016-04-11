@@ -66,7 +66,7 @@ jagg.template("header/default", function(inputs, outputs, jagg) { %>
                 </div>
                 <div id="popover-content" class="hide">
                    <div class="cloud-apps">
-                       <a class="cloud-block" href="https://apps.cloud.wso2.com" target=_blank>
+                       <a class="cloud-block" href="https://api.cloud.wso2.com/publisher" target=_blank>
                            <i class="fw fw-api fa-3x"></i>
                            <div class="cloud-name">API Cloud</div>
                        </a>
