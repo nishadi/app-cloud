@@ -906,4 +906,22 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
             throw new RuntimeProvisioningException(message, e);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void createService(ServiceProxy serviceProxy) throws RuntimeProvisioningException {
+        Service service = getService(serviceProxy);
+        String namespace = this.namespace.getMetadata().getName();
+
+        try {
+            KubernetesClient kubClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();
+            kubClient.inNamespace(namespace).services().create(service);
+        } catch (KubernetesClientException e) {
+            String message = "Error while creating kubernetes kind service with namespace : " + namespace;
+            log.error(message, e);
+            throw new RuntimeProvisioningException(message, e);
+        }
+    }
 }

@@ -2,7 +2,7 @@
 
 ADMIN_PASSWORD=${ADMIN_PASS:-$(pwgen -s 12 1)}
 
-cat >/opt/apache-tomcat-${TOMCAT_VERSION}/conf/tomcat-users.xml <<EOL
+cat >/opt/wso2as-${WSO2_AS_VERSION}-m1/conf/tomcat-users.xml <<EOL
 <?xml version="1.0" encoding="utf-8"?>
 <tomcat-users>
   <role rolename="admin-gui"/>
@@ -42,13 +42,13 @@ echo "========================================================================"
 # and insert SSL certificate information
 sed -i '$!N;s/<!--\s*\n\s*<Connector port="8443"/<Connector port="8443" keyAlias="wso2carbon" \
                keystoreFile="\/wso2carbon.jks" keystorePass="'$CERT_PASSWORD'"/g;P;D' \
-               /opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
+               /opt/wso2as-${WSO2_AS_VERSION}-m1/conf/server.xml
 
 sed -i '$!N;s/clientAuth="false" sslProtocol="TLS" \/>\n\s*-->/clientAuth="false" sslProtocol="TLS" \/>/g;P;D' \
-/opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
+/opt/wso2as-${WSO2_AS_VERSION}-m1/conf/server.xml
 
-sed -i "s/unpackWARs=\"true\"/unpackWARs=\"false\"/g" /opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
+sed -i "s/unpackWARs=\"true\"/unpackWARs=\"false\"/g" /opt/wso2as-${WSO2_AS_VERSION}-m1/conf/server.xml
 
-sed -i "/\/Host/i  \\\t<Context path=\"""\" docBase=\"$APP_WAR\" debug=\"0\" reloadable=\"true\"></Context>" /opt/apache-tomcat-${TOMCAT_VERSION}/conf/server.xml
+sed -i "/\/Host/i  \\\t<Context path=\"""\" docBase=\"$APP_WAR\" debug=\"0\" reloadable=\"true\"></Context>" /opt/wso2as-${WSO2_AS_VERSION}-m1/conf/server.xml
 
 /opt/tomcat/bin/catalina.sh run

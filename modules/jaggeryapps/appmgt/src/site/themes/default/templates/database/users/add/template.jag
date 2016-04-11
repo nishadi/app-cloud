@@ -33,7 +33,7 @@ jagg.template("database/users/add", function(inputs, outputs, jagg) { %>
 	<a href="<%=jagg.getAbsoluteUrl("/site/pages/databases.jag")%>"
 	 class="btn-action"  title="Back to Database">
 			<span class="fw-stack fw-lg btn-action-ico">
-				<i class="fw fw-ring fw-stack-2x"></i>
+				<i class="fw fw-circle-outline fw-stack-2x"></i>
 				<i class="fw fw-left-arrow fw-stack-1x"></i>
 			</span> Back to Database
 	</a>
@@ -90,7 +90,7 @@ jagg.template("database/users/add", function(inputs, outputs, jagg) { %>
 					<button type="button" class="cu-btn cu-btn-sm cu-btn-blue"
 					id="add-user" name="add-user"  onclick="submitForm(); return false;" disabled>
 						<span class="fw-stack fw-lg btn-action-ico">
-							<i class="fw fw-ring fw-stack-2x"></i>
+							<i class="fw fw-circle-outline fw-stack-2x"></i>
 							<i class="fw fw-add fw-stack-1x"></i>
 						</span>
 						Add New User
@@ -107,7 +107,7 @@ jagg.template("database/users/add", function(inputs, outputs, jagg) { %>
 
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.form.js'))%>"></script>
-<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.validate.min.js'))%>"></script>
+<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jQueryValidationPlugin-1.14.0/jquery.validate.min.js'))%>"></script>
 <!-- include custom js functions -->
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/pgenerator-1.0.0/pGenerator.jquery.js'))%>"></script>
 <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('templates/database/users/add/js/add.js'))%>"></script>

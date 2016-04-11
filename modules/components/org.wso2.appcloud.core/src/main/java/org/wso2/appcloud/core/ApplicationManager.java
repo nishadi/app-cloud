@@ -20,14 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
 import org.wso2.appcloud.core.dao.ApplicationDAO;
-import org.wso2.appcloud.core.dto.Application;
-import org.wso2.appcloud.core.dto.RuntimeProperty;
-import org.wso2.appcloud.core.dto.Tag;
-import org.wso2.appcloud.core.dto.Deployment;
-import org.wso2.appcloud.core.dto.ApplicationType;
-import org.wso2.appcloud.core.dto.ApplicationRuntime;
-import org.wso2.appcloud.core.dto.Transport;
-import org.wso2.appcloud.core.dto.Version;
+import org.wso2.appcloud.core.dto.*;
 import org.wso2.carbon.context.CarbonContext;
 
 import java.io.IOException;
@@ -600,5 +593,86 @@ public class ApplicationManager {
         int applicationCount = applicationDAO.getApplicationCount(tenantId);
 
         return applicationCount;
+    }
+    /**
+     * Get container service proxy by version hash id
+     *
+     * @param versionHashId
+     * @return
+     * @throws AppCloudException
+     */
+    public static ContainerServiceProxy getContainerServiceProxyByVersion(String versionHashId)
+            throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        ContainerServiceProxy containerServiceProxy = null;
+
+        try {
+            containerServiceProxy = applicationDAO.getContainerServiceProxyByVersion(versionHashId);
+        } catch (AppCloudException e) {
+            String message = "Error while getting container service proxy with version hash id : " + versionHashId;
+            throw new AppCloudException(message, e);
+        }
+
+        return containerServiceProxy;
+    }
+
+    /**
+     * Update container service proxy service by version hash id
+     *
+     * @param containerId
+     * @param host_url
+     * @return
+     * @throws AppCloudException
+     */
+    public static boolean updateContainerServiceProxyService(String versionHashId, String host_url)
+            throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+        boolean isUpdateSuccess = false;
+
+        try {
+            isUpdateSuccess = applicationDAO.updateContainerServiceProxy(dbConnection, versionHashId, host_url);
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while updating the container service proxy with version hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+
+        return isUpdateSuccess;
+    }
+
+    /**
+     * Update default version field with mapped version for custom url
+     *
+     * @param applicationHashId
+     * @param defautlVersionHashId
+     * @return
+     * @throws AppCloudException
+     */
+    public static boolean updateDefaultVersion(String applicationHashId, String defaultVersionName)
+            throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+        boolean isUpdatedSuccess = false;
+
+        try {
+            isUpdatedSuccess = applicationDAO.updateDefaultVersion(dbConnection, applicationHashId, defaultVersionName);
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String message = "Error while updating default version with application hash id : " + applicationHashId;
+            throw new AppCloudException(message, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+
+        return isUpdatedSuccess;
+    }
+
+    public static Version[] getApplicationVersionsByRunningTimePeriod(int numberOfDays) throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        return applicationDAO.getApplicationVersionsByRunningTimePeriod(numberOfDays);
     }
 }

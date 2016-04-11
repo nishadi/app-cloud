@@ -46,6 +46,8 @@ public class SQLQueryConstants {
     public static final String RUNTIME_IMAGE_NAME = "image_name";
     public static final String RUNTIME_TAG = "tag";
     public static final String EVENT_TIMESTAMP = "timestamp";
+    public static final String HOST_URL = "host_url";
+    public static final String TENANT_ID = "tenant_id";
 
 
     /*==============================
@@ -81,8 +83,8 @@ public class SQLQueryConstants {
             "INSERT INTO AC_CONTAINER (name, version, deployment_id, tenant_id) values (?, ?, ?, ?)";
 
     public static final String ADD_CONTAINER_SERVICE_PROXY =
-            "INSERT INTO AC_CONTAINER_SERVICE_PROXY (name, protocol, port, backend_port, container_id, tenant_id) "
-                    + "values (?, ?, ?, ?, ?, ?)";
+            "INSERT INTO AC_CONTAINER_SERVICE_PROXY (name, protocol, port, backend_port, container_id, tenant_id, host_url) " +
+                    "values (?, ?, ?, ?, ?, ?, ?)";
 
 
 
@@ -158,6 +160,17 @@ public class SQLQueryConstants {
     public static final String GET_CONTAINER =
             "SELECT * FROM AC_CONTAINER WHERE deployment_id=?";
 
+    public static final String GET_CONTAINER_SERVICE_PROXY = "SELECT AC_CONTAINER_SERVICE_PROXY.name, " +
+            "AC_CONTAINER_SERVICE_PROXY.protocol, AC_CONTAINER_SERVICE_PROXY.port, " +
+            "AC_CONTAINER_SERVICE_PROXY.backend_port, AC_CONTAINER_SERVICE_PROXY.host_url " +
+            "FROM AC_CONTAINER_SERVICE_PROXY " +
+            "INNER JOIN AC_CONTAINER ON AC_CONTAINER_SERVICE_PROXY.container_id = AC_CONTAINER.id " +
+            "INNER JOIN AC_DEPLOYMENT ON AC_CONTAINER.deployment_id = AC_DEPLOYMENT.id " +
+            "INNER JOIN AC_VERSION ON AC_DEPLOYMENT.id = AC_VERSION.deployment_id WHERE AC_VERSION.hash_id=?";
+
+
+    public static final String GET_ALL_APP_VERSIONS_CREATED_BEFORE_X_DAYS_AND_NOT_WHITE_LISTED =
+            "SELECT * FROM AC_VERSION WHERE is_white_listed=0 AND status='running' AND timestamp <  timestampadd(day, -?, now());";
 
 
     /* Update Queries */
@@ -179,6 +192,15 @@ public class SQLQueryConstants {
     public static final String UPDATE_APPLICATION_STATUS =
             "UPDATE AC_VERSION SET status=? WHERE hash_id=?";
 
+    public static final String UPDATE_CONTAINER_SERVICE_PROXY = "UPDATE AC_CONTAINER_SERVICE_PROXY " +
+            "INNER JOIN AC_CONTAINER ON AC_CONTAINER_SERVICE_PROXY.container_id = AC_CONTAINER.id " +
+            "INNER JOIN AC_DEPLOYMENT ON AC_CONTAINER.deployment_id = AC_DEPLOYMENT.id " +
+            "INNER JOIN AC_VERSION ON AC_DEPLOYMENT.id = AC_VERSION.deployment_id " +
+            "SET AC_CONTAINER_SERVICE_PROXY.host_url=? " +
+            "WHERE AC_VERSION.hash_id=?";
+
+    public static final String  UPDATE_APPLICATION_DEFAULT_VERSION = "UPDATE AC_APPLICATION " +
+            "SET default_version=? WHERE hash_id=?";
 
 
 

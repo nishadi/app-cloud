@@ -32,6 +32,7 @@ import org.wso2.appcloud.core.dto.RuntimeProperty;
 import org.wso2.appcloud.core.dto.Tag;
 import org.wso2.appcloud.core.dto.Transport;
 import org.wso2.appcloud.core.dto.Version;
+import org.wso2.carbon.user.core.tenant.JDBCTenantManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -375,6 +376,7 @@ public class ApplicationDAO {
             preparedStatement.setString(4, containerServiceProxy.getServiceBackendPort());
             preparedStatement.setInt(5, containerId);
             preparedStatement.setInt(6, tenantId);
+            preparedStatement.setString(7, containerServiceProxy.getHostURL());
             preparedStatement.execute();
 
         } catch (SQLException e) {
@@ -1166,6 +1168,7 @@ public class ApplicationDAO {
                 containerServiceProxy.setServiceProtocol(resultSet.getString(SQLQueryConstants.PROTOCOL));
                 containerServiceProxy.setServicePort(resultSet.getInt(SQLQueryConstants.PORT));
                 containerServiceProxy.setServiceBackendPort(resultSet.getString(SQLQueryConstants.BACKEND_PORT));
+                containerServiceProxy.setHostURL(resultSet.getString(SQLQueryConstants.HOST_URL));
                 containerServiceProxies.add(containerServiceProxy);
             }
 
@@ -1307,7 +1310,6 @@ public class ApplicationDAO {
         }
     }
 
-
     /**
      * Delete all the versions of an application
      *
@@ -1387,18 +1389,143 @@ public class ApplicationDAO {
             preparedStatement.setInt(1, tenantId);
             ResultSet rs = preparedStatement.executeQuery();
             dbConnection.commit();
-            if(rs.next()) {
+            if (rs.next()) {
                 appCount = rs.getInt(1);
             }
         } catch (SQLException e) {
             String msg = "Error while getting the application count of the tenant : " + tenantId;
+        }
+        return appCount;
+    }
+    /**
+     * Get service proxy for given version
+     *
+     * @param versionHashId
+     * @return
+     * @throws AppCloudException
+     */
+    public ContainerServiceProxy getContainerServiceProxyByVersion(String versionHashId) throws AppCloudException {
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        ContainerServiceProxy containerServiceProxy = new ContainerServiceProxy();
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_CONTAINER_SERVICE_PROXY);
+            preparedStatement.setString(1, versionHashId);
+
+            ResultSet rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                containerServiceProxy.setServiceName(rs.getString(SQLQueryConstants.NAME));
+                containerServiceProxy.setServiceProtocol(rs.getString(SQLQueryConstants.PROTOCOL));
+                containerServiceProxy.setServicePort(rs.getInt(SQLQueryConstants.PORT));
+                containerServiceProxy.setServiceBackendPort(rs.getString(SQLQueryConstants.BACKEND_PORT));
+                containerServiceProxy.setHostURL(rs.getString(SQLQueryConstants.HOST_URL));
+            }
+
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error while getting container service proxy with version hash id : " + versionHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
-        return appCount;
+        return containerServiceProxy;
     }
 
+    /**
+     * Update host url from container service proxy for custom url
+     *
+     * @param dbConnection
+     * @param versionHashId
+     * @param host_url
+     * @return
+     * @throws AppCloudException
+     */
+    public boolean updateContainerServiceProxy(Connection dbConnection, String versionHashId, String host_url)
+            throws AppCloudException {
+        PreparedStatement preparedStatement = null;
+        boolean success = false;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_CONTAINER_SERVICE_PROXY);
+            preparedStatement.setString(1, host_url);
+            preparedStatement.setString(2, versionHashId);
+            success = preparedStatement.execute();
+        } catch (SQLException e) {
+            String msg =
+                    "Error occurred while updating container service proxy with version hash id : " + versionHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+
+        return success;
+    }
+
+    /**
+     * Update default version for given application
+     *
+     * @param applicationHashId
+     * @param defaultVersionHashId
+     * @return if sucessfully update the default version
+     * @throws AppCloudException
+     */
+    public boolean updateDefaultVersion(Connection dbConnection, String applicationHashId, String defaultVersionName)
+            throws AppCloudException {
+        PreparedStatement preparedStatement = null;
+        boolean updated = false;
+
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_APPLICATION_DEFAULT_VERSION);
+            preparedStatement.setString(1, defaultVersionName);
+            preparedStatement.setString(2, applicationHashId);
+            updated = preparedStatement.execute();
+        } catch (SQLException e) {
+            String message = "Error while updating default version with application hash id : " + applicationHashId;
+            log.error(message, e);
+            throw new AppCloudException(message, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+
+        return updated;
+    }
+
+
+    public Version[] getApplicationVersionsByRunningTimePeriod(int numberOfDays) throws AppCloudException {
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        List<Version> versions = new ArrayList<>();
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(
+                    SQLQueryConstants.GET_ALL_APP_VERSIONS_CREATED_BEFORE_X_DAYS_AND_NOT_WHITE_LISTED);
+            preparedStatement.setInt(1, numberOfDays);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()){
+                Version version = new Version();
+                version.setHashId(resultSet.getString(SQLQueryConstants.HASH_ID));
+                version.setCreatedTimestamp(resultSet.getTimestamp(SQLQueryConstants.EVENT_TIMESTAMP));
+                version.setTenantId(resultSet.getInt(SQLQueryConstants.TENANT_ID));
+
+                versions.add(version);
+            }
+            dbConnection.commit();
+
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving application version detail for non white listed applications.";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return versions.toArray(new Version[versions.size()]);
+    }
 }

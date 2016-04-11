@@ -59,4 +59,7 @@ var APPLICATION_STOPPED = "stopped";
 var FILE_EXTENSTION_ALTER = ".upload";
 var FILE_EXTENTION_ZIP = "zip";
 
+var PERMISSION_EXECUTE = "ui.execute";
+var LOGIN_PERMISSION = "AppCloud.Login.Permission"
+
 %>

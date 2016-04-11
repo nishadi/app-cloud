@@ -58,11 +58,10 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 
 INSERT INTO `AC_RUNTIME` (`id`, `name`, `repo_url`, `image_name`, `tag`) VALUES
-(1, 'Apache Tomcat 8.0.30', 'registry.docker.appfactory.private.wso2.com:5000', 'tomcat', '8.0'),
+(1, 'WSO2 Application Server 6.0.0-M1', 'registry.docker.appfactory.private.wso2.com:5000', 'wso2as', '6.0.0-m1'),
 (2, 'OpenJDK 8', 'registry.docker.appfactory.private.wso2.com:5000', 'msf4j', '1.0'),
 (3, 'Apache 2.4.10', 'registry.docker.appfactory.private.wso2.com:5000','php','5.6'),
-(4, 'Apache 2.4.18', 'registry.docker.appfactory.private.wso2.com:5000','php','5.7'),
-(5, 'Carbon 4.2.0', 'registry.docker.appfactory.private.wso2.com:5000','carbon','4.2.0');
+(4, 'Carbon 4.2.0', 'registry.docker.appfactory.private.wso2.com:5000','carbon','4.2.0');
 
 
 
@@ -75,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_APPLICATION` (
   `hash_id` VARCHAR(24) NULL,
   `description` VARCHAR(1000) NULL,
   `tenant_id` INT NOT NULL,
-  `default_version` INT NULL,
+  `default_version` varchar(24) DEFAULT NULL,
   `app_type_id` INT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT uk_Application_NAME_TID_REV UNIQUE(`name`, `tenant_id`),
@@ -112,6 +111,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_VERSION` (
   `deployment_id` INT NULL,
   `tenant_id` INT NULL,
   `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_white_listed` TINYINT unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_AC_VERSION_AC_APPLICATION1`
     FOREIGN KEY (`application_id`)
@@ -217,8 +217,7 @@ INSERT INTO `AC_APP_TYPE_RUNTIME` (`app_type_id`, `runtime_id`) VALUES
 (1, 1),
 (2, 2),
 (3, 3),
-(3, 4),
-(4, 5);
+(4, 4);
 
 
 -- -----------------------------------------------------
@@ -279,6 +278,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_CONTAINER_SERVICE_PROXY` (
   `backend_port` VARCHAR(45) NULL,
   `container_id` INT NOT NULL,
   `tenant_id` INT NULL,
+  `host_url` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_ApplicationServiceProxy_ApplicationContainer1`
     FOREIGN KEY (`container_id`)

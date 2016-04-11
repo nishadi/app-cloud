@@ -83,6 +83,7 @@ function changeSelectedRevision(newRevision){
     putSelectedRevisionToSession(applicationKey, newRevision);
     $('#selected-version').html(newRevision+" ");
     $("#selectedRevision").val(newRevision);
+    selectedRevision = newRevision;
     selectedApplicationRevision = application.versions[newRevision];
     //Changing deploymentURL
     var deploymentURL = selectedApplicationRevision.deploymentURL;
@@ -105,11 +106,21 @@ function changeSelectedRevision(newRevision){
     // Change replica status
     $("#tableStatus").html(selectedApplicationRevision.status);
 
+    //Change Env Variables
+    $("#envVars").attr('href',"/appmgt/site/pages/envs.jag?applicationKey=" + applicationKey + "&versionKey=" + selectedApplicationRevision.hashId);
+    $("#envVarsAdd").attr('href',"/appmgt/site/pages/envs.jag?applicationKey=" + applicationKey + "&versionKey=" + selectedApplicationRevision.hashId);
+    $("#runtimePropCount").text(selectedApplicationRevision.runtimeProperties.length.toString());
+
+    //Change Tags
+    $("#tagSet").attr('href',"/appmgt/site/pages/tags.jag?applicationKey=" + applicationKey + "&versionKey=" + selectedApplicationRevision.hashId);
+    $("#tagSetAdd").attr('href',"/appmgt/site/pages/tags.jag?applicationKey=" + applicationKey + "&versionKey=" + selectedApplicationRevision.hashId);
+    listTags();
+
     // Change version status in UI
     if(selectedApplicationRevision.status == 'running'){
 
-        $('.sec').empty();
-        $('.sec').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"' +
+        $('#version-app-launch-block').empty();
+        $('#version-app-launch-block').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"' +
                        'url="' + deploymentURL + '">Launch App</button>' +
                        '<div class="btn-group ctrl-edit-button btn-edit-code"><a type="button" ' +
                        'class="btn cu-btn cu-btn-md cu-btn-red" onclick="stopApplication();">Stop' +
@@ -130,8 +141,8 @@ function changeSelectedRevision(newRevision){
 
     } else if(selectedApplicationRevision.status == 'stopped'){
 
-        $('.sec').empty();
-        $('.sec').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"' +
+        $('#version-app-launch-block').empty();
+        $('#version-app-launch-block').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp"' +
                        'url="' + deploymentURL + '" disabled>Launch App</button>' +
                        '<div class="btn-group ctrl-edit-button btn-edit-code"><a type="button" ' +
                        'class="btn cu-btn cu-btn-md cu-btn-blue" onclick="startApplication();">Start</a></div>');
@@ -147,8 +158,8 @@ function changeSelectedRevision(newRevision){
                                  '</i></span></figcaption></figure></div>');
     } else {
 
-        $('.sec').empty();
-        $('.sec').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp" ' +
+        $('#version-app-launch-block').empty();
+        $('#version-app-launch-block').html('<button class="cu-btn cu-btn-md cu-btn-gr-dark btn-launch-app" id="btn-launchApp" ' +
                        'url="' + deploymentURL + '" disabled>Launch App</button>' +
                        '<div class="btn-group ctrl-edit-button btn-edit-code"><a type="button" ' +
                        'class="btn cu-btn cu-btn-md cu-btn-red" href="#yourlink">Error has occurred.</a></div>');
@@ -253,7 +264,15 @@ function deleteApplication(){
         versionKey:selectedApplicationRevision.hashId
     },function (result) {
         jagg.message({content: "Selected version deleted successfully", type: 'success', id:'view_log'});
-        setTimeout(redirectAppListing, 2000);
+        var versionCount = 0;
+        for (var version in application.versions){
+            versionCount++;
+        }
+        if(versionCount == 1){
+            setTimeout(redirectAppListing, 2000);
+        } else {
+            setTimeout(redirectAppHome, 2000);
+        }
     },function (jqXHR, textStatus, errorThrown) {
         jagg.message({content: "Error occurred while deleting the selected application version", type: 'error', id:'view_log'});
     });
@@ -269,4 +288,8 @@ function deleteApplicationPopUp(){
 
 function redirectAppListing() {
     window.location.replace("index.jag");
+}
+
+function redirectAppHome() {
+    window.location.replace("home.jag?applicationKey=" + applicationKey);
 }

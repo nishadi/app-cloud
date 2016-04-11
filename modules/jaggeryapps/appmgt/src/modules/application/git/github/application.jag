@@ -43,7 +43,7 @@ var Util = Packages.org.wso2.appcloud.core.Util;
  */
 
 var addApplicationViaGitHub = function (applicationName, versionName, applicationDescription, replicas,
-                                        runtimeId, appTypeName, runtimePropertiesArray, tagArray, appIcon, gitHubRepoUrl, gitHubRepoBranch, token, isNewVersion) {
+                                        runtimeId, appTypeName, runtimePropertiesArray, tagArray, appIcon, gitHubRepoUrl, gitHubRepoBranch, projectRoot, token, isNewVersion) {
 
     log.info("Started creating App => name : " + applicationName + " Version : " + versionName + " Description " +
              ": " + applicationDescription + " runtimeId : " + runtimeId + " apptype : " + appTypeName + " GitHub url: "
@@ -68,14 +68,14 @@ var addApplicationViaGitHub = function (applicationName, versionName, applicatio
     var dockerOpClient = new DockerOpClient(modManager.getPropertyValue("DockerClientURL"));
 
     var runtimeProperties = version.getRuntimeProperties();
-    var absFileUploadedPath =  createDockerFileForGitHub(applicationName, versionName, runtimeId, gitHubRepoUrl, gitHubRepoBranch, versionHashId, dockerOpClient);
+    var absFileUploadedPath =  createDockerFileForGitHub(applicationName, versionName, runtimeId, gitHubRepoUrl, gitHubRepoBranch, projectRoot, versionHashId, dockerOpClient);
     appManager.buildDockerImage(applicationName, versionName, runtimeId, absFileUploadedPath, applicationRuntime, tagName, versionHashId, dockerOpClient);
     appManager.pushDockerImage(applicationName, versionName, applicationRuntime, tagName, versionHashId, dockerOpClient);
     appManager.triggerKubernetesDeployment(runtimeProperties, applicationRuntime, tagName, applicationName, versionName, runtimeId, replicas, versionHashId);
 };
 
 
-var createDockerFileForGitHub =  function(applicationName, versionName, runtimeId, gitHubRepoUrl, gitHubRepoBranch, versionHashId, dockerOpClient){
+var createDockerFileForGitHub =  function(applicationName, versionName, runtimeId, gitHubRepoUrl, gitHubRepoBranch, projectRoot, versionHashId, dockerOpClient){
     var msg = "Docker file creation successfully triggered in appcloud";
     appManager.addEvent(DOCKER_FILE_CREATE, EVENT_PENDING, msg, versionHashId);
     var absFileUploadedPath;
@@ -84,7 +84,7 @@ var createDockerFileForGitHub =  function(applicationName, versionName, runtimeI
         var absFileUploadedPath = appManager.getVersionDirectoryPath(versionHashId);
         var dockerFilePath = absFileUploadedPath + DOCKER_FILE_NAME;
         var dockerTemplateFilePath = modManager.getPropertyValue(PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH) + "/" + "dockerfiles";
-        dockerOpClient.createDockerFileForGitHub(runtimeId, gitHubRepoUrl, gitHubRepoBranch, dockerFilePath,dockerTemplateFilePath);
+        dockerOpClient.createDockerFileForGitHub(runtimeId, gitHubRepoUrl, gitHubRepoBranch, dockerFilePath, projectRoot, dockerTemplateFilePath);
     } catch(e){
         var msg = "Error while creating docker file";
         appManager.addEvent(DOCKER_FILE_CREATE, EVENT_FAILED, msg, versionHashId);
