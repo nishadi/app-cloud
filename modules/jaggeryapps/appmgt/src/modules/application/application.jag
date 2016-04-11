@@ -81,7 +81,7 @@ var triggerKubernetesDeployment = function(runtimeProperties, applicationRuntime
     var appHostURL = constructAppLaunchURL(applicationName, versionName);
     var containers = getContainers(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL), applicationRuntime.getImageName(), tagName, versionHashId ,versionHashId, runtimeProperties, runtimeId, appHostURL);
     var deploymentConfig = getDeploymentConfig(containers, versionHashId, replicas);
-    deployApplication(applicationName, versionName, deploymentConfig, false, versionHashId);
+    deployApplication(applicationName, versionName, deploymentConfig, false, versionHashId, "new");
 
 }
 
@@ -337,7 +337,7 @@ var createDockerFile =  function(applicationName, versionName, runtimeId, upload
     return absFileUploadedPath;
 }
 
-var deployApplication = function(applicationName, versionName, deploymentConfig, isRedeploy, versionHashId){
+var deployApplication = function(applicationName, versionName, deploymentConfig, isRedeploy, versionHashId, status){
 
     //Adding deployment pending event
     var msg = "Application deployment successfully triggered in Kubernetes";
@@ -381,33 +381,13 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
     //Adding pod status pending event
     var podStatus = "Pending";
     addEvent(POD_STATUS, EVENT_PENDING, podStatus, versionHashId);
-    podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
 
-    //when the pod is in terminating state, still it gives the status as 'running'. Once the pod is termiated and respawned, it will go from 'pending' state to 'runnning' state
-
-    var timeOut = modManager.getPropertyValue(POD_TIMEOUT);
-    var counter = 0;
-    while(counter < timeOut){ // Waiting 5 minutes to gets pods up and running
-        java.lang.Thread.sleep(1000);
-        podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
-        counter = counter + 1;
-        if (podStatus == "Pending") {
-            //Adding pod status pending event
-            break;
-        }else if(counter == timeOut){ // if pods doesn't starts withing 5 minutes user redirected to user home
-            //Adding pod status error event
-            podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
-            addEvent(POD_STATUS, EVENT_FAILED, podStatus, versionHashId);
-            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
-            log.info("Application rollback started for application:"+applicationName + " with revision:"+
-                     versionName +" because pods are not running even after 5 minutes.");
-            deleteVersion(versionHashId, true, true);
-            return;
-        }
+    if(status == "redeploy"){
+        java.lang.Thread.sleep(50000);
     }
 
     counter = 0;
-    timeOut = timeOut/5;
+    var timeOut = modManager.getPropertyValue(POD_TIMEOUT);;
     while(counter < timeOut){ // Waiting 1 minutes to gets pods up and running
         java.lang.Thread.sleep(1000);
         podStatus = KubernetesProvisioningUtils.getPodStatus(applicationCtx);
@@ -424,11 +404,12 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
             addEvent(POD_STATUS, EVENT_FAILED, podStatus, versionHashId);
             ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
             log.info("Application rollback started for application:"+applicationName + " with revision:"+
-                     versionName +" because pods are not running even after 6 minutes.");
+                     versionName +" because pods are not running even after more than 5 minutes.");
             deleteVersion(versionHashId, true, true);
         }
     }
 };
+
 
 var constructAppLaunchURL = function(applicationName, versionName){
 
@@ -469,7 +450,7 @@ var deleteEventsOfAppVersions = function(versionHashId){
 
 var redeployApplication = function(applicationName, versionName, versionHashId){
     var deploymentConfig = buildDeploymentConfigFromDB(versionHashId);
-    deployApplication(applicationName, versionName, deploymentConfig, true, versionHashId);
+    deployApplication(applicationName, versionName, deploymentConfig, true, versionHashId, "redeploy");
 };
 var persistDeploymentConfig = function(deploymentConfig, versionHashId, applicationName, versionName){
 

@@ -35,8 +35,7 @@ ENGINE = InnoDB;
 INSERT INTO `AC_APP_TYPE` (`id`, `name`, `description`) VALUES
 (1, 'war', 'Allows you to create dynamic websites using Servlets and JSPs, instead of the static HTML webpages and JAX-RS/JAX-WS services.'),
 (2, 'mss', 'WSO2 Microservices Framework for Java (WSO2 MSF4J) offers the best option to create microservices in Java using annotation-based programming model.'),
-(3, 'php', 'Allows you to create dynamic web page content using PHP web applications.'),
-(4, 'carbon', 'Allows you to deploy any carbon server where required deployable artifacts are already deployed into carbon zip file.');
+(3, 'php', 'Allows you to create dynamic web page content using PHP web applications.');
 
 
 -- -----------------------------------------------------
@@ -216,8 +215,7 @@ ENGINE = InnoDB;
 INSERT INTO `AC_APP_TYPE_RUNTIME` (`app_type_id`, `runtime_id`) VALUES
 (1, 1),
 (2, 2),
-(3, 3),
-(4, 4);
+(3, 3);
 
 
 -- -----------------------------------------------------

@@ -98,7 +98,7 @@ public class ApplicationDAO {
             if (application.getIcon() != null) {
                 iconInputStream = IOUtils.toBufferedInputStream(application.getIcon().getBinaryStream());
             }
-            updateApplicationIcon(dbConnection, iconInputStream, application.getHashId());
+            updateApplicationIcon(dbConnection, iconInputStream, applicationId);
 
         } catch (SQLException e) {
 
@@ -389,7 +389,7 @@ public class ApplicationDAO {
     }
 
 
-    public void updateApplicationIcon(Connection dbConnection, InputStream inputStream, String applicationHashId)
+    public void updateApplicationIcon(Connection dbConnection, InputStream inputStream, int applicationId)
             throws AppCloudException {
 
         PreparedStatement preparedStatement = null;
@@ -398,12 +398,12 @@ public class ApplicationDAO {
 
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_APPLICATION_ICON);
             preparedStatement.setBlob(1, inputStream);
-            preparedStatement.setString(2, applicationHashId);
+            preparedStatement.setInt(2, applicationId);
             preparedStatement.execute();
 
         } catch (SQLException e) {
             String msg =
-                    "Error occurred while updating application icon for application with hash id : " + applicationHashId;
+                    "Error occurred while updating application icon for application with id : " + applicationId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
 
