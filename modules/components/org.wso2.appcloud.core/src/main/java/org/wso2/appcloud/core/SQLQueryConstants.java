@@ -178,7 +178,8 @@ public class SQLQueryConstants {
 
     public static final String INSERT_APPLICATION_ICON = "INSERT INTO AC_APP_ICON (icon, application_id) VALUES (?, ?)";
 
-    public static final String UPDATE_APPLICATION_ICON = "UPDATE AC_APP_ICON SET icon=? WHERE application_id=?";
+    public static final String UPDATE_APPLICATION_ICON = "INSERT INTO AC_APP_ICON (icon, application_id) VALUES (?, ?) ON" +
+            " DUPLICATE KEY UPDATE icon= VALUES(icon)";
 
     public static final String GET_APPLICATION_ICON = "SELECT id FROM AC_APP_ICON WHERE application_id=?";
 

@@ -392,43 +392,23 @@ public class ApplicationDAO {
     public void updateApplicationIcon(Connection dbConnection, InputStream inputStream, int applicationId)
             throws AppCloudException {
 
-        PreparedStatement preparedStatement1 = null;
-        PreparedStatement preparedStatement2 = null;
-        ResultSet resultSet = null;
-        String queryString;
+        PreparedStatement preparedStatement = null;
 
         try {
 
-            try {
-                preparedStatement1 = dbConnection.prepareStatement(SQLQueryConstants.GET_APPLICATION_ICON);
-                preparedStatement1.setInt(1, applicationId);
-
-                resultSet = preparedStatement1.executeQuery();
-                resultSet.last();
-
-                if (resultSet.getRow() > 1) {
-                    queryString = SQLQueryConstants.UPDATE_APPLICATION_ICON;
-                } else {
-                    queryString = SQLQueryConstants.INSERT_APPLICATION_ICON;
-                }
-            } finally {
-                DBUtil.closeResultSet(resultSet);
-                DBUtil.closePreparedStatement(preparedStatement1);
-            }
-
-            preparedStatement2 = dbConnection.prepareStatement(queryString);
-            preparedStatement2.setBlob(1, inputStream);
-            preparedStatement2.setInt(2, applicationId);
-            preparedStatement2.executeUpdate();
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_APPLICATION_ICON);
+            preparedStatement.setBlob(1, inputStream);
+            preparedStatement.setInt(2, applicationId);
+            preparedStatement.execute();
 
         } catch (SQLException e) {
             String msg =
-                    "Error occurred while updating application icon for application with updated hash id : " + applicationId;
+                    "Error occurred while updating application icon for application with id : " + applicationId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
 
         } finally {
-            DBUtil.closePreparedStatement(preparedStatement2);
+            DBUtil.closePreparedStatement(preparedStatement);
         }
     }
 
