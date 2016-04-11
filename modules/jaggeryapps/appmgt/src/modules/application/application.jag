@@ -1016,8 +1016,9 @@ var getDeploymentURL = function (applicationName, versionName){
     var urlScheme = CloudUtil.getPropertyValue("DeploymentUrlScheme");
     var baseURL = constructAppLaunchURL(applicationName, versionName);
     var applicationLaunchURL = urlScheme + "://" + baseURL;
-
-    log.debug("Deployment URL: " + applicationLaunchURL);
+    if (log.isDebugEnabled()) {
+        log.debug("Deployment URL: " + applicationLaunchURL);
+    }
     return applicationLaunchURL;
 };
 
