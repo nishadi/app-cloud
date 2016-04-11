@@ -62,9 +62,20 @@ $(document).ready(function () {
     });
 
     $select.on("select2:close", function (e) {
-        var values = $select.select2('data');
+        var highlighted = $(e.target).data('select2').$dropdown.find('.select2-results__option--highlighted');
+        if (highlighted) {
+            var data = highlighted.data('data');
+            var id = data.id;
+            var display = data.name;
+            $select.select2("val",id);
+        }
     });
 
+    $select.on("select2:open", function (e) {
+        if($("#user-name-select").val()){
+            $select.select2("val", "");
+        }
+    });
 
     getExistingUsersForSelectedStage();
 

@@ -408,6 +408,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
             deleteVersion(versionHashId, true, true);
         }
     }
+    return;
 };
 
 
