@@ -57,7 +57,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 
 INSERT INTO `AC_RUNTIME` (`id`, `name`, `repo_url`, `image_name`, `tag`) VALUES
-(1, 'WSO2 Application Server 6.0.0-M1', 'registry.docker.appfactory.private.wso2.com:5000', 'wso2as', '6.0.0-m1'),
+(1, 'Apache Tomcat 8.0.28 / WSO2 Application Server 6.0.0-M1', 'registry.docker.appfactory.private.wso2.com:5000', 'wso2as', '6.0.0-m1'),
 (2, 'OpenJDK 8', 'registry.docker.appfactory.private.wso2.com:5000', 'msf4j', '1.0'),
 (3, 'Apache 2.4.10', 'registry.docker.appfactory.private.wso2.com:5000','php','5.6'),
 (4, 'Carbon 4.2.0', 'registry.docker.appfactory.private.wso2.com:5000','carbon','4.2.0');
