@@ -151,9 +151,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
                     formData.append('uploadedFileName', $("#uploadedFileName").val());
                 } else if (uploadMethod === "url" ) {
                     if (appTypeName == "war") {
-                        formData.append('uploadedFileName', $("#applicationName").val() + ".war");
+                        formData.append('uploadedFileName', "VERSION_HASH_ID.war");
                     } else if (appTypeName == "mss") {
-                        formData.append('uploadedFileName', $("#applicationName").val() + ".jar");
+                        formData.append('uploadedFileName', "VERSION_HASH_ID.jar");
+                    } else if (appTypeName == "php") {
+                        formData.append('uploadedFileName', "VERSION_HASH_ID.zip");
                     }
                 } else if (uploadMethod === "github" ) {
                     formData.append('gitRepoUrl', $("#gitRepoUrl").val());

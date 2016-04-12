@@ -57,6 +57,10 @@ var addApplication = function (applicationName, versionName, applicationDescript
     var applicationHashId = Util.getApplicationHashId(applicationName, tenantId);
     var versionHashId = Util.getVersionHashId(applicationName, versionName, tenantId);
 
+    if(uploadedFileName.indexOf("VERSION_HASH_ID") > -1){
+        uploadedFileName = versionHashId + "." + uploadedFileName.split(".")[1];
+    }
+
     if(isNewVersion == 'true'){
         createAppVersionInDataBase(versionName, runtimeId, runtimePropertiesArray, tagArray, applicationHashId, versionHashId);
     }else{
@@ -1134,12 +1138,14 @@ var downloadFromUrl = function(artifactUrl, applicationName, versionName, apptyp
     createDestinationDirsForUploadedApps(versionHashId);
 
     var filePath = "";
-    var versionDirectoryPath = getVersionDirectoryPath();
+    var versionDirectoryPath = getVersionDirectoryPath(versionHashId);
 
     if (apptype == "war"){
         filePath  = versionDirectoryPath + versionHashId + ".war";
     } else if (apptype == "mss") {
         filePath  = versionDirectoryPath + versionHashId + ".jar";
+    } else if (apptype == "php") {
+        filePath  = versionDirectoryPath + versionHashId + FILE_EXTENSTION_ALTER;
     }
     log.info("apptype: " + apptype);
     CloudUtil.downloadFromUrl(artifactUrl , filePath);
