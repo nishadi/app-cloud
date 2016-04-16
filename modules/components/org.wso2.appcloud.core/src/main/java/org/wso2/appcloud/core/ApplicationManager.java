@@ -181,6 +181,29 @@ public class ApplicationManager {
         return applications.toArray(new Application[applications.size()]);
     }
 
+    /**
+     * Method for getting the list of application of a tenant with tags
+     *
+     * @return
+     * @throws AppCloudException
+     */
+    public static Application[] getApplicationListWithTags() throws AppCloudException {
+
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        Connection dbConnection = DBUtil.getDBConnection();
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        List<Application> applications;
+
+        try {
+            applications = applicationDAO.getAllApplicationsListWithTag(dbConnection, tenantId);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
+        }
+
+        return applications.toArray(new Application[applications.size()]);
+    }
+
 
     public static List<String> getVersionListOfApplication(String applicationHashId) throws AppCloudException {
 

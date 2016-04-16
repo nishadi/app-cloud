@@ -539,6 +539,65 @@ public class ApplicationDAO {
         return applications;
     }
 
+    /**
+     * Method for getting the list of applications of a tenant from database with tag details
+     *
+     * @param dbConnection database connection
+     * @param tenantId tenant id
+     * @return
+     * @throws AppCloudException
+     */
+    public List<Application> getAllApplicationsListWithTag(Connection dbConnection, int tenantId) throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        List<Application> applications = new ArrayList<>();
+        Application application;
+        List<Version> versions = new ArrayList<>();
+        Version version;
+        List<Tag> tags = new ArrayList<>();
+        Tag tag;
+        ResultSet resultSet = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_ALL_APPLICATIONS_LIST_WITH_TAG);
+            preparedStatement.setInt(1, tenantId);
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+
+                tag = new Tag();
+                tag.setTagName(resultSet.getString(SQLQueryConstants.TAG_KEY));
+                tag.setTagValue(resultSet.getString(SQLQueryConstants.TAG_VALUE));
+                tags.add(tag);
+
+                version = new Version();
+                version.setTags(tags);
+                versions.add(version);
+
+                application = new Application();
+                application.setApplicationName(resultSet.getString(SQLQueryConstants.APPLICATION_NAME));
+                application.setApplicationType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
+                application.setHashId(resultSet.getString(SQLQueryConstants.HASH_ID));
+                application.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
+                application.setVersions(versions);
+
+                applications.add(application);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving application list from database for tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        return applications;
+    }
+
 
     public List<String> getAllVersionListOfApplication(Connection dbConnection, String applicationHashId)
             throws AppCloudException {

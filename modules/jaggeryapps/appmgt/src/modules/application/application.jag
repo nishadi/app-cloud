@@ -688,6 +688,40 @@ var getAllApplications = function(){
     return applicationArray;
 }
 
+/**
+ * Method for getting the application summary with tags of all the applications
+ */
+var getAllApplicationsWithTag = function(){
+    var applicationArray = [];
+    try {
+        var applications = ApplicationManager.getApplicationList();
+        var appTypePropertyConfPath = jagg.getAppTypePropertyConfFilePath();
+        var parsedObject = parse(appTypePropertyConfPath);
+        var appTypesProperties = require(parsedObject);
+
+        for (var i = 0; i < applications.length; i++) {
+            var application = applications[i];
+            var applicationObject = {};
+
+            applicationObject.applicationName = application.applicationName;
+            applicationObject.hashId = application.hashId;
+            applicationObject.applicationType = application.applicationType;
+            applicationObject.icon = getApplicationIconAsBase64String(application);
+            applicationObject.appTypeIcon = appTypesProperties[application.applicationType].icon;
+            applicationObject.appTypeTitle = appTypesProperties[application.applicationType].displayName;
+            applicationObject.tagKey = application.versions[0].tags[0].tagName;
+            applicationObject.tagValue = application.versions[0].tags[0].tagValue;
+            applicationArray.push(applicationObject);
+        }
+    } catch(e){
+        log.error("Error while getting the application list");
+        log.error(e);
+        throw e;
+    }
+
+    return applicationArray;
+}
+
 var generateApplicationHashId = function(applicationName){
     var tenantId = modManager.getTenantId();
     try {

@@ -49,6 +49,8 @@ public class SQLQueryConstants {
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String HOST_URL = "host_url";
     public static final String TENANT_ID = "tenant_id";
+    public static final String TAG_KEY = "tag_key";
+    public static final String TAG_VALUE = "tag_value";
 
 
     /*==============================
@@ -95,6 +97,12 @@ public class SQLQueryConstants {
             "SELECT app.name as application_name, app.hash_id as hash_id, type.name as app_type_name, icon.icon as icon " +
             "FROM AC_APPLICATION app JOIN AC_APP_TYPE type ON app.app_type_id = type.id LEFT OUTER JOIN AC_APP_ICON icon" +
             " ON app.id = icon.application_id WHERE app.tenant_id=?";
+
+    public static final String GET_ALL_APPLICATIONS_LIST_WITH_TAG =
+            "SELECT app.name as application_name, app.hash_id as hash_id, type.name as app_type_name, icon.icon as icon, tag.name as tag_key, tag.value as tag_value " +
+                    "FROM AC_APPLICATION app JOIN AC_APP_TYPE type ON app.app_type_id = type.id LEFT OUTER JOIN AC_APP_ICON icon " +
+                    "ON app.id = icon.application_id JOIN AC_VERSION version ON app.id = version.application_id JOIN AC_TAG tag ON version.id = tag.version_id "+
+                    "WHERE app.tenant_id=?";
 
     public static final String GET_VERSION_LIST_OF_APPLICATION =
             "SELECT name FROM AC_VERSION WHERE application_id = (SELECT id FROM AC_APPLICATION WHERE hash_id=?)";
