@@ -1,0 +1,256 @@
+<%
+/*
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+
+var log = new Log("module/application/git/github/application.jag");
+var modManager = jagg.module("manager");
+var appManager = jagg.module("application");
+var ApplicationManager = Packages.org.wso2.appcloud.core.ApplicationManager;
+var Application = Packages.org.wso2.appcloud.core.dto.Application;
+var Version = Packages.org.wso2.appcloud.core.dto.Version;
+var KubernetesProvisioningUtils =  Packages.org.wso2.appcloud.provisioning.runtime.Utils.KubernetesProvisioningUtils;
+var EventsManager = Packages.org.wso2.appcloud.core.EventsManager;
+var Event = Packages.org.wso2.appcloud.core.dto.Event;
+var Deployment = Packages.org.wso2.appcloud.core.dto.Deployment;
+var Container = Packages.org.wso2.appcloud.core.dto.Container;
+var ServiceProxy = Packages.org.wso2.appcloud.core.dto.ContainerServiceProxy;
+var CloudUtil = Packages.org.wso2.appcloud.common.util.AppCloudUtil;
+var RuntimeProperty = Packages.org.wso2.appcloud.core.dto.RuntimeProperty;
+var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
+var CustomTransport = Packages.org.wso2.appcloud.core.dto.CustomTransport;
+var Util = Packages.org.wso2.appcloud.core.Util;
+/**
+ * Add an application via Docker URL
+ *
+ */
+
+var addApplicationViaDockerUrl = function (applicationName, versionName, applicationDescription, replicas, runtimePropertiesArray,
+                                           dockerUrl, imageTag, httpPort, httpsPort, tagArray, appIcon,isNewVersion) {
+
+    var appTypeName = "custom";
+    log.info("Started creating App => serviceName : " + applicationName + " Version : " + versionName + " Description " +
+            ": " + applicationDescription + " apptype : " + appTypeName + " Docker url: "
+            + dockerUrl+":"+imageTag);
+
+    var runtimeId = 5;
+    var tenantId = modManager.getTenantId();
+    var applicationHashId = Util.getApplicationHashId(applicationName, tenantId);
+    var versionHashId = Util.getVersionHashId(applicationName, versionName, tenantId);
+
+
+    if(isNewVersion == 'true'){
+        appManager.createAppVersionInDataBase(versionName, runtimeId, runtimePropertiesArray, tagArray, applicationHashId, versionHashId);
+    }else{
+        appManager.createAppInDataBase(applicationName, versionName, applicationDescription, replicas, runtimeId, appTypeName,
+                runtimePropertiesArray, tagArray, appIcon, applicationHashId, versionHashId);
+    }
+
+    createCustomTransport(versionHashId, 'http', httpPort);
+    createCustomTransport(versionHashId, 'https', httpsPort);
+
+    var tagName = imageTag +"-"+ versionHashId;
+    var DockerOpClient = Packages.org.wso2.appcloud.core.docker.DockerOpClient;
+    var dockerOpClient = new DockerOpClient(modManager.getPropertyValue("DockerClientURL"));
+    var runtimeProperties = appManager.generateRuntimePropsList(runtimePropertiesArray);
+
+    pullDockerImage(applicationName, versionName, dockerUrl, imageTag, versionHashId,dockerOpClient);
+    tagDockerImage(dockerUrl, imageTag, tagName, versionHashId, dockerOpClient);
+    pushDockerImage(applicationName, versionName, dockerUrl, imageTag, tagName, versionHashId, dockerOpClient);
+    triggerKubernetesDeployment(runtimeProperties, tagName, dockerUrl, applicationName, versionName, replicas, versionHashId, httpPort, httpsPort);
+};
+
+
+var createCustomTransport = function(versionHashId, portName, servicePort){
+    var customTransport = new CustomTransport();
+    try {
+        customTransport.setVersionHashId(versionHashId);
+        customTransport.setServiceName(portName);
+        customTransport.setServiceProtocol('TCP');
+        customTransport.setServicePort(servicePort);
+
+        if(portName=='http'){
+            customTransport.setServiceNamePrefix('htp');
+        }else if(portName=='https'){
+            customTransport.setServiceNamePrefix('hts');
+        }
+
+        ApplicationManager.addTransportsForCustomApplication (customTransport);
+
+    }catch (e){
+
+        var msg = "Error while adding application servicePort details to database";
+        appManager.addEvent(DATABASE_CUSTOM_TRANSPORT_ADD, EVENT_FAILED, msg, versionHashId);
+
+        try {
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        } catch (e1){
+            log.error("Error while updating Application Creation Failed event for application : " + applicationName
+                    + " version : " + versionName);
+            log.error(e1);
+            // not throwing the error, because it will hide the actual exception
+        }
+
+        log.error(msg);
+        log.error(e);
+        log.info("Application creation failed because initial application metadata persistence failed and roll back process" +
+                " is started for application : "+applicationName+" with version : "+ versionName);
+        throw e;
+    }
+}
+
+var pullDockerImage =  function(applicationName, versionName, dockerUrl, imageTag, versionHashId, dockerOpClient){
+    //Adding docker image pull pending event
+    var msg = "Docker image pull successfully triggered in appcloud";
+    appManager.addEvent(DOCKER_IMAGE_PULL, EVENT_PENDING, msg,  versionHashId);
+
+    try {
+        dockerOpClient.pullDockerImage(dockerUrl,imageTag);
+    } catch (e){
+        var msg = "Error while pulling docker image";
+        appManager.addEvent(DOCKER_IMAGE_PULL, EVENT_FAILED, msg, versionHashId);
+
+        try {
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        } catch(e1){
+            log.error("Error while updating Application Creation Failed event for application : " + applicationName
+                    + " version : " + versionName);
+            log.error(e1);
+            // not throwing the error, because it will hide the actual exception
+        }
+
+        log.error(msg);
+        log.error(e);
+        log.info("Application creation failed because docker image pull failed and roll back process" +
+                " is started for application : "+applicationName+" with revision : "+versionName);
+        appManager.deleteVersionFromDatabase(versionHashId);
+        throw e;
+    }
+    //Adding docker pull success event
+    var msg = "Docker image pull successfull";
+    appManager.addEvent(DOCKER_IMAGE_PULL, EVENT_SUCCEEDED, msg, versionHashId);
+}
+
+var tagDockerImage =  function(dockerUrl, imageTag, newTag, versionHashId, dockerOpClient){
+
+    var msg = "Docker custom image tag successfully triggered in appcloud";
+    appManager.addEvent(DOCKER_IMAGE_TAG, EVENT_PENDING, msg,  versionHashId);
+
+    try {
+        dockerOpClient.tagDockerImage(dockerUrl, imageTag, modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL),newTag);
+    } catch (e){
+        var msg = "Error while tagging docker image";
+        appManager.addEvent(DOCKER_IMAGE_TAG, EVENT_FAILED, msg, versionHashId);
+
+        try {
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        } catch(e1){
+            log.error("Error while tagging docker image Application Creation Failed event for application : " + applicationName
+                    + " version : " + versionName);
+            log.error(e1);
+            // not throwing the error, because it will hide the actual exception
+        }
+
+        log.error(msg);
+        log.error(e);
+        log.info("Application creation failed because docker image tag failed and roll back process" +
+                " is started for application : "+applicationName+" with revision : "+versionName);
+        appManager.deleteVersionFromDatabase(versionHashId);
+        throw e;
+    }
+    //Adding docker pull success event
+    var msg = "Docker image tag successfull";
+    appManager.addEvent(DOCKER_IMAGE_TAG, EVENT_SUCCEEDED, msg, versionHashId);
+}
+
+var pushDockerImage = function (applicationName, versionName, dockerUrl, imageTag, tagName, versionHashId, dockerOpClient){
+
+    //Adding docker image push pending event
+    var msg = "Docker image push successfully triggered in triggered";
+    appManager.addEvent(DOCKER_REGISTRY_PUSH, EVENT_PENDING, msg, versionHashId);
+
+    try {
+        dockerOpClient.pushDockerImage(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL), dockerUrl, tagName);
+
+    } catch (e) {
+
+        var msg = "Error uploading docker image to remote registry";
+        appManager.addEvent(DOCKER_REGISTRY_PUSH, EVENT_FAILED, msg, versionHashId);
+
+        try {
+            ApplicationManager.updateVersionStatus(versionHashId, APPLICATION_ERROR);
+        } catch(e1){
+            log.error("Error while updating Application Creation Failed event for application : " + applicationName
+                    + " version : " + versionName);
+            log.error(e1);
+            // not throwing the error, because it will hide the actual exception
+        }
+
+        log.error(msg);
+        log.error(e);
+        log.info("Application creation failed because docker image push failed and roll back process" +
+                " is started for application : "+applicationName+" with revision : "+versionName);
+        appManager.deleteVersion(versionHashId, true, false);
+        throw e;
+    }
+
+    //Adding docker push success event
+    var msg = "Docker image push successfully completed";
+    appManager.addEvent(DOCKER_REGISTRY_PUSH, EVENT_SUCCEEDED, msg, versionHashId);
+}
+
+var triggerKubernetesDeployment = function(runtimeProperties, tagName, dockerUrl, applicationName, versionName, replicas, versionHashId, httpPort, httpsPort){
+    var appHostURL = appManager.constructAppLaunchURL(applicationName, versionName);
+    var containers = getContainers(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL), dockerUrl, tagName, versionHashId ,versionHashId, runtimeProperties, appHostURL);
+    var deploymentConfig = appManager.getDeploymentConfig(containers, versionHashId, replicas);
+    appManager.deployApplication(applicationName, versionName, deploymentConfig, false, versionHashId,"new");
+
+}
+
+function getContainers(tenantDockerRegistryUrl, baseImageName, tag, versionHashId, appServiceName, runtimeProperties, appHostURL){
+    var containerList = new java.util.ArrayList();
+    var container = new Packages.org.wso2.appcloud.provisioning.runtime.beans.Container();
+    var appBaseImageName = tenantDockerRegistryUrl + "/" + baseImageName;
+    container.setContainerName(versionHashId);
+    container.setBaseImageName(appBaseImageName);
+    container.setBaseImageVersion(tag);
+    var envs = appManager.getRuntimeProperties(runtimeProperties);
+    container.setEnvVariables(envs);
+    var serviceProxyList = new java.util.ArrayList();
+    var services = ApplicationManager.getTransportsForCustomApplication(versionHashId);
+
+    for(var i = 0; i < services.length; i++){
+        var serviceProxy = new Packages.org.wso2.appcloud.provisioning.runtime.beans.ServiceProxy();
+        var service = services[i];
+        serviceProxy.setServiceName(service.getServiceNamePrefix()+"-" + appServiceName);
+        serviceProxy.setAppHostURL(appHostURL);
+        serviceProxy.setServiceProtocol(service.getServiceProtocol());
+        serviceProxy.setServicePort(appManager.getIngressPort(service.getServiceName()));
+        serviceProxy.setServiceBackendPort(service.getServicePort());
+        serviceProxyList.add(serviceProxy);
+    }
+    container.setServiceProxies(serviceProxyList);
+    containerList.add(container);
+
+    return containerList;
+};
+
+
+%>

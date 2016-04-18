@@ -25,12 +25,15 @@ public class SQLQueryConstants {
 
     public static final String ID = "id";
     public static final String APPLICATION_NAME = "application_name";
+    public static final String SERVICE_NAME = "service_name";
     public static final String NAME = "name";
     public static final String VALUE = "value";
     public static final String IS_SECURED = "is_secured";
     public static final String REPLICAS = "replicas";
     public static final String VERSION = "version";
+    public static final String SERVICE_PROTOCOL = "service_protocol";
     public static final String PROTOCOL = "protocol";
+    public static final String SERVICE_PORT = "service_port";
     public static final String PORT = "port";
     public static final String SERVICE_NAME_PREFIX = "service_prefix";
     public static final String BACKEND_PORT = "backend_port";
@@ -87,7 +90,8 @@ public class SQLQueryConstants {
             "INSERT INTO AC_CONTAINER_SERVICE_PROXY (name, protocol, port, backend_port, container_id, tenant_id, host_url) " +
                     "values (?, ?, ?, ?, ?, ?, ?)";
 
-
+    public static final String ADD_CUSTOM_APP_TRANSPORT =
+            "INSERT INTO AC_TRANSPORT_CUSTOM (version_hash_id, service_name, service_port, service_protocol,service_prefix) VALUES (?, ?, ?, ?,?)";
 
     /*Select Queries*/
 
@@ -172,6 +176,9 @@ public class SQLQueryConstants {
 
     public static final String GET_ALL_APP_VERSIONS_CREATED_BEFORE_X_DAYS_AND_NOT_WHITE_LISTED =
             "SELECT * FROM AC_VERSION WHERE is_white_listed=0 AND status='running' AND timestamp <  timestampadd(day, -?, now());";
+
+    public static final String GET_TRANSPORTS_FOR_CUSTOM_APPLICATION =
+            "SELECT service_name, service_port, service_protocol,service_prefix FROM AC_TRANSPORT_CUSTOM WHERE version_hash_id=?";
 
 
     /* Update Queries */

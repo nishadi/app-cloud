@@ -35,7 +35,8 @@ ENGINE = InnoDB;
 INSERT INTO `AC_APP_TYPE` (`id`, `name`, `description`) VALUES
 (1, 'war', 'Allows you to create dynamic websites using Servlets and JSPs, instead of the static HTML webpages and JAX-RS/JAX-WS services.'),
 (2, 'mss', 'WSO2 Microservices Framework for Java (WSO2 MSF4J) offers the best option to create microservices in Java using annotation-based programming model.'),
-(3, 'php', 'Allows you to create dynamic web page content using PHP web applications.');
+(3, 'php', 'Allows you to create dynamic web page content using PHP web applications.'),
+(5, 'custom', 'Allows you to deploy a custom application with a docker url');
 
 
 -- -----------------------------------------------------
@@ -60,8 +61,8 @@ INSERT INTO `AC_RUNTIME` (`id`, `name`, `repo_url`, `image_name`, `tag`) VALUES
 (1, 'Apache Tomcat 8.0.28 / WSO2 Application Server 6.0.0-M1', 'registry.docker.appfactory.private.wso2.com:5000', 'wso2as', '6.0.0-m1'),
 (2, 'OpenJDK 8', 'registry.docker.appfactory.private.wso2.com:5000', 'msf4j', '1.0'),
 (3, 'Apache 2.4.10', 'registry.docker.appfactory.private.wso2.com:5000','php','5.6'),
-(4, 'Carbon 4.2.0', 'registry.docker.appfactory.private.wso2.com:5000','carbon','4.2.0');
-
+(4, 'Carbon 4.2.0', 'registry.docker.appfactory.private.wso2.com:5000','carbon','4.2.0'),
+(5, 'Custom Runtime', 'registry.docker.appfactory.private.wso2.com:5000', 'customImage', 'customTag');
 
 
 -- -----------------------------------------------------
@@ -316,6 +317,19 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_TRANSPORT` (
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `AppCloudDB`.`AC_TRANSPORT_CUSTOM`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_TRANSPORT_CUSTOM` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `version_hash_id` VARCHAR(100) NOT NULL,
+  `service_name` VARCHAR(20) NOT NULL,
+  `service_port` INT NOT NULL,
+  `service_protocol` VARCHAR(4) NOT NULL,
+  `service_prefix` VARCHAR(3) NOT NULL,
+  `description` VARCHAR(1000) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`))
+  ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `AppCloudDB`.`AC_RUNTIME_TRANSPORT`

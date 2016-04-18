@@ -23,6 +23,7 @@ include('/jagg/constants.jag');
 var action = request.getParameter("action");
 var applicationModule = jagg.module("application");
 var gitHubAppModule = jagg.module("application/git");
+var customAppModule = jagg.module("application/custom");
 var log = new Log();
 (function(){
     if (!jagg.getUser()) {
@@ -81,6 +82,13 @@ var log = new Log();
                 applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
                                                  runtimeId, appTypeName, runtimeProperties, tags, appIcon,
                                                  uploadedFileName, isNewVersion);
+            }else if(appTypeName=='custom') {
+                var dockerUrl = request.getParameter("dockerUrl");
+                var imageTag = request.getParameter("imageTag");
+                var httpPort = request.getParameter("httpPort");
+                var httpsPort = request.getParameter("httpsPort");
+                customAppModule.addApplicationViaDockerUrl(applicationName, applicationRevision, applicationDescription, replicas, runtimeProperties,
+                        dockerUrl, imageTag, httpPort, httpsPort, tags, appIcon,isNewVersion);
             } else {
                 var gitRepoUrl = request.getParameter("gitRepoUrl");
                 var gitRepoBranch = request.getParameter("gitRepoBranch");

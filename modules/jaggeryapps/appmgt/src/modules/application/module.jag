@@ -192,6 +192,24 @@ jagg.module("application", {
     },
     isAplicationVersionExist: function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").isAplicationVersionExist.apply(this, arguments);
+    },
+    generateRuntimePropsList: function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").generateRuntimePropsList.apply(this, arguments);
+    },
+    constructAppLaunchURL: function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").constructAppLaunchURL.apply(this, arguments);
+    },
+    getDeploymentConfig: function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getDeploymentConfig.apply(this, arguments);
+    },
+    getRuntimeProperties: function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getRuntimeProperties.apply(this, arguments);
+    },
+    getIngressPort: function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getIngressPort.apply(this, arguments);
+    },
+    deployApplication: function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").deployApplication.apply(this, arguments);
     }
 });
 %>

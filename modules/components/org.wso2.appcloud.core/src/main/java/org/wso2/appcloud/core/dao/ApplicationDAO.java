@@ -22,16 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.common.AppCloudException;
 import org.wso2.appcloud.core.DBUtil;
 import org.wso2.appcloud.core.SQLQueryConstants;
-import org.wso2.appcloud.core.dto.Application;
-import org.wso2.appcloud.core.dto.ApplicationRuntime;
-import org.wso2.appcloud.core.dto.ApplicationType;
-import org.wso2.appcloud.core.dto.Container;
-import org.wso2.appcloud.core.dto.ContainerServiceProxy;
-import org.wso2.appcloud.core.dto.Deployment;
-import org.wso2.appcloud.core.dto.RuntimeProperty;
-import org.wso2.appcloud.core.dto.Tag;
-import org.wso2.appcloud.core.dto.Transport;
-import org.wso2.appcloud.core.dto.Version;
+import org.wso2.appcloud.core.dto.*;
 import org.wso2.carbon.user.core.tenant.JDBCTenantManager;
 
 import java.io.IOException;
@@ -381,6 +372,38 @@ public class ApplicationDAO {
 
         } catch (SQLException e) {
             String msg = "Error while inserting container service proxy record.";
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+    }
+
+    /**
+     *  Method for adding transport details including port details of a custom application to the database
+     *
+     * @param dbConnection database connection
+     * @param customTransport custom transport details
+     * @throws AppCloudException
+     */
+    public void addTransportsForCustomApplication(Connection dbConnection, CustomTransport customTransport)
+            throws AppCloudException {
+
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.ADD_CUSTOM_APP_TRANSPORT, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, customTransport.getVersionHashId());
+            preparedStatement.setString(2, customTransport.getServiceName());
+            preparedStatement.setInt(3, customTransport.getServicePort());
+            preparedStatement.setString(4, customTransport.getServiceProtocol());
+            preparedStatement.setString(5, customTransport.getServiceNamePrefix());
+
+            preparedStatement.execute();
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while adding custom application transports";
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
@@ -1210,6 +1233,47 @@ public class ApplicationDAO {
 
         } catch (SQLException e) {
             String msg = "Error while retrieving runtime transport detail for runtime : " + runtimeId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+            DBUtil.closeConnection(dbConnection);
+        }
+        return transports;
+    }
+
+    /**
+     * Method for getting https transport details of a custom application from the database
+     *
+     * @param versionHashId application version hash ID
+     * @return returns the transports array
+     * @throws AppCloudException
+     */
+    public List<Transport> getTransportsForCustomApplication(String versionHashId) throws AppCloudException{
+
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        List<Transport> transports = new ArrayList<>();
+
+        try {
+            //Only retrieves the transport details for https
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_TRANSPORTS_FOR_CUSTOM_APPLICATION);
+            preparedStatement.setString(1, versionHashId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()){
+                Transport transport = new Transport();
+                transport.setServiceName(resultSet.getString(SQLQueryConstants.SERVICE_NAME));
+                transport.setServiceProtocol(resultSet.getString(SQLQueryConstants.SERVICE_PROTOCOL));
+                transport.setServicePort(resultSet.getInt(SQLQueryConstants.SERVICE_PORT));
+                transport.setServiceNamePrefix(resultSet.getString(SQLQueryConstants.SERVICE_NAME_PREFIX));
+
+                transports.add(transport);
+            }
+            dbConnection.commit();
+
+        } catch (SQLException e) {
+            String msg = "Error while retrieving custom application transport detail for application version : " + versionHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
         } finally {
