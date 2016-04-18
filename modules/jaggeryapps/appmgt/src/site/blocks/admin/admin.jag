@@ -31,9 +31,9 @@ var log = new Log('site/blocks/admin/admin.jag');
         return;
     }
     if (action == "stopIdleApplications") {
-        var numberOfDays = request.getParameter("numberOfIdleDays");
+        var numberOfHours = request.getParameter("numberOfHours");
         try {
-            adminModule.stopIdleApplicationsByRunningTimePeriod(numberOfDays);
+            adminModule.stopIdleApplicationsByRunningTimePeriod(numberOfHours);
 
             response.status = 200;
             response.message = "Idle applications are successfully stopped.";

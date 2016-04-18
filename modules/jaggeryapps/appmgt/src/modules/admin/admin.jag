@@ -27,8 +27,8 @@ var ApplicationManager = Packages.org.wso2.appcloud.core.ApplicationManager;
 var applicationModule = jagg.module("application");
 var managerModule = jagg.module("manager");
 
-var stopIdleApplicationsByRunningTimePeriod = function (numberOfDays) {
-    var idleApplications = ApplicationManager.getApplicationVersionsByRunningTimePeriod(numberOfDays);
+var stopIdleApplicationsByRunningTimePeriod = function (numberOfHours) {
+    var idleApplications = ApplicationManager.getApplicationVersionsByRunningTimePeriod(numberOfHours);
     log.debug('number of idle applications found:' + idleApplications.length);
     for (var i = 0; i < idleApplications.length; i++) {
         var idleApplication = idleApplications[i];
