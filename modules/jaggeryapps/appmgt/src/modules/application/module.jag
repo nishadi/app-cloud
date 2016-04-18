@@ -192,6 +192,9 @@ jagg.module("application", {
     },
     addCustomUrl: function () {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").addCustomUrl.apply(this, arguments);
+    },
+    isAplicationVersionExist: function () {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").isAplicationVersionExist.apply(this, arguments);
     }
 });
 %>

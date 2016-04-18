@@ -41,7 +41,7 @@ jagg.template("header/default", function(inputs, outputs, jagg) { %>
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav menu-right">
-                <!--li><a href="<%=DOCUMENTATION_REDIRECTION_URL%>" target=_blank><i class="fa fa-book"></i> Documentation</a></li-->
+                <li><a href="<%=DOCUMENTATION_REDIRECTION_URL%>" target=_blank><i class="fa fa-book"></i> Documentation</a></li>
                 <li><a href="<%=SUPPORT_REDIRECTION_URL%>" target=_blank><i class="fa fa-envelope"></i> Support</a></li>
                 <li class="dropdown user-name">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=jagg.getUser()%>
@@ -66,19 +66,19 @@ jagg.template("header/default", function(inputs, outputs, jagg) { %>
                 </div>
                 <div id="popover-content" class="hide">
                    <div class="cloud-apps">
-                       <a class="cloud-block" href="<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>">
-                           <i class="fa fa-3x fa-cubes"></i>
-                           <div class="cloud-name">Application Cloud</div>
+                       <a class="cloud-block" href="https://api.cloud.wso2.com/publisher" target=_blank>
+                           <i class="fw fw-api fa-3x"></i>
+                           <div class="cloud-name">API Cloud</div>
                        </a>
                        <div class="clearfix"></div> <!-- to make seperate -->
                    </div>
                    <div class="cloud-actions">
                        <h3>Manage your cloud</h3>
-                       <a class="cloud-block-invert">
+                        <a class="cloud-block-invert" href="http://cloudmgt.cloud.wso2.com/cloudmgt/site/pages/organization.jag" target=_blank>
                             <i class="fa fa-3x  fa-institution"></i>
                             <div class="cloud-name">Organizations</div>
                         </a>
-                       <a class="cloud-block-invert" href="<%=jagg.getCloudMgtAbsoluteUrl("/site/pages/user.jag")%>">
+                       <a class="cloud-block-invert" href="http://cloudmgt.cloud.wso2.com/cloudmgt/site/pages/user.jag" target=_blank>
                            <i class="fa fa-3x  fa-users"></i>
                            <div class="cloud-name">Members</div>
                        </a>

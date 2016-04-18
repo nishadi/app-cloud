@@ -190,9 +190,11 @@ for(var i=0;i<specsJson.data.length;i++) {
                     formData.append('uploadedFileName', $("#uploadedFileName").val());
                 } else if (uploadMethod === "url" ) {
                     if (appTypeName == "war") {
-                        formData.append('uploadedFileName', $("#applicationName").val() + ".war");
+                        formData.append('uploadedFileName', "VERSION_HASH_ID.war");
                     } else if (appTypeName == "mss") {
-                        formData.append('uploadedFileName', $("#applicationName").val() + ".jar");
+                        formData.append('uploadedFileName', "VERSION_HASH_ID.jar");
+                    } else if (appTypeName == "php") {
+                        formData.append('uploadedFileName', "VERSION_HASH_ID.zip");
                     }
                 } else if (uploadMethod === "github" ) {
                     formData.append('gitRepoUrl', $("#gitRepoUrl").val());
@@ -230,6 +232,7 @@ for(var i=0;i<specsJson.data.length;i++) {
 
             $('#fileupload').fileupload({
                 submit: function(e, data) {
+                    $('#uploadedFileName').focus();
                     data.url = "<%=jagg.getAbsoluteUrl('/site/blocks/application/application.jag') %>",
                         data.dataType = 'json',
                         data.formData = {
@@ -286,7 +289,7 @@ for(var i=0;i<specsJson.data.length;i++) {
                     if(event.status == "success"){
                         statusStyle = "success";
                         if (event.name === "Status") {
-                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                table = table + "<tr class='" + statusStyle + "'><td>Container Status</td>" +
                                                 "<td>"+event.description+"</td>" +
                                                 "<td><i class=\"fa fa-check\"></i></td></tr>";
                         } else {
@@ -297,7 +300,7 @@ for(var i=0;i<specsJson.data.length;i++) {
                     } else if (event.status == "failed") {
                         statusStyle = "danger";
                         if (event.name === "Status") {
-                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                table = table + "<tr class='" + statusStyle + "'><td>Container Status</td>" +
                                                 "<td>"+event.description+"</td>" +
                                                 "<td><i class=\"fa fa-times\"></i></td></tr>";
                         } else {
@@ -308,7 +311,7 @@ for(var i=0;i<specsJson.data.length;i++) {
                     } else if (event.status == "pending"){
                         if (event.name === "Status") {
                             statusStyle = "active";
-                                table = table + "<tr class='" + statusStyle + "'><td>Starting containers</td>" +
+                                table = table + "<tr class='" + statusStyle + "'><td>Container Status</td>" +
                                                 "<td>"+event.description+"</td>" +
                                                 "<td><i class=\"fa fa-circle-o-notch fa-spin\"></i></td></tr>";
                         } else {
@@ -382,7 +385,7 @@ for(var i=0;i<specsJson.data.length;i++) {
                 icon: {                                     // app icon field
                     validateAppIcon: true
                 },
-                fileupload: {
+                uploadedFileName: {
                     validateArtifact: true
                 },
                 runtime: {
@@ -392,11 +395,6 @@ for(var i=0;i<specsJson.data.length;i++) {
             onsubmit: false,    // Since we are handling on submit validation on click event of the "Create" button,
             onfocusout: function (element, event) {
                 var validator = $("#application-details").validate();
-                //Converting application name to lowercase, this should be removed after application name and application key separation from backend.
-                if (element.name == 'applicationName') {
-                    var lowercaseAppName = element.value.toLowerCase();
-                    element.value = lowercaseAppName;
-                }
                 validator.element(element);
                 return false;
             },                            // here we disabled the form validation on submit
@@ -408,7 +406,9 @@ for(var i=0;i<specsJson.data.length;i++) {
                 // Disable app creation button if the form is not valid
                 if (this.numberOfInvalids() > 0) {
                     $("#add-application").prop("disabled", true);
-                    $("#btn-artifact-upload").attr("disabled", true);
+                    if(Object.keys(event)[0] != "uploadedFileName"){
+                        $("#btn-artifact-upload").attr("disabled", true);
+                    }
                     $("#url-upload").attr("disabled", true);
                 } else {
                     activateCreateApplication();
@@ -804,7 +804,7 @@ for(var i=0;i<specsJson.data.length;i++) {
 
             <div class="form-group" id="file-upload-block">
                 <div class="input-group">
-                    <input id="uploadedFileName" type="text" class="form-control" readonly>
+                    <input id="uploadedFileName" name="uploadedFileName" type="text" class="form-control" readonly>
                     <span class="input-group-btn">
                        <span class="btn btn-primary btn-file" id="btn-artifact-upload" disabled>
                            <input id="fileupload" type="file" name="fileupload">Browse

@@ -54,7 +54,7 @@ public class ApplicationDAO {
     private static final Log log = LogFactory.getLog(ApplicationDAO.class);
 
     /**
-     * Method for adding application details to database
+     * Method for adding application details to database.
      *
      * @param dbConnection database connection
      * @param application application object
@@ -98,7 +98,7 @@ public class ApplicationDAO {
             if (application.getIcon() != null) {
                 iconInputStream = IOUtils.toBufferedInputStream(application.getIcon().getBinaryStream());
             }
-            updateApplicationIcon(dbConnection, iconInputStream, application.getHashId());
+            updateApplicationIcon(dbConnection, iconInputStream, applicationId);
 
         } catch (SQLException e) {
 
@@ -389,7 +389,7 @@ public class ApplicationDAO {
     }
 
 
-    public void updateApplicationIcon(Connection dbConnection, InputStream inputStream, String applicationHashId)
+    public void updateApplicationIcon(Connection dbConnection, InputStream inputStream, int applicationId)
             throws AppCloudException {
 
         PreparedStatement preparedStatement = null;
@@ -398,12 +398,12 @@ public class ApplicationDAO {
 
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.UPDATE_APPLICATION_ICON);
             preparedStatement.setBlob(1, inputStream);
-            preparedStatement.setString(2, applicationHashId);
+            preparedStatement.setInt(2, applicationId);
             preparedStatement.execute();
 
         } catch (SQLException e) {
             String msg =
-                    "Error occurred while updating application icon for application with hash id : " + applicationHashId;
+                    "Error occurred while updating application icon for application with id : " + applicationId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
 
@@ -1203,6 +1203,7 @@ public class ApplicationDAO {
                 transport.setServiceName(resultSet.getString(SQLQueryConstants.NAME));
                 transport.setServiceProtocol(resultSet.getString(SQLQueryConstants.PROTOCOL));
                 transport.setServicePort(resultSet.getInt(SQLQueryConstants.PORT));
+                transport.setServiceNamePrefix(resultSet.getString(SQLQueryConstants.SERVICE_NAME_PREFIX));
                 transports.add(transport);
             }
             dbConnection.commit();
@@ -1267,7 +1268,7 @@ public class ApplicationDAO {
 
 
     /**
-     * Delete an application
+     * Delete an application.
      *
      * @param applicationHashId application hash id
      * @return
@@ -1404,22 +1405,24 @@ public class ApplicationDAO {
      * @return
      * @throws AppCloudException
      */
-    public ContainerServiceProxy getContainerServiceProxyByVersion(String versionHashId) throws AppCloudException {
+    public List<ContainerServiceProxy> getContainerServiceProxyByVersion(String versionHashId)
+            throws AppCloudException {
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
-        ContainerServiceProxy containerServiceProxy = new ContainerServiceProxy();
+        List<ContainerServiceProxy> containerServiceProxies = new ArrayList<ContainerServiceProxy>();
 
         try {
             preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_CONTAINER_SERVICE_PROXY);
             preparedStatement.setString(1, versionHashId);
-
             ResultSet rs = preparedStatement.executeQuery();
-            if (rs.next()) {
+            while (rs.next()) {
+                ContainerServiceProxy containerServiceProxy = new ContainerServiceProxy();
                 containerServiceProxy.setServiceName(rs.getString(SQLQueryConstants.NAME));
                 containerServiceProxy.setServiceProtocol(rs.getString(SQLQueryConstants.PROTOCOL));
                 containerServiceProxy.setServicePort(rs.getInt(SQLQueryConstants.PORT));
                 containerServiceProxy.setServiceBackendPort(rs.getString(SQLQueryConstants.BACKEND_PORT));
                 containerServiceProxy.setHostURL(rs.getString(SQLQueryConstants.HOST_URL));
+                containerServiceProxies.add(containerServiceProxy);
             }
 
             dbConnection.commit();
@@ -1431,7 +1434,8 @@ public class ApplicationDAO {
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
-        return containerServiceProxy;
+
+        return containerServiceProxies;
     }
 
     /**

@@ -5,13 +5,11 @@ if [[ $# -eq 0 ]] ; then
     echo 'Usage: ./setup.sh /srv/app_cloud'
     exit 1
 fi
-APPCLOUD_HOME=$1
+APPCLOUD_HOME=/home/nadeeshani/appcloud/new/setupNw1
 PACK_DIR=$APPCLOUD_HOME/packs
 SETUP_DIR=$APPCLOUD_HOME/setup
 AS_VERSION=wso2as-5.2.1
 IS_VERSION=wso2is-5.0.0
-SS_VERSION=wso2ss-1.1.0
-DAS_VERSION=wso2das-3.0.1
 
 IP="$(ifconfig | grep -A 1 'eth0' | tail -1 | cut -d ':' -f 2 | cut -d ' ' -f 1)"
 
@@ -51,12 +49,8 @@ $MYSQL -uroot -proot < $APP_CLOUD_SRC_HOME/modules/dbscripts/http-mon-mysql.sql
 # Unzip default wso2carbon product packs and configure
 mkdir -p $SETUP_DIR
 unzip -q $PACK_DIR/$IS_VERSION.zip -d $SETUP_DIR/
-unzip -q $PACK_DIR/$SS_VERSION.zip -d $SETUP_DIR/
-unzip -q $PACK_DIR/$DAS_VERSION.zip -d $SETUP_DIR/
 
 IS_HOME=$SETUP_DIR/$IS_VERSION/
-SS_HOME=$SETUP_DIR/$SS_VERSION/
-DAS_HOME=$SETUP_DIR/$DAS_VERSION/
 
 
 function as_setup(){
@@ -128,7 +122,7 @@ function as_cluster_setup(){
     sed -i -e "s/<MgtHostName>localhost<\/MgtHostName>/<MgtHostName>$IP<\/MgtHostName>/g" $AS_HOME1/repository/conf/carbon.xml
     sed -i -e "s/<MgtHostName>localhost<\/MgtHostName>/<MgtHostName>$IP<\/MgtHostName>/g" $AS_HOME2/repository/conf/carbon.xml
 
-    sed -i -e "s/https:\/\/localhost:9443\/appmgt\/jagg\/jaggery_acs.jag/http:\/\/$IP\/appmgt\/jagg\/jaggery_acs.jag/g" $IS_HOME/repository/conf/security/sso-idp-config.xml
+    sed -i -e "s/https:\/\/localhost:9443\/appmgt\/jagg\/jaggery_acs.jag/http:\/\/1500\/appmgt\/jagg\/jaggery_acs.jag/g" $IS_HOME/repository/conf/security/sso-idp-config.xml
 
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/axis2/axis2.xml $AS_HOME1/repository/conf/axis2/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/axis2/axis2.xml $AS_HOME2/repository/conf/axis2/
@@ -164,28 +158,6 @@ read -p "Do you wish to do a clustered setup?" yn
          * ) echo "Please answer yes or no.";;
      esac
 
-
-echo "Updating SS node with new configurations"
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $SS_HOME/repository/components/lib/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/nimbus-jose-jwt_2.26.1.wso2v2.jar $SS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/signedjwt-authenticator_4.3.3.jar $SS_HOME/repository/components/dropins/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2ss-1.1.0/repository/conf/datasources/master-datasources.xml $SS_HOME/repository/conf/datasources/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2ss-1.1.0/repository/conf/user-mgt.xml $SS_HOME/repository/conf/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2ss-1.1.0/repository/conf/carbon.xml $SS_HOME/repository/conf/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2ss-1.1.0/repository/conf/etc/* $SS_HOME/repository/conf/etc/
-cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/patches/wso2ss-1.1.0/* $SS_HOME/repository/components/patches/
-
-echo "Updating DAS node with new configurations"
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.1/repository/conf/datasources/master-datasources.xml $DAS_HOME/repository/conf/datasources/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.1/repository/conf/datasources/analytics-datasources.xml $DAS_HOME/repository/conf/datasources/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/mysql-connector-java-5.1.27-bin.jar $DAS_HOME/repository/components/lib/
-mkdir -p $DAS_HOME/repository/deployment/server/carbonapps
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.1/repository/deployment/server/capps/*.car $DAS_HOME/repository/deployment/server/carbonapps
-cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.1/repository/deployment/server/jaggeryapps/monitoring $DAS_HOME/repository/deployment/server/jaggeryapps/
-cp -r $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.1/modules $DAS_HOME/
-cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2das-3.0.1/repository/conf/carbon.xml $DAS_HOME/repository/conf/
-
-
 sh $IS_HOME/bin/wso2server.sh -Dsetup &
 sleep 60
 
@@ -199,10 +171,6 @@ else
     sh $AS_HOME/bin/wso2server.sh &
     sleep 60
 fi
-
-sh $SS_HOME/bin/wso2server.sh -Dsetup &
-sleep 60
-sh $DAS_HOME/bin/wso2server.sh -Dsetup &
 
 echo "If you are setting up App Cloud for the first time, please make sure to run app-cloud/modules/resources/dockerfiles/dockerImages.sh script to build docker base images"
 echo "Set up is completed."

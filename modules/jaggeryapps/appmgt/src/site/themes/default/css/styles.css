@@ -2649,18 +2649,38 @@ svg .outer {
         stroke-dashoffset: 0;
     }
 }
+
 .top-notification {
-    position: relative;
+    position: fixed;
     background: rgba(254, 223, 45, 0.74);
     height: 32px;
     z-index: 1039;
     border: 1px solid #FEE62D;
     padding: 5px;
     text-align: center;
-    width: 900px;
+    width: 100%;
     border-top: none;
     margin: 0px auto;
-    top: -40px;
+    top: 0;
+    display: none;
+}
+body.top-notification-active .top-notification {
+    display: block;
+}
+body.top-notification-active .top-notification a {
+    color: #4C4C4C;
+}
+body.top-notification-active {
+    padding-top: 80px;
+}
+body.top-notification-active .navbar-fixed-top {
+    top: 32px;
+}
+body.top-notification-active .navbar-secondary {
+    top: 85px;
+}
+body.top-notification-active .action-bar {
+    top: 133px;
 }
 
 .edit-key-values{

@@ -32,6 +32,7 @@ public class SQLQueryConstants {
     public static final String VERSION = "version";
     public static final String PROTOCOL = "protocol";
     public static final String PORT = "port";
+    public static final String SERVICE_NAME_PREFIX = "service_prefix";
     public static final String BACKEND_PORT = "backend_port";
     public static final String DESCRIPTION = "description";
     public static final String HASH_ID = "hash_id";
@@ -138,7 +139,7 @@ public class SQLQueryConstants {
             "SELECT * FROM AC_CONTAINER_SERVICE_PROXY WHERE container_id=?";
 
     public static final String GET_TRANSPORTS_FOR_RUNTIME =
-            "SELECT name, port, protocol FROM AC_TRANSPORT WHERE id IN (SELECT transport_id FROM AC_RUNTIME_TRANSPORT " +
+            "SELECT name, port, protocol, service_prefix FROM AC_TRANSPORT WHERE id IN (SELECT transport_id FROM AC_RUNTIME_TRANSPORT " +
             "WHERE runtime_id=?)";
 
     public static final String GET_ALL_APP_TYPES = "SELECT * FROM AC_APP_TYPE";
@@ -175,9 +176,12 @@ public class SQLQueryConstants {
 
     /* Update Queries */
 
-    public static final String UPDATE_APPLICATION_ICON =
-            "INSERT INTO AC_APP_ICON (icon, application_id) VALUES (?, (SELECT id FROM AC_APPLICATION WHERE " +
-            "hash_id=?)) ON DUPLICATE KEY UPDATE icon= VALUES(icon)";
+    public static final String INSERT_APPLICATION_ICON = "INSERT INTO AC_APP_ICON (icon, application_id) VALUES (?, ?)";
+
+    public static final String UPDATE_APPLICATION_ICON = "INSERT INTO AC_APP_ICON (icon, application_id) VALUES (?, ?) ON" +
+            " DUPLICATE KEY UPDATE icon= VALUES(icon)";
+
+    public static final String GET_APPLICATION_ICON = "SELECT id FROM AC_APP_ICON WHERE application_id=?";
 
     public static final String UPDATE_RUNTIME_PROPERTIES =
             "UPDATE AC_RUNTIME_PROPERTY SET name=?, value=? WHERE version_id=(SELECT id FROM AC_VERSION WHERE hash_id=?)" +

@@ -30,4 +30,4 @@ docker build --no-cache -t wso2-appcloud/carbon:4.2.0-base -f $CURRENT_DIR/carbo
 docker build --no-cache -t wso2-appcloud/php:1.0.0-base -f $CURRENT_DIR/php/base/1.0.0/Dockerfile.wso2-appcloud-php-1.0.0.base $CURRENT_DIR/php/base/1.0.0
 
 #tomcat base image
-docker build --no-cache -t wso2-appcloud/tomcat:1.0.0-base -f $CURRENT_DIR/tomcat/base/1.0.0/Dockerfile.wso2-appcloud-tomcat-1.0.0.base $CURRENT_DIR/tomcat/base/1.0.0
+docker build --no-cache -t wso2-appcloud/wso2as:6.0.0-m1-base -f $CURRENT_DIR/wso2as/base/6.0.0-m1/Dockerfile.wso2-appcloud-wso2as-6.0.0-m1.base $CURRENT_DIR/wso2as/base/6.0.0-m1

@@ -35,8 +35,7 @@ ENGINE = InnoDB;
 INSERT INTO `AC_APP_TYPE` (`id`, `name`, `description`) VALUES
 (1, 'war', 'Allows you to create dynamic websites using Servlets and JSPs, instead of the static HTML webpages and JAX-RS/JAX-WS services.'),
 (2, 'mss', 'WSO2 Microservices Framework for Java (WSO2 MSF4J) offers the best option to create microservices in Java using annotation-based programming model.'),
-(3, 'php', 'Allows you to create dynamic web page content using PHP web applications.'),
-(4, 'carbon', 'Allows you to deploy any carbon server where required deployable artifacts are already deployed into carbon zip file.');
+(3, 'php', 'Allows you to create dynamic web page content using PHP web applications.');
 
 
 -- -----------------------------------------------------
@@ -58,7 +57,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 
 INSERT INTO `AC_RUNTIME` (`id`, `name`, `repo_url`, `image_name`, `tag`) VALUES
-(1, 'WSO2 Application Server 6.0.0-M1', 'registry.docker.appfactory.private.wso2.com:5000', 'wso2as', '6.0.0-m1'),
+(1, 'Apache Tomcat 8.0.28 / WSO2 Application Server 6.0.0-M1', 'registry.docker.appfactory.private.wso2.com:5000', 'wso2as', '6.0.0-m1'),
 (2, 'OpenJDK 8', 'registry.docker.appfactory.private.wso2.com:5000', 'msf4j', '1.0'),
 (3, 'Apache 2.4.10', 'registry.docker.appfactory.private.wso2.com:5000','php','5.6'),
 (4, 'Carbon 4.2.0', 'registry.docker.appfactory.private.wso2.com:5000','carbon','4.2.0');
@@ -216,8 +215,7 @@ ENGINE = InnoDB;
 INSERT INTO `AC_APP_TYPE_RUNTIME` (`app_type_id`, `runtime_id`) VALUES
 (1, 1),
 (2, 2),
-(3, 3),
-(4, 4);
+(3, 3);
 
 
 -- -----------------------------------------------------
@@ -313,6 +311,7 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_TRANSPORT` (
   `name` VARCHAR(20) NOT NULL,
   `port` INT NOT NULL,
   `protocol` VARCHAR(4) NOT NULL,
+  `service_prefix` VARCHAR(3) NOT NULL,
   `description` VARCHAR(1000) NULL DEFAULT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
@@ -336,17 +335,34 @@ CREATE TABLE IF NOT EXISTS `AppCloudDB`.`AC_RUNTIME_TRANSPORT` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+CREATE TABLE IF NOT EXISTS AC_SUBSCRIPTION_PLANS (
+    PLAN_ID	INTEGER NOT NULL AUTO_INCREMENT,
+    PLAN_NAME   VARCHAR(200) NOT NULL,	
+    MAX_APPLICATIONS	INT NOT NULL,
+    PRIMARY KEY (PLAN_ID))
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS AC_CONTAINER_SPECIFICATIONS (
+    CON_SPEC_ID     INTEGER NOT NULL AUTO_INCREMENT,
+    CON_SPEC_NAME   VARCHAR(200) NOT NULL,
+    CPU              INT NOT NULL,	
+    MEMORY	     INT NOT NULL,
+    STORAGE	     INT NOT NULL,
+    COST_PER_HOUR    INT NOT NULL,
+    PRIMARY KEY (CON_SPEC_ID))
+ENGINE = InnoDB;
+
 -- -----------------------------------------------------
 -- Populate Data to `AppCloudDB`.`ApplicationRuntime`
 -- -----------------------------------------------------
 
-INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `description`) VALUES
-(1, 'http', 80, 'TCP', 'HTTP Protocol'),
-(2, 'https', 443, 'TCP', 'HTTPS Protocol'),
-(3, 'http-alt', 8080, 'TCP', 'HTTP Alternate Protocol'),
-(4, 'https-alt', 8443, 'TCP', 'HTTPS Alternate Protocol'),
-(5, 'http', 9763, 'TCP', 'HTTP servlet transport for carbon products'),
-(6, 'https', 9443, 'TCP', 'HTTPS servlet transport for carbon products');
+INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `service_prefix`, `description`) VALUES
+(1, 'http', 80, 'TCP', 'htp', 'HTTP Protocol'),
+(2, 'https', 443, 'TCP', 'hts', 'HTTPS Protocol'),
+(3, 'http-alt', 8080, 'TCP', 'htp', 'HTTP Alternate Protocol'),
+(4, 'https-alt', 8443, 'TCP', 'hts', 'HTTPS Alternate Protocol'),
+(5, 'http', 9763, 'TCP', 'htp', 'HTTP servlet transport for carbon products'),
+(6, 'https', 9443, 'TCP', 'hts', 'HTTPS servlet transport for carbon products');
 
 -- -----------------------------------------------------
 -- Populate Data to `AppCloudDB`.`ApplicationRuntimeService`
@@ -354,10 +370,22 @@ INSERT INTO `AC_TRANSPORT` (`id`, `name`, `port`, `protocol`, `description`) VAL
 INSERT INTO `AC_RUNTIME_TRANSPORT` (`transport_id`, `runtime_id`) VALUES
 (4, 1),
 (4, 2),
+(1, 3),
+(4, 4),
+(3, 1),
+(3, 2),
 (2, 3),
-(2, 4),
-(6, 5),
-(6, 5);
+(3, 4);
+
+
+INSERT INTO `AC_CONTAINER_SPECIFICATIONS` (`CON_SPEC_ID`, `CON_SPEC_NAME`, `CPU`, `MEMORY`, `COST_PER_HOUR`) VALUES
+(1, 'SMALL', 100, 128, 1),
+(2, 'MEDIUM', 200, 256, 2),
+(3, 'LARGE', 300, 512, 3);
+
+INSERT INTO `AC_SUBSCRIPTION_PLANS` (`PLAN_ID`, `PLAN_NAME`, `MAX_APPLICATIONS`) VALUES
+(1, 'FREE', 3),
+(2, 'PAID', 10);
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

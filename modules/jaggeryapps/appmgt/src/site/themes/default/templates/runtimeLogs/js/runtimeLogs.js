@@ -66,12 +66,13 @@ function initData(selectedRevision){
         result = result.replace(/\t+/g, "    ");
         selectedRevisionLogMap = jQuery.parseJSON(result);
         if(!jQuery.isEmptyObject(selectedRevisionLogMap)){
+            $("#log-reload").removeClass("btn-action btn disabled").addClass("btn-action");
             selectedRevisionReplicaList = Object.keys(selectedRevisionLogMap);
             regerateReplicasList(selectedRevisionReplicaList);
             setLogArea(selectedRevisionLogMap[selectedRevisionReplicaList[0]]);
         } else {
             jagg.message({content: "Deployment in progress. Please wait",
-                                      type: 'information', id:'view_log', timeout:'5000'});
+                             type: 'information', id:'view_log', timeout:'5000'});
             setTimeout(function(){
                 $.noty.closeAll();
                 initData(selectedRevision);
@@ -79,6 +80,7 @@ function initData(selectedRevision){
         }
     },function (jqXHR, textStatus, errorThrown) {
         $('#revision').prop("disabled", false);
+        $("#log-reload").removeClass("btn-action btn disabled").addClass("btn-action");
         jagg.message({content: "Error occurred while loading the logs.", type: 'error', id:'view_log'});
     });
 }
@@ -109,6 +111,7 @@ function initelements(){
     });
 
     $('#log-reload').on('click', function (e) {
+        $("#log-reload").removeClass("btn-action").addClass("btn-action btn disabled");
         selectedReplica = $('#replicas').val();
         setLogArea("Loading...");
         setTimeout(function(){initData(selectedRevision);setLogArea(selectedRevisionLogMap[selectedReplica]);}, 1000);

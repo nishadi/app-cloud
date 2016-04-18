@@ -23,7 +23,7 @@ import java.util.Set;
 public interface RuntimeProvisioningService {
 
     /**
-     * Set application details for the context
+     * Set application details for the context.
      *
      * @param applicationContext application details
      * @throws RuntimeProvisioningException
@@ -31,7 +31,7 @@ public interface RuntimeProvisioningService {
     void setApplicationContext(ApplicationContext applicationContext) throws RuntimeProvisioningException;
 
     /**
-     * Create an organization for given tenant details
+     * Create an organization for given tenant details.
      *
      * @param tenantInfo details of the tenant
      * @throws RuntimeProvisioningException
@@ -39,7 +39,7 @@ public interface RuntimeProvisioningService {
     void createOrganization(TenantInfo tenantInfo) throws RuntimeProvisioningException;
 
     /**
-     * Update an organization details
+     * Update an organization details.
      *
      * @param tenantInfo details of the tenant
      * @throws RuntimeProvisioningException
@@ -47,7 +47,7 @@ public interface RuntimeProvisioningService {
     void updateOrganization(TenantInfo tenantInfo) throws RuntimeProvisioningException;
 
     /**
-     * Delete an organization related details
+     * Delete an organization related details.
      *
      * @param tenantInfo details of the tenant
      * @throws RuntimeProvisioningException
@@ -55,7 +55,7 @@ public interface RuntimeProvisioningService {
     void deleteOrganization(TenantInfo tenantInfo) throws RuntimeProvisioningException;
 
     /**
-     * Archive an organization
+     * Archive an organization.
      *
      * @param tenantInfo details of the tenant
      * @throws RuntimeProvisioningException
@@ -64,7 +64,7 @@ public interface RuntimeProvisioningService {
 
    
     /**
-     * Deploy an application
+     * Deploy an application.
      *
      * @param deploymentConfig details of the deployment
      * @return list of endpoints
@@ -73,7 +73,7 @@ public interface RuntimeProvisioningService {
     List<String> deployApplication(DeploymentConfig deploymentConfig) throws RuntimeProvisioningException;
 
     /**
-     * Provide deployment related details
+     * Provide deployment related details.
      *
      * @return Whether deployment fail or not
      * @throws RuntimeProvisioningException
@@ -81,7 +81,7 @@ public interface RuntimeProvisioningService {
     boolean getDeploymentStatus(DeploymentConfig deploymentConfig) throws RuntimeProvisioningException;
 
     /**
-     * Provide runtime log stream
+     * Provide runtime log stream.
      *
      * @return log out put stream
      * @throws RuntimeProvisioningException
@@ -89,7 +89,7 @@ public interface RuntimeProvisioningService {
     DeploymentLogStream streamRuntimeLogs() throws RuntimeProvisioningException;
 
     /**
-     * Provide snapshot logs
+     * Provide snapshot logs.
      *
      * @param query query related details
      * @return Snapshot logs of application
@@ -99,7 +99,7 @@ public interface RuntimeProvisioningService {
             throws RuntimeProvisioningException;
 
     /**
-     * Set runtime variables
+     * Set runtime variables.
      *
      * @param runtimeProperties runtime properties
      * @throws RuntimeProvisioningException
@@ -108,7 +108,7 @@ public interface RuntimeProvisioningService {
             throws RuntimeProvisioningException;
 
     /**
-     * Update existing runtime properties
+     * Update existing runtime properties.
      *
      * @param runtimeProperty runtime property
      * @throws RuntimeProvisioningException
@@ -117,7 +117,7 @@ public interface RuntimeProvisioningService {
             throws RuntimeProvisioningException;
 
     /**
-     * Provide application specific runtime properties
+     * Provide application specific runtime properties.
      *
      * @return List of runtime properties
      * @throws RuntimeProvisioningException
@@ -125,7 +125,7 @@ public interface RuntimeProvisioningService {
     List<RuntimeProperty> getRuntimeProperties() throws RuntimeProvisioningException;
 
     /**
-     * Adding a custom domain mapping to a particular application
+     * Adding a custom domain mapping to a particular application.
      *
      * @param domains set of domains
      * @throws RuntimeProvisioningException
@@ -133,7 +133,7 @@ public interface RuntimeProvisioningService {
     boolean addCustomDomain(Set<String> domains) throws RuntimeProvisioningException;
 
     /**
-     * Update a certain custom domain mapping for a particular application version
+     * Update a certain custom domain mapping for a particular application version.
      *
      * @param oldDomain old domain name to be changed
      * @param newDomain new domain name to be changed to
@@ -142,7 +142,7 @@ public interface RuntimeProvisioningService {
     boolean updateCustomDomain(String oldDomain, String newDomain) throws RuntimeProvisioningException;
 
     /**
-     * Return custom domain mappings of a certain application version
+     * Return custom domain mappings of a certain application version.
      *
      * @return set of domains
      * @throws RuntimeProvisioningException
@@ -150,7 +150,7 @@ public interface RuntimeProvisioningService {
     Set<String> getCustomDomains() throws RuntimeProvisioningException;
 
     /**
-     * Delete a certain custom domain mapping
+     * Delete a certain custom domain mapping.
      *
      * @param domain domain name
      * @throws RuntimeProvisioningException
@@ -158,7 +158,7 @@ public interface RuntimeProvisioningService {
     boolean deleteCustomDomain(String domain) throws RuntimeProvisioningException;
 
     /**
-     * Create the launch URL with respective to the environment, tenant domain, app name and the version.
+     * Create the launch URL with respective to the environment, tenant domain, app name and the version..
      *
      * An example launch URL:
      * https://appserver.dev.milestones.appfactory.wso2.com:9443/t/man.com/webapps/foo-default-SNAPSHOT/
@@ -170,14 +170,14 @@ public interface RuntimeProvisioningService {
     boolean createDeploymentUrl(String environmentUrl) throws RuntimeProvisioningException;
 
     /**
-     * Delete deployment related K8 objects
+     * Delete deployment related K8 objects.
      *
      * @throws RuntimeProvisioningException
      */
     void deleteDeployment() throws RuntimeProvisioningException;
 
     /**
-     * Create a service in K8s
+     * Create a service in K8s.
      *
      * @param serviceProxy description of the service
      * @throws RuntimeProvisioningException

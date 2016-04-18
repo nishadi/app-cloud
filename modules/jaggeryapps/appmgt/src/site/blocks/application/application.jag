@@ -69,25 +69,33 @@ var log = new Log();
         var conSpecMemory =request.getParameter("conSpecMemory");
         var conSpecCpu =request.getParameter("conSpecCpu");
 
-        if (isFileAttached) {
-            applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName, applicationRevision);
+        // checking whether an application with same name and same version, already exists or not
+        var versionHashId = applicationModule.getVersionHashId(applicationName, applicationRevision);
+        if (applicationModule.isAplicationVersionExist(versionHashId)) {
+            response.status = 400; // bad request
+            response.message = "Application with same name and version already exists!";
+        } else {
+            if (isFileAttached) {
+                applicationModule.uploadExistingArchive(uploadedArtifact, appTypeName, applicationName,
+                                                        applicationRevision);
+            }
+            if (uploadedFileName) {
+                applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
+                                                 runtimeId, appTypeName, runtimeProperties, tags, appIcon,
+                                                 uploadedFileName, isNewVersion, conSpecMemory, conSpecCpu);
+            } else {
+                var gitRepoUrl = request.getParameter("gitRepoUrl");
+                var gitRepoBranch = request.getParameter("gitRepoBranch");
+                var projectRoot = request.getParameter("projectRoot");
+                var token = request.getParameter("token");
+                gitHubAppModule.addApplicationViaGitHub(applicationName, applicationRevision, applicationDescription,
+                                                        replicas, runtimeId, appTypeName, runtimeProperties, tags,
+                                                        appIcon, gitRepoUrl, gitRepoBranch, projectRoot, token,
+                                                        isNewVersion);
+            }
+            response.status = 200;
+            response.message = "Application creation is successfully submitted";
         }
-        if(uploadedFileName) {
-            applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
-                                             runtimeId, appTypeName, runtimeProperties, tags, appIcon,
-                                             uploadedFileName, isNewVersion,conSpecMemory,conSpecCpu);
-        }else{
-            var gitRepoUrl = request.getParameter("gitRepoUrl");
-            var gitRepoBranch = request.getParameter("gitRepoBranch");
-            var projectRoot = request.getParameter("projectRoot");
-            var token = request.getParameter("token");
-            gitHubAppModule.addApplicationViaGitHub(applicationName, applicationRevision, applicationDescription, replicas,
-                                                    runtimeId, appTypeName, runtimeProperties, tags, appIcon, gitRepoUrl,
-                                                    gitRepoBranch, projectRoot, token, isNewVersion);
-        }
-        response.status = 200;
-        response.message = "Application creation is successfully submitted";
-
     }else if(action == "stopApplication"){
         var applicationName = request.getParameter("applicationName");
         var applicationRevision = request.getParameter("applicationRevision");
