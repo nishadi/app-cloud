@@ -24,8 +24,8 @@ ENV WEB_ROOT /var/www/html/
 
 RUN mkdir -p "$UPLOAD_PATH"
 COPY "$PHP_APP_ZIP" "$UPLOAD_PATH/"
-RUN unzip "$UPLOAD_PATH/$PHP_APP_ZIP" -d "$WEB_ROOT/"
-RUN chmod -R 777 "$WEB_ROOT/"
+RUN unzip "$UPLOAD_PATH/$PHP_APP_ZIP" -d "$WEB_ROOT/" \
+           && chmod -R 777 "$WEB_ROOT/"
 
 ENTRYPOINT ["/usr/local/bin/init.sh"]
 
