@@ -189,7 +189,7 @@ public class PlanDaoImpl implements PlanDao{
     public Plan updatePlanById(int planId, Plan plan) throws SQLException {
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
-        String sql="Update AC_SUBSCRIPTION_PLANS SET PLAN_NAME=?, MAX_INSTANCES=?, MAX_LC=? WHERE PLAN_ID = ?";
+        String sql="Update AC_SUBSCRIPTION_PLANS SET PLAN_NAME=?, MAX_INSTANCES=?, WHERE PLAN_ID = ?";
         try {
             DBConfiguration dbCon=new DBConfiguration();
             dbConnection= dbCon.getConnection();
