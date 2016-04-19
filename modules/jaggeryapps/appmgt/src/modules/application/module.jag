@@ -90,6 +90,10 @@ jagg.module("application", {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getAllApplications.apply(this, arguments);
     },
 
+    getAllApplicationsWithTag:function() {
+        return jagg.require(jagg.getModulesDir() + "application/application.jag").getAllApplicationsWithTag.apply(this, arguments);
+    },
+
     getVersionDirectoryPath:function() {
         return jagg.require(jagg.getModulesDir() + "application/application.jag").getVersionDirectoryPath.apply(this, arguments);
     },

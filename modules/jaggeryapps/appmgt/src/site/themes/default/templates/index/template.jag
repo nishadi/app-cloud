@@ -21,6 +21,7 @@ include("/jagg/jagg.jag");
 
 jagg.template("index", function(inputs, outputs, jagg) {
     var applications = outputs.applications;
+    var applicationsWithTag = outputs.applicationsWithTag;
     var log = new Log("index");
 
     %>
