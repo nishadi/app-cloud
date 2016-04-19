@@ -674,10 +674,6 @@ public class ApplicationManager {
 
     public static Version[] getApplicationVersionsByRunningTimePeriod(int numberOfHours) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
-<<<<<<< HEAD
-=======
-        return applicationDAO.getApplicationVersionsByRunningTimePeriod(numberOfHours);
->>>>>>> 825381531442fca55d3fde01d8a3e6bb62a62254
 
         return applicationDAO.getApplicationVersionsByRunningTimePeriod(numberOfHours);
     }
