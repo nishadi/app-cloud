@@ -464,7 +464,6 @@ var redeployApplication = function(applicationName, versionName, versionHashId,c
     var deploymentConfig = buildDeploymentConfigFromDB(versionHashId);
 
     deployApplication(applicationName, versionName, deploymentConfig, true, versionHashId, "redeploy", conSpecMemory, conSpecCpu);
-
 };
 var persistDeploymentConfig = function(deploymentConfig, versionHashId, applicationName, versionName){
 

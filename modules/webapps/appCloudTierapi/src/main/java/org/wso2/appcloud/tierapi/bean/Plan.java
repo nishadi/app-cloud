@@ -27,17 +27,14 @@ public class Plan {
     
     private int id;
     private String planName;
-    private int team;
     private int maxApplications;
-    private int maxLC;
     
     public Plan() {
         
     }
     
-    public Plan(String planName, int team , int maxApplications, int maxLC){
+    public Plan(String planName, int maxApplications ){
         this.planName=planName;
-        this.team = team;
         this.maxApplications = maxApplications;
     }
     
@@ -55,14 +52,6 @@ public class Plan {
     
     public String getPlanName() {
         return planName;
-    }
-    
-    public void setTeam(int team) {
-        this.team=team;
-    }
-    
-    public int getTeam() {
-        return team;
     }
     
     public void setMaxApplications(int maxApplications) {

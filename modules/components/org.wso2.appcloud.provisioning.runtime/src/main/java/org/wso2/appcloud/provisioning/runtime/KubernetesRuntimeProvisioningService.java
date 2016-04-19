@@ -74,7 +74,6 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
     public KubernetesRuntimeProvisioningService(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
         this.namespace = KubernetesProvisioningUtils.getNameSpace(applicationContext);
-        this.resourceQuotaLimit = resourceQuotaLimit;
 
         //Creating namespace in kubernetes if not available
         KubernetesClient kubernetesClient = KubernetesProvisioningUtils.getFabric8KubernetesClient();

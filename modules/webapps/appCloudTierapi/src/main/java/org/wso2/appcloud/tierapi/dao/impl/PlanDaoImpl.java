@@ -117,15 +117,14 @@ public class PlanDaoImpl implements PlanDao{
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
 
-        String sql="INSERT INTO AC_SUBSCRIPTION_PLANS (PLAN_NAME, TEAM, MAX_INSTANCES) VALUES (?, ?, ?)";
+        String sql="INSERT INTO AC_SUBSCRIPTION_PLANS (PLAN_NAME, TEAM, MAX_INSTANCES) VALUES (?, ?)";
 
         try {
             DBConfiguration dbCon=new DBConfiguration();
             dbConnection= dbCon.getConnection();
             preparedStatement = dbConnection.prepareStatement(sql);
             preparedStatement.setString(1, plan.getPlanName());
-            preparedStatement.setInt(2, plan.getTeam());
-            preparedStatement.setInt(3, plan.getMaxApplications());
+            preparedStatement.setInt(2, plan.getMaxApplications());
 
             preparedStatement.executeUpdate();
             preparedStatement.close();
@@ -190,16 +189,15 @@ public class PlanDaoImpl implements PlanDao{
     public Plan updatePlanById(int planId, Plan plan) throws SQLException {
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
-        String sql="Update AC_SUBSCRIPTION_PLANS SET PLAN_NAME=?, TEAM= ?, MAX_INSTANCES=?, MAX_LC=? WHERE PLAN_ID = ?";
+        String sql="Update AC_SUBSCRIPTION_PLANS SET PLAN_NAME=?, MAX_INSTANCES=?, MAX_LC=? WHERE PLAN_ID = ?";
         try {
             DBConfiguration dbCon=new DBConfiguration();
             dbConnection= dbCon.getConnection();
             preparedStatement = dbConnection.prepareStatement(sql);
 
             preparedStatement.setString(1, plan.getPlanName());
-            preparedStatement.setInt(2, plan.getTeam());
-            preparedStatement.setInt(3, plan.getMaxApplications());
-            preparedStatement.setInt(4, planId);
+            preparedStatement.setInt(2, plan.getMaxApplications());
+            preparedStatement.setInt(3, planId);
             preparedStatement.executeUpdate();
             preparedStatement.close();
 
