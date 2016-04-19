@@ -33,6 +33,7 @@
             <class name="org.wso2.appcloud.integration.test.scenarios.WARApplicationTestCase"/>
             <class name="org.wso2.appcloud.integration.test.scenarios.MSF4JApplicationTestCase"/>
             <class name="org.wso2.appcloud.integration.test.scenarios.PHPApplicationTestCase"/>
+            <class name="org.wso2.appcloud.integration.test.scenarios.DatabaseTestCase"/>
         </classes>
     </test>
 </suite>
