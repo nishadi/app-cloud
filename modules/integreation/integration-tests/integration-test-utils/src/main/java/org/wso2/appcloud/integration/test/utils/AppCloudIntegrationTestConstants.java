@@ -53,6 +53,11 @@ public class AppCloudIntegrationTestConstants {
 	public static final String REST_LOGS_ENDPOINT = "runtimeLogs/ajax/runtimeLogs.jag";
 	public static final String APPMGT_USER_LOGIN = "user/login/ajax/login.jag";
 	public static final String APPMGT_URL_SURFIX = "appmgt/site/blocks/";
+	// Rest endpoints - Database
+	public static final String DATABASE_ADD = "database/add/ajax/add.jag";
+	public static final String DATABASE_USERS = "database/users/ajax/list.jag";
+	public static final String DATABASE_DROP = "database/drop/ajax/drop.jag";
+	public static final String DATABASE_LIST = "database/list/ajax/list.jag";
 
 	public static final String RESPONSE_MESSAGE_NAME = "message";
 	public static final String ATTRIBUTE_KEY = "key";
@@ -60,4 +65,5 @@ public class AppCloudIntegrationTestConstants {
 	public static final String STATUS_STOPPED = "stopped";
 	public static final String PROPERTY_STATUS_NAME = "status";
 	public static final String PROPERTY_VERSIONS_NAME = "versions";
+	public static final String TRUE_STRING = "true";
 }
