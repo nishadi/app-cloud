@@ -1543,7 +1543,7 @@ public class ApplicationDAO {
     }
 
 
-    public Version[] getApplicationVersionsByRunningTimePeriod(int numberOfDays) throws AppCloudException {
+    public Version[] getApplicationVersionsByRunningTimePeriod(int numberOfHours) throws AppCloudException {
         Connection dbConnection = DBUtil.getDBConnection();
         PreparedStatement preparedStatement = null;
         List<Version> versions = new ArrayList<>();
@@ -1552,7 +1552,7 @@ public class ApplicationDAO {
 
             preparedStatement = dbConnection.prepareStatement(
                     SQLQueryConstants.GET_ALL_APP_VERSIONS_CREATED_BEFORE_X_DAYS_AND_NOT_WHITE_LISTED);
-            preparedStatement.setInt(1, numberOfDays);
+            preparedStatement.setInt(1, numberOfHours);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){

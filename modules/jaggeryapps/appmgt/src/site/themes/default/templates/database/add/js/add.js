@@ -67,7 +67,9 @@ $(document).ready(function () {
             var data = highlighted.data('data');
             var id = data.id;
             var display = data.name;
-            $select.select2("val",id);
+            if(id != 0) {
+                $select.select2("val",id);
+            }
         }
     });
 
