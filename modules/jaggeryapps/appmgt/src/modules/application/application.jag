@@ -706,18 +706,25 @@ var getAllApplicationsWithTag = function(){
         for (var i = 0; i < applications.length; i++) {
             var application = applications[i];
             var applicationObject = {};
-
+            var tagArray = [];
             applicationObject.applicationName = application.applicationName;
             applicationObject.hashId = application.hashId;
             applicationObject.applicationType = application.applicationType;
             applicationObject.icon = getApplicationIconAsBase64String(application);
             applicationObject.appTypeIcon = appTypesProperties[application.applicationType].icon;
             applicationObject.appTypeTitle = appTypesProperties[application.applicationType].displayName;
-            applicationObject.tagKey = application.versions.get(0).tags.get(0).tagName;
-            applicationObject.tagValue = application.versions.get(0).tags.get(0).tagValue;
-            applicationArray.push(applicationObject);
 
+            for (var j = 0; j < application.versions.get(0).tags.size(); j++) {
+                var tagObject = {};
+                tagObject.tagKey = application.versions.get(0).tags.get(j).tagName;
+                tagObject.tagValue = application.versions.get(0).tags.get(j).tagValue;
+                tagArray.push(tagObject);
+            }
+
+            applicationObject.tagArray = tagArray;
+            applicationArray.push(applicationObject);
         }
+
     } catch(e){
         log.error("Error while getting the application list");
         log.error(e);

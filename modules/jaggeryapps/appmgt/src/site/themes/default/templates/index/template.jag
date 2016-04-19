@@ -43,10 +43,9 @@ jagg.template("index", function(inputs, outputs, jagg) {
                 init();
             }
             else if($(this).val().substring(0,4) ==="tag:"){
-
                 var finder = $(this).val().substring(4);
 
-                if(finder.includes(":")){
+                if(finder.includes(":")){ //meka key:value dunnth ena eka
                     var tempFinder = finder.split(":");
                     var finderKey = tempFinder[0];
                     var finderVal = tempFinder[1];
@@ -55,20 +54,22 @@ jagg.template("index", function(inputs, outputs, jagg) {
                     var typingPatternVal = new RegExp(finderVal.replace(/^\s+|\s+$/g, ''), "gi");
                     addTableColumnHeaders();
                     jQuery.grep(applicationWithTagList, function (element, index) {
-
-                        if ((element.tagKey.match(typingPatternKey) != null)&&(element.tagValue.match(typingPatternVal) != null)) {
-                            addTableRow(element);
-                        }
+                        jQuery.each(element.tagArray, function( index, value ) {
+                             if ((value.tagKey.match(typingPatternKey) != null)&&(value.tagValue.match(typingPatternVal) != null)) {
+                                 addTableRow(element);
+                             }
+                        });
                     });
 
                 }else{
                     var typingPatternKey = new RegExp(finder.replace(/^\s+|\s+$/g, ''), "gi");
                     addTableColumnHeaders();
                     jQuery.grep(applicationWithTagList, function (element, index) {
-
-                        if (element.tagKey.match(typingPatternKey) != null) {
-                            addTableRow(element);
-                        }
+                        jQuery.each(element.tagArray, function( index, value ) {
+                             if (value.tagKey.match(typingPatternKey) != null) {
+                                 addTableRow(element);
+                             }
+                        });
                     });
                 }
 
