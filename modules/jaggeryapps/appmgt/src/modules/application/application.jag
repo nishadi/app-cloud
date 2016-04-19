@@ -47,7 +47,7 @@ var ResourceQuotaLimit = Packages.org.wso2.appcloud.provisioning.runtime.beans.R
  * @param runtimeId runtime id of the application
  */
 var addApplication = function (applicationName, versionName, applicationDescription, replicas,
-                               runtimeId, appTypeName, runtimePropertiesArray, tagArray, appIcon, uploadedFileName, isNewVersion,conSpecMemory,conSpecCpu) {
+                               runtimeId, appTypeName, runtimePropertiesArray, tagArray, appIcon, uploadedFileName, isNewVersion, conSpecMemory, conSpecCpu) {
 
     log.info("Started creating App => name : " + applicationName + " Version : " + versionName + " Description " +
              ": " + applicationDescription + " runtimeId : " + runtimeId + " apptype : " + appTypeName );
@@ -343,13 +343,14 @@ var createDockerFile =  function(applicationName, versionName, runtimeId, upload
 
 var deployApplication = function(applicationName, versionName, deploymentConfig, isRedeploy, versionHashId, status, conSpecMemory, conSpecCpu){
 
-    var resourceQuotaLimit =new ResourceQuotaLimit();
+    var resourceQuotaLimit = new ResourceQuotaLimit();
         try{
             resourceQuotaLimit.setCpuLimit(conSpecCpu);
             resourceQuotaLimit.setMemoryLimit(conSpecMemory);
         }catch(e){
-            log.info("Error when updating the Resources");
-               log.error(e);
+            var msg = "Error while updating the Resource Quota";
+            log.error(msg);
+            log.error(e);
         }
     //Adding deployment pending event
     var msg = "Application deployment successfully triggered in Kubernetes";
@@ -361,7 +362,7 @@ var deployApplication = function(applicationName, versionName, deploymentConfig,
 
     var applicationCtx = KubernetesProvisioningUtils.getApplicationContext(
             applicationName, versionName, null , modManager.getTenantId(), modManager.getTenantDomain(), versionHashId);
-    var kubService = new KubernetesRuntime(applicationCtx,resourceQuotaLimit);
+    var kubService = new KubernetesRuntime(applicationCtx, resourceQuotaLimit);
 
     log.info("Deploying application: " + applicationName);
     try{
@@ -447,11 +448,11 @@ var updateApplicationStatus = function(versionHashId, status){
     ApplicationManager.updateVersionStatus(versionHashId, status);
 };
 
-var redeployVersion = function(applicationName, versionName, versionHashId,conSpecMemory,conSpecCpu){
+var redeployVersion = function(applicationName, versionName, versionHashId, conSpecMemory, conSpecCpu){
     deleteApplicationFromKubernetes(versionHashId);
     updateApplicationStatus(versionHashId, APPLICATION_STOPPED);
     deleteEventsOfAppVersions(versionHashId);
-    redeployApplication(applicationName, versionName, versionHashId,conSpecMemory,conSpecCpu);
+    redeployApplication(applicationName, versionName, versionHashId, conSpecMemory, conSpecCpu);
     return true;
 };
 
@@ -460,7 +461,7 @@ var deleteEventsOfAppVersions = function(versionHashId){
     eventsManager.deleteAllEventsofAppVersion(versionHashId);
 }
 
-var redeployApplication = function(applicationName, versionName, versionHashId,conSpecMemory,conSpecCpu){
+var redeployApplication = function(applicationName, versionName, versionHashId, conSpecMemory, conSpecCpu){
     var deploymentConfig = buildDeploymentConfigFromDB(versionHashId);
 
     deployApplication(applicationName, versionName, deploymentConfig, true, versionHashId, "redeploy", conSpecMemory, conSpecCpu);

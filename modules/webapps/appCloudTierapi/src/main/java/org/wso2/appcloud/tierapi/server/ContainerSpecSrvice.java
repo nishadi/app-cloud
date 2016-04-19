@@ -31,17 +31,17 @@ import org.wso2.appcloud.tierapi.delegate.DAOdelegate;
 
 @Path("/containerSpecs")
 public class ContainerSpecSrvice {
-    
-    private ContainerSpecDaoImpl ContainerSpecInstance= (ContainerSpecDaoImpl) DAOdelegate.getContainerSpecInstance();
-    
+
+    private ContainerSpecDaoImpl ContainerSpecInstance = (ContainerSpecDaoImpl) DAOdelegate.getContainerSpecInstance();
+
     /*
      * Get all Plans
      * @return                  Return all plans
      */
     @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public List<ContainerSpecifications> getPlans() throws SQLException {
-        
+
         return ContainerSpecInstance.getAllContainerSpecs();
     }
 
@@ -52,9 +52,9 @@ public class ContainerSpecSrvice {
      */
     @GET
     @Path("/{containerSpecId}")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public ContainerSpecifications getPlan(@PathParam("containerSpecId") int containerSpecId) throws SQLException {
-        
+
         return ContainerSpecInstance.getContainerSpecById(containerSpecId);
     }
 
@@ -65,7 +65,7 @@ public class ContainerSpecSrvice {
      */
     @GET
     @Path("allowedruntime/{containerSpecId}")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public ContainerSpecifications getPlanbyRuntimeId(@PathParam("containerSpecId") int runtimeId) throws SQLException {
 
         return ContainerSpecInstance.getContainerSpecByRuntimeID(runtimeId);

@@ -32,17 +32,17 @@ import org.wso2.appcloud.tierapi.delegate.DAOdelegate;
 
 @Path("/plans")
 public class PlanService {
-    
-    private PlanDaoImpl planInstance= (PlanDaoImpl) DAOdelegate.getPlanInstance();
-    
+
+    private PlanDaoImpl planInstance = (PlanDaoImpl) DAOdelegate.getPlanInstance();
+
     /*
      * Get all Plans
      * @return                  Return all plans
      */
     @GET
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public List<Plan> getPlans() throws SQLException {
-        
+
         return planInstance.getAllPlans();
     }
 
@@ -53,17 +53,17 @@ public class PlanService {
      */
     @GET
     @Path("/{planId}")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Plan getPlan(@PathParam("planId") int planId) throws SQLException {
-        
+
         return planInstance.getPlanByPlanId(planId);
     }
-    
+
     @GET
     @Path("/allowedSpecs/{planId}")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public List<ContainerSpecifications> getAllowedConSpecs(@PathParam("planId") int planId) throws SQLException {
-        
+
         return planInstance.getAllowedConSpecs(planId);
     }
 }

@@ -21,19 +21,19 @@ public class ResourceQuotaLimit {
     private String cpuLimit;
     private String memoryLimit;
 
-    public void setCpuLimit( String cpuLimit ){
-        this.cpuLimit=cpuLimit;
+    public void setCpuLimit(String cpuLimit) {
+        this.cpuLimit = cpuLimit;
     }
 
-    public String getCpuLimit(){
+    public String getCpuLimit() {
         return cpuLimit;
     }
 
-    public void setMemoryLimit( String memoryLimit ){
-        this.memoryLimit=memoryLimit;
+    public void setMemoryLimit(String memoryLimit) {
+        this.memoryLimit = memoryLimit;
     }
 
-    public String getMemoryLimit(){
+    public String getMemoryLimit() {
         return memoryLimit;
     }
 }

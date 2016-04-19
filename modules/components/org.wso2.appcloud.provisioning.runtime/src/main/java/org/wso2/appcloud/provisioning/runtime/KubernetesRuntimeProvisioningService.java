@@ -141,10 +141,10 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
         List<Container> containers = config.getContainers();
         ArrayList<io.fabric8.kubernetes.api.model.Container> kubContainerList = new ArrayList<>();
         List<String> serviceNameList = new ArrayList<>();
-        String cpuLimitInt=resourceQuotaLimit.getCpuLimit();
-        String cpuLimit= cpuLimitInt.concat("m");
-        String memoryLimitInt=resourceQuotaLimit.getMemoryLimit();
-        String memoryLimit= memoryLimitInt.concat("Mi");
+        String cpuLimitInt = resourceQuotaLimit.getCpuLimit();
+        String cpuLimit = cpuLimitInt.concat("m");
+        String memoryLimitInt = resourceQuotaLimit.getMemoryLimit();
+        String memoryLimit = memoryLimitInt.concat("Mi");
 
         try {
             //Deployment creation
@@ -155,7 +155,8 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                 kubContainer.setImagePullPolicy(KubernetesPovisioningConstants.IMAGE_PULL_POLICY_ALWAYS);
 
                 ResourceRequirementsBuilder resourceRequirementsBuilder = new ResourceRequirementsBuilder();
-                ResourceRequirements resourceRequirement=resourceRequirementsBuilder.addToLimits("cpu",new Quantity(cpuLimit)).addToLimits("memory",new Quantity(memoryLimit)).build();
+                ResourceRequirements resourceRequirement = resourceRequirementsBuilder
+                        .addToLimits("cpu", new Quantity(cpuLimit)).addToLimits("memory", new Quantity(memoryLimit)).build();
                 kubContainer.setResources(resourceRequirement);
 
                 //Checking whether the container is including volume mounts

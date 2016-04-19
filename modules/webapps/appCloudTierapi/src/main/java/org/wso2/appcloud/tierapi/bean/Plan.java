@@ -24,20 +24,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Plan {
-    
+
     private int id;
     private String planName;
     private int maxApplications;
-    
+
     public Plan() {
-        
+
     }
-    
-    public Plan(String planName, int maxApplications ){
-        this.planName=planName;
+
+    public Plan(String planName, int maxApplications) {
+        this.planName = planName;
         this.maxApplications = maxApplications;
     }
-    
+
     public int getId() {
         return id;
     }
@@ -47,19 +47,19 @@ public class Plan {
     }
 
     public void setPlanName(String planName) {
-        this.planName=planName;
+        this.planName = planName;
     }
-    
+
     public String getPlanName() {
         return planName;
     }
-    
+
     public void setMaxApplications(int maxApplications) {
         this.maxApplications = maxApplications;
     }
-    
+
     public int getMaxApplications() {
         return maxApplications;
     }
-    
+
 }

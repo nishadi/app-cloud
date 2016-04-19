@@ -36,13 +36,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var decodedEnvs = parse(decodeURIComponent(encodedEnvs, "UTF-8"));
         var newVersion = request.getParameter("newVersion");
         var nextVersion = request.getParameter("nextVersion");
-        var subscriptionPlanURL = subscriptionPlanBaseURL+"/plans/1";
-        var containerSpecsAPIURL = subscriptionPlanBaseURL+"/containerSpecs";
-		var runtimeContainerSpecURL = subscriptionPlanBaseURL+"/containerSpecs/allowedruntime/"+runtimeID;
+        var subscriptionPlanURL = subscriptionPlanBaseURL + "/plans/1";
+        var containerSpecsAPIURL = subscriptionPlanBaseURL + "/containerSpecs";
+		var runtimeContainerSpecURL = subscriptionPlanBaseURL + "/containerSpecs/allowedruntime/"+runtimeID;
         var data = null;
-        var specsJson = get(containerSpecsAPIURL ,"" ,"json");
-        var maxInstancesJson = get(subscriptionPlanURL ,"" ,"json");
-		var allowedRuntimeContainerSpecJson = get(runtimeContainerSpecURL,"","json");
+        var specsJson = get(containerSpecsAPIURL , "" , "json");
+        var maxInstancesJson = get(subscriptionPlanURL , "" , "json");
+		var allowedRuntimeContainerSpecJson = get(runtimeContainerSpecURL, "", "json");
     %>
 
 <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
@@ -57,10 +57,10 @@ var allowedRuntimeContainerSpecId = JSON.parse(allowedRuntimeContainerSpecJson.d
 var specCpu = new Array();
 var specCost = new Array();
 var specMemory = new Array();
-for(var i=0;i<specsJson.data.length;i++) {
-    specCpu[i] =JSON.parse(specsJson.data[i].cpu);
-    specMemory[i] =JSON.parse(specsJson.data[i].memory);
-    specCost[i] =JSON.parse(specsJson.data[i].costPerHour);
+for(var i=0; i < specsJson.data.length; i++) {
+    specCpu[i] = JSON.parse(specsJson.data[i].cpu);
+    specMemory[i] = JSON.parse(specsJson.data[i].memory);
+    specCost[i] = JSON.parse(specsJson.data[i].costPerHour);
 }
 %>
 
@@ -68,11 +68,11 @@ for(var i=0;i<specsJson.data.length;i++) {
     var appTypeName = "<%=appType.type%>";
     const APP_TYPE_EXTENSION = "<%=appType.extension%>";
     var applicationName = "<%=applicationName%>";
-    var applicationCount = <%= applicationCount %>
-    var maxApplications = <%= maxApplications %>;
-    var specCpu = <%= specCpu %>;
-    var specMemory = <%= specMemory %>;
-    var specCost = <%= specCost %>;
+    var applicationCount = <%=applicationCount%>
+    var maxApplications = <%=maxApplications%>;
+    var specCpu = <%=specCpu%>;
+    var specMemory = <%=specMemory%>;
+    var specCost = <%=specCost%>;
     var retryCount = 0;
     var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
     var artifactErrorMsg = "Invalid Artifact";
@@ -185,9 +185,9 @@ for(var i=0;i<specsJson.data.length;i++) {
                 var optionConSpecCost = specCost[optionSpec-1];
 
                 formData.append('runtime', optionRuntime);
-                formData.append('conSpecMemory',optionConSpecMemory);
-                formData.append('conSpecCost',optionConSpecCost);
-                formData.append('conSpecCpu',optionConSpecCpu);
+                formData.append('conSpecMemory', optionConSpecMemory);
+                formData.append('conSpecCost', optionConSpecCost);
+                formData.append('conSpecCpu', optionConSpecCpu);
 
                 if(uploadMethod === "file"){
                     formData.append('uploadedFileName', $("#uploadedFileName").val());
@@ -956,17 +956,13 @@ for(var i=0;i<specsJson.data.length;i++) {
       </div><!-- /.container -->
 
       <script>
-
       function myFunction() {
-            if(applicationCount < maxApplications )
-                    {
-                        $("#add-application").prop("disabled", false);
-                    }
-                    else{
-                        $("#add-application").prop("disabled", true);
-            }
+         if (applicationCount < maxApplications ) {
+             $("#add-application").prop("disabled", false);
+         } else {
+             $("#add-application").prop("disabled", true);
+         }
       }
-
       </script>
 
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/vendor/jquery.ui.widget.js'))%>"></script>

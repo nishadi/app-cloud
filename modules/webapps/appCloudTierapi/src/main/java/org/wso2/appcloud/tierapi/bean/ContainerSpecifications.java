@@ -23,26 +23,26 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 public class ContainerSpecifications {
-    
+
     private int id;
     private String conSpecName;
     private int cpu;
     private int memory;
     private int storage;
     private int costPerHour;
-    
-    public ContainerSpecifications(){
-        
+
+    public ContainerSpecifications() {
+
     }
-   
+
     public ContainerSpecifications(String conSpecName, int cpu, int memory, int storage, int costPerHour) {
-        this.conSpecName= conSpecName;
-        this.cpu=cpu;
-        this.storage=storage;
-        this.memory=memory;
-        this.costPerHour=costPerHour;
+        this.conSpecName = conSpecName;
+        this.cpu = cpu;
+        this.storage = storage;
+        this.memory = memory;
+        this.costPerHour = costPerHour;
     }
-    
+
     public int getId() {
         return id;
     }
@@ -50,35 +50,35 @@ public class ContainerSpecifications {
     public void setId(int id) {
         this.id = id;
     }
-    
+
     public void setConSpecName(String conSpecName) {
-        this.conSpecName=conSpecName;
+        this.conSpecName = conSpecName;
     }
-    
+
     public String getConSpecName() {
         return conSpecName;
     }
-    
+
     public void setCpu(int cpu) {
-        this.cpu=cpu;
+        this.cpu = cpu;
     }
-    
+
     public int getCpu() {
         return cpu;
     }
-    
+
     public void setMemory(int memory) {
-        this.memory=memory;
+        this.memory = memory;
     }
-    
+
     public int getMemory() {
         return memory;
     }
 
     public void setCostPerHour(int costPerHour) {
-        this.costPerHour=costPerHour;
+        this.costPerHour = costPerHour;
     }
-    
+
     public int getCostPerHour() {
         return costPerHour;
     }
