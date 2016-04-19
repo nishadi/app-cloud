@@ -31,6 +31,7 @@ jagg.block("application", {
     getOutputs:function (inputs) {
 
         var applicationModule = jagg.module("application");
+        var modManager = jagg.module("manager");
         var runtimes = applicationModule.getAllRuntimes(inputs.appTypeName);
         var appTypePropertyConfPath = jagg.getAppTypePropertyConfFilePath();
         var parsedObject = parse(appTypePropertyConfPath);
@@ -38,12 +39,14 @@ jagg.block("application", {
         var appType = appTypesProperties[inputs.appTypeName];
         var applicationName = inputs.applicationName;
         var applicationCount = applicationModule.getApplicationCount();
+        var subscriptionPlanBaseURL = modManager.getPropertyValue("SubscriptionPlanBaseURL");
 
         return {
             "runtimes" : runtimes,
             "appType" : appType,
             "applicationName" : applicationName,
-            "applicationCount" : applicationCount
+            "applicationCount" : applicationCount,
+            "subscriptionPlanBaseURL" : subscriptionPlanBaseURL
         };
     }
 });

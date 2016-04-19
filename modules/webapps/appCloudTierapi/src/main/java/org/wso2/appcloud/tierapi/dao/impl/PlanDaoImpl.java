@@ -26,6 +26,8 @@ import java.util.logging.Logger;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.tierapi.bean.ContainerSpecifications;
 import org.wso2.appcloud.tierapi.bean.Plan;
 import org.wso2.appcloud.tierapi.dao.PlanDao;
@@ -33,6 +35,8 @@ import org.wso2.appcloud.tierapi.util.DBConfiguration;
 
 @XmlRootElement
 public class PlanDaoImpl implements PlanDao{
+
+    private static final Log log = LogFactory.getLog(PlanDaoImpl.class);
 
     @Override
     public List<Plan> getAllPlans() throws SQLException{
@@ -59,6 +63,9 @@ public class PlanDaoImpl implements PlanDao{
             plans.add(plan);
         }
         } catch (SQLException e) {
+            String msg =
+                    "Error while getting details of Plans";
+            log.error(msg, e);
             throw e;
         } finally {
 
@@ -91,6 +98,7 @@ public class PlanDaoImpl implements PlanDao{
         }
         rs.close();
         } catch (SQLException e) {
+            String msg = "Error while getting details of Plan with ID "+planId;
             throw e;
         } finally {
 
@@ -122,7 +130,7 @@ public class PlanDaoImpl implements PlanDao{
             preparedStatement.executeUpdate();
             preparedStatement.close();
 
-            String sql2="select * from Plan WHERE PLAN_NAME= ?";
+            String sql2="select * from AC_SUBSCRIPTION_PLANS WHERE PLAN_NAME= ?";
             preparedStatement= dbConnection.prepareStatement(sql2);
             preparedStatement.setString(1, plan.getPlanName());
             ResultSet rs = preparedStatement.executeQuery();
@@ -134,7 +142,9 @@ public class PlanDaoImpl implements PlanDao{
             }
 
         } catch (SQLException e) {
-            System.out.println(e);
+            String msg =
+                    "Error while adding the Plans to Data Base";
+            log.error(msg, e);
             throw e;
         } finally {
 
@@ -161,7 +171,9 @@ public class PlanDaoImpl implements PlanDao{
         preparedStatement= dbConnection.prepareStatement(sql);
         isDeleted = preparedStatement.executeUpdate() == 1 ? true : false;
         } catch (SQLException e) {
-            System.out.println(e);
+            String msg =
+                    "Error while deleting the Plan with ID "+planId+"from Data Base";
+            log.error(msg, e);
             throw e;
         } finally {
             if (preparedStatement != null) {
@@ -202,7 +214,9 @@ public class PlanDaoImpl implements PlanDao{
                 plan.setMaxApplications(rs.getInt("MAX_APPLICATIONS"));
             }
         } catch (SQLException e) {
-            System.out.println(e);
+            String msg =
+                    "Error while updating the Plan with ID "+planId+"from Data Base";
+            log.error(msg, e);
             throw e;
         } finally {
             if (preparedStatement != null) {
@@ -238,8 +252,12 @@ public class PlanDaoImpl implements PlanDao{
             containerSpecification.setCostPerHour(rs.getInt("COST_PER_HOUR"));
            allowedContainerSpecs.add(containerSpecification);
         }
-        } catch (SQLException ex) {
-            throw ex;
+        } catch (SQLException e) {
+            String msg =
+                    "Error while getting details of container specifications that are allowed in Plan "
+                    + "with ID the Plan with ID "+planId;
+            log.error(msg, e);
+            throw e;
         } finally {
             if (preparedStatement != null) {
                 preparedStatement.close();

@@ -27,6 +27,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var appTypeName = appType.type;
         var isAppTypeBuildable = appType.buildable;
         var applicationName = outputs.applicationName;
+        var subscriptionPlanBaseURL = outputs.subscriptionPlanBaseURL;
         var encodedLabels = request.getParameter("encodedLabels");
         var encodedEnvs = request.getParameter("encodedEnvs");
         var log = new Log();
@@ -34,12 +35,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var decodedEnvs = parse(decodeURIComponent(encodedEnvs, "UTF-8"));
         var newVersion = request.getParameter("newVersion");
         var nextVersion = request.getParameter("nextVersion");
-        var url3="http://172.16.10.1:9763/tierapi/webapi/plans/1";
-        var url2="http://172.16.10.1:9763/tierapi/webapi/containerSpecs";
+        var subscriptionPlanURL = subscriptionPlanBaseURL+"/plans/1";
+        var containerSpecsAPIURL = subscriptionPlanBaseURL+"/containerSpecs";
 
         var data = null;
-        var specsJson = get(url2 ,"" ,"json");
-        var maxInstancesJson = get(url3 ,"" ,"json");
+        var specsJson = get(containerSpecsAPIURL ,"" ,"json");
+        var maxInstancesJson = get(subscriptionPlanURL ,"" ,"json");
 
     %>
 

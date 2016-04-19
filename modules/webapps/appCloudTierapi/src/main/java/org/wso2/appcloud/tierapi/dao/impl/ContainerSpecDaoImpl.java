@@ -23,14 +23,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.logging.LogFactory;
 import org.wso2.appcloud.tierapi.bean.ContainerSpecifications;
 import org.wso2.appcloud.tierapi.dao.ContainerSpecsDao;
 import org.wso2.appcloud.tierapi.util.DBConfiguration;
 
 @XmlRootElement
 public class ContainerSpecDaoImpl implements ContainerSpecsDao{
+    private static final Log log = LogFactory.getLog(ContainerSpecDaoImpl.class);
 
     @Override
     public List<ContainerSpecifications> getAllContainerSpecs() throws SQLException {
@@ -57,6 +60,9 @@ public class ContainerSpecDaoImpl implements ContainerSpecsDao{
             containerSpecsList.add(containerSpec);
         }
         } catch (SQLException e) {
+            String msg =
+                    "Error while getting details of Container Specifications";
+            log.error(msg, e);
             throw e;
         } finally {
 
@@ -94,6 +100,9 @@ public class ContainerSpecDaoImpl implements ContainerSpecsDao{
         }
         rs.close();
         } catch (SQLException e) {
+            String msg =
+                    "Error while getting details of Container Specification with the ID"+containerSpecId;
+            log.error(msg, e);
             throw e;
         } finally {
             
@@ -142,7 +151,9 @@ public class ContainerSpecDaoImpl implements ContainerSpecsDao{
             }
 
         } catch (SQLException e) {
-            System.out.println(e);
+            String msg =
+                    "Error while defining the Container Specifications";
+            log.error(msg, e);
             throw e;
         } finally {
 
@@ -169,7 +180,9 @@ public class ContainerSpecDaoImpl implements ContainerSpecsDao{
         preparedStatement= dbConnection.prepareStatement(sql);
         isDeleted = preparedStatement.executeUpdate() == 1 ? true : false;
         } catch (SQLException e) {
-            System.out.println(e);
+            String msg =
+                    "Error while deleting the Container Specifications with ID "+containerSpecId;
+            log.error(msg, e);
             throw e;
         } finally {
             if (preparedStatement != null) {
@@ -213,7 +226,9 @@ public class ContainerSpecDaoImpl implements ContainerSpecsDao{
             }
 
         } catch (SQLException e) {
-            System.out.println(e);
+            String msg =
+                    "Error while Updating the Container Specifications with ID "+containerSpecId;
+            log.error(msg, e);
             throw e;
         } finally {
 
