@@ -77,6 +77,48 @@ public class ContainerSpecDaoImpl implements ContainerSpecsDao{
     }
 
     @Override
+    public ContainerSpecifications getContainerSpecByRuntimeID (int runtimeId ) throws SQLException
+    {
+        Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+
+        ContainerSpecifications containerSpec = new ContainerSpecifications();
+        String sql = "SELECT * FROM AC_CONTAINER_SPECIFICATIONS JOIN AC_RUNTIME_CONTAINER_SPECIFICATIONS "
+                     + "ON AC_CONTAINER_SPECIFICATIONS.CON_SPEC_ID = AC_RUNTIME_CONTAINER_SPECIFICATIONS.CON_SPEC_ID"
+                     + " WHERE AC_RUNTIME_CONTAINER_SPECIFICATIONS.id ="+runtimeId;
+        try {
+            DBConfiguration dbCon=new DBConfiguration();
+            dbConnection= dbCon.getConnection();
+
+            preparedStatement= dbConnection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                containerSpec.setId(rs.getInt("CON_SPEC_ID"));
+                containerSpec.setConSpecName(rs.getString("CON_SPEC_NAME"));
+                containerSpec.setCpu(rs.getInt("CPU"));
+                containerSpec.setMemory(rs.getInt("MEMORY"));
+                containerSpec.setCostPerHour(rs.getInt("COST_PER_HOUR"));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            String msg =
+                    "Error while getting details of Container Specifications for Runtime ID "+runtimeId;
+            log.error(msg, e);
+            throw e;
+        } finally {
+
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+        }
+        return containerSpec;
+    }
+
+    @Override
     public ContainerSpecifications getContainerSpecById(int containerSpecId) throws SQLException {
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;

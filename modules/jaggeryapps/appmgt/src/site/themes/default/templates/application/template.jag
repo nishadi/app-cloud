@@ -28,6 +28,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var isAppTypeBuildable = appType.buildable;
         var applicationName = outputs.applicationName;
         var subscriptionPlanBaseURL = outputs.subscriptionPlanBaseURL;
+		var runtimeID = runtimes[0].id;
         var encodedLabels = request.getParameter("encodedLabels");
         var encodedEnvs = request.getParameter("encodedEnvs");
         var log = new Log();
@@ -37,11 +38,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var nextVersion = request.getParameter("nextVersion");
         var subscriptionPlanURL = subscriptionPlanBaseURL+"/plans/1";
         var containerSpecsAPIURL = subscriptionPlanBaseURL+"/containerSpecs";
-
+		var runtimeContainerSpecURL = subscriptionPlanBaseURL+"/containerSpecs/allowedruntime/"+runtimeID;
         var data = null;
         var specsJson = get(containerSpecsAPIURL ,"" ,"json");
         var maxInstancesJson = get(subscriptionPlanURL ,"" ,"json");
-
+		var allowedRuntimeContainerSpecJson = get(runtimeContainerSpecURL,"","json");
     %>
 
 <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
@@ -51,7 +52,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
 
 <%
-var maxApplications =JSON.parse(maxInstancesJson.data.maxApplications);
+var maxApplications = JSON.parse(maxInstancesJson.data.maxApplications);
+var allowedRuntimeContainerSpecId = JSON.parse(allowedRuntimeContainerSpecJson.data.id);
 var specCpu = new Array();
 var specCost = new Array();
 var specMemory = new Array();
@@ -860,14 +862,7 @@ for(var i=0;i<specsJson.data.length;i++) {
                 <label for="container">Container Specification: </label>
                 <select name="container" id="container" class="form-control"  >
                      <option value="None" selected="Selected" >Select Container Specification</option>
-                     <%
-                     for(var i=0; i < specsJson.data.length;i++)
-                     {
-                     %>
-                          <option onClick="myFunction()"> <%=specsJson.data[i].conSpecName%></option>
-                     <%
-                     }
-                     %>
+                     <option onClick="myFunction()"> <%=specsJson.data[allowedRuntimeContainerSpecId-1].conSpecName%></option>
                 </select>
             </div>
             <div class="form-group">

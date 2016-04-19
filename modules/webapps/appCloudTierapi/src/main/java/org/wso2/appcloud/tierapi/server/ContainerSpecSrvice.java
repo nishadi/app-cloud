@@ -58,4 +58,17 @@ public class ContainerSpecSrvice {
         return ContainerSpecInstance.getContainerSpecById(containerSpecId);
     }
 
+    /*
+     * Get Plan using Plan ID
+     * @param planId            Plan ID of the plan
+     * @return                  Return the plan refer to the Plan ID
+     */
+    @GET
+    @Path("allowedruntime/{containerSpecId}")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public ContainerSpecifications getPlanbyRuntimeId(@PathParam("containerSpecId") int runtimeId) throws SQLException {
+
+        return ContainerSpecInstance.getContainerSpecByRuntimeID(runtimeId);
+    }
+
 }
