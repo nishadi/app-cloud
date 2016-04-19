@@ -45,7 +45,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
             else if($(this).val().substring(0,4) ==="tag:"){
                 var finder = $(this).val().substring(4);
 
-                if(finder.includes(":")){ //meka key:value dunnth ena eka
+                if(finder.includes(":")){
                     var tempFinder = finder.split(":");
                     var finderKey = tempFinder[0];
                     var finderVal = tempFinder[1];
