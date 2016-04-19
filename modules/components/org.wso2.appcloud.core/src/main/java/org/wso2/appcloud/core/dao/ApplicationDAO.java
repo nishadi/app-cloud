@@ -558,6 +558,7 @@ public class ApplicationDAO {
         List<Tag> tags = new ArrayList<>();
         Tag tag;
         ResultSet resultSet = null;
+        Boolean applicationExists = false;
 
         try {
 
@@ -568,23 +569,36 @@ public class ApplicationDAO {
 
             while (resultSet.next()) {
 
-                tag = new Tag();
-                tag.setTagName(resultSet.getString(SQLQueryConstants.TAG_KEY));
-                tag.setTagValue(resultSet.getString(SQLQueryConstants.TAG_VALUE));
-                tags.add(tag);
+                applicationExists = false;
+                for (Application applicationTemp : applications) {
+                    if(applicationTemp.getHashId()==resultSet.getString(SQLQueryConstants.HASH_ID)){
+                        applicationExists = true;
+                        tag = new Tag();
+                        tag.setTagName(resultSet.getString(SQLQueryConstants.TAG_KEY));
+                        tag.setTagValue(resultSet.getString(SQLQueryConstants.TAG_VALUE));
+                        applicationTemp.getVersions().get(0).getTags().add(tag);
+                    }
+                }
+                if(!applicationExists){
+                    tag = new Tag();
+                    tag.setTagName(resultSet.getString(SQLQueryConstants.TAG_KEY));
+                    tag.setTagValue(resultSet.getString(SQLQueryConstants.TAG_VALUE));
+                    tags.add(tag);
 
-                version = new Version();
-                version.setTags(tags);
-                versions.add(version);
+                    version = new Version();
+                    version.setTags(tags);
+                    versions.add(version);
 
-                application = new Application();
-                application.setApplicationName(resultSet.getString(SQLQueryConstants.APPLICATION_NAME));
-                application.setApplicationType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
-                application.setHashId(resultSet.getString(SQLQueryConstants.HASH_ID));
-                application.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
-                application.setVersions(versions);
+                    application = new Application();
+                    application.setApplicationName(resultSet.getString(SQLQueryConstants.APPLICATION_NAME));
+                    application.setApplicationType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
+                    application.setHashId(resultSet.getString(SQLQueryConstants.HASH_ID));
+                    application.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
+                    application.setVersions(versions);
 
-                applications.add(application);
+                    applications.add(application);
+                }
+
             }
 
         } catch (SQLException e) {

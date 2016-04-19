@@ -27,7 +27,8 @@ jagg.template("index", function(inputs, outputs, jagg) {
     %>
 
     <script type="text/javascript" xmlns="http://www.w3.org/1999/html" charset="utf-8">
-        var applicationList = <%=applicationsWithTag%>
+        var applicationList = <%=applications%>
+        var applicationWithTagList = <%=applicationsWithTag%>
 
         $(document).ready(function (){
 
@@ -40,7 +41,43 @@ jagg.template("index", function(inputs, outputs, jagg) {
             $("#search-apps").bind("keyup", function () {
             if ($(this).val() === null || $(this).val() === undefined || $(this).val().length === 0) {
                 init();
-            } else {
+            }
+            else if($(this).val().substring(0,4) ==="tag:"){
+
+                var finder = $(this).val().substring(4);
+
+                if(finder.includes(":")){
+                    var tempFinder = finder.split(":");
+                    var finderKey = tempFinder[0];
+                    var finderVal = tempFinder[1];
+
+                    var typingPatternKey = new RegExp(finderKey.replace(/^\s+|\s+$/g, ''), "gi");
+                    var typingPatternVal = new RegExp(finderVal.replace(/^\s+|\s+$/g, ''), "gi");
+                    addTableColumnHeaders();
+                    jQuery.grep(applicationWithTagList, function (element, index) {
+
+                        if ((element.tagKey.match(typingPatternKey) != null)&&(element.tagValue.match(typingPatternVal) != null)) {
+                            addTableRow(element);
+                        }
+                    });
+
+                }else{
+                    var typingPatternKey = new RegExp(finder.replace(/^\s+|\s+$/g, ''), "gi");
+                    addTableColumnHeaders();
+                    jQuery.grep(applicationWithTagList, function (element, index) {
+
+                        if (element.tagKey.match(typingPatternKey) != null) {
+                            addTableRow(element);
+                        }
+                    });
+                }
+
+                if ($("#item_list").children().length <= 1) {
+	                $("#item_list").append($('<div class="col-centered col-md-4 "><div class="cloud-new-content"> '+
+	                 '<h3>Your search tag "'+finder+'" did not match any applications.</h3></div></div>'));
+		        }
+            }
+            else {
                 var finder = $(this).val();
 
                 var typingPattern = new RegExp($(this).val().replace(/^\s+|\s+$/g, ''), "gi");

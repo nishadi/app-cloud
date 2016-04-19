@@ -698,7 +698,7 @@ var getAllApplications = function(){
 var getAllApplicationsWithTag = function(){
     var applicationArray = [];
     try {
-        var applications = ApplicationManager.getApplicationList();
+        var applications = ApplicationManager.getApplicationListWithTags();
         var appTypePropertyConfPath = jagg.getAppTypePropertyConfFilePath();
         var parsedObject = parse(appTypePropertyConfPath);
         var appTypesProperties = require(parsedObject);
@@ -713,9 +713,10 @@ var getAllApplicationsWithTag = function(){
             applicationObject.icon = getApplicationIconAsBase64String(application);
             applicationObject.appTypeIcon = appTypesProperties[application.applicationType].icon;
             applicationObject.appTypeTitle = appTypesProperties[application.applicationType].displayName;
-            applicationObject.tagKey = application.versions[0].tags[0].tagName;
-            applicationObject.tagValue = application.versions[0].tags[0].tagValue;
+            applicationObject.tagKey = application.versions.get(0).tags.get(0).tagName;
+            applicationObject.tagValue = application.versions.get(0).tags.get(0).tagValue;
             applicationArray.push(applicationObject);
+
         }
     } catch(e){
         log.error("Error while getting the application list");
