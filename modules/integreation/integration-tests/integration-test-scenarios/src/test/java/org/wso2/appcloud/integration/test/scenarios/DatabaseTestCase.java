@@ -55,7 +55,7 @@ public class DatabaseTestCase {
     }
 
     /**
-     * Deleting database and user if exists before running the test case new run.
+     * Deleting database and users if exists before running the test case new run.
      *
      * @throws AppCloudIntegrationTestException
      */
@@ -86,7 +86,7 @@ public class DatabaseTestCase {
     public void testCreateNewDatabaseUser() throws AppCloudIntegrationTestException {
         databaseClient.createDatabaseUser(dbUserName2, dbUserPassword);
         Assert.assertEquals(databaseClient.getDatabaseUsers(dbName)
-                                          .toString().contains(dbUserName2), true, "Database user attaching failed");
+                                          .toString().contains(dbUserName2), true, "Database user creation failed");
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.PLATFORM})
