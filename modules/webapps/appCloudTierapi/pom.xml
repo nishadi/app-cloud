@@ -58,6 +58,11 @@
             <version>7.0.34</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.logging</artifactId>
+            <version>4.2.0</version>
+        </dependency>
     </dependencies>
 
     <properties>
