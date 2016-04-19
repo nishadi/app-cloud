@@ -152,6 +152,7 @@ public class KubernetesRuntimeProvisioningService implements RuntimeProvisioning
                 io.fabric8.kubernetes.api.model.Container kubContainer = new io.fabric8.kubernetes.api.model.Container();
                 kubContainer.setName(container.getContainerName());
                 kubContainer.setImage(container.getBaseImageName() + ":" + container.getBaseImageVersion());
+                kubContainer.setImagePullPolicy(KubernetesPovisioningConstants.IMAGE_PULL_POLICY_ALWAYS);
 
                 ResourceRequirementsBuilder resourceRequirementsBuilder = new ResourceRequirementsBuilder();
                 ResourceRequirements resourceRequirement=resourceRequirementsBuilder.addToLimits("cpu",new Quantity(cpuLimit)).addToLimits("memory",new Quantity(memoryLimit)).build();
