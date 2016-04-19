@@ -1434,7 +1434,6 @@ public class ApplicationDAO {
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
-
         return containerServiceProxies;
     }
 
