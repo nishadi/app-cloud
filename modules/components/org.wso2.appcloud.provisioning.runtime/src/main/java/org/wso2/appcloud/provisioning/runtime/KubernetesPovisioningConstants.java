@@ -55,5 +55,7 @@ public class KubernetesPovisioningConstants {
     public static final String SERVICE_SESSION_AFFINITY_MODE = "ClientIP";
     public static final int HTTPS_SERVICE_PORT = 443;
 
+    public static final String IMAGE_PULL_POLICY_ALWAYS = "Always";
+
 
 }
