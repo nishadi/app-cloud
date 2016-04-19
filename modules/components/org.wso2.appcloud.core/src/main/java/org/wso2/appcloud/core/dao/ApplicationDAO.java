@@ -1395,6 +1395,10 @@ public class ApplicationDAO {
             }
         } catch (SQLException e) {
             String msg = "Error while getting the application count of the tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
         }
         return appCount;
     }
