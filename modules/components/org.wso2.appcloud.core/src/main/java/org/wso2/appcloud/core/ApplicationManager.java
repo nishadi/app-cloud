@@ -586,7 +586,15 @@ public class ApplicationManager {
         ApplicationDAO applicationDAO = new ApplicationDAO();
         return applicationDAO.getRuntimeById(runtimeId);
     }
+	
+	public static int getApplicationCount() throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
 
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        int applicationCount = applicationDAO.getApplicationCount(tenantId);
+
+        return applicationCount;
+    }
     /**
      * Get container service proxy by version hash id
      *
@@ -666,7 +674,7 @@ public class ApplicationManager {
 
     public static Version[] getApplicationVersionsByRunningTimePeriod(int numberOfHours) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        return applicationDAO.getApplicationVersionsByRunningTimePeriod(numberOfHours);
 
+        return applicationDAO.getApplicationVersionsByRunningTimePeriod(numberOfHours);
     }
 }

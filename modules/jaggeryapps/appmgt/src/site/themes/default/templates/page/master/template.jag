@@ -34,6 +34,7 @@ jagg.template("page/master", function(inputs, outputs, jagg) {%>
     <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
     <link rel="shortcut icon" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('assets/img/favicon-wso2-logo.ico'))%>" type="image/x-icon"/>
 </head>
+
 <body class="top-notification-active">
     <div class="top-notification">
         <span class="hidden-xs">This new version of WSO2 App Cloud still in alpha stage. Click here for <a href="https://apps.cloud.wso2.com">old</a> version.</span>

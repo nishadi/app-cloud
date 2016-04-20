@@ -92,7 +92,7 @@ function as_setup(){
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/kubernetes-client-1.3.76.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/dnsjava-2.1.7.wso2v1.jar $1/repository/components/dropins/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/json-20160212.jar $1/repository/components/dropins/
-    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/fabric8-utils-2.2.100.jar $1/repository/components/dropins/    
+    cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/lib/fabric8-utils-2.2.100.jar $1/repository/components/dropins/
 
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/datasources/master-datasources.xml $1/repository/conf/datasources/
     cp $APP_CLOUD_SRC_HOME/modules/setup-scripts/conf/wso2as-5.2.1/repository/conf/datasources/appcloud-datasources.xml $1/repository/conf/datasources/

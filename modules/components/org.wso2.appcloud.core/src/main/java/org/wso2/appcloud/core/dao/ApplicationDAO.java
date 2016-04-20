@@ -1311,7 +1311,6 @@ public class ApplicationDAO {
         }
     }
 
-
     /**
      * Delete all the versions of an application
      *
@@ -1382,7 +1381,27 @@ public class ApplicationDAO {
         }
     }
 
-
+	public int getApplicationCount(int tenantId) throws AppCloudException {
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        int appCount = 0;
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_TENANT_APPLICATION_COUNT);
+            preparedStatement.setInt(1, tenantId);
+            ResultSet rs = preparedStatement.executeQuery();
+            dbConnection.commit();
+            if (rs.next()) {
+                appCount = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            String msg = "Error while getting the application count of the tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        return appCount;
+    }
     /**
      * Get service proxy for given version
      *
@@ -1419,7 +1438,6 @@ public class ApplicationDAO {
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
-
         return containerServiceProxies;
     }
 
