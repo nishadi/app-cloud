@@ -259,6 +259,8 @@ public class ApplicationManager {
         } catch (AppCloudException e) {
             String msg = "Error while getting application hash id for application name : " + applicationName;
             throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
         }
     }
 
@@ -533,6 +535,8 @@ public class ApplicationManager {
             String msg = "Error while committing the transaction when deleting the version with hash id : " + versionHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
         }
     }
 
