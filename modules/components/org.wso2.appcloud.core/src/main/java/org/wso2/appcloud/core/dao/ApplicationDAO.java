@@ -602,7 +602,7 @@ public class ApplicationDAO {
 
     public boolean isSingleVersion(Connection dbConnection, String versionHashId) throws AppCloudException {
 
-        PreparedStatement preparedStatement;
+        PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
 
         try {
@@ -624,7 +624,7 @@ public class ApplicationDAO {
             throw new AppCloudException(msg, e);
         } finally {
             DBUtil.closeResultSet(resultSet);
-            DBUtil.closeConnection(dbConnection);
+            DBUtil.closePreparedStatement(preparedStatement);
         }
     }
 
@@ -687,8 +687,8 @@ public class ApplicationDAO {
     public String getApplicationHashIdByName(Connection dbConnection, String applicationName, int tenantId)
             throws AppCloudException {
 
-        PreparedStatement preparedStatement;
-        ResultSet resultSet;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         String applicationHashId = null;
 
         try {
@@ -707,6 +707,9 @@ public class ApplicationDAO {
                          " in tenant : " + tenantId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
         }
 
         return applicationHashId;
@@ -768,8 +771,8 @@ public class ApplicationDAO {
     public List<Version> getAllVersionsOfApplication(Connection dbConnection, String applicationHashId)
             throws AppCloudException {
 
-        PreparedStatement preparedStatement;
-        ResultSet resultSet;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         List<Version> versions = new ArrayList<>();
         try {
 
@@ -792,7 +795,12 @@ public class ApplicationDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            String msg = "Error while getting all versions of application with application hash id : " + applicationHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
         }
 
         return versions;
