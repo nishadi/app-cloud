@@ -35,38 +35,38 @@ public class ContainerSpecSrvice {
     private ContainerSpecDaoImpl ContainerSpecInstance = (ContainerSpecDaoImpl) DAOdelegate.getContainerSpecInstance();
 
     /*
-     * Get all Plans
-     * @return                  Return all plans
+     * Get all Container Specifications
+     * @return                  Return all Container Specifications
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public List<ContainerSpecifications> getPlans() throws SQLException {
+    public List<ContainerSpecifications> getContainerSpecifications() throws SQLException {
 
         return ContainerSpecInstance.getAllContainerSpecs();
     }
 
     /*
-     * Get Plan using Plan ID
-     * @param planId            Plan ID of the plan
-     * @return                  Return the plan refer to the Plan ID
+     * Get Plan using Container Specifications ID
+     * @param containerSpecId            Container Specifications ID of the Container Specification
+     * @return                  Return the Container Specifications refer to the Container Specifications ID
      */
     @GET
     @Path("/{containerSpecId}")
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public ContainerSpecifications getPlan(@PathParam("containerSpecId") int containerSpecId) throws SQLException {
+    public ContainerSpecifications getContainerSpecification(@PathParam("containerSpecId") int containerSpecId) throws SQLException {
 
         return ContainerSpecInstance.getContainerSpecById(containerSpecId);
     }
 
     /*
-     * Get Plan using Plan ID
-     * @param planId            Plan ID of the plan
-     * @return                  Return the plan refer to the Plan ID
+     * Get Container Specifications using Runtime ID
+     * @param RuntimeId         runTimeId ID
+     * @return                  Return the Container Specification refer to Runtime ID
      */
     @GET
-    @Path("allowedruntime/{containerSpecId}")
+    @Path("allowedruntime/{runTimeId}")
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public ContainerSpecifications getPlanbyRuntimeId(@PathParam("containerSpecId") int runtimeId) throws SQLException {
+    public List<ContainerSpecifications> getContainerSpecificationbyRuntimeId(@PathParam("runTimeId") int runtimeId) throws SQLException {
 
         return ContainerSpecInstance.getContainerSpecByRuntimeID(runtimeId);
     }

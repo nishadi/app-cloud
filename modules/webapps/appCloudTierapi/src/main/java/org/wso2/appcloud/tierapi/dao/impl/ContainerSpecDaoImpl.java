@@ -56,6 +56,7 @@ public class ContainerSpecDaoImpl implements ContainerSpecsDao {
                 containerSpec.setCostPerHour(rs.getInt("COST_PER_HOUR"));
                 containerSpecsList.add(containerSpec);
             }
+            rs.close();
         } catch (SQLException e) {
             String msg =
                     "Error while getting details of Container Specifications";
@@ -73,10 +74,10 @@ public class ContainerSpecDaoImpl implements ContainerSpecsDao {
     }
 
     @Override
-    public ContainerSpecifications getContainerSpecByRuntimeID(int runtimeId) throws SQLException {
+    public List<ContainerSpecifications> getContainerSpecByRuntimeID(int runtimeId) throws SQLException {
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
-        ContainerSpecifications containerSpec = new ContainerSpecifications();
+        List<ContainerSpecifications> containerSpecsList = new ArrayList<ContainerSpecifications>();
         String sql = "SELECT * FROM AC_CONTAINER_SPECIFICATIONS JOIN AC_RUNTIME_CONTAINER_SPECIFICATIONS "
                 + "ON AC_CONTAINER_SPECIFICATIONS.CON_SPEC_ID = AC_RUNTIME_CONTAINER_SPECIFICATIONS.CON_SPEC_ID"
                 + " WHERE AC_RUNTIME_CONTAINER_SPECIFICATIONS.id =" + runtimeId;
@@ -86,11 +87,13 @@ public class ContainerSpecDaoImpl implements ContainerSpecsDao {
             preparedStatement = dbConnection.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
+                ContainerSpecifications containerSpec = new ContainerSpecifications();
                 containerSpec.setId(rs.getInt("CON_SPEC_ID"));
                 containerSpec.setConSpecName(rs.getString("CON_SPEC_NAME"));
                 containerSpec.setCpu(rs.getInt("CPU"));
                 containerSpec.setMemory(rs.getInt("MEMORY"));
                 containerSpec.setCostPerHour(rs.getInt("COST_PER_HOUR"));
+                containerSpecsList.add(containerSpec);
             }
             rs.close();
         } catch (SQLException e) {
@@ -106,7 +109,7 @@ public class ContainerSpecDaoImpl implements ContainerSpecsDao {
                 dbConnection.close();
             }
         }
-        return containerSpec;
+        return containerSpecsList;
     }
 
     @Override

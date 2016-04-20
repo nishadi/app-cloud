@@ -37,10 +37,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var newVersion = request.getParameter("newVersion");
         var nextVersion = request.getParameter("nextVersion");
         var subscriptionPlanURL = subscriptionPlanBaseURL + "/plans/1";
-        var containerSpecsAPIURL = subscriptionPlanBaseURL + "/containerSpecs";
 		var runtimeContainerSpecURL = subscriptionPlanBaseURL + "/containerSpecs/allowedruntime/"+runtimeID;
         var data = null;
-        var specsJson = get(containerSpecsAPIURL , "" , "json");
         var maxInstancesJson = get(subscriptionPlanURL , "" , "json");
 		var allowedRuntimeContainerSpecJson = get(runtimeContainerSpecURL, "", "json");
     %>
@@ -52,16 +50,15 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
 
 <%
-var maxApplications = JSON.parse(maxInstancesJson.data.maxApplications);
-var allowedRuntimeContainerSpecId = JSON.parse(allowedRuntimeContainerSpecJson.data.id);
-var specCpu = new Array();
-var specCost = new Array();
-var specMemory = new Array();
-for(var i=0; i < specsJson.data.length; i++) {
-    specCpu[i] = JSON.parse(specsJson.data[i].cpu);
-    specMemory[i] = JSON.parse(specsJson.data[i].memory);
-    specCost[i] = JSON.parse(specsJson.data[i].costPerHour);
-}
+    var maxApplications = JSON.parse(maxInstancesJson.data.maxApplications);
+    var specCpu = new Array();
+    var specCost = new Array();
+    var specMemory = new Array();
+    for(var i=0 ; i<allowedRuntimeContainerSpecJson.data.length ; i++ ) {
+        specCpu[i] = JSON.parse(allowedRuntimeContainerSpecJson.data[i].cpu);
+        specMemory[i] = JSON.parse(allowedRuntimeContainerSpecJson.data[i].memory);
+        specCost[i] = JSON.parse(allowedRuntimeContainerSpecJson.data[i].costPerHour);
+    }
 %>
 
  <script type="text/javascript">
@@ -862,7 +859,14 @@ for(var i=0; i < specsJson.data.length; i++) {
                 <label for="container">Container Specification: </label>
                 <select name="container" id="container" class="form-control"  >
                      <option value="None" selected="Selected" >Select Container Specification</option>
-                     <option onClick="myFunction()"> <%=specsJson.data[allowedRuntimeContainerSpecId-1].conSpecName%></option>
+                     <%
+                     for(var i=0;i<allowedRuntimeContainerSpecJson.data.length;i++)
+                     {
+                     %>
+                        <option onClick="myFunction()"> <%=allowedRuntimeContainerSpecJson.data[i].conSpecName%></option>
+                     <%
+                     }
+                     %>
                 </select>
             </div>
             <div class="form-group">
