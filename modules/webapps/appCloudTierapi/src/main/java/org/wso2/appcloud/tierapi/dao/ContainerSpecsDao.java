@@ -39,7 +39,7 @@ public interface ContainerSpecsDao {
     /*
      * Get Container Spec by Runtime ID
      */
-    public ContainerSpecifications getContainerSpecByRuntimeID (int runtimeId ) throws SQLException;
+    public List<ContainerSpecifications> getContainerSpecByRuntimeID (int runtimeId ) throws SQLException;
 
     /*
      * Define new Container Spec

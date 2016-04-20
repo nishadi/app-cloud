@@ -16,6 +16,8 @@
 
 package org.wso2.appcloud.tierapi.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.naming.SelectorContext;
 
 import javax.naming.Context;
@@ -27,6 +29,8 @@ import java.sql.SQLException;
 import java.util.Hashtable;
 
 public class DataSourceJDBC {
+
+    private static final Log log = LogFactory.getLog(DataSourceJDBC.class);
 
     public static Connection getConnection() {
         Connection conn = null;
@@ -42,9 +46,13 @@ public class DataSourceJDBC {
             conn = ds.getConnection();
 
         } catch (NamingException e) {
-            e.printStackTrace();
+            String msg =
+                    "Error while connecting to Data Source ";
+            log.error(msg, e);
         } catch (SQLException e) {
-            e.printStackTrace();
+            String msg =
+                    "Error while getting connection to Data Base ";
+            log.error(msg, e);
         }
         return conn;
     }

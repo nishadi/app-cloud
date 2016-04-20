@@ -16,9 +16,14 @@
 
 package org.wso2.appcloud.tierapi.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.sql.Connection;
 
 public class DBConfiguration {
+
+    private static final Log log = LogFactory.getLog(DBConfiguration.class);
 
     public Connection getConnection() {
         try {
@@ -26,10 +31,10 @@ public class DBConfiguration {
             Connection con = DataSourceJDBC.getConnection();
             return con;
         } catch (Exception e) {
-            System.out.println(e);
+            String msg =
+                    "Error while connecting to Data Base ";
+            log.error(msg, e);
         }
         return null;
     }
 }
-
-
