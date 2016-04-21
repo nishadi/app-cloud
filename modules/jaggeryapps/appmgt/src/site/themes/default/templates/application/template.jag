@@ -28,7 +28,12 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var isAppTypeBuildable = appType.buildable;
         var applicationName = outputs.applicationName;
         var subscriptionPlanBaseURL = outputs.subscriptionPlanBaseURL;
-		var runtimeID = runtimes[0].id;
+        if(appTypeName=="custom"){
+            var runtimeID = 5;
+        }else{
+            var runtimeID = runtimes[0].id;
+        }
+
         var encodedLabels = request.getParameter("encodedLabels");
         var encodedEnvs = request.getParameter("encodedEnvs");
         var log = new Log();
@@ -459,7 +464,14 @@ jagg.template("application", function (inputs, outputs, jagg) {
         // Validate Icon
         $("#icon").change(function() {
              var file = $('#icon');
-             validateIconImage(file.val(), this.files[0].size);
+             validateIconImage(file.val(), this.files[0].size);        });
+
+        $("#httpPort").change(function() {
+             activateCreateApplication();
+        });
+
+        $("#httpsPort").change(function() {
+            activateCreateApplication();
         });
 
         $('.radio-inline input:radio').click(function() {
@@ -892,7 +904,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 </div>
                 <div class="form-group">
                     <label for="http-servicePort">HTTP servicePort exposing: </label>
-                    <input id="httpPort" serviceName="httpPort" type="int" class="form-control" placeholder="1.0" />
+                    <input id="httpPort" name="httpPort" serviceName="httpPort" type="int" class="form-control" placeholder="1.0" />
                 </div>
                 <div class="form-group">
                     <label for="https-servicePort">HTTPS servicePort exposing: </label>
