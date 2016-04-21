@@ -544,7 +544,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
     });
 
     function activateCreateApplication() {
-        if ($('#applicationName').val() && $('#applicationRevision').val() 
+        if ($('#applicationName').val() && $('#applicationRevision').val() && ($('#container option:selected').text() != "Select Container Specification")
                         && $('#runtime').val() > 0 && ($("#uploadedFileName").val() || $("#artifactUrl").val() || ($("#gitRepoUrl").val()  && $("#gitRepoBranch").val()))) {// checks form for validity
 
             if($("#uploadedFileName").val()){
