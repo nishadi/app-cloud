@@ -153,6 +153,32 @@
                 <artifactId>xalan</artifactId>
                 <version>2.7.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.containers</groupId>
+                <artifactId>jersey-container-servlet-core</artifactId>
+                <version>2.22.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-moxy</artifactId>
+                <version>2.22.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey</groupId>
+                <artifactId>jersey-bom</artifactId>
+                <version>2.22.1</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.38</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-catalina</artifactId>
+                <version>7.0.34</version>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -194,6 +220,8 @@
         <module>modules/components/org.wso2.appcloud.core</module>
         <module>modules/components/org.wso2.appcloud.provisioning.runtime</module>
         <module>modules/jaggeryapps/appmgt</module>
+        <module>modules/webapps/appCloudTierapi</module>
+        
         <!--module>modules/integreation/integration-tests</module-->
     </modules>
 

@@ -625,7 +625,7 @@ public class ApplicationDAO {
 
     public boolean isSingleVersion(Connection dbConnection, String versionHashId) throws AppCloudException {
 
-        PreparedStatement preparedStatement;
+        PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
 
         try {
@@ -647,7 +647,7 @@ public class ApplicationDAO {
             throw new AppCloudException(msg, e);
         } finally {
             DBUtil.closeResultSet(resultSet);
-            DBUtil.closeConnection(dbConnection);
+            DBUtil.closePreparedStatement(preparedStatement);
         }
     }
 
@@ -710,8 +710,8 @@ public class ApplicationDAO {
     public String getApplicationHashIdByName(Connection dbConnection, String applicationName, int tenantId)
             throws AppCloudException {
 
-        PreparedStatement preparedStatement;
-        ResultSet resultSet;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         String applicationHashId = null;
 
         try {
@@ -730,6 +730,9 @@ public class ApplicationDAO {
                          " in tenant : " + tenantId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
         }
 
         return applicationHashId;
@@ -791,8 +794,8 @@ public class ApplicationDAO {
     public List<Version> getAllVersionsOfApplication(Connection dbConnection, String applicationHashId)
             throws AppCloudException {
 
-        PreparedStatement preparedStatement;
-        ResultSet resultSet;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         List<Version> versions = new ArrayList<>();
         try {
 
@@ -815,7 +818,12 @@ public class ApplicationDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            String msg = "Error while getting all versions of application with application hash id : " + applicationHashId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeResultSet(resultSet);
+            DBUtil.closePreparedStatement(preparedStatement);
         }
 
         return versions;
@@ -1375,7 +1383,6 @@ public class ApplicationDAO {
         }
     }
 
-
     /**
      * Delete all the versions of an application
      *
@@ -1446,7 +1453,27 @@ public class ApplicationDAO {
         }
     }
 
-
+	public int getApplicationCount(int tenantId) throws AppCloudException {
+        Connection dbConnection = DBUtil.getDBConnection();
+        PreparedStatement preparedStatement = null;
+        int appCount = 0;
+        try {
+            preparedStatement = dbConnection.prepareStatement(SQLQueryConstants.GET_TENANT_APPLICATION_COUNT);
+            preparedStatement.setInt(1, tenantId);
+            ResultSet rs = preparedStatement.executeQuery();
+            dbConnection.commit();
+            if (rs.next()) {
+                appCount = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            String msg = "Error while getting the application count of the tenant : " + tenantId;
+            log.error(msg, e);
+            throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closePreparedStatement(preparedStatement);
+        }
+        return appCount;
+    }
     /**
      * Get service proxy for given version
      *
@@ -1483,7 +1510,6 @@ public class ApplicationDAO {
             DBUtil.closePreparedStatement(preparedStatement);
             DBUtil.closeConnection(dbConnection);
         }
-
         return containerServiceProxies;
     }
 

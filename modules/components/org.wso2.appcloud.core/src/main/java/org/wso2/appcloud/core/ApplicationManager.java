@@ -259,6 +259,8 @@ public class ApplicationManager {
         } catch (AppCloudException e) {
             String msg = "Error while getting application hash id for application name : " + applicationName;
             throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
         }
     }
 
@@ -533,6 +535,8 @@ public class ApplicationManager {
             String msg = "Error while committing the transaction when deleting the version with hash id : " + versionHashId;
             log.error(msg, e);
             throw new AppCloudException(msg, e);
+        } finally {
+            DBUtil.closeConnection(dbConnection);
         }
     }
 
@@ -586,7 +590,15 @@ public class ApplicationManager {
         ApplicationDAO applicationDAO = new ApplicationDAO();
         return applicationDAO.getRuntimeById(runtimeId);
     }
+	
+	public static int getApplicationCount() throws AppCloudException {
+        ApplicationDAO applicationDAO = new ApplicationDAO();
 
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        int applicationCount = applicationDAO.getApplicationCount(tenantId);
+
+        return applicationCount;
+    }
     /**
      * Get container service proxy by version hash id
      *
@@ -666,8 +678,8 @@ public class ApplicationManager {
 
     public static Version[] getApplicationVersionsByRunningTimePeriod(int numberOfHours) throws AppCloudException {
         ApplicationDAO applicationDAO = new ApplicationDAO();
-        return applicationDAO.getApplicationVersionsByRunningTimePeriod(numberOfHours);
 
+        return applicationDAO.getApplicationVersionsByRunningTimePeriod(numberOfHours);
     }
 
     /**
