@@ -23,9 +23,12 @@ include("/jagg/jagg.jag");
 jagg.template("application", function (inputs, outputs, jagg) {
         var runtimes = outputs.runtimes;
         var appType = outputs.appType;
+        var applicationCount = outputs.applicationCount;
         var appTypeName = appType.type;
         var isAppTypeBuildable = appType.buildable;
         var applicationName = outputs.applicationName;
+        var subscriptionPlanBaseURL = outputs.subscriptionPlanBaseURL;
+		var runtimeID = runtimes[0].id;
         var encodedLabels = request.getParameter("encodedLabels");
         var encodedEnvs = request.getParameter("encodedEnvs");
         var log = new Log();
@@ -33,7 +36,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var decodedEnvs = parse(decodeURIComponent(encodedEnvs, "UTF-8"));
         var newVersion = request.getParameter("newVersion");
         var nextVersion = request.getParameter("nextVersion");
-
+        var subscriptionPlanURL = subscriptionPlanBaseURL + "/plans/1";
+		var runtimeContainerSpecURL = subscriptionPlanBaseURL + "/containerSpecs/allowedruntime/"+runtimeID;
+        var data = null;
+        var maxInstancesJson = get(subscriptionPlanURL , "" , "json");
+		var allowedRuntimeContainerSpecJson = get(runtimeContainerSpecURL, "", "json");
     %>
 
 <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/bootstrap-3.2.0/bootstrap.min.css'))%>">
@@ -42,10 +49,27 @@ jagg.template("application", function (inputs, outputs, jagg) {
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/web-fonts/Roboto.css'))%>">
       <link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('css/styles.css'))%>">
 
+<%
+    var maxApplications = JSON.parse(maxInstancesJson.data.maxApplications);
+    var specCpu = new Array();
+    var specCost = new Array();
+    var specMemory = new Array();
+    for(var i=0 ; i<allowedRuntimeContainerSpecJson.data.length ; i++ ) {
+        specCpu[i] = JSON.parse(allowedRuntimeContainerSpecJson.data[i].cpu);
+        specMemory[i] = JSON.parse(allowedRuntimeContainerSpecJson.data[i].memory);
+        specCost[i] = JSON.parse(allowedRuntimeContainerSpecJson.data[i].costPerHour);
+    }
+%>
+
  <script type="text/javascript">
     var appTypeName = "<%=appType.type%>";
     const APP_TYPE_EXTENSION = "<%=appType.extension%>";
     var applicationName = "<%=applicationName%>";
+    var applicationCount = <%=applicationCount%>
+    var maxApplications = <%=maxApplications%>;
+    var specCpu = <%=specCpu%>;
+    var specMemory = <%=specMemory%>;
+    var specCost = <%=specCost%>;
     var retryCount = 0;
     var iconErrorMsg = "Invalid Image";                // used to hold the validation error message of the app icon
     var artifactErrorMsg = "Invalid Artifact";
@@ -57,6 +81,8 @@ jagg.template("application", function (inputs, outputs, jagg) {
     $(document).ready(function(){
 
             $("#runtime").select2();
+            $("containerSpec").select2();
+            $("container").select2();
             //check if application name available
             if (applicationName != "null") {
                 $("#applicationName").val(applicationName);
@@ -87,6 +113,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
             $.each(<%=runtimes%>,function(key,value){
                 $("#runtime").append($('<option></option>').val(value.id).html(value.runtimeName));
                 $("#runtime").trigger('change');
+            });
+
+            $.each(<%=specCpu%>,function(key,value){
+                $("#containerSpec").append($('<option></option>').val(value.id).html(value.conSpecName));
+                $("#containerSpec").trigger('change');
             });
 
             var max_fields      = 10; //maximum input boxes allowed
@@ -145,7 +176,15 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 formData.append('appTypeName', appTypeName);
                 formData.append('applicationName', $("#applicationName").val());
                 var optionRuntime = $("#runtime option:selected").val();
+                var optionSpec = $("#container option:selected").index();
+                var optionConSpecCpu = specCpu[optionSpec-1];
+                var optionConSpecMemory = specMemory[optionSpec-1];
+                var optionConSpecCost = specCost[optionSpec-1];
+
                 formData.append('runtime', optionRuntime);
+                formData.append('conSpecMemory', optionConSpecMemory);
+                formData.append('conSpecCost', optionConSpecCost);
+                formData.append('conSpecCpu', optionConSpecCpu);
 
                 if(uploadMethod === "file"){
                     formData.append('uploadedFileName', $("#uploadedFileName").val());
@@ -816,6 +855,20 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <select name="runtime" id="runtime" class="form-control"></select>
             </div>
 
+			<div class="form-group">
+                <label for="container">Container Specification: </label>
+                <select name="container" id="container" class="form-control"  >
+                     <option value="None" selected="Selected" >Select Container Specification</option>
+                     <%
+                     for(var i=0;i<allowedRuntimeContainerSpecJson.data.length;i++)
+                     {
+                     %>
+                        <option onClick="myFunction()"> <%=allowedRuntimeContainerSpecJson.data[i].conSpecName%></option>
+                     <%
+                     }
+                     %>
+                </select>
+            </div>
             <div class="form-group">
                 <label for="application-icon">Icon:
                     <i class="fa fa-question-circle help-tips" data-toggle="tooltip" data-placement="left"
@@ -905,6 +958,16 @@ jagg.template("application", function (inputs, outputs, jagg) {
         </div>
         </div>
       </div><!-- /.container -->
+
+      <script>
+      function myFunction() {
+         if (applicationCount < maxApplications ) {
+             $("#add-application").prop("disabled", false);
+         } else {
+             $("#add-application").prop("disabled", true);
+         }
+      }
+      </script>
 
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/vendor/jquery.ui.widget.js'))%>"></script>
       <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.fileupload.js'))%>"></script>

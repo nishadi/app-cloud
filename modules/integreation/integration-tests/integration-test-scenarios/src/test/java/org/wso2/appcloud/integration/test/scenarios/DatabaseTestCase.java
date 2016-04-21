@@ -18,6 +18,7 @@
 package org.wso2.appcloud.integration.test.scenarios;
 
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.appcloud.integration.test.utils.AppCloudIntegrationTestConstants;
@@ -35,7 +36,6 @@ public class DatabaseTestCase {
     private DatabaseClient databaseClient;
     private String defaultAdmin;
     private String defaultAdminPassword;
-    private String defaultTenantDomain;
     private String serverUrl;
     private String dbName = "db1";
     private String dbUserName = "sanga";
@@ -46,32 +46,21 @@ public class DatabaseTestCase {
     @BeforeClass(alwaysRun = true)
     public void setEnvironment() throws Exception {
         serverUrl = AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.URLS_APPCLOUD);
-        defaultTenantDomain = AppCloudIntegrationTestUtils.getDefaultTenantDomain();
         defaultAdmin = AppCloudIntegrationTestUtils.getAdminUsername();
         defaultAdminPassword = AppCloudIntegrationTestUtils.getAdminPassword();
         databaseClient = new DatabaseClient(serverUrl, defaultAdmin, defaultAdminPassword);
-
-        deleteDatabaseAndUserForNewTestRun();
     }
 
-    /**
-     * Deleting database and users if exists before running the test case new run.
-     *
-     * @throws AppCloudIntegrationTestException
-     */
-    private void deleteDatabaseAndUserForNewTestRun() throws AppCloudIntegrationTestException {
 
-        databaseClient.detachUserFromDatabase(dbName, dbUserName);
-        databaseClient.detachUserFromDatabase(dbName, dbUserName2);
-        databaseClient.deleteDatabaseUser(dbUserName);
-        databaseClient.deleteDatabaseUser(dbUserName2);
-        if (databaseClient.getDatabases().toString().contains(dbName)) {
-            databaseClient.deleteDatabase(dbName);
-        }
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.PLATFORM})
+    @Test(description = "Checking whether database already exists")
+    public void testCheckDatabaseAlreadyExists() throws AppCloudIntegrationTestException {
+        Assert.assertEquals(databaseClient.getDatabases()
+                                          .toString().contains(dbName), false, "Database already exists!");
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.PLATFORM})
-    @Test(description = "Create database")
+    @Test(description = "Create database", dependsOnMethods = {"testCheckDatabaseAlreadyExists"})
     public void testCreateDatabase() throws AppCloudIntegrationTestException {
         databaseClient.createDatabaseAndAttachUser(dbName, dbUserName, dbUserPassword, AppCloudIntegrationTestConstants
                 .TRUE_STRING);
@@ -82,7 +71,14 @@ public class DatabaseTestCase {
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.PLATFORM})
-    @Test(description = "Create new database user", dependsOnMethods = {"testCreateDatabase"})
+    @Test(description = "Checking whether user already exists", dependsOnMethods = {"testCreateDatabase"})
+    public void testCheckUserAlreadyExists() throws AppCloudIntegrationTestException {
+        Assert.assertEquals(databaseClient.getDatabaseUsers(dbName)
+                                          .toString().contains(dbUserName2), false, "Database user already exists!");
+    }
+
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.PLATFORM})
+    @Test(description = "Create new database user", dependsOnMethods = {"testCheckUserAlreadyExists"})
     public void testCreateNewDatabaseUser() throws AppCloudIntegrationTestException {
         databaseClient.createDatabaseUser(dbUserName2, dbUserPassword);
         Assert.assertEquals(databaseClient.getDatabaseUsers(dbName)
@@ -125,4 +121,13 @@ public class DatabaseTestCase {
                                           .toString().contains(dbName), false, "Database deletion failed");
     }
 
+    @AfterClass(alwaysRun = true)
+    public void clearEnvironment() throws Exception {
+        databaseClient.detachUserFromDatabase(dbName, dbUserName);
+        databaseClient.detachUserFromDatabase(dbName, dbUserName2);
+        databaseClient.deleteDatabaseUser(dbUserName);
+        databaseClient.deleteDatabaseUser(dbUserName2);
+        databaseClient.deleteDatabase(dbName);
+
+    }
 }

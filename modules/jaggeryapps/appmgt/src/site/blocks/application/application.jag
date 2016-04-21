@@ -66,6 +66,8 @@ var log = new Log();
         var appIcon = request.getFile("appIcon");
         var uploadedArtifact = request.getFile("fileupload");
         var isFileAttached = request.getParameter("isFileAttached");
+        var conSpecMemory = request.getParameter("conSpecMemory");
+        var conSpecCpu = request.getParameter("conSpecCpu");
 
         // checking whether an application with same name and same version, already exists or not
         var versionHashId = applicationModule.getVersionHashId(applicationName, applicationRevision);
@@ -80,7 +82,7 @@ var log = new Log();
             if (uploadedFileName) {
                 applicationModule.addApplication(applicationName, applicationRevision, applicationDescription, replicas,
                                                  runtimeId, appTypeName, runtimeProperties, tags, appIcon,
-                                                 uploadedFileName, isNewVersion);
+                                                 uploadedFileName, isNewVersion, conSpecMemory, conSpecCpu);
             } else {
                 var gitRepoUrl = request.getParameter("gitRepoUrl");
                 var gitRepoBranch = request.getParameter("gitRepoBranch");
@@ -125,7 +127,7 @@ var log = new Log();
         var versionKey = request.getParameter("versionKey");
 
         // redeploy application from kubernetes
-        applicationModule.redeployApplication(applicationName, applicationRevision, versionKey);
+        applicationModule.redeployApplication(applicationName, applicationRevision, versionKey, conSpecMemory, conSpecCpu);
 
         response.status = 200;
         response.message = "Application starting requested is completed successfully.";
