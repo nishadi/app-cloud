@@ -140,7 +140,7 @@ var pullDockerImage =  function(applicationName, versionName, dockerUrl, imageTa
         log.error(e);
         log.info("Application creation failed because docker image pull failed and roll back process" +
                 " is started for application : "+applicationName+" with revision : "+versionName);
-        appManager.deleteVersionFromDatabase(versionHashId);
+        appManager.deleteVersion(versionHashId);
         throw e;
     }
     //Adding docker pull success event
@@ -172,7 +172,7 @@ var tagDockerImage =  function(dockerUrl, imageTag, newTag, versionHashId, docke
         log.error(e);
         log.info("Application creation failed because docker image tag failed and roll back process" +
                 " is started for application : "+applicationName+" with revision : "+versionName);
-        appManager.deleteVersionFromDatabase(versionHashId);
+        appManager.deleteVersion(versionHashId);
         throw e;
     }
     //Adding docker pull success event

@@ -611,8 +611,13 @@ var getAllAppTypes = function(){
         var appTypes = ApplicationManager.getAllAppTypes();
 
         for (var i = 0; i < appTypes.length; i++) {
+
             var appType = appTypes[i];
             var appTypeObject = {};
+
+            if((modManager.getPropertyValue(PROPERTY_APPCLOUD_CUSTOM_APP_ACCESS_PERMISSION)=="false")&&(appType.appTypeName==APP_TYPE_CUSTOM)){
+                continue;
+            }
 
             appTypeObject.name = appType.appTypeName;
             appTypeObject.description = appType.description;

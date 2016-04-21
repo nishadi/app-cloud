@@ -23,6 +23,7 @@ var PROPERTY_APPMGT_DEPLOYMENT_DIR_PATH="Appmgt.DeploymentDirPath";
 var PROPERTY_DOCKER_REGISTRY_URL="DockerRegistryURL";
 var PROPERTY_STORAGE_SERVER_URL="StorageServerURL";
 var PROPERTY_RSS_ENVIRONMENT_NAME="RSSEnvironmentName";
+var PROPERTY_APPCLOUD_CUSTOM_APP_ACCESS_PERMISSION="AppCloud.CustomApplication.Permission.Enabled";
 var DOCKER_FILE_NAME = "Dockerfile";
 var TENANT_DOMAIN_NAME = "tenantDomainName";
 var SUPER_TENANT_DOMAIN_NAME = "carbon.super";
@@ -64,5 +65,7 @@ var FILE_EXTENTION_ZIP = "zip";
 
 var PERMISSION_EXECUTE = "ui.execute";
 var LOGIN_PERMISSION = "AppCloud.Login.Permission"
+
+var APP_TYPE_CUSTOM = "custom";
 
 %>

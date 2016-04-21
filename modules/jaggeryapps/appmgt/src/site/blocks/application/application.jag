@@ -24,6 +24,7 @@ var action = request.getParameter("action");
 var applicationModule = jagg.module("application");
 var gitHubAppModule = jagg.module("application/git");
 var customAppModule = jagg.module("application/custom");
+var modManager = jagg.module("manager");
 var log = new Log();
 (function(){
     if (!jagg.getUser()) {
@@ -40,6 +41,12 @@ var log = new Log();
         response.message = "Artifact is successfully uploaded!";
 
     } else if (action == "createApplication") {
+
+        var appTypeName = request.getParameter("appTypeName");
+        if((modManager.getPropertyValue(PROPERTY_APPCLOUD_CUSTOM_APP_ACCESS_PERMISSION)=="false")&&(appTypeName==APP_TYPE_CUSTOM)){
+            print(UNAUTHORIZED_ERROR_RESPONSE);
+            return;
+        }
         var applicationDescription = request.getParameter("applicationDescription");
         var replicas = 1;
         var runtimeId = request.getParameter("runtime");
