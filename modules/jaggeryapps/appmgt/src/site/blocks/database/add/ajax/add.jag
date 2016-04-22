@@ -63,7 +63,11 @@ var DEFAULT_TEMPLATE = 'DEFAULT_ALL_PERMISSIONS';
         }catch(e){
             log.error(e);
         }
-		print('success');
+        var respObj = {};
+        respObj.actualDBName = actualDBName;
+        respObj.value = 'success';
+        respObj.userName = userName;
+        print(stringify(respObj));
 
 	}else if(action == "attachUserWithPermissions"){
         var dbname = request.getParameter("databaseName");
