@@ -80,7 +80,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
     var applicationHashId;
     $(document).ready(function(){
 
-             if(applicationCount > maxApplications){
+             if(applicationCount >= maxApplications){
                 $('#outerContainer').empty();
                 $('#outerContainer').html('<div class="container-fluid"><div class="row row-centered">' +
                  '<div class="col-centered col-xs-10 col-sm-7  col-md-7 col-lg-6"><div class="cloud-new-content">' +
