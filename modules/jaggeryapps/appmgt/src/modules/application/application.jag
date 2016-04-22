@@ -36,6 +36,10 @@ var RuntimeProperty = Packages.org.wso2.appcloud.core.dto.RuntimeProperty;
 var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
 var Util = Packages.org.wso2.appcloud.core.Util;
 var ResourceQuotaLimit = Packages.org.wso2.appcloud.provisioning.runtime.beans.ResourceQuotaLimit;
+var List = Packages.java.util.List;
+var Arrays = Packages.java.util.Arrays;
+
+
 /**
  * Add an application object
  *
@@ -1413,6 +1417,19 @@ var isAplicationVersionExist = function (versionHashId) {
         applicationExists = true;
     }
     return applicationExists;
+};
+
+var getNotAllowedEnvVariables = function () {
+    var notAllowedVariables = [];
+
+        var notAllowedVariableString = modManager.getPropertyValue(NOT_ALLOWED_ENV_VARIABLES);
+        var notAllowedVariableList = notAllowedVariableString.split("\\s*,\\s*");
+
+        for (var i = 0; i < notAllowedVariableList.length; i++ ){
+            notAllowedVariables.push(notAllowedVariableList[i].toLowerCase());
+        }
+
+        return notAllowedVariables;
 };
 
 %>

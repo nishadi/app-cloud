@@ -25,6 +25,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var appType = outputs.appType;
         var applicationCount = outputs.applicationCount;
         var appTypeName = appType.type;
+        var notAllowedEnvVariables = outputs.notAllowedEnvVariables;
         var isAppTypeBuildable = appType.buildable;
         var applicationName = outputs.applicationName;
         var subscriptionPlanBaseURL = outputs.subscriptionPlanBaseURL;
@@ -75,9 +76,11 @@ jagg.template("application", function (inputs, outputs, jagg) {
     var artifactErrorMsg = "Invalid Artifact";
     var contentInvalidErrorMsg = "";
     var validationFailErrorMsg = "";
+    var envVariableErrorMsg = "";
     var uploadMethod = "file";
     var urlUploadComplete = false;
     var applicationHashId;
+    var notAllowedEnvVariables = "<%=notAllowedEnvVariables%>";
     $(document).ready(function(){
 
              if(applicationCount >= maxApplications){
@@ -445,6 +448,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         $.validator.addMethod("validationApplicationRevisionChar", validationApplicationRevisionChar, getValidationFailErrorMsg);
         $.validator.addMethod("validateRuntimeSelection", validateRuntimeSelection, "Please select a valid runtime");
         $.validator.addMethod("validateArtifact", validateArtifact, getArtifactErrorMessage);
+        $.validator.addMethod("validateEnvironmentVariable", validateEnvironmentVariable, getEnvVariableErrorMsg);
 
         $("#appIcon").change(function() {
              $("#icon").val($("#appIcon").val());
@@ -631,6 +635,19 @@ jagg.template("application", function (inputs, outputs, jagg) {
         } else {
             return true;
         }
+    }
+
+    function validateEnvironmentVariable(value){
+        if(value != "" && $.inArray(value.toLowerCase(), notAllowedEnvVariables) > -1){
+            envVariableErrorMsg = value + " is not allowed";
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    function getEnvVariableErrorMsg(){
+        return envVariableErrorMsg;
     }
 
     function validateIconImage(filename, fileSize) {
