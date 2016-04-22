@@ -186,9 +186,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 formData.append('applicationName', $("#applicationName").val());
                 var optionRuntime = $("#runtime option:selected").val();
                 var optionSpec = $("#container option:selected").index();
-                var optionConSpecCpu = specCpu[optionSpec-1];
-                var optionConSpecMemory = specMemory[optionSpec-1];
-                var optionConSpecCost = specCost[optionSpec-1];
+                var optionConSpecCpu = specCpu[optionSpec];
+                var optionConSpecMemory = specMemory[optionSpec];
+                var optionConSpecCost = specCost[optionSpec];
 
                 formData.append('runtime', optionRuntime);
                 formData.append('conSpecMemory', optionConSpecMemory);
@@ -868,12 +868,17 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 <label for="container">Container Specification: </label>
                 <select name="container" id="container" class="form-control"  >
                      <%
-                     for(var i=0;i<allowedRuntimeContainerSpecJson.data.length;i++)
-                     {
+                        if(allowedRuntimeContainerSpecJson.data.length>0) {
                      %>
-                        <option onClick="maxApplicationCountValidate()"> <%=allowedRuntimeContainerSpecJson.data[i].conSpecName%></option>
+                        <option onClick="myFunction()" selected="Selected" ><%=allowedRuntimeContainerSpecJson.data[0].conSpecName%></option>
                      <%
-                     }
+                        }
+                        for(var i=1;i<allowedRuntimeContainerSpecJson.data.length;i++)
+                        {
+                     %>
+                        <option onClick="myFunction()"> <%=allowedRuntimeContainerSpecJson.data[i].conSpecName%></option>
+                     <%
+                        }
                      %>
                 </select>
             </div>
