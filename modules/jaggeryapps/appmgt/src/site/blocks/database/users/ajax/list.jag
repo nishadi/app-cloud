@@ -48,8 +48,10 @@ var result = {};
 
         try {
             var dbUser = mod.createDatabaseUser(username, password );
-            result = "success";
-            print(result);
+            var result = {};
+            result.value = "success";
+            result.userName = dbUser;
+            print(stringify(result));
         } catch(e) {
             var msg = "Error while creating database user : " + username;
             log.error(msg);
