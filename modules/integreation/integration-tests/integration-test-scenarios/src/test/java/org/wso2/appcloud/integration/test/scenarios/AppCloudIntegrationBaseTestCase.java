@@ -43,6 +43,8 @@ public abstract class AppCloudIntegrationBaseTestCase {
 	protected String applicationDescription;
 	protected String properties;
 	protected String tags;
+	private String containerSpecMemory = "1024";
+	private String containerSpecCpu = "300";
 
 	public AppCloudIntegrationBaseTestCase(String runtimeID, String fileName, String applicationType){
 		this.runtimeID = runtimeID;
@@ -71,12 +73,13 @@ public abstract class AppCloudIntegrationBaseTestCase {
 
 		createApplication();
 	}
-	
+
 	public void createApplication() throws Exception {
 		//Application creation
 		File uploadArtifact = new File(TestConfigurationProvider.getResourceLocation() + fileName);
 		applicationClient.createNewApplication(applicationName, this.runtimeID, applicationType, applicationRevision,
-		                                       applicationDescription, this.fileName, properties, tags, uploadArtifact, false);
+		                                       applicationDescription, this.fileName, properties, tags,
+		                                       uploadArtifact, false, containerSpecMemory, containerSpecCpu);
 
 		//Wait until creation finished
 		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING, "Application creation");
@@ -97,7 +100,8 @@ public abstract class AppCloudIntegrationBaseTestCase {
 	@Test(description = "Testing start application action", dependsOnMethods = {"testStopApplication"})
 	public void testStartApplication() throws Exception {
 		String versionHash = applicationClient.getVersionHash(applicationName, applicationRevision);
-		applicationClient.startApplicationRevision(applicationName, applicationRevision, versionHash);
+        applicationClient.startApplicationRevision(applicationName, applicationRevision, versionHash,
+                                                   containerSpecMemory, containerSpecCpu);
 
 		//Wait until start application finished
 		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING,
@@ -236,8 +240,9 @@ public abstract class AppCloudIntegrationBaseTestCase {
 		String applicationRevision =
 				AppCloudIntegrationTestUtils.getPropertyValue(AppCloudIntegrationTestConstants.APP_NEW_REVISION_KEY);
 		File uploadArtifact = new File(TestConfigurationProvider.getResourceLocation() + fileName);
-		applicationClient.createNewApplication(applicationName, this.runtimeID, applicationType, applicationRevision,
-		                                       applicationDescription, this.fileName, properties, tags, uploadArtifact, true);
+        applicationClient.createNewApplication(applicationName, this.runtimeID, applicationType, applicationRevision,
+                                               applicationDescription, this.fileName, properties, tags, uploadArtifact,
+                                               true, containerSpecMemory, containerSpecCpu);
 
 		//Wait until creation finished
 		RetryApplicationActions(applicationRevision, AppCloudIntegrationTestConstants.STATUS_RUNNING, "Application version creation");
