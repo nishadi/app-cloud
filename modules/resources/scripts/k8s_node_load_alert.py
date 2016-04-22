@@ -21,6 +21,7 @@ logging.basicConfig(level=logging.ERROR, filename=log_file)
 
 def get_node_statues():
     alert_message = ""
+    condition_ok = True
 
     try:
         cert = (client_cert_file_path, client_key_file_path)
@@ -49,7 +50,8 @@ def get_node_statues():
     except Exception:
         logging.exception("Error while getting node status")
 
-    send_email_alert(alert_message)
+    if not condition_ok:
+        send_email_alert(alert_message)
 
 
 def send_email_alert(body):
