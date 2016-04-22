@@ -80,7 +80,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
     var uploadMethod = "file";
     var urlUploadComplete = false;
     var applicationHashId;
-    var notAllowedEnvVariables = "<%=notAllowedEnvVariables%>";
+    var notAllowedEnvVariables = jQuery.parseJSON('<%=notAllowedEnvVariables%>');
     $(document).ready(function(){
 
              if(applicationCount >= maxApplications){
