@@ -870,13 +870,13 @@ jagg.template("application", function (inputs, outputs, jagg) {
                      <%
                         if(allowedRuntimeContainerSpecJson.data.length>0) {
                      %>
-                        <option onClick="myFunction()" selected="Selected" ><%=allowedRuntimeContainerSpecJson.data[0].conSpecName%></option>
+                        <option onClick="maxApplicationCountValidate()" selected="Selected" ><%=allowedRuntimeContainerSpecJson.data[0].conSpecName%></option>
                      <%
                         }
                         for(var i=1;i<allowedRuntimeContainerSpecJson.data.length;i++)
                         {
                      %>
-                        <option onClick="myFunction()"> <%=allowedRuntimeContainerSpecJson.data[i].conSpecName%></option>
+                        <option onClick="maxApplicationCountValidate()"> <%=allowedRuntimeContainerSpecJson.data[i].conSpecName%></option>
                      <%
                         }
                      %>
