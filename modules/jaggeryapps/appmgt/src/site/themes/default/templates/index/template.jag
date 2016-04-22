@@ -19,16 +19,16 @@
 
 include("/jagg/jagg.jag");
 
-jagg.template("index", function(inputs, outputs, jagg) {
+jagg.template("index", function (inputs, outputs, jagg) {
     var applications = outputs.applications;
-    var applicationsWithTag = outputs.applicationsWithTag;
+    var taggedApplications = outputs.taggedApplications;
     var log = new Log("index");
 
     %>
 
     <script type="text/javascript" xmlns="http://www.w3.org/1999/html" charset="utf-8">
         var applicationList = <%=applications%>
-        var applicationWithTagList = <%=applicationsWithTag%>
+        var taggedApplicationsList = <%=taggedApplications%>
 
         $(document).ready(function (){
 
@@ -42,7 +42,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
             if ($(this).val() === null || $(this).val() === undefined || $(this).val().length === 0) {
                 init();
             }
-            else if($(this).val().substring(0,4) ==="tag:"){
+            else if ($(this).val().substring(0,4) ==="tag:") {
                 var finder = $(this).val().substring(4);
 
                 if(finder.includes(":")){
@@ -53,7 +53,7 @@ jagg.template("index", function(inputs, outputs, jagg) {
                     var typingPatternKey = new RegExp(finderKey.replace(/^\s+|\s+$/g, ''), "gi");
                     var typingPatternVal = new RegExp(finderVal.replace(/^\s+|\s+$/g, ''), "gi");
                     addTableColumnHeaders();
-                    jQuery.grep(applicationWithTagList, function (element, index) {
+                    jQuery.grep(taggedApplicationsList, function (element, index) {
                         jQuery.each(element.tagArray, function( index, value ) {
                              if ((value.tagKey.match(typingPatternKey) != null)&&(value.tagValue.match(typingPatternVal) != null)) {
                                  addTableRow(element);
@@ -61,10 +61,11 @@ jagg.template("index", function(inputs, outputs, jagg) {
                         });
                     });
 
-                }else{
+                }
+                else {
                     var typingPatternKey = new RegExp(finder.replace(/^\s+|\s+$/g, ''), "gi");
                     addTableColumnHeaders();
-                    jQuery.grep(applicationWithTagList, function (element, index) {
+                    jQuery.grep(taggedApplicationsList, function (element, index) {
                         jQuery.each(element.tagArray, function( index, value ) {
                              if (value.tagKey.match(typingPatternKey) != null) {
                                  addTableRow(element);
@@ -227,25 +228,28 @@ jagg.template("index", function(inputs, outputs, jagg) {
                 <i class="fw fw-add fw-stack-1x"></i>
             </span> <span class="hidden-xs">Create Application</span>
         </a>
-        <a href="<%=jagg.getAbsoluteUrl("/site/pages/newdatabase.jag")%>?isEdit=false" class="btn-action" data-toggle="tooltip" data-placement="top" title="Add New Database">
-            <span class="fw-stack fw-lg btn-action-ico">
-                <i class="fw fw-circle-outline fw-stack-2x"></i>
-                <i class="fw fw-add fw-stack-1x"></i>
-            </span> <span class="hidden-xs">Create Database</span>
-        </a>
-    </div>
-    <div class="container-fluid">
+        <a href="<%=jagg.getAbsoluteUrl("/site/pages/newdatabase.jag")
+    %>?isEdit=false" class="btn-action" data-toggle="tooltip" data-placement="top" title="Add New Database">
+                <span class="fw-stack fw-lg btn-action-ico">
+                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                    <i class="fw fw-add fw-stack-1x"></i>
+                </span> <span class="hidden-xs">Create Database</span>
+            </a>
+        </div>
+        <div class="container-fluid">
 
-    </div><!-- /.container -->
-    <div class="container-fluid">
-    <% if (applications.length > 0 ) { %>
+        </div><!-- /.container -->
+        <div class="container-fluid">
+        <%
+    if (applications.length > 0) { %>
         <div class="row row-centered app-sort-bar">
             <div class="col-centered col-md-5 search">
-                <input type="text" class="form-control" id="search-apps" placeholder="Search applications">
+                <input type="text" class="form-control" id="search-apps" placeholder="Search applications ex: <application-name> | tag:<key> | tag:<key>:<value> ">
                 <i class="fa fa-2x fa-search" ></i>
             </div>
         </div>
-    <% } else { %>
+    <%
+    } else { %>
         <div class="row row-centered">
             <div class="col-centered col-xs-10 col-sm-7  col-md-7 col-lg-6">
                 <div class="cloud-new-content">
@@ -258,33 +262,35 @@ jagg.template("index", function(inputs, outputs, jagg) {
                 </div>
             </div>
         </div>
-    <% } %>
-        <div class="row row-centered app-listing">
-            <!-- BOF listing block -->
-            <div class="" id="item_list"></div>
-        </div>
-    </div>
+    <%
+    }
+    %>
+           <div class="row row-centered app-listing">
+               <!-- BOF listing block -->
+               <div class="" id="item_list"></div>
+           </div>
+       </div>
 
-    <!-- --------------------------------------- Overlay ----------------------------------------- -->
-    <div class="modal fade build-logs-modal" id="app_creation_progress_modal">
-        <div class="modal-dialog modal-dialog-margin-top-md ">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="modal-title"></h4>
-                </div>
-                <div class="modal-body">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div id="progress_table" class="col-xs-12 col-md-12 section-title">
-                            <i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-       </div><!-- /.modal-content -->
-     </div><!-- /.modal -->
+       <!-- --------------------------------------- Overlay ----------------------------------------- -->
+       <div class="modal fade build-logs-modal" id="app_creation_progress_modal">
+           <div class="modal-dialog modal-dialog-margin-top-md ">
+               <div class="modal-content">
+                   <div class="modal-header">
+                       <h4 class="modal-title" id="modal-title"></h4>
+                   </div>
+                   <div class="modal-body">
+                       <div class="container-fluid">
+                           <div class="row">
+                               <div id="progress_table" class="col-xs-12 col-md-12 section-title">
+                               <i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
 
-    <script src="/appmgt/site/themes/default/js/app-listing-tile-icon.js"></script>
+       <script src="/appmgt/site/themes/default/js/app-listing-tile-icon.js"></script>
 
-<%
+   <%
 }); %>

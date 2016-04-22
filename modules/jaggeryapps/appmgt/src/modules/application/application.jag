@@ -712,10 +712,10 @@ var getAllApplications = function(){
 /**
  * Method for getting the application summary with tags of all the applications
  */
-var getAllApplicationsWithTag = function(){
+var getTaggedApplicationsList = function(){
     var applicationArray = [];
     try {
-        var applications = ApplicationManager.getApplicationListWithTags();
+        var applications = ApplicationManager.getTaggedApplicationsList();
         var appTypePropertyConfPath = jagg.getAppTypePropertyConfFilePath();
         var parsedObject = parse(appTypePropertyConfPath);
         var appTypesProperties = require(parsedObject);
@@ -743,7 +743,7 @@ var getAllApplicationsWithTag = function(){
         }
 
     } catch(e){
-        log.error("Error while getting the application list");
+        log.error("Error while getting the tagged application list");
         log.error(e);
         throw e;
     }
