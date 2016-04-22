@@ -19,7 +19,7 @@ log_file = 'k8s_node_load_alert.log'
 logging.basicConfig(level=logging.ERROR, filename=log_file)
 
 
-def get_node_statues():
+def get_node_status():
     alert_message = ""
     condition_ok = True
 
@@ -77,4 +77,4 @@ def send_email_alert(body):
         logging.exception("Error while sending the email")
 
 
-get_node_statues()
+get_node_status()
