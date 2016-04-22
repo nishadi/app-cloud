@@ -4,7 +4,6 @@ import requests, json, smtplib, logging
 client_cert_file_path = "client-cert.pem"
 client_key_file_path = "client-key.pem"
 k8s_api_server_url = "http://192.168.19.249:8080"
-context_get_nodes = "/api/v1/nodes"
 
 # SMTP server details
 smtp_server = "smtp.gmail.com"
@@ -25,6 +24,7 @@ def get_node_statues():
 
     try:
         cert = (client_cert_file_path, client_key_file_path)
+        context_get_nodes = "/api/v1/nodes"
         url = k8s_api_server_url + context_get_nodes
         request = requests.get(url, cert=cert, verify=False)
         request_json = request.text
