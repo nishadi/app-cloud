@@ -791,7 +791,7 @@ public class ApplicationDAO {
                 version.setRuntimeId(resultSet.getInt(SQLQueryConstants.RUNTIME_ID));
                 version.setStatus(resultSet.getString(SQLQueryConstants.STATUS));
                 version.setConSpecCpu(resultSet.getString(SQLQueryConstants.CON_SPEC_CPU));
-                version.setConSpecMemory(resultSet.getString((SQLQueryConstants.CON_SPEC_MEMORY));
+                version.setConSpecMemory(resultSet.getString((SQLQueryConstants.CON_SPEC_MEMORY)));
                 version.setTags(getAllTagsOfVersion(dbConnection, version.getHashId()));
                 version.setRuntimeProperties(getAllRuntimePropertiesOfVersion(dbConnection, version.getHashId()));
 
@@ -1488,7 +1488,6 @@ public class ApplicationDAO {
      * Update default version for given application
      *
      * @param applicationHashId
-     * @param defaultVersionHashId
      * @return if sucessfully update the default version
      * @throws AppCloudException
      */
