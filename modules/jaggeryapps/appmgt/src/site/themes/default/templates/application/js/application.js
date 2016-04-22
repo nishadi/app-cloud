@@ -52,6 +52,21 @@ $(document).on('change focusout keyup', '.element-add-key', function () {
     var propHolder = $(this).parent('div').parent('div');
     var value = propHolder.find('.element-add-value').val();
     var addBtn = propHolder.find('.btn-primary-add-val');
+
+    if(propHolder.parent('div').attr("id") == "env-pane"){
+        $(this).rules("add", {
+            validateEnvironmentVariable: true
+        });
+
+        if(validateEnvironmentVariable(key)){
+            addBtn.prop("disabled" , false);
+            propHolder.find('.element-add-value').prop("disabled" , false);
+        } else {
+            addBtn.prop("disabled" , true);
+            propHolder.find('.element-add-value').prop("disabled" , true);
+        }
+    }
+
     if(!value || !key){
         addBtn.prop("disabled" , true);
     } else {
