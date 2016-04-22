@@ -382,7 +382,8 @@ function addNewDatabase() {
             copyToAll: false
         }, function (result) {
             result = $.trim(result);
-            if (result == 'success') {
+            result = JSON.parse(result);
+            if (result.value == 'success') {
                 window.location.href = "databases.jag";
             } else {
                 jagg.message({content: 'Error occurred while creating database!', type: 'error', id: 'databasecreation'});

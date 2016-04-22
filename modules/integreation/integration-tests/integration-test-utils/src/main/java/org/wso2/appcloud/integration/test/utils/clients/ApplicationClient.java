@@ -80,6 +80,8 @@ public class ApplicationClient extends BaseClient{
 	protected static final String PARAM_NAME_IS_FILE_ATTACHED = "isFileAttached";
 	protected static final String PARAM_NAME_FILE_UPLOAD = "fileupload";
 	protected static final String PARAM_NAME_IS_NEW_VERSION = "isNewVersion";
+	protected static final String PARAM_NAME_CONTAINER_SPEC_MEMORY = "conSpecMemory";
+	protected static final String PARAM_NAME_CONTAINER_SPEC_CPU = "conSpecCpu";
 
 	private String endpoint;
 
@@ -98,9 +100,10 @@ public class ApplicationClient extends BaseClient{
 	                    + AppCloudIntegrationTestConstants.REST_APPLICATION_ENDPOINT;
     }
 
-    public void createNewApplication(String applicationName, String runtime, String appTypeName,
-            String applicationRevision, String applicationDescription, String uploadedFileName,
-            String runtimeProperties, String tags, File uploadArtifact, boolean isNewVersion) throws Exception {
+	public void createNewApplication(String applicationName, String runtime, String appTypeName,
+	                                 String applicationRevision, String applicationDescription, String uploadedFileName,
+	                                 String runtimeProperties, String tags, File uploadArtifact, boolean isNewVersion,
+	                                 String containerSpecMemory, String containerSpecCpu) throws Exception {
 
 	    HttpClient httpclient = HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
 	    HttpPost httppost = new HttpPost(this.endpoint);
@@ -109,6 +112,8 @@ public class ApplicationClient extends BaseClient{
 	    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
 	    builder.addPart(PARAM_NAME_FILE_UPLOAD, new FileBody(uploadArtifact));
 	    builder.addPart(PARAM_NAME_ACTION, new StringBody(CREATE_APPLICATION_ACTION, ContentType.TEXT_PLAIN));
+	    builder.addPart(PARAM_NAME_CONTAINER_SPEC_MEMORY, new StringBody(containerSpecMemory, ContentType.TEXT_PLAIN));
+	    builder.addPart(PARAM_NAME_CONTAINER_SPEC_CPU, new StringBody(containerSpecCpu, ContentType.TEXT_PLAIN));
 	    builder.addPart(PARAM_NAME_APPLICATION_NAME, new StringBody(applicationName, ContentType.TEXT_PLAIN));
 	    builder.addPart(PARAM_NAME_APPLICATION_DESCRIPTION, new StringBody(applicationDescription, ContentType.TEXT_PLAIN));
 	    builder.addPart(PARAM_NAME_RUNTIME, new StringBody(runtime, ContentType.TEXT_PLAIN));
@@ -150,13 +155,16 @@ public class ApplicationClient extends BaseClient{
 		}
 	}
 
-	public void startApplicationRevision(String applicationName, String applicationRevision, String versionHash) throws Exception {
+	public void startApplicationRevision(String applicationName, String applicationRevision, String versionHash,
+	                                     String containerSpecMemory, String containerSpecCpu) throws Exception {
 		HttpResponse response = HttpRequestUtil.doPost(
 				new URL(this.endpoint),
 				PARAM_NAME_ACTION + PARAM_EQUALIZER + START_APPLICATION_ACTION
 				+ PARAM_SEPARATOR + PARAM_NAME_APPLICATION_NAME + PARAM_EQUALIZER + applicationName
 				+ PARAM_SEPARATOR + PARAM_NAME_APPLICATION_REVISION + PARAM_EQUALIZER + applicationRevision
 				+ PARAM_SEPARATOR + PARAM_NAME_VERSION_KEY + PARAM_EQUALIZER + versionHash
+				+ PARAM_SEPARATOR + PARAM_NAME_CONTAINER_SPEC_CPU + PARAM_EQUALIZER + containerSpecCpu
+				+ PARAM_SEPARATOR + PARAM_NAME_CONTAINER_SPEC_MEMORY + PARAM_EQUALIZER + containerSpecMemory
 				, getRequestHeaders());
 		if (response.getResponseCode() != HttpStatus.SC_OK) {
 			throw new AppCloudIntegrationTestException("Application start failed " + response.getData());

@@ -40,13 +40,15 @@ jagg.block("application", {
         var applicationName = inputs.applicationName;
         var applicationCount = applicationModule.getApplicationCount();
         var subscriptionPlanBaseURL = modManager.getPropertyValue("SubscriptionPlanBaseURL");
+        var notAllowedEnvVariables = applicationModule.getNotAllowedEnvVariables();
 
         return {
             "runtimes" : runtimes,
             "appType" : appType,
             "applicationName" : applicationName,
             "applicationCount" : applicationCount,
-            "subscriptionPlanBaseURL" : subscriptionPlanBaseURL
+            "subscriptionPlanBaseURL" : subscriptionPlanBaseURL,
+            "notAllowedEnvVariables" : notAllowedEnvVariables
         };
     }
 });

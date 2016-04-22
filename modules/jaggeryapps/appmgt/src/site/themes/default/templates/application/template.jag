@@ -25,6 +25,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         var appType = outputs.appType;
         var applicationCount = outputs.applicationCount;
         var appTypeName = appType.type;
+        var notAllowedEnvVariables = outputs.notAllowedEnvVariables;
         var isAppTypeBuildable = appType.buildable;
         var applicationName = outputs.applicationName;
         var subscriptionPlanBaseURL = outputs.subscriptionPlanBaseURL;
@@ -75,10 +76,21 @@ jagg.template("application", function (inputs, outputs, jagg) {
     var artifactErrorMsg = "Invalid Artifact";
     var contentInvalidErrorMsg = "";
     var validationFailErrorMsg = "";
+    var envVariableErrorMsg = "";
     var uploadMethod = "file";
     var urlUploadComplete = false;
     var applicationHashId;
+    var notAllowedEnvVariables = jQuery.parseJSON('<%=notAllowedEnvVariables%>');
     $(document).ready(function(){
+
+             if(applicationCount >= maxApplications){
+                $('#outerContainer').empty();
+                $('#outerContainer').html('<div class="container-fluid"><div class="row row-centered">' +
+                 '<div class="col-centered col-xs-10 col-sm-7  col-md-7 col-lg-6"><div class="cloud-new-content">' +
+                  '<h3>You cannot create more than 3 applications, including versions, on a free subscription. ' +
+                   'Please delete an existing application to continue...</h3></div></div></div></div>');
+                return;
+            }
 
             $("#runtime").select2();
             $("containerSpec").select2();
@@ -177,9 +189,9 @@ jagg.template("application", function (inputs, outputs, jagg) {
                 formData.append('applicationName', $("#applicationName").val());
                 var optionRuntime = $("#runtime option:selected").val();
                 var optionSpec = $("#container option:selected").index();
-                var optionConSpecCpu = specCpu[optionSpec-1];
-                var optionConSpecMemory = specMemory[optionSpec-1];
-                var optionConSpecCost = specCost[optionSpec-1];
+                var optionConSpecCpu = specCpu[optionSpec];
+                var optionConSpecMemory = specMemory[optionSpec];
+                var optionConSpecCost = specCost[optionSpec];
 
                 formData.append('runtime', optionRuntime);
                 formData.append('conSpecMemory', optionConSpecMemory);
@@ -436,6 +448,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
         $.validator.addMethod("validationApplicationRevisionChar", validationApplicationRevisionChar, getValidationFailErrorMsg);
         $.validator.addMethod("validateRuntimeSelection", validateRuntimeSelection, "Please select a valid runtime");
         $.validator.addMethod("validateArtifact", validateArtifact, getArtifactErrorMessage);
+        $.validator.addMethod("validateEnvironmentVariable", validateEnvironmentVariable, getEnvVariableErrorMsg);
 
         $("#appIcon").change(function() {
              $("#icon").val($("#appIcon").val());
@@ -544,7 +557,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
     });
 
     function activateCreateApplication() {
-        if ($('#applicationName').val() && $('#applicationRevision').val() 
+        if ($('#applicationName').val() && $('#applicationRevision').val() && $('#container option:selected').val()
                         && $('#runtime').val() > 0 && ($("#uploadedFileName").val() || $("#artifactUrl").val() || ($("#gitRepoUrl").val()  && $("#gitRepoBranch").val()))) {// checks form for validity
 
             if($("#uploadedFileName").val()){
@@ -622,6 +635,19 @@ jagg.template("application", function (inputs, outputs, jagg) {
         } else {
             return true;
         }
+    }
+
+    function validateEnvironmentVariable(value){
+        if(value != "" && $.inArray(value.toLowerCase(), notAllowedEnvVariables) > -1){
+            envVariableErrorMsg = value + " is not allowed";
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    function getEnvVariableErrorMsg(){
+        return envVariableErrorMsg;
     }
 
     function validateIconImage(filename, fileSize) {
@@ -733,7 +759,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
     </div>
 <!-- EOF App Cloud menu actionbar-->
 
-<div class="container-fluid cloud-container">
+<div class="container-fluid cloud-container" id="outerContainer">
         <div class="row">
             <div class="col-fixed-left col-fixed-1x">
                 <div class="cloud-selected-app-type <%= appType.color%>" id="1">
@@ -858,14 +884,18 @@ jagg.template("application", function (inputs, outputs, jagg) {
 			<div class="form-group">
                 <label for="container">Container Specification: </label>
                 <select name="container" id="container" class="form-control"  >
-                     <option value="None" selected="Selected" >Select Container Specification</option>
                      <%
-                     for(var i=0;i<allowedRuntimeContainerSpecJson.data.length;i++)
-                     {
+                        if(allowedRuntimeContainerSpecJson.data.length>0) {
                      %>
-                        <option onClick="myFunction()"> <%=allowedRuntimeContainerSpecJson.data[i].conSpecName%></option>
+                        <option onClick="maxApplicationCountValidate()" selected="Selected" ><%=allowedRuntimeContainerSpecJson.data[0].conSpecName%></option>
                      <%
-                     }
+                        }
+                        for(var i=1;i<allowedRuntimeContainerSpecJson.data.length;i++)
+                        {
+                     %>
+                        <option onClick="maxApplicationCountValidate()"> <%=allowedRuntimeContainerSpecJson.data[i].conSpecName%></option>
+                     <%
+                        }
                      %>
                 </select>
             </div>
@@ -960,7 +990,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
       </div><!-- /.container -->
 
       <script>
-      function myFunction() {
+      function maxApplicationCountValidate() {
          if (applicationCount < maxApplications ) {
              $("#add-application").prop("disabled", false);
          } else {

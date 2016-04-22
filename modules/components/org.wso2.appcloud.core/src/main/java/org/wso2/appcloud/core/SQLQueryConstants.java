@@ -51,6 +51,9 @@ public class SQLQueryConstants {
     public static final String TENANT_ID = "tenant_id";
     public static final String TAG_KEY = "tag_key";
     public static final String TAG_VALUE = "tag_value";
+    public static final String CON_SPEC_CPU = "con_spec_cpu";
+    public static final String CON_SPEC_MEMORY = "con_spec_memory";
+
 
 
     /*==============================
@@ -65,7 +68,7 @@ public class SQLQueryConstants {
             "(?, ?, ?, ?, ?, (SELECT id FROM AC_APP_TYPE WHERE name=?))";
 
     public static final String ADD_VERSION =
-            "INSERT INTO AC_VERSION (name, hash_id, application_id, runtime_id, tenant_id) VALUES (?, ?, ?, ?, ?)";
+            "INSERT INTO AC_VERSION (name, hash_id, application_id, runtime_id, tenant_id, con_spec_cpu, con_spec_memory) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     public static final String ADD_TAG =
             "INSERT INTO AC_TAG (name, value, version_id, description, tenant_id) values (?, ?, (SELECT id FROM " +
@@ -241,5 +244,5 @@ public class SQLQueryConstants {
     public static final String DELETE_ALL_APP_VERSION_EVENTS =
             "Delete from AC_EVENT where version_id = (SELECT id FROM AC_VERSION WHERE hash_id=?)";
 
-	public static final String GET_TENANT_APPLICATION_COUNT = "SELECT COUNT(*) FROM AC_APPLICATION WHERE tenant_id = ?";
+	public static final String GET_TENANT_APPLICATION_COUNT = "SELECT COUNT(*) FROM AC_VERSION WHERE tenant_id = ?";
 }
