@@ -43,7 +43,7 @@ var Util = Packages.org.wso2.appcloud.core.Util;
  */
 
 var addApplicationViaDockerUrl = function (applicationName, versionName, applicationDescription, replicas, runtimePropertiesArray,
-                                           dockerUrl, imageTag, httpPort, httpsPort, tagArray, appIcon,isNewVersion) {
+                                           dockerUrl, imageTag, httpPort, httpsPort, tagArray, appIcon,isNewVersion, conSpecMemory, conSpecCpu) {
 
     var appTypeName = "custom";
     log.info("Started creating App => serviceName : " + applicationName + " Version : " + versionName + " Description " +
@@ -74,7 +74,7 @@ var addApplicationViaDockerUrl = function (applicationName, versionName, applica
     pullDockerImage(applicationName, versionName, dockerUrl, imageTag, versionHashId,dockerOpClient);
     tagDockerImage(dockerUrl, imageTag, tagName, versionHashId, dockerOpClient);
     pushDockerImage(applicationName, versionName, dockerUrl, imageTag, tagName, versionHashId, dockerOpClient);
-    triggerKubernetesDeployment(runtimeProperties, tagName, dockerUrl, applicationName, versionName, replicas, versionHashId, httpPort, httpsPort);
+    triggerKubernetesDeployment(runtimeProperties, tagName, dockerUrl, applicationName, versionName, replicas, versionHashId, httpPort, httpsPort, conSpecMemory, conSpecCpu);
 };
 
 
@@ -216,11 +216,11 @@ var pushDockerImage = function (applicationName, versionName, dockerUrl, imageTa
     appManager.addEvent(DOCKER_REGISTRY_PUSH, EVENT_SUCCEEDED, msg, versionHashId);
 }
 
-var triggerKubernetesDeployment = function(runtimeProperties, tagName, dockerUrl, applicationName, versionName, replicas, versionHashId, httpPort, httpsPort){
+var triggerKubernetesDeployment = function(runtimeProperties, tagName, dockerUrl, applicationName, versionName, replicas, versionHashId, httpPort, httpsPort, conSpecMemory, conSpecCpu){
     var appHostURL = appManager.constructAppLaunchURL(applicationName, versionName);
     var containers = getContainers(modManager.getPropertyValue(PROPERTY_DOCKER_REGISTRY_URL), dockerUrl, tagName, versionHashId ,versionHashId, runtimeProperties, appHostURL);
     var deploymentConfig = appManager.getDeploymentConfig(containers, versionHashId, replicas);
-    appManager.deployApplication(applicationName, versionName, deploymentConfig, false, versionHashId,"new");
+    appManager.deployApplication(applicationName, versionName, deploymentConfig, false, versionHashId,"new", conSpecMemory, conSpecCpu);
 
 }
 

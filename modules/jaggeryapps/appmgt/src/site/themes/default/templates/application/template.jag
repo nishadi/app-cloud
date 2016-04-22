@@ -463,7 +463,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
 
         // Validate Icon
         $("#icon").change(function() {
-             var file = $('#icon');
+            var file = $('#icon');
              validateIconImage(file.val(), this.files[0].size);        });
 
         $("#httpPort").change(function() {

@@ -96,7 +96,7 @@ var log = new Log();
                 var httpPort = request.getParameter("httpPort");
                 var httpsPort = request.getParameter("httpsPort");
                 customAppModule.addApplicationViaDockerUrl(applicationName, applicationRevision, applicationDescription, replicas, runtimeProperties,
-                        dockerUrl, imageTag, httpPort, httpsPort, tags, appIcon,isNewVersion);
+                        dockerUrl, imageTag, httpPort, httpsPort, tags, appIcon,isNewVersion, conSpecMemory, conSpecCpu);
 
             } else {
                 var gitRepoUrl = request.getParameter("gitRepoUrl");
