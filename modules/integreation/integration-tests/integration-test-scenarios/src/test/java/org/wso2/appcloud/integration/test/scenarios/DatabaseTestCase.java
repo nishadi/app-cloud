@@ -122,7 +122,7 @@ public class DatabaseTestCase {
     }
 
     @AfterClass(alwaysRun = true)
-    public void clearEnvironment() throws Exception {
+    public void cleanEnvironment() throws Exception {
         databaseClient.detachUserFromDatabase(dbName, dbUserName);
         databaseClient.detachUserFromDatabase(dbName, dbUserName2);
         databaseClient.deleteDatabaseUser(dbUserName);
