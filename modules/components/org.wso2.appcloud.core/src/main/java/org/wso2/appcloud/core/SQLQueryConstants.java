@@ -49,6 +49,9 @@ public class SQLQueryConstants {
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String HOST_URL = "host_url";
     public static final String TENANT_ID = "tenant_id";
+    public static final String CON_SPEC_CPU = "con_spec_cpu";
+    public static final String CON_SPEC_MEMORY = "con_spec_memory";
+
 
 
     /*==============================
@@ -63,7 +66,7 @@ public class SQLQueryConstants {
             "(?, ?, ?, ?, ?, (SELECT id FROM AC_APP_TYPE WHERE name=?))";
 
     public static final String ADD_VERSION =
-            "INSERT INTO AC_VERSION (name, hash_id, application_id, runtime_id, tenant_id) VALUES (?, ?, ?, ?, ?)";
+            "INSERT INTO AC_VERSION (name, hash_id, application_id, runtime_id, tenant_id, con_spec_cpu, con_spec_memory) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     public static final String ADD_TAG =
             "INSERT INTO AC_TAG (name, value, version_id, description, tenant_id) values (?, ?, (SELECT id FROM " +
