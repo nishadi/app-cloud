@@ -23,6 +23,8 @@ include("/jagg/constants.jag");
 jagg.template("home", function(inputs, outputs, jagg) {
     var application = outputs.application;
     var selectedRevision = outputs.selectedRevision;
+    var conSpecCpu = outputs.conSpecCpu;
+    var conSpecMemory = outputs.conSpecMemory;
     var versions = application.versions;
     var defaultVersionName = application.defaultVersionName;
     if (application.defaultVersionName != null && versions[defaultVersionName] != undefined) {
@@ -43,6 +45,8 @@ jagg.template("home", function(inputs, outputs, jagg) {
 
     var applicationName = "<%=applicationName%>";
     var applicationKey = "<%=applicationKey%>";
+    var conSpecCpu = "<%=conSpecCpu%>";
+    var conSpecMemory = "<%=conSpecMemory%>";
     var application = jQuery.parseJSON('<%=application%>');
     var selectedRevision = "<%=selectedRevision%>";
     var revisions = jQuery.parseJSON('<%=revisions%>');
@@ -199,7 +203,7 @@ jagg.template("home", function(inputs, outputs, jagg) {
                                   </span> Delete
                               </div>
                           </a>
-                          <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=application.applicationType%>&applicationKey=<%=applicationKey%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>&newVersion=true">
+                          <a id="upload-revision" href="<%=appCreationPageBaseUrl%>?appTypeName=<%=application.applicationType%>&applicationKey=<%=applicationKey%>&encodedLabels=<%=encodedLabels%>&encodedEnvs=<%=encodedEnvs%>&newVersion=true&conSpecCpu=<%=conSpecCpu%>&conSpecMemory=<%=conSpecMemory%>">
                               <div class="btn-create-version">
                                   <span class="fw-stack fw-lg btn-action-ico">
                                      <i class="fw fw-circle-outline fw-stack-2x"></i>
@@ -342,7 +346,9 @@ jagg.template("home", function(inputs, outputs, jagg) {
             action: "redeployApplication",
             applicationName: applicationName,
             applicationRevision: selectedRevision,
-            versionKey: selectedApplicationRevision.hashId
+            versionKey: selectedApplicationRevision.hashId,
+            conSpecCpu: conSpecCpu,
+            conSpecMemory: conSpecMemory
         }, function (result) {
             jagg.message({content: "Application redeployed successfully.", type: 'info'});
         });
@@ -380,7 +386,9 @@ jagg.template("home", function(inputs, outputs, jagg) {
             action: "startApplication",
             applicationName: applicationName,
             applicationRevision: selectedRevision,
-            versionKey: selectedApplicationRevision.hashId
+            versionKey: selectedApplicationRevision.hashId,
+            conSpecCpu: conSpecCpu,
+            conSpecMemory: conSpecMemory
 
         }, function (result) {
              //jagg.message({content: "Application start request is submitted successfully.", type: 'info'});

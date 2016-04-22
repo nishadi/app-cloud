@@ -42,9 +42,15 @@ jagg.block("home", {
         if(!selectedRevision && application.defaultVersion){
             selectedRevision = application.defaultVersion;
         }
+        var selectedVersion = application.versions[selectedRevision];
+        var conSpecCpu = selectedVersion.conSpecCpu;
+        var conSpecMemory = selectedVersion.conSpecMemory;
+
         return {
             "application" : application,
-            "selectedRevision":selectedRevision
+            "selectedRevision":selectedRevision,
+            "conSpecCpu" : conSpecCpu,
+            "conSpecMemory" : conSpecMemory
         };
     }
 

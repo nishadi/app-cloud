@@ -15,6 +15,8 @@ public class Version {
     private List<Tag> tags;
     private int tenantId;
     private Timestamp createdTimestamp;
+    private String conSpecCpu;
+    private String conSpecMemory;
 
     public String getVersionName() {
         return versionName;
@@ -86,5 +88,21 @@ public class Version {
 
     public void setCreatedTimestamp(Timestamp createdTimestamp) {
         this.createdTimestamp = createdTimestamp;
+    }
+
+    public void setConSpecCpu(String conSpecCpu) {
+        this.conSpecCpu = conSpecCpu;
+    }
+
+    public String getConSpecCpu() {
+        return conSpecCpu;
+    }
+
+    public void setConSpecMemory(String conSpecMemory) {
+        this.conSpecMemory = conSpecMemory;
+    }
+
+    public String getConSpecMemory() {
+        return conSpecMemory;
     }
 }

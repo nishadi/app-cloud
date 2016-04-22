@@ -8,7 +8,7 @@ $(document).ready(function() {
     var nextVersion = generateNextPossibleVersion(application.versions);
     var uploadRevisionUrl = appCreationPageBaseUrl+"?appTypeName="+application.applicationType +
                             "&applicationName="+applicationName + "&encodedLabels="+encodedLabels + "&encodedEnvs="
-                                    + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion;
+                                    + encodedEnvs + "&newVersion=true&nextVersion=" + nextVersion + "&conSpecCpu=" + conSpecCpu + "&conSpecMemory=" + conSpecMemory;
     $('#upload-revision').attr("href", uploadRevisionUrl);
 });
 

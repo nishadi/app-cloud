@@ -862,7 +862,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
                      for(var i=0;i<allowedRuntimeContainerSpecJson.data.length;i++)
                      {
                      %>
-                        <option onClick="myFunction()"> <%=allowedRuntimeContainerSpecJson.data[i].conSpecName%></option>
+                        <option onClick="maxApplicationCountValidate()"> <%=allowedRuntimeContainerSpecJson.data[i].conSpecName%></option>
                      <%
                      }
                      %>
@@ -959,7 +959,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
       </div><!-- /.container -->
 
       <script>
-      function myFunction() {
+      function maxApplicationCountValidate() {
          if (applicationCount < maxApplications ) {
              $("#add-application").prop("disabled", false);
          } else {
