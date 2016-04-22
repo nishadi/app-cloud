@@ -544,7 +544,7 @@ jagg.template("application", function (inputs, outputs, jagg) {
     });
 
     function activateCreateApplication() {
-        if ($('#applicationName').val() && $('#applicationRevision').val() 
+        if ($('#applicationName').val() && $('#applicationRevision').val() && $('#container option:selected').val()
                         && $('#runtime').val() > 0 && ($("#uploadedFileName").val() || $("#artifactUrl").val() || ($("#gitRepoUrl").val()  && $("#gitRepoBranch").val()))) {// checks form for validity
 
             if($("#uploadedFileName").val()){
@@ -858,7 +858,6 @@ jagg.template("application", function (inputs, outputs, jagg) {
 			<div class="form-group">
                 <label for="container">Container Specification: </label>
                 <select name="container" id="container" class="form-control"  >
-                     <option value="None" selected="Selected" >Select Container Specification</option>
                      <%
                      for(var i=0;i<allowedRuntimeContainerSpecJson.data.length;i++)
                      {
