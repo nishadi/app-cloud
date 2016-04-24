@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Collections;
 
 /**
  * DAO class for persisting or retrieving application related data to database
@@ -542,21 +543,19 @@ public class ApplicationDAO {
     }
 
     /**
-     * Method for getting the list of applications of a tenant from database with tag details
+     * Get the list of tagged applications
      *
      * @param dbConnection database connection
      * @param tenantId     tenant id
-     * @return
+     * @return taggedApplicationsList List of all the tagged applications
      * @throws AppCloudException
      */
     public List<Application> getTaggedApplicationsList(Connection dbConnection, int tenantId) throws AppCloudException {
 
         PreparedStatement preparedStatement = null;
-
-        List<Application> applications = new ArrayList<>();
+        List<Application> taggedApplicationsList = new ArrayList<>();
         Application application;
         ResultSet resultSet = null;
-        Boolean applicationExists = false;
 
         try {
 
@@ -564,46 +563,46 @@ public class ApplicationDAO {
             preparedStatement.setInt(1, tenantId);
 
             resultSet = preparedStatement.executeQuery();
-
-            List<Version> versions = new ArrayList<>();
-            Version version;
-            List<Tag> tags = new ArrayList<>();
-            Tag tag;
+            Boolean applicationAddedtoList;
 
             while (resultSet.next()) {
 
-                applicationExists = false;
-                for (Application applicationTemp : applications) {
-                    if (applicationTemp.getHashId().equals(resultSet.getString(SQLQueryConstants.HASH_ID))) {
-                        applicationExists = true;
+                Tag tag;
+                applicationAddedtoList = false;
+                //Iterating the existing tagged application list to check whether the application is already added into the list
+                for (Application applicationTemp : taggedApplicationsList) {
+                    String hashId = resultSet.getString(SQLQueryConstants.HASH_ID);
+                    System.out.println(hashId);
+                    if (applicationTemp.getHashId().equals(hashId)) {
+                        applicationAddedtoList = true;
                         tag = new Tag();
                         tag.setTagName(resultSet.getString(SQLQueryConstants.TAG_KEY));
                         tag.setTagValue(resultSet.getString(SQLQueryConstants.TAG_VALUE));
                         applicationTemp.getVersions().get(0).getTags().add(tag);
                     }
                 }
-                if (!applicationExists) {
-                    tag = new Tag();
-                    tag.setTagName(resultSet.getString(SQLQueryConstants.TAG_KEY));
-                    tag.setTagValue(resultSet.getString(SQLQueryConstants.TAG_VALUE));
-                    tags.add(tag);
-
-                    version = new Version();
-                    version.setTags(tags);
-                    versions.add(version);
+                //Adding a new application if it is not already in the tagged application list
+                if (!applicationAddedtoList) {
 
                     application = new Application();
                     application.setApplicationName(resultSet.getString(SQLQueryConstants.APPLICATION_NAME));
                     application.setApplicationType(resultSet.getString(SQLQueryConstants.APPLICATION_TYPE_NAME));
                     application.setHashId(resultSet.getString(SQLQueryConstants.HASH_ID));
                     application.setIcon(resultSet.getBlob(SQLQueryConstants.ICON));
-                    application.setVersions(versions);
 
-                    applications.add(application);
+                    List<Tag> tags = new ArrayList<>();
+                    Version version = new Version();
+                    tag = new Tag();
+                    tag.setTagName(resultSet.getString(SQLQueryConstants.TAG_KEY));
+                    tag.setTagValue(resultSet.getString(SQLQueryConstants.TAG_VALUE));
+                    tags.add(tag);
+
+                    version.setTags(tags);
+                    application.setVersions(Collections.singletonList(version));
+
+                    taggedApplicationsList.add(application);
                 }
-
             }
-
         } catch (SQLException e) {
             String msg = "Error while retrieving application list from database for tenant : " + tenantId;
             log.error(msg, e);
@@ -612,9 +611,8 @@ public class ApplicationDAO {
             DBUtil.closeResultSet(resultSet);
             DBUtil.closePreparedStatement(preparedStatement);
         }
-        return applications;
+        return taggedApplicationsList;
     }
-
 
     public List<String> getAllVersionListOfApplication(Connection dbConnection, String applicationHashId)
             throws AppCloudException {

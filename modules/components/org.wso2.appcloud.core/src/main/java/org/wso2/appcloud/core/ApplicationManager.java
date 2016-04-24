@@ -182,9 +182,9 @@ public class ApplicationManager {
     }
 
     /**
-     * Method for getting the list of application of a tenant with tags
+     * Get the list of tagged applications
      *
-     * @return
+     * @return List of all the tagged applications
      * @throws AppCloudException
      */
     public static Application[] getTaggedApplicationsList() throws AppCloudException {
@@ -200,7 +200,6 @@ public class ApplicationManager {
         } finally {
             DBUtil.closeConnection(dbConnection);
         }
-
         return applications.toArray(new Application[applications.size()]);
     }
 

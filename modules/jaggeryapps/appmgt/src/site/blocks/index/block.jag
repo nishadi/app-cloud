@@ -19,26 +19,22 @@
 
 include('/jagg/constants.jag');
 jagg.block("index", {
-    initialize:function (data) {
+    initialize: function (data) {
 
     },
-    getInputs:function () {
+    getInputs: function () {
 
     },
-
-    getOutputs:function (inputs) {
+    getOutputs: function (inputs) {
 
         var applicationModule = jagg.module("application");
         var applications = applicationModule.getAllApplications();
-        var taggedApplications = applicationModule.getTaggedApplicationsList();
         var applicationName = request.getParameter("applicationName");
 
         return {
-            "applications" : applications,
-            "taggedApplications" : taggedApplications,
-            "applicationName" :applicationName
+            "applications": applications,
+            "applicationName": applicationName
         };
     }
-
 });
 %>
